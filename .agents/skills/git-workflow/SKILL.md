@@ -104,7 +104,16 @@ gh pr merge <number> --repo DengNaichen/Roster --squash \
 
 ## 合并后清理
 
-squash 合并后，分支提交不是 `main` 的祖先，`git branch -d` 和 `merge-base --is-ancestor` 都无法判断是否已合并。改为核对 PR 记录，核对通过后才允许 `-D`：
+squash 合并后，分支提交不是 `main` 的祖先，`git branch -d` 和 `merge-base --is-ancestor` 都无法判断是否已合并。改为核对 PR 记录，核对通过后才允许 `-D`。
+
+默认用脚本完成全部步骤，先 `--dry-run` 读一遍计划。脚本必须从**主 checkout** 运行（不能从要删除的 worktree 里运行），任何一步核对不通过就停止，不删除任何东西：
+
+```sh
+scripts/finish-branch <branch> --dry-run
+scripts/finish-branch <branch>
+```
+
+脚本依次执行下面的步骤；脚本不可用或需要排查时，按同样顺序手工执行：
 
 1. 读取 PR 状态，确认 `state` 为 `MERGED`，并记下 `headRefOid`：
 
