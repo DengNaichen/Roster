@@ -1,5 +1,5 @@
 import { useCapabilities } from "./Capabilities";
-import { CalendarRange, FileText, Box, ChevronDown, ChevronRight, List, Menu, Plus, Settings, Tag, Target } from "lucide-react";
+import { CalendarRange, FileText, Box, ChevronDown, ChevronRight, List, Menu, Plus, Target } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
 import { Session } from "./Session";
@@ -25,8 +25,6 @@ export function Sidebar({ route, visit, teams, onCreateTeam }: {
         <NavLink className={`nav-item ${route.kind === "specs" || route.kind === "spec" ? "active" : ""}`} to={pagePath("/specs")}><FileText className="icon" /><span className="nav-label">Specs</span></NavLink>
         <NavLink unavailable={!capabilities.projects} className={`nav-item ${active("projects") ? "active" : ""}`} to={pagePath("/projects")}><Box className="icon" /><span className="nav-label">All projects</span>{!capabilities.projects && <small>Not migrated</small>}</NavLink>
         <NavLink unavailable={!capabilities.initiatives} className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`} to={pagePath("/initiatives")}><Target className="icon" /><span className="nav-label">Initiatives</span>{!capabilities.initiatives && <small>Not migrated</small>}</NavLink>
-        <NavLink unavailable={!capabilities.labels} className={`nav-item ${route.kind === "labels" ? "active" : ""}`} to={pagePath("/labels")}><Tag className="icon" /><span className="nav-label">Labels</span>{!capabilities.labels && <small>Not migrated</small>}</NavLink>
-        <NavLink className={`nav-item ${route.kind === "settings" ? "active" : ""}`} to={pagePath("/settings")}><Settings className="icon" /><span className="nav-label">Settings</span></NavLink>
         <div className="sidebar-label sidebar-heading"><span>Teams</span><button type="button" className="ghost" aria-label="Create team" title="Create team" onClick={onCreateTeam}><Plus className="icon" /></button></div>
         {teams.filter((item) => !item.membership_enabled || item.joined || ("team" in route && route.team === item.key)).map((item) => <TeamNavigation key={item.key} team={item} route={route} />)}
       </nav>
