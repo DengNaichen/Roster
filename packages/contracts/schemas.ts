@@ -51,6 +51,10 @@ export const createIssueSchema = z.strictObject({
 });
 export const updateIssueSchema = createIssueSchema.omit({ team: true }).partial();
 export const listIssuesSchema = z.strictObject({
+  type: z.union([type, z.literal('')]).optional(),
+  priority: z.number().int().min(0).max(4).optional(),
+  assignee: subject.nullable().optional(),
+  assigned_to_me: z.boolean().optional(),
   team: z.string().optional(),
   status: status.optional(),
   query: z.string().max(500).optional(),

@@ -79,6 +79,10 @@ export type UpdateIssueInput = Partial<Omit<CreateIssueInput, 'team'>>;
 export type ListIssuesInput = {
   team?: string;
   status?: IssueStatus;
+  type?: IssueType | '';
+  priority?: number;
+  assignee?: string | null;
+  assigned_to_me?: boolean;
   query?: string;
   limit?: number;
   /** Last issue UUID from the previous page; scoped to this query. Results sort by created_at DESC, id DESC. */
@@ -155,6 +159,7 @@ export interface Service {
     key: string,
     input: UpdateTeamInput,
   ): Promise<Team>;
+  listAssignees(ctx: RequestContext, slug: string, key: string): Promise<Identity[]>;
   listTeamMembers(
     ctx: RequestContext,
     slug: string,

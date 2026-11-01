@@ -1,0 +1,56 @@
+import { useCapabilities } from "./Capabilities";
+import { CalendarRange, Box, ChevronDown, ChevronRight, List, Menu, Plus, Settings, Tag, Target } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { EntityEmoji } from "./EmojiPicker";
+import { Session } from "./Session";
+import { WorkspaceMenu } from "./WorkspaceMenu";
+import { NavLink, pagePath, Team, WorkspaceRoute } from "./shared";
+
+export function Sidebar({ route, visit, teams, onCreateTeam }: {
+  route: WorkspaceRoute;
+  visit: number;
+  teams: Team[];
+  onCreateTeam: () => void;
+}) {
+  const capabilities = useCapabilities();
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => setExpanded(false), [visit]);
+  const active = (kind: "issues" | "projects", team = "") => route.kind === kind && route.team === team;
+  return (
+    <aside className="sidebar scope-sidebar">
+      <div className="sidebar-top"><WorkspaceMenu /><button type="button" className="button navigation-toggle" aria-expanded={expanded} aria-controls="workspace-navigation" onClick={() => setExpanded(!expanded)}><Menu className="icon" />Navigation</button></div>
+      <nav id="workspace-navigation" className={`scope-navigation ${expanded ? "expanded" : ""}`} aria-label="Workspace navigation">
+        <div className="sidebar-label">Workspace</div>
+        <NavLink className={`nav-item ${active("issues") ? "active" : ""}`} to={pagePath("/")}><List className="icon" /><span className="nav-label">All issues</span></NavLink>
+        <NavLink unavailable={!capabilities.projects} className={`nav-item ${active("projects") ? "active" : ""}`} to={pagePath("/projects")}><Box className="icon" /><span className="nav-label">All projects</span>{!capabilities.projects && <small>Not migrated</small>}</NavLink>
+        <NavLink unavailable={!capabilities.initiatives} className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`} to={pagePath("/initiatives")}><Target className="icon" /><span className="nav-label">Initiatives</span>{!capabilities.initiatives && <small>Not migrated</small>}</NavLink>
+        <NavLink unavailable={!capabilities.labels} className={`nav-item ${route.kind === "labels" ? "active" : ""}`} to={pagePath("/labels")}><Tag className="icon" /><span className="nav-label">Labels</span>{!capabilities.labels && <small>Not migrated</small>}</NavLink>
+        <NavLink className={`nav-item ${route.kind === "settings" ? "active" : ""}`} to={pagePath("/settings")}><Settings className="icon" /><span className="nav-label">Settings</span></NavLink>
+        <div className="sidebar-label sidebar-heading"><span>Teams</span><button type="button" className="ghost" aria-label="Create team" title="Create team" onClick={onCreateTeam}><Plus className="icon" /></button></div>
+        {teams.filter((item) => !item.membership_enabled || item.joined || ("team" in route && route.team === item.key)).map((item) => <TeamNavigation key={item.key} team={item} route={route} />)}
+      </nav>
+      <Session />
+    </aside>
+  );
+}
+
+function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) {
+  const capabilities = useCapabilities();
+  const [expanded, setExpanded] = useState(true);
+  const destinationsId = useId();
+  const active = (kind: "issues" | "projects") => route.kind === kind && route.team === team.key;
+  return (
+    <section className="team-navigation" aria-label={`${team.name} navigation`}>
+      <button type="button" className="nav-item team-heading" aria-expanded={expanded} aria-controls={destinationsId} onClick={() => setExpanded(!expanded)}>
+        <EntityEmoji emoji={team.emoji} teamKey={team.key} />
+        <span className="nav-label" title={team.name}>{team.name}</span>
+        {expanded ? <ChevronDown className="icon" aria-hidden="true" /> : <ChevronRight className="icon" aria-hidden="true" />}
+      </button>
+      <div id={destinationsId} className="team-destinations" hidden={!expanded}>
+        <NavLink className={`nav-item team-destination ${active("issues") ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}><List className="icon" /><span className="nav-label">Issues</span></NavLink>
+        <NavLink unavailable={!capabilities.projects} className={`nav-item team-destination ${active("projects") ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/projects`)}><Box className="icon" /><span className="nav-label">Projects</span>{!capabilities.projects && <small>Not migrated</small>}</NavLink>
+        <NavLink unavailable={!capabilities.cycles} className={`nav-item team-destination ${(route.kind === "cycles" || route.kind === "cycle") && route.team === team.key ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/cycles`)}><CalendarRange className="icon" /><span className="nav-label">Cycles</span>{!capabilities.cycles && <small>Not migrated</small>}</NavLink>
+      </div>
+    </section>
+  );
+}

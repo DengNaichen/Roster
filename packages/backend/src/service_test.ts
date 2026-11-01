@@ -1,6 +1,7 @@
 import { Pool } from 'npm:pg@8.23.1';
 import { createDatabase } from './db/client.ts';
 import { createService } from './service.ts';
+import { createHttpApp } from './transport/http.ts';
 import { AppError, type RequestContext } from '../../contracts/mod.ts';
 
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
@@ -120,6 +121,9 @@ Deno.test({
       await rejects(() => s.getIssue(other, w.slug, hidden.identifier), 'not_found');
       await rejects(() => s.getIssue(member, w.slug, hidden.identifier), 'not_found');
       assert(!(await s.listIssues(member, w.slug)).items.length);
+      assert((await s.listAssignees(member, w.slug, 'AA')).length === 3);
+      await rejects(() => s.listAssignees(member, w.slug, 'PR'), 'not_found');
+      assert((await s.listAssignees(owner, w.slug, 'PR')).length === 1);
       await rejects(() => s.joinTeam(other, w.slug, 'PR', {}), 'invalid_input');
       await s.joinTeam(other, w.slug, 'PR', { confirm_private: true });
       assert((await s.getIssue(other, w.slug, hidden.identifier)).title === 'Private issue');
@@ -172,10 +176,68 @@ Deno.test({
           detail.audit.every((a) => a.actor_subject === member.identity.subject),
       );
       assert(detail.audit[1].kind === 'issue.updated');
+      assert(BigInt(detail.audit[0].id) < BigInt(detail.audit[1].id), 'Audit IDs sort numerically');
+      assert(
+        (await s.listIssues(member, w.slug, { priority: 2, type: 'bug', assignee: null })).items
+          .length === 1,
+      );
+      assert((await s.listIssues(member, w.slug, { assigned_to_me: true })).items.length === 11);
+      await rejects(
+        () => s.listIssues(member, w.slug, { assigned_to_me: true, assignee: null }),
+        'invalid_input',
+      );
+      const http = createHttpApp({ service: s, verify: async () => member, allowedOrigins: [] });
+      const request = async (path: string, method = 'GET', body?: unknown) =>
+        await http.request('https://local/api/w/' + w.slug + path, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        });
+      const createdResponse = await request('/issues', 'POST', {
+        team: 'AA',
+        title: 'Original frontend HTTP',
+        assignee: '',
+        type: '',
+        project_id: 0,
+        cycle_id: 0,
+      });
+      assert(createdResponse.status === 201, await createdResponse.clone().text());
+      const createdHTTP = await createdResponse.json();
+      const statusResponse = await request(
+        '/issues/' + createdHTTP.identifier + '/status',
+        'PATCH',
+        { status: 'done' },
+      );
+      assert(statusResponse.status === 200 && (await statusResponse.json()).status === 'done');
+      const httpList = await (await request('/issues?label_mode=any&query=Original')).json();
+      assert(
+        httpList.issues.length === 1 && httpList.issues[0].identifier === createdHTTP.identifier,
+      );
+      const httpDetail = await (await request('/issues/' + createdHTTP.identifier)).json();
+      assert(httpDetail.audit.length === 2 && !('comments' in httpDetail));
+      assert((await request('/projects')).status === 501);
+
+      const isISO = (value: string) =>
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
+        new Date(value).toISOString() === value;
+      assert(
+        [...issues, edited, detail].every((issue) =>
+          isISO(issue.created_at) && isISO(issue.updated_at)
+        ),
+        'Create, update and detail timestamps must be ISO UTC',
+      );
+      assert(
+        detail.audit.every((event) => isISO(event.created_at)),
+        'Audit timestamps must be ISO UTC',
+      );
       const first = await s.listIssues(member, w.slug, { limit: 5 });
       assert(first.items.length === 5 && first.next_cursor);
       const second = await s.listIssues(member, w.slug, { limit: 5, cursor: first.next_cursor });
       const both = [...first.items, ...second.items];
+      assert(
+        both.every((issue) => isISO(issue.created_at) && isISO(issue.updated_at)),
+        'List timestamps must be ISO UTC',
+      );
       assert(
         both.every((issue, i) => i === 0 || both[i - 1].created_at >= issue.created_at),
         'Issue pages must use descending creation time',

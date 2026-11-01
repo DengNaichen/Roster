@@ -1,6 +1,27 @@
 # 开发与手动部署
 
+## 本机免登录预览
+
+独立入口 `scripts/preview.ts` 固定使用本地开发者身份，首次启动创建示例 Workspace、两个 Team 和七条任务。它只接受 loopback 上、名称以 `_preview` 结尾的数据库，HTTP 只监听 `127.0.0.1:18471`，允许前端 Origin `127.0.0.1:5178` / `localhost:5178`。该入口不被 Edge Functions 引用。
+
+先在隔离的本地 Postgres 创建 `roster_preview` 库、应用 migrations，并为本地 login 授予 `roster_app`。当前开发机已经在端口 55439 完成这一初始化。分别运行：
+
+```sh
+DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview deno run --allow-env --allow-net scripts/preview.ts
+VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --strictPort
+```
+
+访问 `http://127.0.0.1:5178/roster`。修改保存在该本地数据库，重启不覆盖已有工作区。预览只有一个固定用户，不能用于验证多用户登录或 OAuth；生产构建即使设置 `VITE_LOCAL_PREVIEW=true` 也不会启用免登录。
+
 ## 数据访问
+
+### 原前端兼容
+
+前端保留 InfTask 的 History 路由、`useResource` 和 `useRequestScope`，迁移不以更换路由/请求库为前提。`src/integration` 处理 Supabase 会话和本地预览，`shared.api` 保持原调用签名。
+
+`GET /api/w/:workspace/capabilities` 在页面挂载前声明已实现能力；获取失败会阻断并提供重试，不默认为全部可用。原组件所需的缺失数组仅由前端 `issueCompatibility` 补结构占位，并由 capability gate 明确显示未迁移，不将未实现功能表述为真实空数据。
+
+`packages/backend/src/transport/compat.ts` 负责 REST 兼容：列表提供原 `{issues}`，详情/状态更新按原形状返回，处理原表单的空负责人、无项目/周期字段，并保留真实负责人筛选和历史。MCP 继续使用其独立公开契约。前端代码仍保留未启用的功能，以便后端能力迁移后重新启用。
 
 `roster` schema 不加入 Supabase Data API 的暴露名单。迁移撤销 `public`、`anon`、`authenticated` 的访问，并创建 `roster_app` NOLOGIN 权限角色。业务权限由 Service 每次读取成员关系后执行；数据库客户端并不自动传递用户 JWT。应用连接不能使用 `postgres` 超级用户。
 

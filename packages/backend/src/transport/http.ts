@@ -4,12 +4,10 @@ import { z } from 'npm:zod@4.6.7';
 import {
   AppError,
   changeTeamMemberSchema,
-  createIssueSchema,
   createTeamSchema,
   createWorkspaceSchema,
   joinTeamSchema,
   joinWorkspaceSchema,
-  listIssuesSchema,
   type RequestContext,
   type Service,
   updateIssueSchema,
@@ -17,6 +15,17 @@ import {
   updateTeamSchema,
   updateWorkspaceSchema,
 } from '../../../contracts/mod.ts';
+import {
+  capabilities,
+  restCreateIssueSchema,
+  restDetail,
+  restIssue,
+  restListInput,
+  restTeam,
+  restUpdateIssueSchema,
+  UnsupportedFeatureError,
+  unsupportedRoute,
+} from './compat.ts';
 import type { VerifyIdentity } from '../auth/jwt.ts';
 export interface TransportOptions {
   service: Service;
@@ -42,6 +51,11 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     }),
   );
   app.onError((error, c) => {
+    if (error instanceof UnsupportedFeatureError) {
+      return c.json({
+        error: { code: 'not_implemented', message: error.message, feature: error.feature },
+      }, 501);
+    }
     if (error instanceof AppError) {
       return c.json(
         { error: { code: error.code, message: error.message } },
@@ -74,6 +88,13 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     }
     return schema.parse(input);
   };
+  app.get('/auth/session', (c) => {
+    const u = c.get('requestContext').identity;
+    return c.json({
+      enabled: true,
+      user: { sub: u.subject, display_name: u.name, email: u.email },
+    });
+  });
   app.get('/api/session', (c) => c.json(c.get('requestContext').identity));
   app.get(
     '/api/workspaces',
@@ -102,6 +123,32 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
           await body(c, updateWorkspaceSchema),
         ),
       ),
+  );
+  app.patch(
+    '/api/workspaces/:workspace',
+    async (c) =>
+      c.json(
+        await s.updateWorkspace(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          await body(c, updateWorkspaceSchema),
+        ),
+      ),
+  );
+  app.get('/api/w/:workspace/capabilities', async (c) => {
+    await s.listTeams(c.get('requestContext'), c.req.param('workspace'));
+    return c.json({ capabilities });
+  });
+  app.get(
+    '/api/w/:workspace/teams/:key/assignees',
+    async (c) =>
+      c.json({
+        assignees: await s.listAssignees(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          c.req.param('key'),
+        ),
+      }),
   );
   app.get('/api/w/:workspace/access', async (c) => {
     const workspace = (await s.listWorkspaces(c.get('requestContext'))).find((w) =>
@@ -134,21 +181,29 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
   app.get(
     '/api/w/:workspace/teams',
     async (c) =>
-      c.json({ teams: await s.listTeams(c.get('requestContext'), c.req.param('workspace')) }),
+      c.json({
+        teams: (await s.listTeams(c.get('requestContext'), c.req.param('workspace'))).map(restTeam),
+      }),
   );
   app.get(
     '/api/w/:workspace/team-directory',
     async (c) =>
-      c.json({ teams: await s.teamDirectory(c.get('requestContext'), c.req.param('workspace')) }),
+      c.json({
+        teams: (await s.teamDirectory(c.get('requestContext'), c.req.param('workspace'))).map(
+          restTeam,
+        ),
+      }),
   );
   app.post(
     '/api/w/:workspace/teams',
     async (c) =>
       c.json(
-        await s.createTeam(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          await body(c, createTeamSchema),
+        restTeam(
+          await s.createTeam(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            await body(c, createTeamSchema),
+          ),
         ),
         201,
       ),
@@ -157,11 +212,13 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     '/api/w/:workspace/teams/:key',
     async (c) =>
       c.json(
-        await s.updateTeam(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          c.req.param('key'),
-          await body(c, updateTeamSchema),
+        restTeam(
+          await s.updateTeam(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('key'),
+            await body(c, updateTeamSchema),
+          ),
         ),
       ),
   );
@@ -169,11 +226,23 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     '/api/w/:workspace/teams/:key/members',
     async (c) =>
       c.json({
-        members: await s.listTeamMembers(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          c.req.param('key'),
-        ),
+        members: await (async () => {
+          const members = await s.listTeamMembers(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('key'),
+          );
+          const workspaceMembers = await s.listMembers(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+          );
+          return members.map((m) => ({
+            ...m,
+            workspace_admin: workspaceMembers.some((w) =>
+              w.subject === m.subject && w.role === 'admin'
+            ),
+          }));
+        })(),
       }),
   );
   app.patch('/api/w/:workspace/teams/:key/members', async (c) => {
@@ -189,34 +258,32 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     '/api/w/:workspace/teams/:key/membership',
     async (c) =>
       c.json(
-        await s.joinTeam(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          c.req.param('key'),
-          await body(c, joinTeamSchema),
+        restTeam(
+          await s.joinTeam(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('key'),
+            await body(c, joinTeamSchema),
+          ),
         ),
       ),
   );
   app.get('/api/w/:workspace/issues', async (c) => {
-    const q = c.req.query();
-    if (q.search !== undefined) {
-      q.query = q.search;
-      delete q.search;
-    }
-    const input = listIssuesSchema.parse({
-      ...q,
-      ...(q.limit !== undefined ? { limit: Number(q.limit) } : {}),
-    });
-    return c.json(await s.listIssues(c.get('requestContext'), c.req.param('workspace'), input));
+    const input = restListInput(c.req.query());
+    const page = await s.listIssues(c.get('requestContext'), c.req.param('workspace'), input);
+    const issues = page.items.map(restIssue);
+    return c.json({ ...page, items: issues, issues });
   });
   app.post(
     '/api/w/:workspace/issues',
     async (c) =>
       c.json(
-        await s.createIssue(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          await body(c, createIssueSchema),
+        restIssue(
+          await s.createIssue(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            await body(c, restCreateIssueSchema),
+          ),
         ),
         201,
       ),
@@ -225,10 +292,13 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     '/api/w/:workspace/issues/:identifier',
     async (c) =>
       c.json(
-        await s.getIssue(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          c.req.param('identifier'),
+        restDetail(
+          await s.getIssue(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('identifier'),
+          ),
+          await s.listMembers(c.get('requestContext'), c.req.param('workspace')),
         ),
       ),
   );
@@ -236,14 +306,39 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     '/api/w/:workspace/issues/:identifier',
     async (c) =>
       c.json(
-        await s.updateIssue(
-          c.get('requestContext'),
-          c.req.param('workspace'),
-          c.req.param('identifier'),
-          await body(c, updateIssueSchema),
+        restIssue(
+          await s.updateIssue(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('identifier'),
+            await body(c, restUpdateIssueSchema),
+          ),
         ),
       ),
   );
+  app.patch(
+    '/api/w/:workspace/issues/:identifier/status',
+    async (c) =>
+      c.json(
+        restIssue(
+          await s.updateIssue(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('identifier'),
+            await body(c, updateIssueSchema.pick({ status: true }).required()),
+          ),
+        ),
+      ),
+  );
+  app.all('/api/w/:workspace/*', async (c, next) => {
+    const feature = unsupportedRoute(c.req.path);
+    if (!feature) {
+      await next();
+      return;
+    }
+    await s.listTeams(c.get('requestContext'), c.req.param('workspace'));
+    throw new UnsupportedFeatureError(feature);
+  });
   app.notFound((c) => c.json({ error: { code: 'not_found', message: 'Route not found' } }, 404));
   return app;
 }

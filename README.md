@@ -4,6 +4,8 @@
 
 当前是独立重写的首个可运行切片，旧 InfTask 保持独立运行。这里不连接旧库，也不自动迁移正式数据。
 
+前端直接迁自 InfTask `0f7740bfbc29ba2755a778bba8a0f04074ea1224` 的 `web/src`：保留原页面、六份 CSS、列表/看板、Markdown 详情、新建/编辑弹窗、路由及保存队列。仅通过认证、REST 兼容和能力声明适配新后端，不另做一套简化 UI。原 UI 的后端功能尚未全部迁移；不能使用的入口/字段明确标记 `Not migrated`。
+
 ## 当前范围
 
 - Workspace 创建与切换、Admin/Member、停用与恢复、可重置的邀请链接。
@@ -11,7 +13,7 @@
 - 任务创建、列表、详情、更新与审计记录；事务分配编号。
 - REST、MCP、Supabase JWT 校验、网页登录与 OAuth 授权界面。
 
-Projects、Initiatives、Labels、Cycles、评论、Agent 工作记录/接票、GitHub 同步和旧数据导入尚未迁移。本仓库没有 CI/CD；验证和部署手动执行。
+Projects、Initiatives、Labels、Cycles、评论、Agent 工作记录/接票、关系、链接、GitHub 同步和旧数据导入的后端尚未迁移。对应原前端组件保留，能力声明关闭这些功能；后端返回 501，不伪造空数据或写入成功。本仓库没有 CI/CD；验证和部署手动执行。
 
 ## 目录
 
@@ -25,6 +27,8 @@ Projects、Initiatives、Labels、Cycles、评论、Agent 工作记录/接票、
 | `scripts` | 本地开发入口 |
 
 ## 本地开发
+
+当前开发机的免登录预览在 `http://127.0.0.1:5178/roster`，使用独立 `roster_preview` 数据库；启动命令见 [本机免登录预览](docs/DEVELOPMENT.md#本机免登录预览)。
 
 前置：Node 22、Corepack、Deno 2、Supabase CLI 与 Docker。前端依赖由 pnpm 管理，后端 npm 依赖由 Deno 解析；两份锁文件均需保留。
 

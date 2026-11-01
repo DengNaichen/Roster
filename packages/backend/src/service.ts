@@ -167,7 +167,7 @@ async function assignee(
 const issueSelect =
   sql`select i.*,t.key as team,u.subject as user_subject,u.name as user_name,u.email as user_email from roster.issues i join roster.teams t on t.id=i.team_id left join roster.users u on u.subject=i.assignee_subject`;
 function iso(value: unknown) {
-  return value instanceof Date ? value.toISOString() : String(value);
+  return (value instanceof Date ? value : new Date(String(value))).toISOString();
 }
 function issueDTO(r: Row): Issue {
   return {
@@ -407,6 +407,15 @@ export function createService(db: Database): Service {
         return teamDTO(await team(tx, ctx, w, key, true), w);
       });
     },
+    async listAssignees(ctx, slug, key) {
+      const w = await workspace(db, ctx, slug);
+      const t = await team(db, ctx, w, key);
+      return await rows(
+        db,
+        sql`select u.* from roster.users u join roster.workspace_members wm on wm.subject=u.subject where wm.workspace_id=${w.id} and wm.status='active' and (${!t
+          .private} or exists(select 1 from roster.team_members tm where tm.team_id=${t.id} and tm.subject=u.subject)) order by u.name,u.subject`,
+      ) as unknown as Identity[];
+    },
     async listTeamMembers(ctx, slug, key) {
       const w = await workspace(db, ctx, slug);
       const t = await team(db, ctx, w, key, true);
@@ -502,6 +511,22 @@ export function createService(db: Database): Service {
       ];
       if (input.team) predicates.push(sql`t.key=${input.team}`);
       if (input.status) predicates.push(sql`i.status=${input.status}`);
+      if (input.type !== undefined) {
+        predicates.push(input.type === '' ? sql`i.type is null` : sql`i.type=${input.type}`);
+      }
+      if (input.priority !== undefined) predicates.push(sql`i.priority=${input.priority}`);
+      if (input.assigned_to_me && input.assignee !== undefined) {
+        fail('invalid_input', 'Cannot combine assignee and assigned_to_me');
+      }
+      if (input.assigned_to_me) predicates.push(sql`i.assignee_subject=${ctx.identity.subject}`);
+      if (input.assignee !== undefined) {
+        predicates.push(
+          input.assignee === null
+            ? sql`i.assignee_subject is null`
+            : sql`i.assignee_subject=${input.assignee}`,
+        );
+      }
+
       if (input.query) {
         predicates.push(
           sql`(i.title ilike ${'%' + input.query + '%'} or i.description ilike ${
@@ -535,7 +560,7 @@ export function createService(db: Database): Service {
       const r = await readIssue(db, ctx, w, identifier);
       const events = await rows(
         db,
-        sql`select id::text,kind,actor_subject,before,after,created_at from roster.audit_events where issue_id=${r.id} order by id`,
+        sql`select id::text,kind,actor_subject,before,after,created_at from roster.audit_events where issue_id=${r.id} order by roster.audit_events.id`,
       );
       return {
         ...issueDTO(r),

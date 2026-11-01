@@ -132,7 +132,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   );
   tool(
     'list_members',
-    'List workspace members (administrator only).',
+    'List workspace members (active workspace membership required).',
     {},
     true,
     () => service.listMembers(ctx, workspace),
