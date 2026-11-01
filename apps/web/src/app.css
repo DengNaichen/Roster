@@ -317,7 +317,7 @@ a:focus-visible, button:focus-visible { outline: var(--focus-width) solid var(--
 /* Status and priority share the same keyboard-accessible menu surface. */
 .status-control { position: relative; display: inline-flex; flex: none; align-items: center; gap: var(--space-8); padding: 0; color: var(--text-2); border: 0; background: transparent; border-radius: var(--radius); }
 .status-control:hover, .status-control[data-state="open"] { background: var(--hover); }
-.status-control:focus-within { box-shadow: 0 0 0 var(--border-width) var(--accent); }
+.status-control:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: calc(-1 * var(--focus-width)); }
 .status-select { white-space: nowrap; }
 .list-row .status-control, .card .status-control { justify-content: center; width: var(--list-control-size); height: var(--list-control-size); }
 .list-row .status-select, .card .status-select { display: none; }
@@ -464,7 +464,7 @@ a:focus-visible, button:focus-visible { outline: var(--focus-width) solid var(--
 .priority-mark-dot { fill: var(--panel); }
 .priority-control { display: inline-flex; align-items: center; gap: var(--space-8); height: var(--space-28); padding: 0 var(--space-8); border: 0; border-radius: var(--radius); background: transparent; color: var(--text-2); font-size: var(--font-size-13); text-align: left; white-space: nowrap; }
 .priority-control:hover, .priority-control[data-state="open"] { background: var(--hover); }
-.priority-control:focus-visible { outline: var(--border-width) solid var(--accent); outline-offset: var(--border-width); }
+.priority-control:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: calc(-1 * var(--focus-width)); }
 .priority-control:disabled { opacity: var(--opacity-disabled); cursor: wait; }
 .priority-compact { justify-content: center; width: var(--list-control-size); height: var(--list-control-size); padding: 0; }
 .priority-menu { z-index: 20; width: var(--priority-menu-width); max-height: var(--radix-select-content-available-height); overflow: auto; padding: var(--space-4); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius-lg); color: var(--text-2); background: var(--raised); box-shadow: var(--shadow-priority-menu); }

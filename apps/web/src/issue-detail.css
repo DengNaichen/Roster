@@ -48,6 +48,8 @@
 .issue-composer .composer-property .dropdown { flex: 1; width: auto; max-width: var(--priority-menu-width); height: auto; padding: var(--space-6) var(--space-6) var(--space-6) 0; border: 0; font-size: var(--font-size-12); }
 .issue-composer .composer-property input { flex: 1; min-width: 0; width: auto; max-width: var(--priority-menu-width); padding: var(--space-6) 0; background: transparent; border: 0; border-radius: 0; font-size: var(--font-size-12); text-overflow: ellipsis; }
 .issue-composer .composer-property:focus-within { border-color: var(--accent); }
+/* The property border owns the focus indicator; nested triggers add no ring. */
+.issue-composer .composer-property :focus-visible { outline: none; }
 .issue-composer .composer-property:has(.dropdown:not(:disabled)):hover { background: var(--hover); }
 .issue-composer .composer-property:has(.dropdown:disabled) { opacity: var(--opacity-disabled); }
 .issue-composer .composer-priority { padding-right: 0; }
