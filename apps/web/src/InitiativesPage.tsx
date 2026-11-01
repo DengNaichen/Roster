@@ -1,3 +1,4 @@
+import { Target } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PageHeader } from "./PageHeader";
 import { ProjectDialog } from "./ProjectManagement";
@@ -14,13 +15,23 @@ function InitiativeDirectory() {
   const items = useResource<{ initiatives: Initiative[] }>(apiPath("/initiatives?include_archived=true"), { initiatives: [] });
   const [archived, setArchived] = useState(false);
   const [creating, setCreating] = useState(false);
+  const visible = items.data.initiatives.filter((item) => item.archived === archived);
   return <>
-    <PageHeader actions={<button className="button" onClick={() => setCreating(true)}>New initiative</button>}>Initiatives</PageHeader>
-    <p className="scope-description">Group projects around a shared objective. Projects can also be planned independently.</p>
-    <div className="project-actions project-list-toolbar"><button className="button" aria-pressed={!archived} onClick={() => setArchived(false)}>Active initiatives</button><button className="button" aria-pressed={archived} onClick={() => setArchived(true)}>Archived initiatives</button></div>
-    {items.error ? <div className="scope-message"><RequestError message={items.error} /><button className="button" onClick={() => void items.reload()}>Retry initiatives</button></div> : items.loading ? <p className="empty">Loading initiatives…</p> : <section className="project-list" aria-label="Initiatives">
-      {items.data.initiatives.filter((item) => item.archived === archived).map((item) => <article className="project-row" key={item.id}><NavLink className="project-name" to={pagePath(`/initiative/${item.id}`)}>{item.name}</NavLink><p title={item.description}>{item.description || "No description yet."}</p><small>{item.project_ids.length} visible projects</small></article>)}
-      {!items.data.initiatives.some((item) => item.archived === archived) && <p className="empty">No {archived ? "archived" : "active"} initiatives.</p>}
+    <PageHeader actions={<button className="button primary" onClick={() => setCreating(true)}>New initiative</button>}>Initiatives</PageHeader>
+    <div className="project-toolbar"><div className="segmented" role="group" aria-label="Initiative status"><button type="button" aria-pressed={!archived} onClick={() => setArchived(false)}>Active</button><button type="button" aria-pressed={archived} onClick={() => setArchived(true)}>Archived</button></div></div>
+    {items.error ? <div className="scope-message"><RequestError message={items.error} /><button className="button" onClick={() => void items.reload()}>Retry initiatives</button></div> : items.loading ? <p className="empty">Loading initiatives…</p> : visible.length === 0 ? <div className="project-empty">
+      <Target className="icon" aria-hidden="true" />
+      <p>No {archived ? "archived" : "active"} initiatives</p>
+      <small>{archived ? "Initiatives you archive will show up here." : "Group projects around a shared objective. Projects can also be planned independently."}</small>
+    </div> : <section className="project-list initiative-list" aria-label="Initiatives">
+      <div className="project-list-head" aria-hidden="true"><span>Name</span><span>Projects</span></div>
+      {visible.map((item) => <article className="project-row" key={item.id}>
+        <NavLink className="project-name" aria-label={item.name} to={pagePath(`/initiative/${item.id}`)}>
+          <span className="project-icon"><Target className="icon" aria-hidden="true" /></span>
+          <span className="project-text"><span className="project-title" title={item.name}>{item.name}</span>{item.description && <span className="project-summary" title={item.description}>{item.description}</span>}</span>
+        </NavLink>
+        <span className="project-date">{item.project_ids.length} {item.project_ids.length === 1 ? "project" : "projects"}</span>
+      </article>)}
     </section>}
     {creating && <InitiativeDialog onClose={() => setCreating(false)} onSaved={async () => { setArchived(false); setCreating(false); await items.reload(); }} />}
   </>;
@@ -37,9 +48,9 @@ function InitiativeDetail({ id, teams }: { id: number; teams: Team[] }) {
   if (!current) return <p className="empty">Loading initiative…</p>;
   const visible = projects.data.projects.filter((p) => current.project_ids.includes(p.id));
   return <>
-    <PageHeader actions={<button className="button" onClick={() => setEditing(true)}>Edit initiative</button>}>{current.name}</PageHeader>
-    <div className="scope-description"><NavLink to={pagePath("/initiatives")}>All initiatives</NavLink><p className="initiative-description">{current.description || "No description yet."}</p>{current.archived && <p>Archived initiative. Restore it before adding projects.</p>}</div>
-    <div className="project-actions project-list-toolbar"><button className="button" aria-pressed={!timeline} onClick={() => setTimeline(false)}>List</button><button className="button" aria-pressed={timeline} onClick={() => setTimeline(true)}>Timeline</button></div>
+    <PageHeader actions={<button className="button" onClick={() => setEditing(true)}>Edit initiative</button>}><NavLink to={pagePath("/initiatives")}>Initiatives</NavLink><span className="separator">›</span><span>{current.name}</span></PageHeader>
+    {(current.description || current.archived) && <div className="initiative-intro">{current.description && <p className="initiative-description">{current.description}</p>}{current.archived && <p className="project-notice">Archived initiative. Restore it before adding projects.</p>}</div>}
+    <div className="project-toolbar"><div className="segmented" role="group" aria-label="Project layout"><button type="button" aria-pressed={!timeline} onClick={() => setTimeline(false)}>List</button><button type="button" aria-pressed={timeline} onClick={() => setTimeline(true)}>Timeline</button></div></div>
     {projects.error ? <div className="scope-message"><RequestError message={projects.error} /><button className="button" onClick={() => void projects.reload()}>Retry projects</button></div> : timeline && !projects.loading ? <ProjectTimeline projects={visible} onEdit={setEditingProject} /> : <ProjectList projects={visible} teams={teams} loading={projects.loading} archived={false} />}
     {editing && <InitiativeDialog initiative={current} onClose={() => setEditing(false)} onSaved={async (saved) => { item.update(() => saved); setEditing(false); await item.reload(); }} />}
     {editingProject && <ProjectDialog project={editingProject} teams={teams} onClose={() => setEditingProject(null)} onSaved={async (saved) => { projects.update((data) => ({ projects: data.projects.map((p) => p.id === saved.id ? saved : p) })); setEditingProject(null); await projects.reload(); }} />}

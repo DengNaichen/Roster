@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Dropdown } from "./Dropdown";
 import { api, apiPath, ModalDialog, RequestError } from "./shared";
 import { useResource } from "./useResource";
 import { useRequestScope } from "./useRequestScope";
@@ -18,12 +19,12 @@ export function CycleSelect({ team, value, onChange, disabled = false, label = "
   const resource = useResource<CyclePage>(team ? apiPath(`/teams/${encodeURIComponent(team)}/cycles`) : null, emptyCycles);
   const available = resource.data.cycles.filter((c) => filter || (resource.data.settings.enabled && c.state !== "completed") || c.id === value);
   return <span className="cycle-select">
-    <select aria-label={label} value={value} disabled={disabled || !team || resource.loading || !!resource.error} onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}>
-      {filter && <option value="">All cycles</option>}
-      <option value={0}>No cycle</option>
-      {value !== "" && value !== 0 && !available.some((c) => c.id === value) && <option value={value} disabled>Cycle unavailable</option>}
-      {available.map((c) => <option key={c.id} value={c.id}>{cycleName(c)} · {c.state}</option>)}
-    </select>
+    <Dropdown variant="ghost" aria-label={label} value={String(value)} disabled={disabled || !team || resource.loading || !!resource.error} onChange={(next) => onChange(next === "" ? "" : Number(next))} options={[
+      ...(filter ? [{ value: "", label: "All cycles" }] : []),
+      { value: "0", label: "No cycle" },
+      ...(value !== "" && value !== 0 && !available.some((c) => c.id === value) ? [{ value: String(value), label: "Cycle unavailable", disabled: true }] : []),
+      ...available.map((c) => ({ value: String(c.id), label: `${cycleName(c)} · ${c.state}` })),
+    ]} />
     {resource.error && <><RequestError message={resource.error} /><button type="button" className="ghost" onClick={() => void resource.reload()}>Retry cycles</button></>}
   </span>;
 }

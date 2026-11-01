@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { FormEvent, ReactNode, useState } from "react";
 import { X } from "lucide-react";
 import { api, apiPath, Label, LabelBadge, LabelGroup, ModalDialog, RequestError } from "./shared";
@@ -88,18 +89,17 @@ export function LabelPicker({
         {batch && (
           <label>
             Action
-            <select
+            <Dropdown
+              variant="block"
               aria-label="Label action"
               disabled={busy}
               value={operation}
-              onChange={(e) => {
-                setOperation(e.target.value);
+              onChange={(next) => {
+                setOperation(next);
                 setSelected([]);
               }}
-            >
-              <option value="add">Add labels</option>
-              <option value="remove">Remove labels</option>
-            </select>
+              options={[{ value: "add", label: "Add labels" }, { value: "remove", label: "Remove labels" }]}
+            />
           </label>
         )}
         <input
@@ -194,17 +194,18 @@ export function LabelFilter({
           >
             <label>
               Match
-              <select
+              <Dropdown
+                variant="block"
+                aria-label="Match"
                 value={draft.mode}
-                onChange={(e) =>
-                  setDraft({ ...draft, mode: e.target.value, ...(e.target.value === "unlabeled" ? { labels: [], groups: [] } : {}) })
-                }
-              >
-                <option value="any">Any selected label or group</option>
-                <option value="all">All selected labels and groups</option>
-                <option value="none">None of the selected labels or groups</option>
-                <option value="unlabeled">No labels</option>
-              </select>
+                onChange={(next) => setDraft({ ...draft, mode: next, ...(next === "unlabeled" ? { labels: [], groups: [] } : {}) })}
+                options={[
+                  { value: "any", label: "Any selected label or group" },
+                  { value: "all", label: "All selected labels and groups" },
+                  { value: "none", label: "None of the selected labels or groups" },
+                  { value: "unlabeled", label: "No labels" },
+                ]}
+              />
             </label>
             {draft.mode !== "unlabeled" && (
               <>

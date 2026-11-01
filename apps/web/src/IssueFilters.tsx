@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { UnavailableField, useCapabilities } from "./Capabilities";
 import { AssigneeFilter } from "./Assignee";
 import * as Popover from "@radix-ui/react-popover";
@@ -91,20 +92,11 @@ export function IssueFilters({ assignee, setAssignee, membershipEnabled, filter,
               }
             }}>
               <div className="toolbar-popover-heading">Filter issues</div>
-              <label className="toolbar-field">Status<select value={filter} aria-label="Filter by status" onChange={(event) => setFilter(event.target.value as Status | "all")}>
-                <option value="all">All statuses</option>
-                {columns.map((column) => <option key={column.status} value={column.status}>{column.label}</option>)}
-              </select></label>
-              {teams.length > 0 && <label className="toolbar-field">Team<select value={team} aria-label="Filter by Team" onChange={(event) => setTeam(event.target.value)}><option value="">All project teams</option>{teams.map((item) => <option key={item.key} value={item.key}>{item.name}</option>)}</select></label>}
+              <label className="toolbar-field">Status<Dropdown variant="block" aria-label="Filter by status" value={filter} onChange={(next) => setFilter(next as Status | "all")} options={[{ value: "all", label: "All statuses" }, ...columns.map((column) => ({ value: column.status, label: column.label, icon: <StatusIcon status={column.status} /> }))]} /></label>
+              {teams.length > 0 && <label className="toolbar-field">Team<Dropdown variant="block" aria-label="Filter by Team" value={team} onChange={setTeam} options={[{ value: "", label: "All project teams" }, ...teams.map((item) => ({ value: item.key, label: item.name }))]} /></label>}
               <AssigneeFilter value={assignee} currentLabel={assigneeLabel} onChange={(value, label) => { setAssignee(value); setAssigneeLabel(label); clearSelection(); }} enabled={membershipEnabled} />
-              <label className="toolbar-field">Type<select value={type} aria-label="Filter by type" onChange={(event) => { setType(event.target.value); clearSelection(); }}>
-                <option value="">All types</option>
-                {issueTypes.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select></label>
-              <label className="toolbar-field">Priority<select value={priority} aria-label="Filter by priority" onChange={(event) => { setPriority(event.target.value === "" ? "" : Number(event.target.value) as Priority); clearSelection(); }}>
-                <option value="">All priorities</option>
-                {priorities.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select></label>
+              <label className="toolbar-field">Type<Dropdown variant="block" aria-label="Filter by type" value={type} onChange={(next) => { setType(next); clearSelection(); }} options={[{ value: "", label: "All types" }, ...issueTypes.map((item) => ({ value: item, label: item }))]} /></label>
+              <label className="toolbar-field">Priority<Dropdown variant="block" aria-label="Filter by priority" value={String(priority)} onChange={(next) => { setPriority(next === "" ? "" : Number(next) as Priority); clearSelection(); }} options={[{ value: "", label: "All priorities" }, ...priorities.map((option) => ({ value: String(option.value), label: option.label, icon: <PriorityIcon priority={option.value} /> }))]} /></label>
               <div className="toolbar-label-field"><span>Labels</span>{!capabilities.labels ? <UnavailableField name="Labels" /> : <LabelFilter value={labelFilter} onChange={(value) => { setLabelFilter(value); clearSelection(); }} catalog={catalog} />}</div>
               <Popover.Close asChild><button type="button" className="toolbar-popover-done">Done</button></Popover.Close>
             </Popover.Content>
@@ -126,11 +118,7 @@ export function IssueFilters({ assignee, setAssignee, membershipEnabled, filter,
                 <button type="button" className={view === "list" ? "active" : ""} aria-pressed={view === "list"} onClick={() => setView("list")}><List className="icon" />List</button>
                 <button type="button" className={view === "board" ? "active" : ""} aria-pressed={view === "board"} onClick={() => setView("board")}><Columns2 className="icon" />Board</button>
               </nav>
-              <label className="toolbar-field">Ordering<select value={sort} aria-label="Issue ordering" onChange={(event) => setSort(event.target.value as IssueSort)}>
-                <option value="auto">Default ordering</option>
-                <option value="updated">Last updated</option>
-                <option value="priority">Priority</option>
-              </select></label>
+              <label className="toolbar-field">Ordering<Dropdown variant="block" aria-label="Issue ordering" value={sort} onChange={(next) => setSort(next as IssueSort)} options={[{ value: "auto", label: "Default ordering" }, { value: "updated", label: "Last updated" }, { value: "priority", label: "Priority" }]} /></label>
               <Popover.Close asChild><button type="button" className="toolbar-menu-action" disabled={selectionDisabled || visibleCount === 0} onClick={selectVisible}>Select visible issues</button></Popover.Close>
             </Popover.Content>
           </Popover.Portal>

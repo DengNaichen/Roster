@@ -4,6 +4,14 @@ import { afterEach } from "vitest";
 
 afterEach(cleanup);
 
+// jsdom lacks the pointer and scroll APIs Radix Select uses when a menu opens.
+Object.assign(Element.prototype, {
+  hasPointerCapture: () => false,
+  setPointerCapture: () => {},
+  releasePointerCapture: () => {},
+  scrollIntoView: () => {},
+});
+
 // Existing component tests exercise the original complete UI contract explicitly.
 vi.mock("../Capabilities", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../Capabilities")>();

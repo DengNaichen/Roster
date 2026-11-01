@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import type { SpecSummary } from "../../../packages/contracts/spec";
@@ -41,22 +42,16 @@ export default function SpecsPage(
       </PageHeader>
       <section className="spec-directory" aria-label="Specs directory">
         <label>
-          Team scope<select
+          Team scope<Dropdown
+            variant="block"
+            aria-label="Team scope"
             value={team}
-            onChange={(event) =>
+            onChange={(next) =>
               navigate(pagePath(
-                event.target.value
-                  ? `/team/${encodeURIComponent(event.target.value)}/specs`
-                  : "/specs",
+                next ? `/team/${encodeURIComponent(next)}/specs` : "/specs",
               ))}
-          >
-            <option value="">All teams</option>
-            {visibleTeams.map((item) => (
-              <option key={item.key} value={item.key}>
-                {item.name} ({item.key})
-              </option>
-            ))}
-          </select>
+            options={[{ value: "", label: "All teams" }, ...visibleTeams.map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))]}
+          />
         </label>
         {resource.error && (
           <>

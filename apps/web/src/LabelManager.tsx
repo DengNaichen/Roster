@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { FormEvent, useState } from "react";
 import { api, apiPath, Label, LabelBadge, LabelGroup, RequestError } from "./shared";
 import { Catalog } from "./useLabels";
@@ -15,15 +16,6 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
   );
   return (
     <section className="label-manager" aria-label="Label settings">
-      <div className="label-manager-heading">
-        <div>
-          <h1>Labels</h1>
-          <p className="label-help">Organize issues across projects. Groups allow one label per issue.</p>
-        </div>
-        <button className="button primary" onClick={() => setEditor("new")}>
-          New label
-        </button>
-      </div>
       <div className="label-toolbar">
         <input
           type="search"
@@ -35,9 +27,14 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
         <label>
           <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} /> Show archived
         </label>
-        <button className="button" onClick={() => setGroupEditor("new")}>
-          New group
-        </button>
+        <span className="label-toolbar-actions">
+          <button className="button" onClick={() => setGroupEditor("new")}>
+            New group
+          </button>
+          <button className="button primary" onClick={() => setEditor("new")}>
+            New label
+          </button>
+        </span>
       </div>
       {catalog.error && (
         <RequestError message={catalog.error} />
@@ -135,14 +132,10 @@ function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalo
         </label>
         <label>
           Group
-          <select disabled={busy || !isNew} value={group} onChange={(e) => setGroup(Number(e.target.value))}>
-            <option value={0}>Ungrouped (multiple labels)</option>
-            {catalog.groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name} (single select)
-              </option>
-            ))}
-          </select>
+          <Dropdown variant="block" aria-label="Group" disabled={busy || !isNew} value={String(group)} onChange={(next) => setGroup(Number(next))} options={[
+            { value: "0", label: "Ungrouped (multiple labels)" },
+            ...catalog.groups.map((g) => ({ value: String(g.id), label: `${g.name} (single select)` })),
+          ]} />
         </label>
         {!isNew && (
           <label className="label-option">
@@ -245,16 +238,9 @@ function MergeEditor({
         </p>
         <label>
           Target label
-          <select disabled={busy} required value={target} onChange={(e) => setTarget(e.target.value)}>
-            <option value="">Choose a label…</option>
-            {catalog.labels
-              .filter((l) => l.id !== source.id && !l.archived && l.group_id === source.group_id)
-              .map((l) => (
-                <option value={l.id} key={l.id}>
-                  {l.name}
-                </option>
-              ))}
-          </select>
+          <Dropdown variant="block" aria-label="Target label" placeholder="Choose a label…" required disabled={busy} value={target} onChange={setTarget} options={catalog.labels
+            .filter((l) => l.id !== source.id && !l.archived && l.group_id === source.group_id)
+            .map((l) => ({ value: String(l.id), label: l.name }))} />
         </label>
         {error && (
           <RequestError message={error} />

@@ -20,9 +20,8 @@
 .detail-properties .status-icon { margin: 0 var(--space-1); }
 .detail-properties .assignee-control { position: relative; display: flex; max-width: calc(100% + var(--space-8)); margin-left: calc(-1 * var(--space-8)); }
 .detail-properties .assignee-control > .icon, .detail-properties .assignee-control > .person-avatar { position: absolute; top: calc((var(--detail-property-row-height) - var(--icon-size)) / 2); left: var(--space-8); pointer-events: none; }
-.detail-properties .assignee-control select { appearance: none; max-width: 100%; height: var(--detail-property-row-height); padding: 0 var(--space-8) 0 calc(var(--space-8) + var(--icon-size) + var(--space-8)); color: var(--text-2); text-overflow: ellipsis; }
-.detail-properties .assignee-control select:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: calc(-1 * var(--focus-width)); }
-.detail-properties .assignee-empty select { color: var(--muted); }
+.detail-properties .assignee-control .dropdown { flex: 1; max-width: 100%; height: var(--detail-property-row-height); padding-left: calc(var(--space-8) + var(--icon-size) + var(--space-8)); }
+.detail-properties .assignee-empty .dropdown { color: var(--muted); }
 /* The agent mark sits under the assignee name, so its hit area starts one inset
    before the mark and the elbow from the assignee icon stays outside it. */
 .detail-property-child .delegation-link { position: relative; max-width: calc(100% - var(--icon-size)); margin-left: var(--icon-size); }
@@ -46,10 +45,11 @@
 .issue-composer .composer-property { display: inline-flex; align-items: center; gap: var(--space-6); min-width: 0; max-width: 100%; min-height: var(--space-32); padding: 0 var(--space-8); color: var(--text-2); background: transparent; border: var(--border-width) solid var(--border); border-radius: var(--radius); font-size: var(--font-size-12); font-weight: var(--weight-regular); }
 .composer-property > .icon { flex: none; color: var(--muted); }
 .composer-property-name { flex: none; color: var(--muted); font-size: var(--font-size-11); }
-.issue-composer .composer-property select, .issue-composer .composer-property input { flex: 1; min-width: 0; width: auto; max-width: var(--priority-menu-width); padding: var(--space-6) 0; background: transparent; border: 0; border-radius: 0; font-size: var(--font-size-12); text-overflow: ellipsis; }
+.issue-composer .composer-property .dropdown { flex: 1; width: auto; max-width: var(--priority-menu-width); height: auto; padding: var(--space-6) var(--space-6) var(--space-6) 0; border: 0; font-size: var(--font-size-12); }
+.issue-composer .composer-property input { flex: 1; min-width: 0; width: auto; max-width: var(--priority-menu-width); padding: var(--space-6) 0; background: transparent; border: 0; border-radius: 0; font-size: var(--font-size-12); text-overflow: ellipsis; }
 .issue-composer .composer-property:focus-within { border-color: var(--accent); }
-.issue-composer .composer-property:has(select:not(:disabled)):hover { background: var(--hover); }
-.issue-composer .composer-property:has(select:disabled) { opacity: var(--opacity-disabled); }
+.issue-composer .composer-property:has(.dropdown:not(:disabled)):hover { background: var(--hover); }
+.issue-composer .composer-property:has(.dropdown:disabled) { opacity: var(--opacity-disabled); }
 .issue-composer .composer-priority { padding-right: 0; }
 .composer-priority .priority-control { font-size: var(--font-size-12); }
 .issue-composer .composer-status { color: var(--muted); }
@@ -73,8 +73,6 @@
 
 .assignee-control { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--space-6); min-width: 0; max-width: 100%; }
 .assignee-control > .icon { flex-shrink: 0; color: var(--text-3); }
-.assignee-control select { flex: 1; min-width: 0; max-width: 100%; padding: var(--space-4); font: inherit; color: inherit; background: transparent; border: 0; border-radius: var(--radius); }
-.assignee-control select:hover { background: var(--hover); }
 .person-avatar { display: grid; flex: none; place-items: center; width: var(--icon-size); height: var(--icon-size); color: var(--text-2); background: var(--button-bg); border-radius: var(--radius-circle); font-size: var(--font-size-9); font-weight: var(--weight-medium); line-height: 1; }
 .assignment-history ol { padding-left: var(--space-6); }
 .assignment-history li { margin-bottom: var(--space-3); }

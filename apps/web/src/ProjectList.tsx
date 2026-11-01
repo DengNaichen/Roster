@@ -25,7 +25,7 @@ export function ProjectList({ projects, teams, loading, archived }: { projects: 
       const start = shortDate(project.start_date);
       const target = shortDate(project.target_date);
       return <article key={project.id} className="project-row">
-        <NavLink className="project-name" to={pagePath(`/project/${project.id}`)}>
+        <NavLink className="project-name" aria-label={project.name} to={pagePath(`/project/${project.id}`)}>
           <span className="project-icon">{project.emoji ? <EntityEmoji emoji={project.emoji} /> : <Box className="icon" aria-hidden="true" />}</span>
           <span className="project-text">
             <span className="project-title" title={project.name}>{project.name}</span>

@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { useState } from "react";
 import type {
   Spec,
@@ -55,44 +56,34 @@ export function SpecHistory({ spec }: { spec: Spec }) {
             {!comparing
               ? (
                 <label>
-                  Revision<select
-                    value={selected}
-                    onChange={(event) =>
-                      setSelected(Number(event.target.value))}
-                  >
-                    {history.data.revisions.map((item) => (
-                      <option key={item.number} value={item.number}>
-                        r{item.number} · {item.message || "No message"}
-                      </option>
-                    ))}
-                  </select>
+                  Revision<Dropdown
+                    variant="block"
+                    aria-label="Revision"
+                    value={String(selected)}
+                    onChange={(next) => setSelected(Number(next))}
+                    options={history.data.revisions.map((item) => ({ value: String(item.number), label: `r${item.number} · ${item.message || "No message"}` }))}
+                  />
                 </label>
               )
               : (
                 <>
                   <label>
-                    From revision<select
-                      value={from}
-                      onChange={(event) => setFrom(Number(event.target.value))}
-                    >
-                      {history.data.revisions.map((item) => (
-                        <option key={item.number} value={item.number}>
-                          r{item.number}
-                        </option>
-                      ))}
-                    </select>
+                    From revision<Dropdown
+                      variant="block"
+                      aria-label="From revision"
+                      value={String(from)}
+                      onChange={(next) => setFrom(Number(next))}
+                      options={history.data.revisions.map((item) => ({ value: String(item.number), label: `r${item.number}` }))}
+                    />
                   </label>
                   <label>
-                    To revision<select
-                      value={to}
-                      onChange={(event) => setTo(Number(event.target.value))}
-                    >
-                      {history.data.revisions.map((item) => (
-                        <option key={item.number} value={item.number}>
-                          r{item.number}
-                        </option>
-                      ))}
-                    </select>
+                    To revision<Dropdown
+                      variant="block"
+                      aria-label="To revision"
+                      value={String(to)}
+                      onChange={(next) => setTo(Number(next))}
+                      options={history.data.revisions.map((item) => ({ value: String(item.number), label: `r${item.number}` }))}
+                    />
                   </label>
                 </>
               )}

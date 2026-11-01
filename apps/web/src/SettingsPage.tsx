@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PageHeader } from "./PageHeader";
-import { NavLink, pagePath } from "./shared";
 import { EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
 import { MembersSettings } from "./WorkspaceAccess";
@@ -12,12 +11,15 @@ export function SettingsPage({ teams, loading, onSaved }: { teams: Team[]; loadi
   const [directory, setDirectory] = useState<Team[] | null>(null);
   const [directoryError, setDirectoryError] = useState("");
   useEffect(() => { let active = true; api<TeamDirectory>(apiPath("/team-directory")).then((result) => { if (active) setDirectory(result.teams); }, (cause: Error) => { if (active) setDirectoryError(cause.message); }); return () => { active = false; }; }, []);
+  const [tab, setTab] = useState<"members" | "teams">("teams");
   const entries = directory ?? teams;
-  return <><PageHeader actions={<NavLink to={pagePath("/")}>Back to issues</NavLink>}><span>Settings</span></PageHeader><div className="settings-page">
-    <MembersSettings />
-    <header className="settings-heading"><h1>Teams</h1><p>Manage team names and icons in this workspace.</p></header>
-    {directoryError && <RequestError message={directoryError} />}
-    {entries.length === 0 ? <p className="empty">{loading ? "Loading teams…" : "No teams yet. Use + beside Teams to create one."}</p> : entries.map((team) => <TeamSettings key={team.key} team={team} onSaved={(updated) => { setDirectory((items) => (items ?? teams).map((item) => item.key === updated.key ? updated : item)); onSaved(updated); }} />)}
+  return <><PageHeader><span>Settings</span></PageHeader>
+  <div className="project-toolbar"><div className="segmented" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected={tab === "teams"} aria-pressed={tab === "teams"} onClick={() => setTab("teams")}>Teams</button><button type="button" role="tab" aria-selected={tab === "members"} aria-pressed={tab === "members"} onClick={() => setTab("members")}>Members</button></div></div>
+  <div className="settings-page">
+    {tab === "members" && <MembersSettings />}
+    {tab === "teams" && <header className="settings-heading"><p>Manage team names, icons and access in this workspace.</p></header>}
+    {tab === "teams" && directoryError && <RequestError message={directoryError} />}
+    {tab === "teams" && (entries.length === 0 ? <p className="empty">{loading ? "Loading teams…" : "No teams yet. Use + beside Teams to create one."}</p> : entries.map((team) => <TeamSettings key={team.key} team={team} onSaved={(updated) => { setDirectory((items) => (items ?? teams).map((item) => item.key === updated.key ? updated : item)); onSaved(updated); }} />))}
   </div></>;
 }
 
