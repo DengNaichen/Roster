@@ -68,8 +68,7 @@
 .toolbar-popover { width: var(--board-column-width); padding: var(--space-8); }
 .toolbar-popover-heading { margin: var(--space-2) var(--space-4) var(--space-12); color: var(--text); font-size: var(--font-size-12); font-weight: var(--weight-strong); }
 .toolbar-field, .toolbar-label-field { display: grid; grid-template-columns: var(--property-label-width) minmax(0, 1fr); align-items: center; gap: var(--space-8); margin-bottom: var(--space-8); padding: 0 var(--space-4); font-size: var(--font-size-12); color: var(--text-3); }
-.toolbar-field select { min-width: 0; width: 100%; padding: var(--space-5) var(--space-6); color: var(--text-2); background: var(--panel); border: var(--border-width) solid var(--border); border-radius: var(--radius); font-size: var(--font-size-12); }
-.toolbar-field select:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: var(--border-width); }
+.toolbar-field .dropdown { font-size: var(--font-size-12); }
 .toolbar-label-field > .button { padding: var(--space-5) var(--space-6); text-align: left; font-size: var(--font-size-12); }
 .toolbar-popover-done, .toolbar-menu-action { display: flex; align-items: center; justify-content: flex-start; gap: var(--space-8); width: 100%; padding: var(--space-8); color: var(--text-2); background: transparent; border: 0; border-radius: var(--radius); text-align: left; font-size: var(--font-size-12); }
 .toolbar-popover-done { justify-content: center; background: var(--button-bg); }
@@ -170,7 +169,7 @@
 .team-access-actions strong { margin-right: auto; }
 .team-member-add { margin-top: var(--space-16); }
 .team-member-add label { min-width: 0; flex: 1; }
-.team-member-add select { display: block; width: 100%; margin-top: var(--space-8); }
+.team-member-add .dropdown { margin-top: var(--space-8); }
 .team-join-confirm { padding: var(--space-12); background: var(--raised); border-radius: var(--radius-md); margin-top: var(--space-12); }
 .invite-settings label { display: block; margin-top: var(--space-12); }
 .invite-settings input { display: block; width: 100%; margin-top: var(--space-8); }
@@ -191,6 +190,3 @@
   .settings-field { align-items: flex-start; flex-direction: column; gap: var(--space-8); }
   .settings-name { width: 100%; }
 }
-
-.settings-page select { height: var(--space-28); padding: 0 var(--space-24) 0 var(--space-10); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius); background-color: transparent; font-size: var(--font-size-13); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23808893' stroke-width='1.5'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right var(--space-8) center; }
-.settings-page select:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: var(--border-width); }

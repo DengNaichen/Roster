@@ -373,8 +373,9 @@ a:focus-visible, button:focus-visible { outline: var(--focus-width) solid var(--
 .issue-dialog h2 { color: var(--text); font-size: var(--font-size-14); font-weight: var(--weight-strong); }
 .issue-dialog header .ghost { margin-right: calc(-1 * var(--space-8)); }
 .issue-dialog label { display: grid; gap: var(--space-6); color: var(--muted); font-size: var(--font-size-12); font-weight: var(--weight-medium); }
-.issue-dialog input, .issue-dialog textarea, .issue-dialog select { width: 100%; padding: var(--space-8) var(--space-10); color: var(--text); background: var(--panel); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius); font-size: var(--font-size-13); outline: none; }
-.issue-dialog input:focus, .issue-dialog textarea:focus, .issue-dialog select:focus { border-color: var(--accent); }
+.issue-dialog input, .issue-dialog textarea { width: 100%; padding: var(--space-8) var(--space-10); color: var(--text); background: var(--panel); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius); font-size: var(--font-size-13); outline: none; }
+.issue-dialog input:focus, .issue-dialog textarea:focus { border-color: var(--accent); }
+.issue-dialog .dropdown { height: calc(var(--space-32) + var(--space-4)); padding-left: var(--space-10); background: var(--panel); }
 .issue-dialog textarea { line-height: var(--line-body); resize: vertical; }
 .issue-dialog ::placeholder { color: var(--muted); }
 .issue-dialog .error { margin: 0; }
@@ -470,6 +471,19 @@ a:focus-visible, button:focus-visible { outline: var(--focus-width) solid var(--
 .priority-option { display: flex; align-items: center; gap: var(--space-8); height: var(--space-32); padding: 0 var(--space-8); border-radius: var(--radius); font-size: var(--font-size-13); cursor: default; user-select: none; outline: none; }
 .priority-option[data-highlighted] { color: var(--text); background: var(--selected); }
 .priority-check { display: flex; align-items: center; width: var(--icon-size); }
+/* One dropdown trigger for every choice list; the menu reuses .priority-menu. */
+.dropdown { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: space-between; gap: var(--space-8); min-width: 0; max-width: 100%; height: var(--space-28); padding: 0 var(--space-8) 0 var(--space-10); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius); background: transparent; color: var(--text-2); font-size: var(--font-size-13); text-align: left; white-space: nowrap; }
+.dropdown:hover, .dropdown[data-state="open"] { background: var(--hover); color: var(--text); }
+.dropdown:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: var(--border-width); }
+.dropdown:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+.dropdown-label { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.dropdown-placeholder { color: var(--faint); }
+.dropdown-chevron { flex: none; width: var(--font-size-12); height: var(--font-size-12); color: var(--faint); }
+.dropdown-block { display: flex; width: 100%; }
+.dropdown-ghost { border-color: transparent; padding-left: var(--space-6); }
+.dropdown-menu { width: auto; min-width: var(--radix-select-trigger-width); max-width: min(360px, calc(100vw - var(--space-16))); }
+.dropdown-menu .priority-option { white-space: nowrap; }
+input.dropdown-required { position: absolute; box-sizing: border-box; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 .dialog-priority { display: flex; align-items: center; gap: var(--space-16); margin: var(--space-16) 0; color: var(--text-2); font-size: var(--font-size-13); }
 .dialog-priority > .priority-control { border: var(--border-width) solid var(--border); }
 .priority-bar-muted { opacity: var(--priority-muted-opacity); }

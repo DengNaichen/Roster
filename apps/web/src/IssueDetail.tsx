@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { UnavailableField, useCapabilities } from "./Capabilities";
 import { CycleSelect } from "./Cycles";
 import "./cycles.css";
@@ -301,9 +302,7 @@ function IssueEditor({ issue, teams, onClose, onSave, write }: { issue: Issue; t
         <div className="composer-properties">
           <label className="composer-property"><Users className="icon" /><span className="composer-property-name">Team</span><input value={`${teams.find((item) => item.key === team)?.name ?? team} (${team})`} readOnly /></label>
           <IssueProjectSelect projects={projects} team={team} value={projectID} onChange={setProjectID} disabled={saving || loadingProjects || !!projectError || !capabilities.projects} retainedID={issue.project_id ?? 0} fallback={issue.project ?? "Unavailable project"} />{!capabilities.projects && <UnavailableField name="Project" />}
-          <label className="composer-property"><StatusIcon status={status} /><span className="composer-property-name">Status</span><select disabled={saving} value={status} onChange={(event) => setStatus(event.target.value as Status)}>
-            {columns.map((column) => <option key={column.status} value={column.status}>{column.label}</option>)}
-          </select></label>
+          <label className="composer-property"><StatusIcon status={status} /><span className="composer-property-name">Status</span><Dropdown variant="ghost" aria-label="Status" disabled={saving} value={status} onChange={(next) => setStatus(next as Status)} options={columns.map((column) => ({ value: column.status, label: column.label }))} /></label>
           <div className="composer-property composer-priority"><span className="composer-property-name">Priority</span><PrioritySelect priority={priority} onChange={setPriority} label="Edit issue priority" disabled={saving} /></div>
         </div>
         <p className="dialog-hint">The team and identifier of an existing issue cannot be changed.</p>

@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { useEffect, useRef, useState } from "react";
 import { api, apiPath, navigate, RequestError, Workspace } from "./shared";
 import { Session } from "./Session";
@@ -61,7 +62,7 @@ export function MembersSettings() {
     {!access && !error && <p>Loading members…</p>}
     <div className="member-list">{members.map((member) => <div className="member-row" key={member.subject}>
       <div className="member-identity"><strong>{member.name || member.email || member.subject}{member.subject === access?.subject ? " (you)" : ""}</strong><small>{member.email || member.subject}</small></div>
-      {admin ? <select aria-label={`Role for ${member.name || member.subject}`} value={member.role} disabled={busy} onChange={(event) => void update(member, { role: event.target.value === "admin" ? "admin" : "member" })}><option value="member">Member</option><option value="admin">Admin</option></select> : <span>{member.role === "admin" ? "Admin" : "Member"}</span>}
+      {admin ? <Dropdown aria-label={`Role for ${member.name || member.subject}`} value={member.role} disabled={busy} onChange={(next) => void update(member, { role: next === "admin" ? "admin" : "member" })} options={[{ value: "member", label: "Member" }, { value: "admin", label: "Admin" }]} /> : <span>{member.role === "admin" ? "Admin" : "Member"}</span>}
       <span>{member.status === "active" ? "Active" : "Suspended"}</span>
       {admin && <button type="button" className="button" disabled={busy} onClick={() => void update(member, { status: member.status === "active" ? "suspended" : "active" })}>{member.status === "active" ? "Suspend" : "Restore"}</button>}
     </div>)}</div>

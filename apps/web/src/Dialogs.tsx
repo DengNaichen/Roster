@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { UnavailableField, useCapabilities } from "./Capabilities";
 import { CycleSelect } from "./Cycles";
 import { AssigneeSelect } from "./Assignee";
@@ -47,10 +48,7 @@ export function NewIssueDialog({ cycleID: initialCycleID = 0, teams, team: scope
         <label className="composer-description"><span className="composer-field-label">Description</span><textarea rows={5} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Add a description… (Markdown)" disabled={saving} /></label>
         <div className="composer-properties">
           {teams.length > 0 ? (
-            <label className="composer-property"><Users className="icon" /><span className="composer-property-name">Team <span title="Required">*</span></span><select value={team} onChange={(event) => { setTeam(event.target.value); setAssignee(""); setCycleID(0); }} required disabled={saving}>
-              <option value="">Choose a team…</option>
-              {teams.map((item) => <option key={item.key} value={item.key}>{item.name} ({item.key})</option>)}
-            </select></label>
+            <label className="composer-property"><Users className="icon" /><span className="composer-property-name">Team <span title="Required">*</span></span><Dropdown variant="ghost" value={team} aria-label="Team" placeholder="Choose a team…" required disabled={saving} onChange={(next) => { setTeam(next); setAssignee(""); setCycleID(0); }} options={teams.map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))} /></label>
           ) : (
             <p className="error" role="alert">No teams yet. Create a team from Navigation, then reopen this dialog.</p>
           )}
@@ -75,11 +73,11 @@ export function NewIssueDialog({ cycleID: initialCycleID = 0, teams, team: scope
 export function IssueProjectSelect({ projects, team, value, onChange, disabled, retainedID = 0, fallback }: { projects: Project[]; team: string; value: number; onChange: (id: number) => void; disabled: boolean; retainedID?: number; fallback: string }) {
   const available = projects.filter((project) => project.teams.includes(team) && (!project.archived || project.id === retainedID));
   const unavailable = value !== 0 && !available.some((project) => project.id === value);
-  return <label className="composer-property"><Box className="icon" /><span className="composer-property-name">Project</span><select value={value} onChange={(event) => onChange(Number(event.target.value))} disabled={disabled}>
-    <option value={0}>No project</option>
-    {unavailable && <option value={value} disabled>{projects.find((project) => project.id === value)?.name ?? fallback}{team ? " (not available for this team)" : " (choose a team)"}</option>}
-    {available.map((project) => <option key={project.id} value={project.id}>{project.name}{project.archived ? " (archived, current project)" : ""}</option>)}
-  </select></label>;
+  return <label className="composer-property"><Box className="icon" /><span className="composer-property-name">Project</span><Dropdown variant="ghost" aria-label="Project" value={String(value)} disabled={disabled} onChange={(next) => onChange(Number(next))} options={[
+    { value: "0", label: "No project" },
+    ...(unavailable ? [{ value: String(value), label: `${projects.find((project) => project.id === value)?.name ?? fallback}${team ? " (not available for this team)" : " (choose a team)"}`, disabled: true }] : []),
+    ...available.map((project) => ({ value: String(project.id), label: `${project.name}${project.archived ? " (archived, current project)" : ""}` })),
+  ]} /></label>;
 }
 
 export function CreateTeamDialog({ onClose, onCreate }: { onClose: () => void; onCreate: (team: Team) => void }) {

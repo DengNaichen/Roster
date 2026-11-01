@@ -14,10 +14,13 @@ it("retries failed cycle reads and keeps the selected value", async () => {
   const changed = vi.fn();
   render(<CycleSelect team="AL" value={1} onChange={changed} />);
   await screen.findByText("Offline");
-  expect((screen.getByRole("combobox") as HTMLSelectElement).value).toBe("1");
+  const control = screen.getByRole("combobox") as HTMLButtonElement;
+  expect(control.textContent).toContain("Cycle unavailable");
   failed = false; fireEvent.click(screen.getByRole("button", { name: "Retry cycles" }));
-  await screen.findByRole("option", { name: "Focus · current" });
-  fireEvent.change(screen.getByRole("combobox"), { target: { value: "0" } });
+  await waitFor(() => expect(control.disabled).toBe(false));
+  expect(control.textContent).toContain("Focus · current");
+  fireEvent.keyDown(control, { key: "ArrowDown" });
+  fireEvent.click(await screen.findByRole("option", { name: "No cycle" }));
   expect(changed).toHaveBeenCalledWith(0);
 });
 it("keeps cycle configuration drafts after a failed save", async () => {

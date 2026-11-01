@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { Spec, SpecContent } from "../../../packages/contracts/spec";
 import { api, apiPath, ModalDialog, RequestError, Team } from "./shared";
@@ -121,18 +122,15 @@ export function SpecEditor(
         <fieldset disabled={saving || reviewing} className="spec-editor-fields">
           {!spec && (
             <label>
-              Team<select
+              Team<Dropdown
+                variant="block"
+                aria-label="Team"
+                placeholder="Choose a team…"
                 required
                 value={team}
-                onChange={(event) => setTeam(event.target.value)}
-              >
-                <option value="">Choose a team…</option>
-                {teams.filter((item) => item.accessible).map((item) => (
-                  <option key={item.key} value={item.key}>
-                    {item.name} ({item.key})
-                  </option>
-                ))}
-              </select>
+                onChange={setTeam}
+                options={teams.filter((item) => item.accessible).map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))}
+              />
             </label>
           )}
           <label>
@@ -148,18 +146,17 @@ export function SpecEditor(
           </label>
           <div className="spec-editor-row">
             <label>
-              Status<select
+              Status<Dropdown
+                variant="block"
+                aria-label="Status"
                 value={draft.status}
-                onChange={(event) =>
+                onChange={(next) =>
                   setDraft((current) => ({
                     ...current,
-                    status: event.target.value as SpecContent["status"],
+                    status: next as SpecContent["status"],
                   }))}
-              >
-                {["draft", "review", "approved", "superseded"].map((status) => (
-                  <option key={status}>{status}</option>
-                ))}
-              </select>
+                options={["draft", "review", "approved", "superseded"].map((status) => ({ value: status, label: status }))}
+              />
             </label>
             <label>
               Branch<input

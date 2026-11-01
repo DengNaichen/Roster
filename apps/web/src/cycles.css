@@ -16,7 +16,7 @@
 .cycle-empty { padding: var(--space-28) 0; color: var(--muted); }
 .cycle-empty h2 { color: var(--text); font-size: var(--font-size-20); }
 .cycle-select { display: inline-flex; flex-wrap: wrap; gap: var(--space-6); min-width: 0; max-width: 100%; }
-.cycle-select select { max-width: 100%; min-width: 0; }
+.cycle-select .dropdown { max-width: 100%; min-width: 0; }
 .cycle-overview { padding: var(--space-16) var(--space-24); border-bottom: var(--border-width) solid var(--border); overflow-wrap: anywhere; }
 .cycle-overview p { color: var(--muted); white-space: pre-wrap; }
 .cycle-filter { padding: var(--space-8) var(--space-24); display: flex; align-items: center; gap: var(--space-8); }
@@ -27,5 +27,6 @@
 
 .detail-cycle-value { display: flex; align-items: center; gap: var(--space-4); }
 .detail-cycle-value .cycle-select { flex: 1; }
-.detail-cycle-value select { width: 100%; border: 0; background: transparent; color: var(--text-2); font: inherit; }
+.detail-properties .detail-cycle-value { margin-left: calc(-1 * var(--space-6)); }
+.detail-cycle-value .dropdown { width: 100%; }
 .detail-cycle-value > a { display: inline-flex; flex-shrink: 0; color: var(--muted); }

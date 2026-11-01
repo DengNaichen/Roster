@@ -1,3 +1,4 @@
+import { Dropdown } from "./Dropdown";
 import { useEffect, useRef, useState } from "react";
 import { api, apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 
@@ -58,7 +59,7 @@ export function TeamAccess({ team, onChanged }: { team: Team; onChanged: () => v
       <span>{member.workspace_admin ? "Workspace admin" : member.role === "owner" ? "Team owner" : "Member"}</span>
       {team.can_manage && <><button className="button" disabled={busy || member.workspace_admin || member.status !== "active"} onClick={() => void save("/members", "PATCH", { subject: member.subject, role: member.role === "owner" ? "member" : "owner" })}>{member.role === "owner" ? "Make member" : "Make owner"}</button><button className="button" disabled={busy} onClick={() => void save("/members", "PATCH", { subject: member.subject, remove: true })}>Remove</button></>}
     </div>)}
-    {team.can_manage && <form className="team-member-add" onSubmit={(event) => { event.preventDefault(); void save("/members", "PATCH", { subject, role: "member" }); }}><label>Add workspace member<select required disabled={busy} value={subject} onChange={(event) => setSubject(event.target.value)}><option value="">Choose a member</option>{candidates.map((candidate) => <option key={candidate.subject} value={candidate.subject}>{candidate.name || candidate.email || candidate.subject}</option>)}</select></label><button className="button" disabled={busy || !subject}>Add member</button></form>}
+    {team.can_manage && <form className="team-member-add" onSubmit={(event) => { event.preventDefault(); void save("/members", "PATCH", { subject, role: "member" }); }}><label>Add workspace member<Dropdown variant="block" aria-label="Add workspace member" placeholder="Choose a member" required disabled={busy} value={subject} onChange={setSubject} options={candidates.map((candidate) => ({ value: candidate.subject, label: candidate.name || candidate.email || candidate.subject }))} /></label><button className="button" disabled={busy || !subject}>Add member</button></form>}
     {error && <RequestError message={error} />}
   </div>;
 }
