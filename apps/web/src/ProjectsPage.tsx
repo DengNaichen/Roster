@@ -17,11 +17,13 @@ export default function ProjectsPage({ team, teams }: { team: string; teams: Tea
   const activeTeam = teams.find((item) => item.key === team);
   const visible = projects.data.projects.filter((item) => item.archived === archived && (!team || item.teams.includes(team)));
   return <>
-    <PageHeader actions={<button className="button" disabled={projects.loading || !!projects.error} onClick={() => setCreating(true)}>New project</button>}>
+    <PageHeader actions={<button className="button primary" disabled={projects.loading || !!projects.error} onClick={() => setCreating(true)}>New project</button>}>
       {activeTeam && <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />}<span>{team ? `${activeTeam?.name ?? team} / Projects` : "All projects"}</span>
     </PageHeader>
-    <div className="project-actions project-list-toolbar"><button className="button" aria-pressed={!archived} onClick={() => setArchived(false)}>Active projects</button><button className="button" aria-pressed={archived} onClick={() => setArchived(true)}>Archived projects</button></div>
-    <div className="project-actions project-list-toolbar"><button className="button" aria-pressed={!timeline} onClick={() => setTimeline(false)}>List</button><button className="button" aria-pressed={timeline} onClick={() => setTimeline(true)}>Timeline</button></div>
+    <div className="project-toolbar">
+      <div className="segmented" role="group" aria-label="Project status"><button type="button" aria-pressed={!archived} onClick={() => setArchived(false)}>Active</button><button type="button" aria-pressed={archived} onClick={() => setArchived(true)}>Archived</button></div>
+      <div className="segmented" role="group" aria-label="Project layout"><button type="button" aria-pressed={!timeline} onClick={() => setTimeline(false)}>List</button><button type="button" aria-pressed={timeline} onClick={() => setTimeline(true)}>Timeline</button></div>
+    </div>
     {created && <p className="scope-description" role="status">Created {created.name}. <NavLink to={pagePath(`/project/${created.id}`)}>View project</NavLink></p>}
     {projects.error ? <div className="scope-message"><RequestError message={projects.error} /><button className="button" onClick={() => void projects.reload()}>Retry</button></div> : timeline && !projects.loading ? <ProjectTimeline projects={visible} onEdit={setEditing} /> : <ProjectList projects={visible} teams={teams} loading={projects.loading} archived={archived} />}
     {editing && <ProjectDialog project={editing} teams={teams} onClose={() => setEditing(null)} onSaved={async (saved) => { projects.update((data) => ({ projects: data.projects.map((p) => p.id === saved.id ? saved : p) })); setEditing(null); await projects.reload(); }} />}

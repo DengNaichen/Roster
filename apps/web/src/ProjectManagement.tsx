@@ -1,4 +1,5 @@
-import { X } from "lucide-react";
+import { CalendarDays, Flag, Users, X } from "lucide-react";
+import { MarkdownText } from "./MarkdownText";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { api, apiPath, ModalDialog, Project, RequestError, Team } from "./shared";
 
@@ -65,11 +66,23 @@ export function ProjectOverview({ project, teams, onEdit, onSaved }: { project: 
       if (mounted.current) setSaving(false);
     }
   }
-  return <section className="scope-description" aria-label="Project details">
-    <p>{project.description || "No description yet."}</p>
-    <p>Schedule: {project.start_date || "No start date"} → {project.target_date || "No target date"}</p>
-    <p>{project.teams.length === 0 ? "This historical project has no assigned teams yet." : `Teams: ${project.teams.map((key) => teams.find((team) => team.key === key)?.name ?? key).join(", ")}`}</p>
-    {project.archived && <p>Archived project. Existing issues remain available. Restore it before adding new issues.</p>}
+  const teamName = (key: string) => teams.find((team) => team.key === key)?.name ?? key;
+  return <section className="project-overview" aria-label="Project details">
+    <h1>{project.name}</h1>
+    <div className="project-properties" aria-label="Properties">
+      <span className="project-properties-label">Properties</span>
+      <span className="property-chip"><CalendarDays className="icon" aria-hidden="true" />{project.start_date ? `Start ${project.start_date}` : "No start date"}</span>
+      <span className="property-chip"><Flag className="icon" aria-hidden="true" />{project.target_date ? `Target ${project.target_date}` : "No target date"}</span>
+      {project.teams.length === 0
+        ? <span className="property-chip property-chip-muted"><Users className="icon" aria-hidden="true" />No teams</span>
+        : project.teams.map((key) => <span key={key} className="property-chip"><Users className="icon" aria-hidden="true" />{teamName(key)}</span>)}
+    </div>
+    {project.archived && <p className="project-notice">Archived project. Existing issues remain available. Restore it before adding new issues.</p>}
+    {project.teams.length === 0 && !project.archived && <p className="project-notice">This historical project has no assigned teams yet. Assign teams to add issues.</p>}
+    <div className="project-section">
+      <h2>Description</h2>
+      {project.description ? <MarkdownText text={project.description} /> : <p className="project-none">No description yet.</p>}
+    </div>
     <div className="project-actions"><button type="button" className="button" disabled={saving} onClick={onEdit}>{project.teams.length === 0 ? "Assign teams / Edit project" : "Edit project"}</button><button type="button" className="button" disabled={saving} onClick={() => void changeArchive()}>{saving ? "Saving…" : project.archived ? "Restore project" : "Archive project"}</button></div>
     {error && <RequestError message={error} />}
   </section>;

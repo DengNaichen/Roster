@@ -30,6 +30,7 @@ export default function IssuesPage({ route, teams, teamsLoading, onCreateTeam, v
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Partial<Record<Status, boolean>>>({});
   const [projectDialog, setProjectDialog] = useState(false);
+  const [projectTab, setProjectTab] = useState<"overview" | "issues">("overview");
   const [savedIssue, setSavedIssue] = useState<IssueSummary | null>(null);
   const [cycleFilter, setCycleFilter] = useState<number | "">("");
   const [editingCycle, setEditingCycle] = useState(false);
@@ -59,6 +60,7 @@ export default function IssuesPage({ route, teams, teamsLoading, onCreateTeam, v
   const defaultCollapsed = (status: Status) => filter === "all" && !query && (status === "done" || status === "canceled");
   const isCollapsed = (status: Status) => collapsed[status] ?? defaultCollapsed(status);
   const activeTeam = teams.find((item) => item.key === scopeTeam);
+  const showOverview = route.kind === "project" && projectTab === "overview";
   const heading = (cycle.data ? cycleName(cycle.data) : "") || activeProject?.name || (scopeTeam ? `${activeTeam?.name ?? scopeTeam} / Issues` : "All issues");
   const scopeError = cycle.error || (cycle.data && route.kind === "cycle" && cycle.data.team !== route.team ? "Cycle not found." : "") || project.error || loadError || (!teamsLoading && scopeTeam && !activeTeam ? "Team not found." : "");
   const canCreate = (route.kind !== "cycle" || (cycle.data?.state !== "completed" && cycleTeam.data.settings.enabled && !cycleTeam.error && !cycleTeam.loading)) && !loading && !scopeError && !projects.loading && !projects.error && !activeProject?.archived && (activeProject === null || activeProject.teams.length > 0);
@@ -105,12 +107,14 @@ export default function IssuesPage({ route, teams, teamsLoading, onCreateTeam, v
   }
   return <>
     <PageHeader actions={!scopeError && <button className="button" disabled={!canCreate} onClick={() => setCreating(true)}>New issue</button>}>
+      {route.kind === "project" && <><NavLink to={pagePath("/projects")}>Projects</NavLink><span className="separator">›</span></>}
       {activeProject ? <EmojiPicker value={activeProject.emoji} label={`Change emoji for project ${activeProject.name}`} onChange={async (emoji) => {
         const updated = await api<Project>(apiPath(`/projects/by-id/${activeProject.id}`), "PATCH", { emoji });
         project.update(() => updated);
       }} /> : activeTeam ? <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} /> : null}<span>{heading}</span>
     </PageHeader>
-        {!scopeError && (
+    {activeProject && !scopeError && <div className="project-toolbar project-tabs"><div className="segmented" role="tablist" aria-label="Project sections"><button type="button" role="tab" aria-selected={projectTab === "overview"} aria-pressed={projectTab === "overview"} onClick={() => setProjectTab("overview")}>Overview</button><button type="button" role="tab" aria-selected={projectTab === "issues"} aria-pressed={projectTab === "issues"} onClick={() => setProjectTab("issues")}>Issues</button></div></div>}
+        {!scopeError && !showOverview && (
           <IssueFilters assignee={assignee} setAssignee={setAssignee} membershipEnabled={teams.some((item) => item.membership_enabled)} filter={filter} setFilter={changeStatusFilter} team={teamFilter} teams={route.kind === "project" && activeProject ? teams.filter((item) => activeProject.teams.includes(item.key)) : []} setTeam={changeTeamFilter}
             type={type} setType={setType} query={query} submitQuery={submitQuery}
             priority={priority} setPriority={setPriority} sort={sort} setSort={setSort} labelFilter={labelFilter} setLabelFilter={setLabelFilter}
@@ -120,15 +124,15 @@ export default function IssuesPage({ route, teams, teamsLoading, onCreateTeam, v
     {cycle.data && !scopeError && <div className="cycle-overview"><NavLink to={pagePath(`/team/${encodeURIComponent(cycle.data.team)}/cycles`)}>All cycles</NavLink><p>{cycleDates(cycle.data)} · {cycle.data.timezone}</p><p>{cycle.data.state} · {cycle.data.done} / {cycle.data.total} done · {cycle.data.canceled} canceled · {cycle.data.rolled_over} carried over</p>{cycle.data.description && <p>{cycle.data.description}</p>}{cycle.data.state === "completed" && <p>Counts are a completion snapshot. The issues below reflect their current cycle assignment and status.</p>}<button className="button" onClick={() => setEditingCycle(true)}>Edit cycle</button></div>}
     {capabilities.cycles && route.kind !== "cycle" && team && <label className="cycle-filter">Cycle <CycleSelect key={team} team={team} value={cycleFilter} filter onChange={(id) => { setCycleFilter(id); setSelected([]); }} /></label>}
     {editingCycle && cycle.data && <CycleEditor cycle={cycle.data} onClose={() => setEditingCycle(false)} onSaved={(updated) => { cycle.update(() => updated); setEditingCycle(false); }} />}
-    {activeProject && <ProjectOverview project={activeProject} teams={teams} onEdit={() => setProjectDialog(true)} onSaved={saveProject} />}
+    {showOverview && activeProject && <ProjectOverview project={activeProject} teams={teams} onEdit={() => setProjectDialog(true)} onSaved={saveProject} />}
     {cycleTeam.error && <div className="scope-message"><RequestError message={cycleTeam.error} /><button className="button" onClick={() => void cycleTeam.reload()}>Retry cycle settings</button></div>}
     {projects.error && <div className="scope-message"><RequestError message={projects.error} /><button className="button" onClick={() => void projects.reload()}>Retry projects</button></div>}
     {scopeError && <div className="scope-message"><RequestError message={scopeError} /><button className="button" onClick={() => { void loadIssues(); void project.reload(); void cycle.reload(); }}>Retry</button> <NavLink to={pagePath("/")}>Back to all issues</NavLink></div>}
     {savedIssue && <p className="scope-description" role="status">Created {savedIssue.identifier}. <NavLink to={pagePath(`/issue/${savedIssue.identifier}`)}>View issue</NavLink></p>}
     {error && <RequestError message={error} />}
-        {!scopeError && !loading && selectedVisible.length > 0 && <div className="selection-toolbar" role="toolbar" aria-label="Selected issues"><button type="button" className="ghost" onClick={() => setSelected(issues.filter((issue) => filter === "all" || issue.status === filter).map((issue) => issue.identifier))}>Select visible</button><span>{selectedVisible.length} selected</span><button className="button" disabled={!capabilities.labels} title={!capabilities.labels ? "Labels have not been migrated yet" : undefined} onClick={() => setBatchLabels(true)}>Change labels</button><button className="ghost" onClick={() => setSelected([])}>Clear selection</button></div>}
+        {!scopeError && !showOverview && !loading && selectedVisible.length > 0 && <div className="selection-toolbar" role="toolbar" aria-label="Selected issues"><button type="button" className="ghost" onClick={() => setSelected(issues.filter((issue) => filter === "all" || issue.status === filter).map((issue) => issue.identifier))}>Select visible</button><span>{selectedVisible.length} selected</span><button className="button" disabled={!capabilities.labels} title={!capabilities.labels ? "Labels have not been migrated yet" : undefined} onClick={() => setBatchLabels(true)}>Change labels</button><button className="ghost" onClick={() => setSelected([])}>Clear selection</button></div>}
 
-    {!scopeError && (!loading && teams.length === 0 ? <div className="scope-message"><p>No teams yet. Create a team to start adding issues.</p><button className="button" onClick={onCreateTeam}>Create team</button></div> :
+    {!scopeError && !showOverview && (!loading && teams.length === 0 ? <div className="scope-message"><p>No teams yet. Create a team to start adding issues.</p><button className="button" onClick={onCreateTeam}>Create team</button></div> :
       <IssueViews view={view} visibleColumns={visibleColumns} grouped={grouped} loading={loading} isCollapsed={isCollapsed}
         toggleGroup={(status) => setCollapsed((current) => ({ ...current, [status]: !(current[status] ?? defaultCollapsed(status)) }))}
         actions={{ selected: selectedVisible, toggle: toggleIssue, savingPriorities, changePriority, moveIssue }} />)}
