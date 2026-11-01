@@ -12,3 +12,7 @@ supabase/.branches/
 coverage/
 playwright-report/
 test-results/
+__pycache__/
+*.pyc
+*.db
+*.dump

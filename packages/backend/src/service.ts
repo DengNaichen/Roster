@@ -1,5 +1,36 @@
-import { type SQL, sql } from 'npm:drizzle-orm@0.45.4';
+import { sql } from 'npm:drizzle-orm@0.45.4';
+import {
+  buildLabelFilter,
+  createCatalogService,
+  hydrateIssueCatalog,
+  resolveIssueProject,
+  visibleProject,
+} from './modules/catalog.ts';
+import { createActivityService, hydrateIssueActivity } from './modules/activity.ts';
+import { createCycleService, validateIssueCycle } from './modules/cycles.ts';
 import * as schemas from '../../contracts/schemas.ts';
+import {
+  admin,
+  audit,
+  digest,
+  type Executor,
+  fail,
+  identity,
+  iso,
+  issueDTO,
+  issueSelect,
+  manager,
+  one,
+  readIssue,
+  type Row,
+  rows,
+  saveIdentity,
+  team,
+  teamDTO,
+  text,
+  visible,
+  workspace,
+} from './modules/shared.ts';
 import type { Database } from './db/client.ts';
 import {
   AppError,
@@ -12,119 +43,6 @@ import {
   type Team,
 } from '../../contracts/mod.ts';
 
-type Row = Record<string, unknown>;
-type Executor = Pick<Database, 'execute'>;
-const fail = (
-  code: ConstructorParameters<typeof AppError>[0],
-  message: string,
-): never => {
-  throw new AppError(code, message);
-};
-async function rows(db: Executor, query: SQL): Promise<Row[]> {
-  return (await db.execute(query)).rows as Row[];
-}
-async function one(db: Executor, query: SQL): Promise<Row> {
-  const row = (await rows(db, query))[0];
-  return row ?? fail('not_found', 'Resource not found');
-}
-function text(value: unknown, label: string): string {
-  if (typeof value !== 'string' || !value.trim()) {
-    fail('invalid_input', `${label} is required`);
-  }
-  return (value as string).trim();
-}
-function identity(ctx: RequestContext): Identity {
-  if (!ctx?.identity?.subject) {
-    fail('unauthenticated', 'Authentication required');
-  }
-  return ctx.identity;
-}
-async function saveIdentity(db: Executor, ctx: RequestContext) {
-  const u = identity(ctx);
-  await db.execute(
-    sql`insert into roster.users(subject,name,email) values(${u.subject},${u.name},${u.email}) on conflict(subject) do update set name=excluded.name,email=excluded.email`,
-  );
-}
-async function workspace(
-  db: Executor,
-  ctx: RequestContext,
-  slug: string,
-  lock = false,
-): Promise<Row> {
-  const u = identity(ctx);
-  const w = await one(
-    db,
-    sql`select * from roster.workspaces where slug=${slug}${lock ? sql` for update` : sql``}`,
-  );
-  const m = (await rows(
-    db,
-    sql`select role from roster.workspace_members where workspace_id=${w.id} and subject=${u.subject} and status='active'`,
-  ))[0];
-  if (!m) fail('forbidden', 'Workspace access denied');
-  return { ...w, role: m.role };
-}
-function admin(w: Row) {
-  if (w.role !== 'admin') fail('forbidden', 'Administrator required');
-}
-function visible(subject: string) {
-  return sql`(not t.private or exists(select 1 from roster.team_members tm where tm.team_id=t.id and tm.subject=${subject}))`;
-}
-async function team(
-  db: Executor,
-  ctx: RequestContext,
-  w: Row,
-  key: string,
-  settings = false,
-) {
-  const t = await one(
-    db,
-    sql`select t.*, exists(select 1 from roster.team_members tm where tm.team_id=t.id and tm.subject=${ctx.identity.subject}) as joined, exists(select 1 from roster.team_members tm where tm.team_id=t.id and tm.subject=${ctx.identity.subject} and tm.role='owner') as owner from roster.teams t where t.workspace_id=${w.id} and t.key=${key}`,
-  );
-  if (t.private && !t.joined && !(settings && w.role === 'admin')) {
-    fail('not_found', 'Team not found');
-  }
-  return t;
-}
-function teamDTO(t: Row, w: Row): Team {
-  const accessible = !t.private || Boolean(t.joined);
-  return {
-    id: String(t.id),
-    key: String(t.key),
-    name: String(t.name),
-    emoji: String(t.emoji),
-    private: Boolean(t.private),
-    joined: Boolean(t.joined),
-    accessible,
-    can_manage: w.role === 'admin' || Boolean(t.owner),
-    next_number: accessible ? Number(t.next_number) : null,
-  };
-}
-function manager(t: Row, w: Row) {
-  if (w.role !== 'admin' && !t.owner) fail('forbidden', 'Team owner required');
-}
-async function digest(token: string) {
-  return Array.from(
-    new Uint8Array(
-      await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)),
-    ),
-    (b) => b.toString(16).padStart(2, '0'),
-  ).join('');
-}
-async function audit(
-  db: Executor,
-  ctx: RequestContext,
-  w: Row,
-  kind: string,
-  before: unknown,
-  after: unknown,
-  issueId: string | null = null,
-) {
-  await db.execute(
-    sql`insert into roster.audit_events(workspace_id,issue_id,actor_subject,kind,before,after) values(${w.id},${issueId},${ctx.identity.subject},${kind},${
-      JSON.stringify(before)
-    }::jsonb,${JSON.stringify(after)}::jsonb)`,
-  );
-}
 function validateIssue(input: Record<string, unknown>) {
   if (input.title !== undefined) text(input.title, 'Title');
   if (
@@ -164,47 +82,63 @@ async function assignee(
   }
   return subject;
 }
-const issueSelect =
-  sql`select i.*,t.key as team,u.subject as user_subject,u.name as user_name,u.email as user_email from roster.issues i join roster.teams t on t.id=i.team_id left join roster.users u on u.subject=i.assignee_subject`;
-function iso(value: unknown) {
-  return (value instanceof Date ? value : new Date(String(value))).toISOString();
+function publicAuditSnapshot(value: unknown) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    // References are exposed only through the current permission-filtered DTO.
+    // Historical snapshots must not reveal references that became private.
+    const { parent_id, project_id, cycle_id, workspace_id, team_id, ...snapshot } = value as Row;
+    return snapshot;
+  }
+  return value;
 }
-function issueDTO(r: Row): Issue {
-  return {
-    id: String(r.id),
-    identifier: String(r.identifier),
-    team: String(r.team),
-    title: String(r.title),
-    description: String(r.description),
-    status: r.status as Issue['status'],
-    type: r.type as Issue['type'],
-    priority: Number(r.priority),
-    assignee: r.user_subject
-      ? {
-        subject: String(r.user_subject),
-        name: String(r.user_name),
-        email: String(r.user_email),
-      }
-      : null,
-    created_at: iso(r.created_at),
-    updated_at: iso(r.updated_at),
-  };
-}
-async function readIssue(
+async function hydrateCoreIssues(
   db: Executor,
   ctx: RequestContext,
   w: Row,
-  id: string,
-) {
-  return one(
-    db,
-    sql`${issueSelect} where i.workspace_id=${w.id} and i.identifier=${id} and ${
-      visible(ctx.identity.subject)
-    }`,
+  items: Row[],
+): Promise<Issue[]> {
+  const hydrated = await hydrateIssueCatalog(db, ctx, String(w.id), items);
+  const parentIds = [...new Set(items.filter((i) => i.parent_id).map((i) => String(i.parent_id)))];
+  const parents = parentIds.length
+    ? await rows(
+      db,
+      sql`select i.id,i.identifier from roster.issues i join roster.teams t on t.id=i.team_id where i.workspace_id=${w.id} and i.id in (${
+        sql.join(parentIds.map((id) => sql`${id}::uuid`), sql`,`)
+      }) and ${visible(ctx.identity.subject)}`,
+    )
+    : [];
+  const names = new Map(parents.map((p) => [String(p.id), String(p.identifier)]));
+  return hydrated.map((r) =>
+    issueDTO({ ...r, parent: r.parent_id ? names.get(String(r.parent_id)) ?? null : null })
   );
 }
-export function createService(db: Database): Service {
+async function validateParent(
+  db: Executor,
+  ctx: RequestContext,
+  w: Row,
+  input: string | undefined,
+  current: Row | null,
+) {
+  if (input === undefined) return current?.parent_id ?? null;
+  if (input === '') return null;
+  const p = await readIssue(db, ctx, w, input);
+  if (current) {
+    if (p.id === current.id) fail('invalid_input', 'An issue cannot be its own parent');
+    const cycle = await rows(
+      db,
+      sql`with recursive ancestors(id,parent_id) as(select id,parent_id from roster.issues where id=${p.id} union select i.id,i.parent_id from roster.issues i join ancestors a on i.id=a.parent_id) select 1 from ancestors where id=${current.id}`,
+    );
+    if (cycle.length) fail('invalid_input', 'Parent cycle is not allowed');
+  }
+  return p.id;
+}
+export function createService(db: Database, options: { now?: () => Date } = {}): Service {
+  const clock = options.now ?? (() => new Date());
+
   const service: Service = {
+    ...createCatalogService(db),
+    ...createCycleService(db, { now: clock }),
+    ...createActivityService(db),
     async listWorkspaces(ctx) {
       identity(ctx);
       const rs = await rows(
@@ -279,13 +213,6 @@ export function createService(db: Database): Service {
           if (count.n === 1) {
             fail('conflict', 'Cannot remove the last active administrator');
           }
-        }
-        if (m.status === 'active' && input.status === 'suspended') {
-          const owned = await rows(
-            tx,
-            sql`select t.* from roster.teams t join roster.team_members tm on tm.team_id=t.id where t.workspace_id=${w.id} and tm.subject=${input.subject} and tm.role='owner'`,
-          );
-          for (const t of owned) await guardOwner(tx, t, input.subject, true);
         }
         await tx.execute(
           sql`update roster.workspace_members set role=${input.role},status=${input.status} where workspace_id=${w.id} and subject=${input.subject}`,
@@ -386,7 +313,7 @@ export function createService(db: Database): Service {
       return db.transaction(async (tx) => {
         const w = await workspace(tx, ctx, slug, true);
         const t = await team(tx, ctx, w, key, true);
-        manager(t, w);
+        if (input.private !== undefined) manager(t, w);
         if (input.private !== undefined && typeof input.private !== 'boolean') {
           fail('invalid_input', 'Invalid visibility');
         }
@@ -421,7 +348,7 @@ export function createService(db: Database): Service {
       const t = await team(db, ctx, w, key, true);
       return await rows(
         db,
-        sql`select u.*,tm.role,wm.status from roster.team_members tm join roster.users u on u.subject=tm.subject join roster.workspace_members wm on wm.subject=tm.subject and wm.workspace_id=tm.workspace_id where tm.team_id=${t.id} order by u.name,u.subject`,
+        sql`select u.*,case when wm.role='admin' then 'owner' else tm.role end as role,wm.status,(wm.role='admin') as workspace_admin from roster.team_members tm join roster.users u on u.subject=tm.subject join roster.workspace_members wm on wm.subject=tm.subject and wm.workspace_id=tm.workspace_id where tm.team_id=${t.id} order by u.name,u.subject`,
       ) as unknown as Awaited<ReturnType<Service['listTeamMembers']>>;
     },
     async changeTeamMember(ctx, slug, key, input) {
@@ -432,19 +359,12 @@ export function createService(db: Database): Service {
         const w = await workspace(tx, ctx, slug, true);
         const t = await team(tx, ctx, w, key, true);
         manager(t, w);
-        const m = await one(
-          tx,
-          sql`select * from roster.workspace_members where workspace_id=${w.id} and subject=${input.subject} and (${
-            Boolean(input.remove)
-          } or status='active')`,
-        );
-        void m;
-        await guardOwner(
-          tx,
-          t,
-          input.subject,
-          input.remove || input.role !== 'owner',
-        );
+        if (!input.remove) {
+          await one(
+            tx,
+            sql`select 1 from roster.workspace_members where workspace_id=${w.id} and subject=${input.subject} and status='active'`,
+          );
+        }
         if (input.remove) {
           await tx.execute(
             sql`delete from roster.team_members where team_id=${t.id} and subject=${input.subject}`,
@@ -463,7 +383,6 @@ export function createService(db: Database): Service {
         const w = await workspace(tx, ctx, slug, true);
         const t = await team(tx, ctx, w, key, true);
         if (input.leave) {
-          await guardOwner(tx, t, ctx.identity.subject, true);
           await tx.execute(
             sql`delete from roster.team_members where team_id=${t.id} and subject=${ctx.identity.subject}`,
           );
@@ -495,10 +414,10 @@ export function createService(db: Database): Service {
     },
     async listIssues(ctx, slug, input = {}) {
       const w = await workspace(db, ctx, slug);
-      const limit = input.limit ?? 50;
-      if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-        fail('invalid_input', 'Limit must be 1–100');
-      }
+      const limit = input.limit === undefined || input.limit === 0 ? 50 : input.limit;
+      if (!Number.isSafeInteger(limit)) fail('invalid_input', 'Limit must be an integer');
+      const all = limit < 0;
+      const sort = input.sort ?? (input.status === 'agent_ready' ? 'priority' : 'updated');
       if (input.status && !statuses.includes(input.status)) {
         fail('invalid_input', 'Invalid status');
       }
@@ -527,6 +446,38 @@ export function createService(db: Database): Service {
         );
       }
 
+      if (input.cycle_id !== undefined) {
+        predicates.push(
+          input.cycle_id === 0 ? sql`i.cycle_id is null` : sql`i.cycle_id=${input.cycle_id}`,
+        );
+      }
+      if (input.parent) {
+        const parent = await readIssue(db, ctx, w, input.parent);
+        predicates.push(sql`i.parent_id=${parent.id}`);
+      }
+      if (input.project_id || input.project !== undefined) {
+        if (input.project === '') {
+          if (input.project_id) fail('invalid_input', 'Project references disagree');
+          predicates.push(sql`i.project_id is null`);
+        } else {
+          const p = await one(
+            db,
+            sql`select p.id from roster.projects p where p.workspace_id=${w.id} and ${
+              visibleProject(ctx.identity.subject)
+            } ${input.project_id ? sql`and p.id=${input.project_id}` : sql``} ${
+              input.project !== undefined ? sql`and p.name=${input.project}` : sql``
+            }`,
+          );
+          predicates.push(sql`i.project_id=${p.id}`);
+        }
+      }
+      predicates.push(
+        await buildLabelFilter(db, String(w.id), {
+          label_mode: input.label_mode,
+          label_ids: input.label_ids,
+          label_group_ids: input.label_group_ids,
+        }),
+      );
       if (input.query) {
         predicates.push(
           sql`(i.title ilike ${'%' + input.query + '%'} or i.description ilike ${
@@ -542,17 +493,30 @@ export function createService(db: Database): Service {
           } and i.id=${input.cursor}::uuid`,
         ))[0];
         if (!boundary) fail('invalid_input', 'Cursor is unavailable for this query');
-        predicates.push(sql`(i.created_at,i.id)<(${boundary.created_at},${boundary.id}::uuid)`);
+        if (sort === 'updated') {
+          predicates.push(sql`(i.updated_at,i.id)<(${boundary.updated_at},${boundary.id}::uuid)`);
+        } else if (sort === 'priority') {
+          const priority = Number(boundary.priority) || 5;
+          predicates.push(
+            sql`((case when i.priority=0 then 5 else i.priority end)>${priority} or ((case when i.priority=0 then 5 else i.priority end)=${priority} and (i.updated_at,i.id)<(${boundary.updated_at},${boundary.id}::uuid)))`,
+          );
+        } else {predicates.push(
+            sql`(i.created_at,i.id)<(${boundary.created_at},${boundary.id}::uuid)`,
+          );}
       }
       const rs = await rows(
         db,
-        sql`${issueSelect} where ${
-          sql.join(predicates, sql` and `)
-        } order by i.created_at desc,i.id desc limit ${limit + 1}`,
+        sql`${issueSelect} where ${sql.join(predicates, sql` and `)} order by ${
+          sort === 'updated'
+            ? sql`i.updated_at desc,i.id desc`
+            : sort === 'priority'
+            ? sql`case when i.priority=0 then 5 else i.priority end,i.updated_at desc,i.id desc`
+            : sql`i.created_at desc,i.id desc`
+        } ${all ? sql`` : sql`limit ${limit + 1}`}`,
       );
       return {
-        items: rs.slice(0, limit).map(issueDTO),
-        next_cursor: rs.length > limit ? String(rs[limit - 1].id) : null,
+        items: await hydrateCoreIssues(db, ctx, w, all ? rs : rs.slice(0, limit)),
+        next_cursor: !all && rs.length > limit ? String(rs[limit - 1].id) : null,
       };
     },
     async getIssue(ctx, slug, identifier) {
@@ -562,13 +526,25 @@ export function createService(db: Database): Service {
         db,
         sql`select id::text,kind,actor_subject,before,after,created_at from roster.audit_events where issue_id=${r.id} order by roster.audit_events.id`,
       );
-      return {
-        ...issueDTO(r),
+      const children = await rows(
+        db,
+        sql`${issueSelect} where i.workspace_id=${w.id} and i.parent_id=${r.id} and ${
+          visible(ctx.identity.subject)
+        } order by i.updated_at desc,i.id desc`,
+      );
+      const detail = {
+        ...(await hydrateCoreIssues(db, ctx, w, [r]))[0],
+        children: await hydrateCoreIssues(db, ctx, w, children),
         audit: events.map((e) => ({
           ...e,
+          before: publicAuditSnapshot(e.before),
+          after: publicAuditSnapshot(e.after),
           created_at: iso(e.created_at),
-        })) as unknown as Awaited<ReturnType<Service['getIssue']>>['audit'],
+        })) as unknown as Awaited<
+          ReturnType<Service['getIssue']>
+        >['audit'],
       };
+      return hydrateIssueActivity(db, ctx, w, detail);
     },
     async createIssue(ctx, slug, input) {
       validateIssue(input);
@@ -577,20 +553,25 @@ export function createService(db: Database): Service {
         const w = await workspace(tx, ctx, slug, true);
         const t = await team(tx, ctx, w, input.team);
         const who = await assignee(tx, w, t, input.assignee);
+        const project = await resolveIssueProject(tx, ctx, String(w.id), String(t.id), input, null);
+        const cycle = await validateIssueCycle(tx, t, input.cycle_id, null, clock());
+        const parent = await validateParent(tx, ctx, w, input.parent, null);
         const n = await one(
           tx,
           sql`update roster.teams set next_number=next_number+1 where id=${t.id} returning next_number-1 as n`,
         );
         const r = await one(
           tx,
-          sql`insert into roster.issues(workspace_id,team_id,number,identifier,title,description,status,type,priority,assignee_subject) values(${w.id},${t.id},${n.n},${
+          sql`insert into roster.issues(workspace_id,team_id,number,identifier,title,description,status,type,priority,assignee_subject,project_id,cycle_id,parent_id) values(${w.id},${t.id},${n.n},${
             input.team + '-' + n.n
           },${input.title.trim()},${input.description ?? ''},${input.status ?? 'triage'},${
             input.type ?? null
-          },${input.priority ?? 0},${who}) returning *`,
+          },${input.priority ?? 0},${who},${project},${cycle},${parent}) returning *`,
         );
         await audit(tx, ctx, w, 'issue.created', null, r, String(r.id));
-        return issueDTO(await readIssue(tx, ctx, w, String(r.identifier)));
+        return (await hydrateCoreIssues(tx, ctx, w, [
+          await readIssue(tx, ctx, w, String(r.identifier)),
+        ]))[0];
       });
     },
     async updateIssue(ctx, slug, identifier, input) {
@@ -599,6 +580,22 @@ export function createService(db: Database): Service {
         const w = await workspace(tx, ctx, slug, true);
         const r = await readIssue(tx, ctx, w, identifier);
         const t = await team(tx, ctx, w, String(r.team));
+        const project = await resolveIssueProject(
+          tx,
+          ctx,
+          String(w.id),
+          String(t.id),
+          input,
+          r.project_id == null ? null : Number(r.project_id),
+        );
+        const cycle = await validateIssueCycle(
+          tx,
+          t,
+          input.cycle_id,
+          r.cycle_id == null ? null : Number(r.cycle_id),
+          clock(),
+        );
+        const parent = await validateParent(tx, ctx, w, input.parent, r);
         const who = input.assignee === undefined
           ? r.assignee_subject
           : await assignee(tx, w, t, input.assignee);
@@ -609,11 +606,11 @@ export function createService(db: Database): Service {
             input.type === undefined ? r.type : input.type
           },priority=${
             input.priority ?? r.priority
-          },assignee_subject=${who},updated_at=now() where id=${r.id}`,
+          },assignee_subject=${who},project_id=${project},cycle_id=${cycle},parent_id=${parent},updated_at=clock_timestamp() where id=${r.id}`,
         );
         const after = await readIssue(tx, ctx, w, identifier);
         await audit(tx, ctx, w, 'issue.updated', r, after, String(r.id));
-        return issueDTO(after);
+        return (await hydrateCoreIssues(tx, ctx, w, [after]))[0];
       });
     },
   };
@@ -675,19 +672,4 @@ export function createService(db: Database): Service {
       };
     },
   });
-}
-async function guardOwner(
-  db: Executor,
-  t: Row,
-  subject: string,
-  removing: boolean,
-) {
-  if (!removing) return;
-  const result = await one(
-    db,
-    sql`select count(*) filter(where tm.role='owner' and wm.status='active')::int as n,coalesce(bool_or(tm.subject=${subject} and tm.role='owner' and wm.status='active'),false) as target from roster.team_members tm join roster.workspace_members wm on wm.workspace_id=tm.workspace_id and wm.subject=tm.subject where tm.team_id=${t.id}`,
-  );
-  if (result.target && result.n === 1) {
-    fail('conflict', 'Cannot remove the last active team owner');
-  }
 }

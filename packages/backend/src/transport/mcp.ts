@@ -17,6 +17,14 @@ import {
   updateWorkspaceSchema,
 } from '../../../contracts/mod.ts';
 import type { VerifyIdentity } from '../auth/jwt.ts';
+import * as activity from '../../../contracts/activity.ts';
+import * as catalog from '../../../contracts/catalog.ts';
+import * as cycles from '../../../contracts/cycles.ts';
+import { restCreateIssueSchema, restUpdateIssueSchema } from './compat.ts';
+const compatibleIssueFields = {
+  type: z.union([createIssueSchema.shape.type, z.literal('')]),
+  assignee: z.union([createIssueSchema.shape.assignee, z.literal('')]),
+};
 export interface McpOptions {
   service: Service;
   verify: VerifyIdentity;
@@ -56,7 +64,7 @@ const resultSchemas: Record<string, z.ZodType> = {
   get_issue: issueOutput.extend({
     audit: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.string().regex(/^[1-9][0-9]*$/),
         kind: z.string(),
         actor_subject: z.string(),
         before: z.unknown(),
@@ -224,16 +232,220 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'create_issue',
     'Create an issue in an accessible team.',
-    createIssueSchema.shape,
+    createIssueSchema.extend(compatibleIssueFields).shape,
     false,
-    (i) => service.createIssue(ctx, workspace, i),
+    (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
   );
   tool(
     'update_issue',
     'Update a visible issue; omitted properties remain unchanged.',
-    { identifier: z.string(), ...updateIssueSchema.shape },
+    { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
     false,
-    ({ identifier, ...i }) => service.updateIssue(ctx, workspace, identifier, i),
+    ({ identifier, ...i }) =>
+      service.updateIssue(ctx, workspace, identifier, restUpdateIssueSchema.parse(i)),
+  );
+  tool(
+    'list_assignees',
+    'List active human assignees with access to the team.',
+    { team: z.string() },
+    true,
+    (i) => service.listAssignees(ctx, workspace, i.team),
+  );
+  tool(
+    'list_team_directory',
+    'List team directory including discoverable private metadata.',
+    {},
+    true,
+    () => service.teamDirectory(ctx, workspace),
+  );
+  tool(
+    'add_comment',
+    'Append a comment attributed to the authenticated caller.',
+    activity.addCommentSchema.shape,
+    false,
+    (i) => service.addComment(ctx, workspace, i),
+  );
+  tool(
+    'add_work_log',
+    'Record progress or a settled decision with its rationale.',
+    activity.addWorkLogSchema.shape,
+    false,
+    (i) => service.addWorkLog(ctx, workspace, i),
+  );
+  tool(
+    'list_work_logs',
+    'List work log summaries, newest first, with numeric before cursor.',
+    activity.listWorkLogsSchema.shape,
+    true,
+    (i) => service.listWorkLogs(ctx, workspace, i),
+  );
+  tool(
+    'get_work_log',
+    'Read one work log body belonging to this issue.',
+    activity.getWorkLogSchema.shape,
+    true,
+    (i) => service.getWorkLog(ctx, workspace, i),
+  );
+  tool(
+    'delegate_issue',
+    'Register client-reported execution provenance, never an authorization identity. Requires a human assignee on every call. Idempotent registration; starts or restarts in_progress without changing assignee.',
+    activity.delegateIssueSchema.shape,
+    false,
+    (i) => service.delegateIssue(ctx, workspace, i),
+  );
+  tool(
+    'add_relation',
+    'Add blocks, blocked_by or undirected related relation. Blocking dependencies must remain acyclic.',
+    activity.addRelationSchema.omit({ remove: true }).shape,
+    false,
+    (i) => service.addRelation(ctx, workspace, { ...i, remove: false }),
+  );
+  tool(
+    'remove_relation',
+    'Remove a relation; absent relations succeed.',
+    activity.addRelationSchema.omit({ remove: true }).shape,
+    false,
+    (i) => service.addRelation(ctx, workspace, { ...i, remove: true }),
+  );
+  tool(
+    'add_link',
+    'Attach a titled HTTP(S) URL without credentials.',
+    activity.addLinkSchema.shape,
+    false,
+    (i) => service.addLink(ctx, workspace, i),
+  );
+  tool(
+    'list_projects',
+    'List visible projects; archived projects are opt-in.',
+    catalog.listProjectsSchema.shape,
+    true,
+    (i) => service.listProjects(ctx, workspace, i),
+  );
+  tool(
+    'get_project',
+    'Read a visible project by id or current name; both must agree.',
+    catalog.getProjectSchema.shape,
+    true,
+    (i) => service.getProject(ctx, workspace, i),
+  );
+  tool(
+    'create_project',
+    'Create a project attached to existing teams.',
+    catalog.createProjectSchema.shape,
+    false,
+    (i) => service.createProject(ctx, workspace, i),
+  );
+  tool(
+    'update_project',
+    'Update project metadata or team links; omitted fields are unchanged.',
+    catalog.updateProjectSchema.shape,
+    false,
+    (i) => service.updateProject(ctx, workspace, i),
+  );
+  tool(
+    'list_initiatives',
+    'List initiatives and associated projects.',
+    catalog.listInitiativesSchema.shape,
+    true,
+    (i) => service.listInitiatives(ctx, workspace, i),
+  );
+  tool(
+    'get_initiative',
+    'Read an initiative by stable id.',
+    catalog.getInitiativeSchema.shape,
+    true,
+    (i) => service.getInitiative(ctx, workspace, i),
+  );
+  tool(
+    'create_initiative',
+    'Create an initiative with optional project links.',
+    catalog.createInitiativeSchema.shape,
+    false,
+    (i) => service.createInitiative(ctx, workspace, i),
+  );
+  tool(
+    'update_initiative',
+    'Update an initiative and project links.',
+    catalog.updateInitiativeSchema.shape,
+    false,
+    (i) => service.updateInitiative(ctx, workspace, i),
+  );
+  tool(
+    'list_labels',
+    'List workspace labels, optionally including archived labels.',
+    catalog.listLabelsSchema.shape,
+    true,
+    (i) => service.listLabels(ctx, workspace, i),
+  );
+  tool(
+    'list_label_groups',
+    'List workspace label groups.',
+    catalog.listLabelGroupsSchema.shape,
+    true,
+    (i) => service.listLabelGroups(ctx, workspace, i),
+  );
+  tool(
+    'save_label_group',
+    'Create or rename a label group.',
+    catalog.saveLabelGroupSchema.shape,
+    false,
+    (i) => service.saveLabelGroup(ctx, workspace, i),
+  );
+  tool(
+    'create_label',
+    'Create a label with a validated hex color.',
+    catalog.createLabelSchema.shape,
+    false,
+    (i) => service.createLabel(ctx, workspace, i),
+  );
+  tool(
+    'update_label',
+    'Update or archive a label.',
+    catalog.updateLabelSchema.shape,
+    false,
+    (i) => service.updateLabel(ctx, workspace, i),
+  );
+  tool(
+    'change_issue_labels',
+    'Atomically add and remove labels on visible issues.',
+    catalog.changeIssueLabelsSchema.shape,
+    false,
+    (i) => service.changeIssueLabels(ctx, workspace, i),
+  );
+  tool(
+    'merge_labels',
+    'Merge a source label into a distinct target label.',
+    catalog.mergeLabelsSchema.shape,
+    false,
+    (i) => service.mergeLabels(ctx, workspace, i),
+  );
+  tool(
+    'list_cycles',
+    'List a team’s configured current, upcoming and completed cycles.',
+    { team: z.string() },
+    true,
+    (i) => service.listCycles(ctx, workspace, i.team),
+  );
+  tool(
+    'configure_cycles',
+    'Configure team cycle scheduling.',
+    { team: z.string(), ...cycles.configureCyclesSchema.shape },
+    false,
+    ({ team, ...i }) => service.configureCycles(ctx, workspace, team, i),
+  );
+  tool(
+    'get_cycle',
+    'Read cycle metadata and issue totals.',
+    { id: z.number().int().positive() },
+    true,
+    (i) => service.getCycle(ctx, workspace, i.id),
+  );
+  tool(
+    'update_cycle',
+    'Update cycle name or description.',
+    { id: z.number().int().positive(), ...cycles.updateCycleSchema.shape },
+    false,
+    ({ id, ...i }) => service.updateCycle(ctx, workspace, id, i),
   );
   return server;
 }

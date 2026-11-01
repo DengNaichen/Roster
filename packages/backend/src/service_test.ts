@@ -1,6 +1,7 @@
 import { Pool } from 'npm:pg@8.23.1';
 import { createDatabase } from './db/client.ts';
 import { createService } from './service.ts';
+import { cleanupWorkspace, prepareTestDatabase } from './test_support.ts';
 import { createHttpApp } from './transport/http.ts';
 import { AppError, type RequestContext } from '../../contracts/mod.ts';
 
@@ -38,21 +39,7 @@ Deno.test({
     const slugs = [`t-${crypto.randomUUID()}`, `t-${crypto.randomUUID()}`];
     let runtime: ReturnType<typeof createDatabase> | undefined;
     try {
-      await setup.query(
-        `do $$ begin if not exists(select 1 from pg_roles where rolname='anon') then create role anon nologin; end if; if not exists(select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if; end $$`,
-      );
-      const exists = await setup.query("select to_regclass('roster.workspaces') as name");
-      if (!exists.rows[0].name) {
-        await setup.query(
-          await Deno.readTextFile(
-            new URL('../../../supabase/migrations/20261101000000_initial.sql', import.meta.url),
-          ),
-        );
-      }
-      await setup.query(
-        `do $$ begin if not exists(select 1 from pg_roles where rolname='${runtimeRole}') then create role ${runtimeRole} login nosuperuser nocreatedb nocreaterole nobypassrls; end if; end $$`,
-      );
-      await setup.query(`grant roster_app to ${runtimeRole}`);
+      await prepareTestDatabase(setup);
       const runtimeUrl = new URL(url);
       runtimeUrl.username = runtimeRole;
       runtime = createDatabase(runtimeUrl.toString());
@@ -127,16 +114,76 @@ Deno.test({
       await rejects(() => s.joinTeam(other, w.slug, 'PR', {}), 'invalid_input');
       await s.joinTeam(other, w.slug, 'PR', { confirm_private: true });
       assert((await s.getIssue(other, w.slug, hidden.identifier)).title === 'Private issue');
-      await rejects(() => s.joinTeam(owner, w.slug, 'PR', { leave: true }), 'conflict');
-      await rejects(
-        () =>
-          s.updateMember(other, w.slug, {
-            subject: owner.identity.subject,
-            role: 'admin',
-            status: 'suspended',
-          }),
-        'conflict',
+      const admins = await s.listTeamMembers(other, w.slug, 'PR');
+      assert(
+        admins.every((m) => m.role === 'owner' && m.workspace_admin),
+        'Workspace admins display owner role even when their stored team role is member',
       );
+      const left = await s.joinTeam(owner, w.slug, 'PR', { leave: true });
+      assert(
+        !left.joined && !left.accessible && left.can_manage,
+        'The final stored owner may leave; workspace admin retains management',
+      );
+      await rejects(() => s.getIssue(owner, w.slug, hidden.identifier), 'not_found');
+      await s.joinTeam(owner, w.slug, 'PR', { confirm_private: true });
+      await s.updateMember(other, w.slug, {
+        subject: owner.identity.subject,
+        role: 'admin',
+        status: 'suspended',
+      });
+      await rejects(() => s.getIssue(owner, w.slug, hidden.identifier), 'forbidden');
+      await s.updateMember(other, w.slug, {
+        subject: owner.identity.subject,
+        role: 'admin',
+        status: 'active',
+      });
+      const renamed = await s.updateTeam(member, w.slug, 'AA', {
+        name: 'Renamed public team',
+        emoji: '😀',
+      });
+      assert(
+        renamed.name === 'Renamed public team' && renamed.emoji === '😀',
+        'Visible public team metadata may be edited by any active workspace member',
+      );
+      await rejects(() => s.updateTeam(member, w.slug, 'AA', { private: true }), 'forbidden');
+      await s.createTeam(member, w.slug, { key: 'MO', name: 'Ownerless allowed' });
+      await s.changeTeamMember(other, w.slug, 'MO', {
+        subject: member.identity.subject,
+        role: 'member',
+      });
+      assert(
+        (await s.listTeamMembers(owner, w.slug, 'MO'))[0].role === 'member',
+        'Last owner may be demoted',
+      );
+      await s.changeTeamMember(other, w.slug, 'MO', {
+        subject: member.identity.subject,
+        role: 'owner',
+      });
+      await s.changeTeamMember(other, w.slug, 'MO', {
+        subject: member.identity.subject,
+        remove: true,
+      });
+      assert(
+        !(await s.listTeamMembers(owner, w.slug, 'MO')).length,
+        'Teams may have no owners or members',
+      );
+      await s.changeTeamMember(other, w.slug, 'MO', { subject: crypto.randomUUID(), remove: true });
+      await s.createTeam(member, w.slug, { key: 'LV', name: 'Leave allowed' });
+      assert(
+        !(await s.joinTeam(member, w.slug, 'LV', { leave: true })).joined,
+        'Last owner may leave without an administrator action',
+      );
+      await s.createTeam(member, w.slug, { key: 'SP', name: 'Suspension allowed' });
+      await s.updateMember(other, w.slug, {
+        subject: member.identity.subject,
+        role: 'member',
+        status: 'suspended',
+      });
+      await s.updateMember(other, w.slug, {
+        subject: member.identity.subject,
+        role: 'member',
+        status: 'active',
+      });
       await rejects(
         () =>
           s.createIssue(owner, w.slug, {
@@ -176,6 +223,17 @@ Deno.test({
           detail.audit.every((a) => a.actor_subject === member.identity.subject),
       );
       assert(detail.audit[1].kind === 'issue.updated');
+      assert(
+        detail.audit.every((event) =>
+          [event.before, event.after].every((snapshot) =>
+            !snapshot || typeof snapshot !== 'object' ||
+            !['parent_id', 'project_id', 'cycle_id', 'workspace_id', 'team_id'].some((key) =>
+              key in snapshot
+            )
+          )
+        ),
+        'Public audit snapshots do not leak internal or historical reference IDs',
+      );
       assert(BigInt(detail.audit[0].id) < BigInt(detail.audit[1].id), 'Audit IDs sort numerically');
       assert(
         (await s.listIssues(member, w.slug, { priority: 2, type: 'bug', assignee: null })).items
@@ -214,8 +272,8 @@ Deno.test({
         httpList.issues.length === 1 && httpList.issues[0].identifier === createdHTTP.identifier,
       );
       const httpDetail = await (await request('/issues/' + createdHTTP.identifier)).json();
-      assert(httpDetail.audit.length === 2 && !('comments' in httpDetail));
-      assert((await request('/projects')).status === 501);
+      assert(httpDetail.audit.length === 2 && Array.isArray(httpDetail.comments));
+      assert((await request('/projects')).status === 200);
 
       const isISO = (value: string) =>
         /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
@@ -239,8 +297,8 @@ Deno.test({
         'List timestamps must be ISO UTC',
       );
       assert(
-        both.every((issue, i) => i === 0 || both[i - 1].created_at >= issue.created_at),
-        'Issue pages must use descending creation time',
+        both.every((issue, i) => i === 0 || both[i - 1].updated_at >= issue.updated_at),
+        'Issue pages must use descending update time',
       );
       await rejects(() => s.listIssues(member, w.slug, { cursor: hidden.id }), 'invalid_input');
       await rejects(
@@ -291,6 +349,51 @@ Deno.test({
         locker.release();
         await racingJoin?.catch(() => {});
       }
+      await rejects(
+        () => s.createTeam(owner, w.slug, { key: 'EM', name: 'Bad emoji', emoji: 'hello 😀' }),
+        'invalid_input',
+      );
+      const ready = [];
+      for (const priority of [0, 4, 1]) {
+        ready.push(
+          await s.createIssue(owner, w.slug, {
+            team: 'AA',
+            title: 'Priority semantics',
+            status: 'agent_ready',
+            priority,
+          }),
+        );
+      }
+      const priorityPage = await s.listIssues(owner, w.slug, {
+        status: 'agent_ready',
+        query: 'Priority semantics',
+        limit: -1,
+      });
+      assert(
+        priorityPage.items.map((i) => i.priority).join(',') === '1,4,0' &&
+          priorityPage.next_cursor === null,
+        'Agent-ready defaults to priority, with no priority last, and negative limit returns all',
+      );
+      assert(
+        (await s.listIssues(owner, w.slug, { query: 'Priority semantics', limit: 0 })).items
+          .length === 3,
+        'Zero limit uses the default instead of returning nothing',
+      );
+      const priorityFirst = await s.listIssues(owner, w.slug, {
+        status: 'agent_ready',
+        query: 'Priority semantics',
+        limit: 1,
+      });
+      const priorityNext = await s.listIssues(owner, w.slug, {
+        status: 'agent_ready',
+        query: 'Priority semantics',
+        limit: 1,
+        cursor: priorityFirst.next_cursor!,
+      });
+      assert(
+        priorityFirst.items[0].priority === 1 && priorityNext.items[0].priority === 4,
+        'Priority cursor must use the priority/update/id ordering',
+      );
       const demotions = await Promise.allSettled([
         s.updateMember(owner, w.slug, {
           subject: owner.identity.subject,
@@ -307,11 +410,11 @@ Deno.test({
         demotions.filter((result) => result.status === 'fulfilled').length === 1,
         'Concurrent administrator demotions must preserve one administrator',
       );
-      const admins = await runtime.pool.query(
+      const activeAdmins = await runtime.pool.query(
         "select count(*)::int as n from roster.workspace_members where workspace_id=$1 and role='admin' and status='active'",
         [w.id],
       );
-      assert(admins.rows[0].n === 1);
+      assert(activeAdmins.rows[0].n === 1);
       const audits = await runtime.pool.query(
         'select count(*)::int as n from roster.audit_events where workspace_id=$1',
         [w.id],
@@ -330,24 +433,7 @@ Deno.test({
         const ws = await setup.query('select id from roster.workspaces where slug=$1', [slug]);
         if (ws.rows.length) {
           const id = ws.rows[0].id;
-          for (
-            const table of [
-              'audit_events',
-              'issues',
-              'team_members',
-              'teams',
-              'workspace_invites',
-              'workspace_members',
-              'workspaces',
-            ]
-          ) {
-            await setup.query(
-              `delete from roster.${table} where ${
-                table === 'workspaces' ? 'id' : 'workspace_id'
-              }=$1`,
-              [id],
-            );
-          }
+          await cleanupWorkspace(setup, id);
         }
       }
       await setup.query('delete from roster.users where subject=any($1::text[])', [

@@ -175,3 +175,130 @@ Deno.test('MCP tool errors hide internal exceptions and advertise structured out
   assert(failed.includes('Internal server error'), failed);
   assert(!failed.includes('password'), failed);
 });
+
+// Original Go MCP production tool names, excluding tests and server metadata.
+export const originalMcpTools = [
+  'list_issues',
+  'get_issue',
+  'create_issue',
+  'update_issue',
+  'add_comment',
+  'add_work_log',
+  'list_work_logs',
+  'get_work_log',
+  'add_relation',
+  'remove_relation',
+  'add_link',
+  'list_teams',
+  'create_team',
+  'update_team',
+  'list_team_directory',
+  'join_team',
+  'list_team_members',
+  'change_team_member',
+  'list_assignees',
+  'delegate_issue',
+  'list_projects',
+  'get_project',
+  'create_project',
+  'update_project',
+  'list_initiatives',
+  'get_initiative',
+  'create_initiative',
+  'update_initiative',
+  'list_labels',
+  'list_label_groups',
+  'save_label_group',
+  'create_label',
+  'update_label',
+  'change_issue_labels',
+  'merge_labels',
+  'list_cycles',
+  'configure_cycles',
+  'get_cycle',
+  'update_cycle',
+];
+Deno.test('All original MCP tools are genuinely registered with input and output contracts', async () => {
+  const fetch = createMcpFetch({
+    service: {} as Service,
+    verify: async () => ({ identity: { subject, name: 'Member', email: 'member@example.test' } }),
+    allowedOrigins: [],
+    publicUrl: 'https://app',
+    authorizationServer: issuer,
+  });
+  const response = await fetch(
+    new Request('https://app/w/default/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
+        'MCP-Protocol-Version': '2025-11-25',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} }),
+    }),
+  );
+  const text = await response.text();
+  const jsonLine = text.split('\n').find((line) => line.startsWith('data: '));
+  const result = JSON.parse(jsonLine ? jsonLine.slice(6) : text);
+  const tools = result.result.tools as {
+    name: string;
+    inputSchema: unknown;
+    outputSchema: unknown;
+  }[];
+  for (const name of originalMcpTools) {
+    const tool = tools.find((t) => t.name === name);
+    assert(tool, `Missing migrated tool: ${name}`);
+    assert(tool.inputSchema && tool.outputSchema, `Missing contracts for ${name}`);
+  }
+});
+Deno.test('MCP get_issue validates real bigint audit IDs without treating them as UUIDs', async () => {
+  const service = {
+    getIssue: async () => ({
+      id: 'f06ddfcf-545d-4d29-977e-6151bf65b466',
+      identifier: 'AL-1',
+      team: 'AL',
+      title: 'Issue',
+      description: 'Body',
+      status: 'triage',
+      type: null,
+      priority: 0,
+      assignee: null,
+      created_at: '2026-11-02T00:00:00Z',
+      updated_at: '2026-11-02T00:00:00Z',
+      audit: [{
+        id: '123456789012345',
+        kind: 'issue.created',
+        actor_subject: subject,
+        before: null,
+        after: { title: 'Issue' },
+        created_at: '2026-11-02T00:00:00Z',
+      }],
+    }),
+  } as unknown as Service;
+  const fetch = createMcpFetch({
+    service,
+    verify: async () => ({ identity: { subject, name: 'Member', email: 'member@example.test' } }),
+    allowedOrigins: [],
+    publicUrl: 'https://app',
+    authorizationServer: issuer,
+  });
+  const response = await fetch(
+    new Request('https://app/w/default/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
+        'MCP-Protocol-Version': '2025-11-25',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'get_issue', arguments: { identifier: 'AL-1' } },
+      }),
+    }),
+  );
+  const text = await response.text();
+  assert(response.status === 200 && !text.includes('isError":true'), text);
+  assert(text.includes('123456789012345'), text);
+});

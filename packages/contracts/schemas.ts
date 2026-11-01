@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidEmoji } from './catalog.ts';
 const subject = z.string().uuid();
 const status = z.enum([
   'triage',
@@ -25,7 +26,7 @@ export const updateMemberSchema = z.strictObject({
 export const createTeamSchema = z.strictObject({
   key: z.string().regex(/^[A-Z][A-Z0-9]{1,5}$/),
   name: z.string().trim().min(1).max(200),
-  emoji: z.string().max(32).optional(),
+  emoji: z.string().max(32).refine(isValidEmoji, 'Expected a Unicode emoji').optional(),
   private: z.boolean().optional(),
   start_number: z.number().int().min(1).max(2147483646).optional(),
 });
@@ -41,6 +42,10 @@ export const joinTeamSchema = z.strictObject({
   confirm_private: z.boolean().optional(),
 });
 export const createIssueSchema = z.strictObject({
+  project_id: z.number().int().min(0).max(2147483647).optional(),
+  project: z.string().max(200).optional(),
+  cycle_id: z.number().int().min(0).max(2147483647).optional(),
+  parent: z.string().max(100).optional(),
   team: z.string().min(1).max(6),
   title: z.string().trim().min(1).max(500),
   description: z.string().max(100000).optional(),
@@ -51,6 +56,14 @@ export const createIssueSchema = z.strictObject({
 });
 export const updateIssueSchema = createIssueSchema.omit({ team: true }).partial();
 export const listIssuesSchema = z.strictObject({
+  project_id: z.number().int().min(0).max(2147483647).optional(),
+  project: z.string().max(200).optional(),
+  cycle_id: z.number().int().min(0).max(2147483647).optional(),
+  parent: z.string().max(100).optional(),
+  label_mode: z.enum(['any', 'all', 'none', 'unlabeled']).optional(),
+  label_ids: z.array(z.number().int().positive()).optional(),
+  label_group_ids: z.array(z.number().int().positive()).optional(),
+  sort: z.enum(['created', 'updated', 'priority']).optional(),
   type: z.union([type, z.literal('')]).optional(),
   priority: z.number().int().min(0).max(4).optional(),
   assignee: subject.nullable().optional(),
@@ -58,6 +71,6 @@ export const listIssuesSchema = z.strictObject({
   team: z.string().optional(),
   status: status.optional(),
   query: z.string().max(500).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  limit: z.number().int().min(-2147483648).max(2147483647).optional(),
   cursor: z.string().uuid().optional(),
 });

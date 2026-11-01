@@ -3,7 +3,7 @@
   "nodeModulesDir": "none",
   "imports": { "zod": "npm:zod@4.6.7" },
   "tasks": {
-    "check": "deno check packages/backend/src/bootstrap.ts supabase/functions/api/index.ts supabase/functions/mcp/index.ts",
+    "check": "deno check packages/backend/src/bootstrap.ts packages/backend/src/jobs.ts supabase/functions/api/index.ts supabase/functions/mcp/index.ts supabase/functions/jobs/index.ts supabase/functions/github-webhook/index.ts scripts/preview.ts scripts/migrate.ts scripts/import-sqlite.ts scripts/import-linear.ts",
     "test": "deno test --allow-env --allow-net --allow-read packages/backend/src",
     "dev": "deno run --allow-env --allow-net --env-file=.env scripts/dev.ts"
   },

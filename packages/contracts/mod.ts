@@ -1,3 +1,6 @@
+import type { CatalogService, Label } from './catalog.ts';
+import type { CycleService } from './cycles.ts';
+import type { ActivityIssueDetails, ActivityService } from './activity.ts';
 export type Identity = { subject: string; name: string; email: string };
 export type RequestContext = { identity: Identity };
 export const statuses = [
@@ -30,6 +33,7 @@ export type Member = Identity & {
   status: 'active' | 'suspended';
 };
 export type TeamMember = Identity & {
+  workspace_admin: boolean;
   role: 'owner' | 'member';
   status: 'active' | 'suspended';
 };
@@ -54,6 +58,12 @@ export type Issue = {
   type: IssueType | null;
   priority: number;
   assignee: Identity | null;
+  project_id: number | null;
+  project: string | null;
+  project_emoji: string;
+  cycle_id: number | null;
+  parent: string | null;
+  labels: Label[];
   created_at: string;
   updated_at: string;
 };
@@ -65,7 +75,7 @@ export type AuditEvent = {
   after: unknown;
   created_at: string;
 };
-export type IssueDetail = Issue & { audit: AuditEvent[] };
+export type IssueDetail = Issue & { audit: AuditEvent[]; children: Issue[] } & ActivityIssueDetails;
 export type CreateIssueInput = {
   team: string;
   title: string;
@@ -74,6 +84,10 @@ export type CreateIssueInput = {
   type?: IssueType | null;
   priority?: number;
   assignee?: string | null;
+  project_id?: number;
+  project?: string;
+  cycle_id?: number;
+  parent?: string;
 };
 export type UpdateIssueInput = Partial<Omit<CreateIssueInput, 'team'>>;
 export type ListIssuesInput = {
@@ -83,9 +97,17 @@ export type ListIssuesInput = {
   priority?: number;
   assignee?: string | null;
   assigned_to_me?: boolean;
+  project_id?: number;
+  project?: string;
+  cycle_id?: number;
+  parent?: string;
+  label_ids?: number[];
+  label_group_ids?: number[];
+  label_mode?: 'any' | 'all' | 'none' | 'unlabeled';
+  sort?: 'created' | 'updated' | 'priority';
   query?: string;
   limit?: number;
-  /** Last issue UUID from the previous page; scoped to this query. Results sort by created_at DESC, id DESC. */
+  /** Last issue UUID in this query. Default order is updated DESC; agent_ready defaults to priority (0 last). Zero limit defaults to 50, negative returns all. */
   cursor?: string;
 };
 export type IssuePage = { items: Issue[]; next_cursor: string | null };
@@ -124,7 +146,7 @@ export class AppError extends Error {
     this.name = 'AppError';
   }
 }
-export interface Service {
+export interface Service extends CatalogService, CycleService, ActivityService {
   listWorkspaces(ctx: RequestContext): Promise<Workspace[]>;
   createWorkspace(
     ctx: RequestContext,
@@ -200,3 +222,7 @@ export interface Service {
   ): Promise<Issue>;
 }
 export * from './schemas.ts';
+
+export * from './catalog.ts';
+export * from './cycles.ts';
+export * from './activity.ts';
