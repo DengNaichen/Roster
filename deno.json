@@ -1,0 +1,12 @@
+{
+  "compilerOptions": { "strict": true },
+  "nodeModulesDir": "none",
+  "imports": { "zod": "npm:zod@4.6.7" },
+  "tasks": {
+    "check": "deno check packages/backend/src/bootstrap.ts supabase/functions/api/index.ts supabase/functions/mcp/index.ts",
+    "test": "deno test --allow-env --allow-net --allow-read packages/backend/src",
+    "dev": "deno run --allow-env --allow-net --env-file=.env scripts/dev.ts"
+  },
+  "fmt": { "singleQuote": true, "lineWidth": 100 },
+  "exclude": ["apps/web", "node_modules"]
+}

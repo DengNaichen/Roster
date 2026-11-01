@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+!.env.*.example
+.DS_Store
+HANDOFF.md
+.supabase/
+supabase/.temp/
+supabase/.branches/
+coverage/
+playwright-report/
+test-results/
