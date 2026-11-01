@@ -32,8 +32,10 @@ export async function apiFetch(
   if (!localPreview && session?.data.session) {
     headers.set("Authorization", `Bearer ${session.data.session.access_token}`);
   }
+  const previewPort = Number(import.meta.env.VITE_PREVIEW_API_PORT || "18471");
+  const safePreviewPort = Number.isInteger(previewPort) && previewPort > 0 && previewPort <= 65535 ? previewPort : 18471;
   const base = localPreview
-    ? "http://127.0.0.1:18471"
+    ? `http://127.0.0.1:${safePreviewPort}`
     : import.meta.env.VITE_API_BASE_URL;
   const response = await fetch(`${base.replace(/\/$/, "")}${path}`, {
     ...init,

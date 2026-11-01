@@ -22,6 +22,18 @@ describe("API integration boundary", () => {
     );
     expect(fetch.mock.calls[0][1].headers.has("Authorization")).toBe(false);
   });
+  it.each([["18472", "18472"], ["18472@remote.example", "18471"], ["70000", "18471"]])("keeps preview port %s on loopback", async (port, expected) => {
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
+    vi.stubEnv("VITE_PREVIEW_API_PORT", port);
+    vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } });
+    const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ workspaces: [] }) });
+    vi.stubGlobal("fetch", fetch);
+    const { api } = await import("./api");
+    await api("/api/workspaces");
+    expect(fetch.mock.calls[0][0]).toBe(`http://127.0.0.1:${expected}/api/workspaces`);
+    expect(fetch.mock.calls[0][1].headers.has("Authorization")).toBe(false);
+  });
   it("does not bypass production auth with preview flag", async () => {
     vi.stubEnv("DEV", false);
     vi.stubEnv("VITE_LOCAL_PREVIEW", "true");

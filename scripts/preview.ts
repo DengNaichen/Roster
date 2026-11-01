@@ -15,7 +15,8 @@ if (
   throw new Error('Preview requires a loopback database named *_preview');
 }
 const port = Number(Deno.env.get('PORT') ?? '18471');
-const origins = ['http://127.0.0.1:5178', 'http://localhost:5178'];
+const frontendPort = Number(Deno.env.get('PREVIEW_FRONTEND_PORT') ?? '5178');
+const origins = [`http://127.0.0.1:${frontendPort}`, `http://localhost:${frontendPort}`];
 const ctx: RequestContext = {
   identity: {
     subject: 'b965fa67-d823-4534-a240-56b88f839dad',
