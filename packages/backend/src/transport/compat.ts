@@ -14,6 +14,7 @@ export const capabilities = {
   members: true,
   teams: true,
   issues: true,
+  specs: true,
   assignees: true,
   assignments: true,
   projects: true,

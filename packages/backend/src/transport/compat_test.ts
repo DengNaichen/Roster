@@ -56,5 +56,5 @@ Deno.test('Original REST issue filters preserve repeated labels and full issue m
 
 Deno.test('Capabilities only advertise the fully migrated domains', () => {
   assert(Object.values(capabilities).every((value) => value === true));
-  assert(Object.keys(capabilities).length === 16);
+  assert(Object.keys(capabilities).length === 17);
 });

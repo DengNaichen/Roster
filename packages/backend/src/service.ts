@@ -1,3 +1,4 @@
+import { createSpecService } from './modules/spec.ts';
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import {
   buildLabelFilter,
@@ -137,6 +138,7 @@ export function createService(db: Database, options: { now?: () => Date } = {}):
 
   const service: Service = {
     ...createCatalogService(db),
+    ...createSpecService(db, { now: clock }),
     ...createCycleService(db, { now: clock }),
     ...createActivityService(db),
     async listWorkspaces(ctx) {

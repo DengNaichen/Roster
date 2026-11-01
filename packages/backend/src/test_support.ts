@@ -18,6 +18,7 @@ export async function prepareTestDatabase(pool: Pool) {
       '20261102000200_cycles_issues.sql': 'cycles',
       '20261102000300_activity.sql': 'comments',
       '20261102000400_github.sql': 'pull_requests',
+      '20261102000500_specs.sql': 'specs',
     };
     for (const [file, table] of Object.entries(markers)) {
       const exists = await connection.query('select to_regclass($1) as name', ['roster.' + table]);
@@ -40,6 +41,30 @@ export async function prepareTestDatabase(pool: Pool) {
   }
 }
 export async function cleanupWorkspace(pool: Pool, id: string) {
+  const database = await pool.query('select current_database() as name');
+  if (!String(database.rows[0].name).endsWith('_test')) {
+    throw new Error('Cleanup is restricted to isolated *_test databases');
+  }
+  const specs = await pool.query("select to_regclass('roster.specs') as name");
+  if (specs.rows[0].name) {
+    const connection = await pool.connect();
+    try {
+      await connection.query('begin');
+      await connection.query('alter table roster.spec_revisions disable trigger user');
+      await connection.query(
+        'delete from roster.spec_revisions where spec_id in(select id from roster.specs where workspace_id=$1)',
+        [id],
+      );
+      await connection.query('alter table roster.spec_revisions enable trigger user');
+      await connection.query('delete from roster.specs where workspace_id=$1', [id]);
+      await connection.query('commit');
+    } catch (error) {
+      await connection.query('rollback');
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
   const tables = [
     'github_sync',
     'pull_requests',

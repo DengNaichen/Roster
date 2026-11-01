@@ -9,6 +9,8 @@ import { Session } from "./Session";
 import { api, apiPath, IssueSort, navigate, NavLink, pagePath, RequestError, Team, Workspace, workspaceRoute, workspaceSlug } from "./shared";
 import { useResource } from "./useResource";
 
+const SpecsPage = lazy(() => import("./SpecsPage"));
+const SpecPage = lazy(() => import("./SpecPage"));
 const CyclesPage = lazy(() => import("./CyclesPage"));
 const IssuesPage = lazy(() => import("./IssuesPage"));
 const ProjectsPage = lazy(() => import("./ProjectsPage"));
@@ -98,6 +100,8 @@ function WorkspaceContent() {
             : route.kind === "projects" ? <ProjectsPage team={route.team} teams={teams.data.teams} />
             : route.kind === "initiatives" || route.kind === "initiative" ? <InitiativesPage id={route.kind === "initiative" ? route.id : undefined} teams={teams.data.teams} />
             : route.kind === "issue" ? <IssuePage identifier={route.identifier} teams={teams.data.teams} />
+            : route.kind === "specs" ? <SpecsPage team={route.team} teams={teams.data.teams} />
+            : route.kind === "spec" ? <SpecPage id={route.identifier} />
             : route.kind === "labels" ? <LabelsPage />
             : <SettingsPage teams={teams.data.teams} loading={teams.loading} onSaved={(updated) => teams.update((data) => ({ teams: data.teams.map((team) => team.key === updated.key ? updated : team) }))} />}
         </Suspense>

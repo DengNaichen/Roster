@@ -178,6 +178,12 @@ Deno.test('MCP tool errors hide internal exceptions and advertise structured out
 
 // Original Go MCP production tool names, excluding tests and server metadata.
 export const originalMcpTools = [
+  'list_specs',
+  'get_spec',
+  'create_spec',
+  'update_spec',
+  'list_spec_revisions',
+  'get_spec_revision',
   'list_issues',
   'get_issue',
   'create_issue',
@@ -219,6 +225,10 @@ export const originalMcpTools = [
   'update_cycle',
 ];
 Deno.test('All original MCP tools are genuinely registered with input and output contracts', async () => {
+  assert(
+    originalMcpTools.length === 45,
+    'The migrated Go tool inventory must contain all 45 production tools',
+  );
   const fetch = createMcpFetch({
     service: {} as Service,
     verify: async () => ({ identity: { subject, name: 'Member', email: 'member@example.test' } }),

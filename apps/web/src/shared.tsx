@@ -107,6 +107,8 @@ export function workspaceSlug() {
 export type WorkspaceRoute =
   | { kind: "cycles"; team: string }
   | { kind: "cycle"; team: string; id: number }
+  | { kind: "specs"; team: string }
+  | { kind: "spec"; identifier: string }
   | { kind: "initiatives" }
   | { kind: "initiative"; id: number }
   | { kind: "issues"; team: string }
@@ -120,15 +122,18 @@ export type WorkspaceRoute =
 export function workspaceRoute(path: string): WorkspaceRoute {
   const route = "/" + path.split("/").slice(2).join("/");
   if (route === "/") return { kind: "issues", team: "" };
+  if (route === "/specs") return { kind: "specs", team: "" };
+  const spec = route.match(/^\/spec\/(SPEC-[1-9][0-9]*)$/);
+  if (spec) return { kind: "spec", identifier: spec[1] };
   if (route === "/projects") return { kind: "projects", team: "" };
   if (route === "/initiatives") return { kind: "initiatives" };
   const initiative = route.match(/^\/initiative\/([1-9][0-9]*)$/);
   if (initiative && Number.isSafeInteger(Number(initiative[1]))) return { kind: "initiative", id: Number(initiative[1]) };
   if (route === "/settings") return { kind: "settings" };
   if (route === "/labels") return { kind: "labels" };
-  const team = route.match(/^\/team\/([^/]+)\/(issues|projects|cycles)$/);
+  const team = route.match(/^\/team\/([^/]+)\/(issues|projects|cycles|specs)$/);
   if (team) {
-    try { return { kind: team[2] as "issues" | "projects" | "cycles", team: decodeURIComponent(team[1]) }; }
+    try { return { kind: team[2] as "issues" | "projects" | "cycles" | "specs", team: decodeURIComponent(team[1]) }; }
     catch { return { kind: "invalid" }; }
   }
   const cycle = route.match(/^\/team\/([^/]+)\/cycles\/([1-9][0-9]*)$/);

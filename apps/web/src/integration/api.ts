@@ -55,11 +55,11 @@ export async function api<T>(
   });
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(
+    throw Object.assign(new Error(
       typeof data.error === "string"
         ? data.error
         : data.error?.message || `Request failed (${response.status})`,
-    );
+    ), { status: response.status, code: typeof data.error === "object" ? data.error?.code : undefined });
   }
   return data as T;
 }

@@ -1,3 +1,4 @@
+import type { SpecService } from './spec.ts';
 import type { CatalogService, Label } from './catalog.ts';
 import type { CycleService } from './cycles.ts';
 import type { ActivityIssueDetails, ActivityService } from './activity.ts';
@@ -146,7 +147,7 @@ export class AppError extends Error {
     this.name = 'AppError';
   }
 }
-export interface Service extends CatalogService, CycleService, ActivityService {
+export interface Service extends CatalogService, CycleService, ActivityService, SpecService {
   listWorkspaces(ctx: RequestContext): Promise<Workspace[]>;
   createWorkspace(
     ctx: RequestContext,
@@ -226,3 +227,5 @@ export * from './schemas.ts';
 export * from './catalog.ts';
 export * from './cycles.ts';
 export * from './activity.ts';
+
+export * from './spec.ts';

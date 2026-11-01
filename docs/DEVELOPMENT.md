@@ -19,7 +19,7 @@ VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --str
 
 前端保留 InfTask 的 History 路由、`useResource` 和 `useRequestScope`，迁移不以更换路由/请求库为前提。`src/integration` 处理 Supabase 会话和本地预览，`shared.api` 保持原调用签名。
 
-`GET /api/w/:workspace/capabilities` 在页面挂载前声明已实现能力，当前全部启用；获取失败会阻断并提供重试。原组件读取的项目、标签、周期、评论、工作记录、关系和 PR 均来自真实存储。
+`GET /api/w/:workspace/capabilities` 在页面挂载前声明已实现能力，当前全部启用；获取失败会阻断并提供重试。原组件读取的项目、标签、周期、评论、工作记录、关系和 PR 均来自真实存储；独立 Specs 的文档与修订同样来自真实服务。
 
 `packages/backend/src/transport/compat.ts` 负责 REST 兼容：列表提供原 `{issues}`，详情/状态更新按原形状返回，处理原表单的清空字段，并保留真实负责人筛选和历史。MCP 保留旧工具名称/输入语义；`list_issues` 的零 limit 使用默认值，负 limit 返回全部，支持优先级和更新时间排序。
 
@@ -50,9 +50,10 @@ deno task test
 
 ```sh
 ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_test deno test --allow-env --allow-net --allow-read packages/backend/src/service_test.ts
+ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno test --allow-env --allow-net --allow-read packages/backend/src/modules/spec_test.ts
 ```
 
-全套真实数据库测试还读取 `ROSTER_ACTIVITY_TEST_DATABASE_URL`（数据库名必须为 `roster_activity_test`）、`ROSTER_INTEGRATIONS_TEST_DATABASE_URL` 和 `ROSTER_IMPORT_TEST_DATABASE_URL`；后两者使用隔离 `_test` 库，导入测试要求没有工作区。每个测试创建自己的数据并清理。`deno task test` 未设置相应变量时会跳过该数据库测试。传输单元测试使用签名 JWT 与 stub；活动测试另通过真实数据库跨 REST/MCP 写读。
+全套真实数据库测试还读取 `ROSTER_ACTIVITY_TEST_DATABASE_URL`（数据库名必须为 `roster_activity_test`）、`ROSTER_INTEGRATIONS_TEST_DATABASE_URL` 和 `ROSTER_IMPORT_TEST_DATABASE_URL`；后两者使用隔离 `_test` 库，导入测试要求没有工作区。每个测试创建自己的数据并清理。`deno task test` 未设置相应变量时会跳过该数据库测试。传输单元测试使用签名 JWT 与 stub；活动与独立 Spec 测试另通过真实数据库跨 REST/MCP 写读；Spec 套件覆盖全部 6 个 REST 路由、6 个 MCP 工具、版本冲突和历史只读。
 
 ## 配置
 

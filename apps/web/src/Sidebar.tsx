@@ -1,5 +1,5 @@
 import { useCapabilities } from "./Capabilities";
-import { CalendarRange, Box, ChevronDown, ChevronRight, List, Menu, Plus, Settings, Tag, Target } from "lucide-react";
+import { CalendarRange, FileText, Box, ChevronDown, ChevronRight, List, Menu, Plus, Settings, Tag, Target } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
 import { Session } from "./Session";
@@ -22,6 +22,7 @@ export function Sidebar({ route, visit, teams, onCreateTeam }: {
       <nav id="workspace-navigation" className={`scope-navigation ${expanded ? "expanded" : ""}`} aria-label="Workspace navigation">
         <div className="sidebar-label">Workspace</div>
         <NavLink className={`nav-item ${active("issues") ? "active" : ""}`} to={pagePath("/")}><List className="icon" /><span className="nav-label">All issues</span></NavLink>
+        <NavLink className={`nav-item ${route.kind === "specs" || route.kind === "spec" ? "active" : ""}`} to={pagePath("/specs")}><FileText className="icon" /><span className="nav-label">Specs</span></NavLink>
         <NavLink unavailable={!capabilities.projects} className={`nav-item ${active("projects") ? "active" : ""}`} to={pagePath("/projects")}><Box className="icon" /><span className="nav-label">All projects</span>{!capabilities.projects && <small>Not migrated</small>}</NavLink>
         <NavLink unavailable={!capabilities.initiatives} className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`} to={pagePath("/initiatives")}><Target className="icon" /><span className="nav-label">Initiatives</span>{!capabilities.initiatives && <small>Not migrated</small>}</NavLink>
         <NavLink unavailable={!capabilities.labels} className={`nav-item ${route.kind === "labels" ? "active" : ""}`} to={pagePath("/labels")}><Tag className="icon" /><span className="nav-label">Labels</span>{!capabilities.labels && <small>Not migrated</small>}</NavLink>
@@ -48,6 +49,7 @@ function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) 
       </button>
       <div id={destinationsId} className="team-destinations" hidden={!expanded}>
         <NavLink className={`nav-item team-destination ${active("issues") ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}><List className="icon" /><span className="nav-label">Issues</span></NavLink>
+        <NavLink className={`nav-item team-destination ${route.kind === "specs" && route.team === team.key ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/specs`)}><FileText className="icon" /><span className="nav-label">Specs</span></NavLink>
         <NavLink unavailable={!capabilities.projects} className={`nav-item team-destination ${active("projects") ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/projects`)}><Box className="icon" /><span className="nav-label">Projects</span>{!capabilities.projects && <small>Not migrated</small>}</NavLink>
         <NavLink unavailable={!capabilities.cycles} className={`nav-item team-destination ${(route.kind === "cycles" || route.kind === "cycle") && route.team === team.key ? "active" : ""}`} to={pagePath(`/team/${encodeURIComponent(team.key)}/cycles`)}><CalendarRange className="icon" /><span className="nav-label">Cycles</span>{!capabilities.cycles && <small>Not migrated</small>}</NavLink>
       </div>

@@ -28,6 +28,7 @@ import type { VerifyIdentity } from '../auth/jwt.ts';
 import * as activity from '../../../contracts/activity.ts';
 import * as catalog from '../../../contracts/catalog.ts';
 import * as cycles from '../../../contracts/cycles.ts';
+import * as specs from '../../../contracts/spec.ts';
 export interface TransportOptions {
   service: Service;
   verify: VerifyIdentity;
@@ -665,6 +666,81 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     );
     return c.json({ updated: true });
   });
+  app.get('/api/w/:workspace/specs', async (c) => {
+    const query = c.req.queries();
+    const input: Record<string, string> = {};
+    for (const [key, value] of Object.entries(query)) {
+      if (value.length !== 1) throw new AppError('invalid_input', 'Repeated query parameter');
+      input[key] = value[0];
+    }
+    return c.json({
+      specs: await s.listSpecs(
+        c.get('requestContext'),
+        c.req.param('workspace'),
+        specs.listSpecsSchema.parse(input),
+      ),
+    });
+  });
+  app.post(
+    '/api/w/:workspace/specs',
+    async (c) =>
+      c.json(
+        await s.createSpec(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          await body(c, specs.createSpecSchema),
+        ),
+        201,
+      ),
+  );
+  app.get(
+    '/api/w/:workspace/specs/:identifier',
+    async (c) =>
+      c.json(
+        await s.getSpec(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          specs.getSpecSchema.parse({ identifier: c.req.param('identifier') }).identifier,
+        ),
+      ),
+  );
+  app.put('/api/w/:workspace/specs/:identifier', async (c) => {
+    // The original REST body has no identifier; reject attempts to supply one,
+    // even if it matches. Only the URL selects which spec is updated.
+    const input = await body(c, specs.updateSpecSchema.omit({ identifier: true }));
+    return c.json(
+      await s.updateSpec(
+        c.get('requestContext'),
+        c.req.param('workspace'),
+        specs.updateSpecSchema.parse({ ...input, identifier: c.req.param('identifier') }),
+      ),
+    );
+  });
+  app.get(
+    '/api/w/:workspace/specs/:identifier/revisions',
+    async (c) =>
+      c.json({
+        revisions: await s.listSpecRevisions(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          specs.listSpecRevisionsSchema.parse({ identifier: c.req.param('identifier') }).identifier,
+        ),
+      }),
+  );
+  app.get(
+    '/api/w/:workspace/specs/:identifier/revisions/:number',
+    async (c) =>
+      c.json(
+        await s.getSpecRevision(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          specs.getSpecRevisionSchema.parse({
+            identifier: c.req.param('identifier'),
+            number: Number(c.req.param('number')),
+          }),
+        ),
+      ),
+  );
   app.notFound((c) => c.json({ error: { code: 'not_found', message: 'Route not found' } }, 404));
   return app;
 }

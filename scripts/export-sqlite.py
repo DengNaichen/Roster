@@ -2,7 +2,7 @@
 import argparse, json, sqlite3
 from pathlib import Path
 
-TABLES = 'users workspaces workspace_members workspace_invites teams team_members projects project_teams initiatives initiative_projects label_groups labels team_cycle_settings cycles issues issue_labels comments work_logs issue_delegations relations links issue_assignments events pull_requests github_sync'.split()
+TABLES = 'users workspaces workspace_members workspace_invites teams team_members projects project_teams initiatives initiative_projects label_groups labels team_cycle_settings cycles issues issue_labels comments work_logs issue_delegations relations links issue_assignments events specs spec_revisions pull_requests github_sync'.split()
 def export(source, destination):
     uri = Path(source).resolve().as_uri() + '?mode=ro'
     db = sqlite3.connect(uri, uri=True)

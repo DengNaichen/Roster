@@ -1,5 +1,7 @@
 import type { Pool } from 'npm:pg@8.23.1';
 import { addLinkSchema } from '../../../contracts/activity.ts';
+import { createSpecSchema, type SpecContent, specContentSchema } from '../../../contracts/spec.ts';
+import { encodeSpec } from '../modules/spec.ts';
 type Row = Record<string, unknown>;
 export type SQLiteSnapshot = { format: 'inftask-sqlite-v1'; tables: Record<string, Row[]> };
 export type IdentityMap = {
@@ -28,6 +30,8 @@ const order = [
   'issue_delegations',
   'relations',
   'links',
+  'specs',
+  'spec_revisions',
   'pull_requests',
   'github_sync',
 ] as const;
@@ -65,6 +69,8 @@ export async function importSQLite(pool: Pool, snapshot: SQLiteSnapshot, mapping
   const sourceTeam = new Map(source('teams').map((r) => [String(r.id), r]));
   const sourceProject = new Map(source('projects').map((r) => [String(r.id), r]));
   const sourceInitiative = new Map(source('initiatives').map((r) => [String(r.id), r]));
+  const sourceSpec = new Map(source('specs').map((r) => [String(r.id), r]));
+  const normalizedSpecRevisions = new Map<Row, SpecContent>();
   const counts: Record<string, number> = {};
   const client = await pool.connect();
   try {
@@ -115,7 +121,9 @@ export async function importSQLite(pool: Pool, snapshot: SQLiteSnapshot, mapping
         if (table === 'issues') row.id = lookup(issues, input.id);
         let oldWorkspace = input.workspace_id;
         if (oldWorkspace === undefined) {
-          if (input.issue_id !== undefined) {
+          if (input.spec_id !== undefined) {
+            oldWorkspace = sourceSpec.get(String(input.spec_id))?.workspace_id;
+          } else if (input.issue_id !== undefined) {
             oldWorkspace = sourceIssue.get(String(input.issue_id))?.workspace_id;
           } else if (input.team_id !== undefined) {
             oldWorkspace = sourceTeam.get(String(input.team_id))?.workspace_id;
@@ -133,16 +141,79 @@ export async function importSQLite(pool: Pool, snapshot: SQLiteSnapshot, mapping
           table === 'relations' && row.kind === 'related' &&
           String(row.issue_id) > String(row.other_id)
         ) [row.issue_id, row.other_id] = [row.other_id, row.issue_id];
-        for (const key of ['subject', 'assignee_subject', 'actor_subject']) {
+        for (const key of ['subject', 'assignee_subject', 'actor_subject', 'author_subject']) {
           if (input[key] !== undefined) row[key] = subject(input[key]);
         }
         if (table === 'comments' && input.actor_subject === undefined) row.actor_subject = null;
         if (table === 'links') {
           addLinkSchema.pick({ title: true, url: true }).parse({ title: row.title, url: row.url });
         }
+        if (table === 'spec_revisions') {
+          let decoded: unknown = input.content;
+          if (typeof decoded === 'string') {
+            try {
+              decoded = JSON.parse(decoded);
+            } catch {
+              throw new Error('Spec revision content must be valid JSON');
+            }
+          }
+          const parsed = specContentSchema.safeParse(decoded);
+          if (!parsed.success) {
+            throw new Error(
+              'Invalid Spec revision content: ' +
+                parsed.error.issues.map((i) => i.message).join('; '),
+            );
+          }
+          row.content = encodeSpec(parsed.data);
+          row.message = createSpecSchema.shape.message.parse(input.message) ?? '';
+          normalizedSpecRevisions.set(input, parsed.data);
+        }
         if (table === 'issues') row.parent_id = null; // second pass after every issue exists
         if (table === 'github_sync' && !row.last_updated_at) row.last_updated_at = null;
         await insert(table, row);
+      }
+    }
+    // A snapshot must preserve every append-only revision and stable-ID tombstone.
+    const revisionsBySpec = new Map<string, Row[]>();
+    for (const revision of source('spec_revisions')) {
+      const id = String(revision.spec_id);
+      if (!sourceSpec.has(id)) throw new Error('Missing Spec revision parent ' + id);
+      const list = revisionsBySpec.get(id) ?? [];
+      list.push(revision);
+      revisionsBySpec.set(id, list);
+    }
+    for (const spec of source('specs')) {
+      const revisions = (revisionsBySpec.get(String(spec.id)) ?? []).sort((a, b) =>
+        Number(a.number) - Number(b.number)
+      );
+      if (
+        !Number.isSafeInteger(spec.current_revision) || Number(spec.current_revision) < 1 ||
+        revisions.length !== spec.current_revision
+      ) {
+        throw new Error(
+          'Spec revision history must include every revision through current_revision',
+        );
+      }
+      const ever = new Set<string>();
+      let previous = new Set<string>();
+      for (let index = 0; index < revisions.length; index++) {
+        const revision = revisions[index];
+        if (revision.number !== index + 1) {
+          throw new Error('Spec revision numbers must be contiguous from 1');
+        }
+        const content = normalizedSpecRevisions.get(revision)!;
+        const current = new Set(
+          [...content.stories, ...content.requirements, ...content.success_criteria].map((item) =>
+            item.id
+          ),
+        );
+        for (const id of current) {
+          if (ever.has(id) && !previous.has(id)) {
+            throw new Error('Retired Spec stable ID cannot be reused: ' + id);
+          }
+          ever.add(id);
+        }
+        previous = current;
       }
     }
     for (const input of source('issues')) {

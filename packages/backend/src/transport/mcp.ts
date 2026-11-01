@@ -20,6 +20,7 @@ import type { VerifyIdentity } from '../auth/jwt.ts';
 import * as activity from '../../../contracts/activity.ts';
 import * as catalog from '../../../contracts/catalog.ts';
 import * as cycles from '../../../contracts/cycles.ts';
+import * as specs from '../../../contracts/spec.ts';
 import { restCreateIssueSchema, restUpdateIssueSchema } from './compat.ts';
 const compatibleIssueFields = {
   type: z.union([createIssueSchema.shape.type, z.literal('')]),
@@ -58,7 +59,75 @@ const issueOutput = z.object({
   created_at: z.string(),
   updated_at: z.string(),
 }).passthrough();
+const specStatusOutput = z.enum(['draft', 'review', 'approved', 'superseded']);
+const specIdentifierOutput = z.string().regex(/^SPEC-[1-9][0-9]*$/);
+const specContentOutput = z.object({
+  title: z.string(),
+  status: specStatusOutput,
+  branch: z.string().optional(),
+  stories: z.array(
+    z.object({
+      id: z.string().regex(/^US-[0-9]+$/),
+      title: z.string(),
+      priority: z.enum(['P1', 'P2', 'P3']),
+      description: z.string(),
+      why: z.string(),
+      independent_test: z.string(),
+      scenarios: z.array(
+        z.object({ given: z.string(), when: z.string(), then: z.string() }).passthrough(),
+      ),
+    }).passthrough(),
+  ),
+  edge_cases: z.array(z.string()),
+  requirements: z.array(
+    z.object({
+      id: z.string().regex(/^FR-[0-9]+$/),
+      text: z.string(),
+      clarify: z.string().optional(),
+    }).passthrough(),
+  ),
+  entities: z.array(z.object({ name: z.string(), description: z.string() }).passthrough()),
+  success_criteria: z.array(
+    z.object({ id: z.string().regex(/^SC-[0-9]+$/), text: z.string() }).passthrough(),
+  ),
+  clarifications: z.array(
+    z.object({
+      date: z.string(),
+      items: z.array(z.object({ question: z.string(), answer: z.string() }).passthrough()),
+    }).passthrough(),
+  ),
+}).passthrough();
+const specRevisionOutput = z.object({
+  number: z.number().int().positive(),
+  message: z.string(),
+  author: identityOutput.nullable(),
+  created_at: z.string(),
+}).passthrough();
+const specSummaryOutput = z.object({
+  identifier: specIdentifierOutput,
+  team: z.string(),
+  title: z.string(),
+  status: specStatusOutput,
+  revision: z.number().int().positive(),
+  updated_at: z.string(),
+}).passthrough();
+const specOutput = z.object({
+  identifier: specIdentifierOutput,
+  team: z.string(),
+  revision: z.number().int().positive(),
+  message: z.string(),
+  author: identityOutput.nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  content: specContentOutput,
+}).passthrough();
 const resultSchemas: Record<string, z.ZodType> = {
+  list_specs: z.array(specSummaryOutput),
+  get_spec: specOutput,
+  create_spec: specOutput,
+  update_spec: specOutput,
+  list_spec_revisions: z.array(specRevisionOutput),
+  get_spec_revision: specRevisionOutput.extend({ content: specContentOutput }),
   list_issues: z.object({ items: z.array(issueOutput), next_cursor: z.string().uuid().nullable() })
     .passthrough(),
   get_issue: issueOutput.extend({
@@ -446,6 +515,48 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     { id: z.number().int().positive(), ...cycles.updateCycleSchema.shape },
     false,
     ({ id, ...i }) => service.updateCycle(ctx, workspace, id, i),
+  );
+  tool(
+    'list_specs',
+    'List readable team spec summaries, newest updated first.',
+    specs.listSpecsSchema.shape,
+    true,
+    (i) => service.listSpecs(ctx, workspace, i),
+  );
+  tool(
+    'get_spec',
+    'Read the current structured Spec Kit content and trusted author.',
+    specs.getSpecSchema.shape,
+    true,
+    (i) => service.getSpec(ctx, workspace, i.identifier),
+  );
+  tool(
+    'create_spec',
+    'Create a team spec as revision 1. Content is structured JSON with stable US/FR/SC ids.',
+    specs.createSpecSchema.shape,
+    false,
+    (i) => service.createSpec(ctx, workspace, i),
+  );
+  tool(
+    'update_spec',
+    'Save complete content as an append-only revision. Supply base_revision; conflicts require re-reading before retry. Retired stable IDs cannot be reused.',
+    specs.updateSpecSchema.shape,
+    false,
+    (i) => service.updateSpec(ctx, workspace, i),
+  );
+  tool(
+    'list_spec_revisions',
+    'List immutable revision summaries newest first.',
+    specs.listSpecRevisionsSchema.shape,
+    true,
+    (i) => service.listSpecRevisions(ctx, workspace, i.identifier),
+  );
+  tool(
+    'get_spec_revision',
+    'Read historical revision content without modifying history.',
+    specs.getSpecRevisionSchema.shape,
+    true,
+    (i) => service.getSpecRevision(ctx, workspace, i),
   );
   return server;
 }
