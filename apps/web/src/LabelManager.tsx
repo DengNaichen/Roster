@@ -15,15 +15,6 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
   );
   return (
     <section className="label-manager" aria-label="Label settings">
-      <div className="label-manager-heading">
-        <div>
-          <h1>Labels</h1>
-          <p className="label-help">Organize issues across projects. Groups allow one label per issue.</p>
-        </div>
-        <button className="button primary" onClick={() => setEditor("new")}>
-          New label
-        </button>
-      </div>
       <div className="label-toolbar">
         <input
           type="search"
@@ -35,9 +26,14 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
         <label>
           <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} /> Show archived
         </label>
-        <button className="button" onClick={() => setGroupEditor("new")}>
-          New group
-        </button>
+        <span className="label-toolbar-actions">
+          <button className="button" onClick={() => setGroupEditor("new")}>
+            New group
+          </button>
+          <button className="button primary" onClick={() => setEditor("new")}>
+            New label
+          </button>
+        </span>
       </div>
       {catalog.error && (
         <RequestError message={catalog.error} />

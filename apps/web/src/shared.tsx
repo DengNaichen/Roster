@@ -159,13 +159,13 @@ export function navigate(path: string) {
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
-export function NavLink({ to, className, children, unavailable }: { to: string; className?: string; children: ReactNode; unavailable?: boolean }) {
+export function NavLink({ to, className, children, unavailable, "aria-label": ariaLabel }: { to: string; className?: string; children: ReactNode; unavailable?: boolean; "aria-label"?: string }) {
   function open(event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) return;
     event.preventDefault();
     navigate(to);
   }
-  return <a className={className} href={to} onClick={open} aria-disabled={unavailable || undefined} title={unavailable ? "This feature has not been migrated to Roster yet" : undefined} style={unavailable ? { opacity: 0.5 } : undefined}>{children}</a>;
+  return <a className={className} href={to} onClick={open} aria-label={ariaLabel} aria-disabled={unavailable || undefined} title={unavailable ? "This feature has not been migrated to Roster yet" : undefined} style={unavailable ? { opacity: 0.5 } : undefined}>{children}</a>;
 }
 
 const statusColors: Record<Status, string> = {
