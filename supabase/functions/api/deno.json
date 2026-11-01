@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": [
+      "deno.ns",
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
+  },
+  "nodeModulesDir": "none",
+  "imports": {
+    "zod": "npm:zod@4.6.7"
+  }
+}

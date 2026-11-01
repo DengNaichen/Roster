@@ -1,0 +1,120 @@
+.spec-editor {
+  max-width: var(--composer-width);
+  max-height: calc(100vh - var(--space-24));
+  overflow-y: auto;
+}
+.spec-editor-fields {
+  display: grid;
+  gap: var(--space-16);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.spec-editor-fields section {
+  display: grid;
+  gap: var(--space-12);
+}
+.spec-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+.spec-editor-row > label {
+  flex: 1;
+  min-width: 0;
+}
+.spec-editor-item {
+  display: grid;
+  gap: var(--space-8);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-12);
+}
+.spec-editor-item textarea {
+  min-height: var(--space-64);
+}
+.spec-directory, .spec-history {
+  padding: var(--space-24);
+  overflow-y: auto;
+}
+.spec-directory > .spec-directory-list {
+  margin-top: var(--space-20);
+}
+.spec-directory-list > a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  align-items: baseline;
+  padding: var(--space-12) 0;
+  border-bottom: var(--border-width) solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.spec-directory-list strong {
+  flex: 1;
+  min-width: 0;
+}
+.spec-directory-list small, .spec-revision-meta {
+  color: var(--muted);
+}
+.spec-history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  align-items: end;
+  margin-bottom: var(--space-20);
+}
+.spec-history-controls label {
+  display: grid;
+  gap: var(--space-4);
+}
+.spec-history > .spec-scroll {
+  max-height: 65vh;
+}
+.spec-conflict {
+  margin: var(--space-12) 0;
+  padding: var(--space-12);
+  background: var(--raised);
+  border-radius: var(--radius);
+}
+.spec-conflict .spec-scroll {
+  max-height: 40vh;
+}
+.spec-diff-entry {
+  border-bottom: var(--border-width) solid var(--border);
+  padding: var(--space-12) 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.spec-diff-entry del, .spec-diff-entry ins {
+  display: block;
+  margin-top: var(--space-8);
+  text-decoration: none;
+  padding: var(--space-8);
+}
+.spec-diff-entry del {
+  color: var(--error-text);
+  background: var(--error-bg);
+}
+.spec-diff-entry ins {
+  color: var(--success);
+  background: var(--raised);
+}
+.spec-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.spec-directory, .spec-history {
+  flex: 1;
+  min-height: 0;
+}
+.header-row:has(.spec-action-row) {
+  height: auto;
+  min-height: var(--space-40);
+  flex-wrap: wrap;
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
