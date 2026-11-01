@@ -1,22 +1,25 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useCapabilities } from "./Capabilities";
 import { PageHeader } from "./PageHeader";
 import { EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
 import { MembersSettings } from "./WorkspaceAccess";
-import { api, apiPath, RequestError, Team } from "./shared";
+import { api, apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 
 type TeamDirectory = { teams: Team[] };
 
 export function SettingsPage({ teams, loading, onSaved }: { teams: Team[]; loading: boolean; onSaved: (team: Team) => void }) {
+  const capabilities = useCapabilities();
   const [directory, setDirectory] = useState<Team[] | null>(null);
   const [directoryError, setDirectoryError] = useState("");
   useEffect(() => { let active = true; api<TeamDirectory>(apiPath("/team-directory")).then((result) => { if (active) setDirectory(result.teams); }, (cause: Error) => { if (active) setDirectoryError(cause.message); }); return () => { active = false; }; }, []);
-  const [tab, setTab] = useState<"members" | "teams">("teams");
+  const [tab, setTab] = useState<"members" | "teams" | "labels">("teams");
   const entries = directory ?? teams;
   return <><PageHeader><span>Settings</span></PageHeader>
-  <div className="project-toolbar"><div className="segmented" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected={tab === "teams"} aria-pressed={tab === "teams"} onClick={() => setTab("teams")}>Teams</button><button type="button" role="tab" aria-selected={tab === "members"} aria-pressed={tab === "members"} onClick={() => setTab("members")}>Members</button></div></div>
+  <div className="project-toolbar"><div className="segmented" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected={tab === "teams"} aria-pressed={tab === "teams"} onClick={() => setTab("teams")}>Teams</button><button type="button" role="tab" aria-selected={tab === "members"} aria-pressed={tab === "members"} onClick={() => setTab("members")}>Members</button><button type="button" role="tab" aria-selected={tab === "labels"} aria-pressed={tab === "labels"} onClick={() => setTab("labels")}>Labels</button></div></div>
   <div className="settings-page">
     {tab === "members" && <MembersSettings />}
+    {tab === "labels" && <section className="team-settings" aria-label="Labels"><div className="settings-field"><div><span>Workspace and team labels</span><p>Manage labels and groups used to organize issues.</p></div><NavLink className="button" unavailable={!capabilities.labels} to={pagePath("/labels")}>Manage labels</NavLink></div></section>}
     {tab === "teams" && <header className="settings-heading"><p>Manage team names, icons and access in this workspace.</p></header>}
     {tab === "teams" && directoryError && <RequestError message={directoryError} />}
     {tab === "teams" && (entries.length === 0 ? <p className="empty">{loading ? "Loading teams…" : "No teams yet. Use + beside Teams to create one."}</p> : entries.map((team) => <TeamSettings key={team.key} team={team} onSaved={(updated) => { setDirectory((items) => (items ?? teams).map((item) => item.key === updated.key ? updated : item)); onSaved(updated); }} />))}

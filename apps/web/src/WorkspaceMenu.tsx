@@ -1,7 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
-import { Check, ChevronDown, Plus, Pencil, X } from "lucide-react";
+import { Check, ChevronDown, Plus, Pencil, Settings, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { api, apiPath, ModalDialog, navigate, RequestError, Workspace, workspaceSlug } from "./shared";
+import { api, apiPath, ModalDialog, navigate, pagePath, RequestError, Workspace, workspaceSlug } from "./shared";
 import { WorkspaceAccess } from "./WorkspaceAccess";
 
 type WorkspaceList = { workspaces: Workspace[] };
@@ -61,6 +61,7 @@ export function WorkspaceMenu() {
             </button>)}
           </div>
           <div className="workspace-actions">
+            <button type="button" className="workspace-option" onClick={() => { setOpen(false); navigate(pagePath("/settings")); }}><Settings className="icon" />Settings</button>
             <button type="button" className="workspace-option" onClick={() => showDialog("create")}><Plus className="icon" />Create workspace…</button>
             <button type="button" className="workspace-option" disabled={!current || !canRename} onClick={() => showDialog("rename")}><Pencil className="icon" />Rename workspace…</button>
           </div>
