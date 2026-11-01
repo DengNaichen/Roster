@@ -59,6 +59,7 @@ scripts/new-worktree <branch> [--base <ref>] [--no-setup]
 
 - 分支合并、放弃或转正后清理对应 worktree：先在**目标 worktree 内**运行 `deno task worktree:clean`（要求工作区干净；删除本 worktree 的预览库和 `.env.worktree`），成功后从主 checkout 执行 `git worktree remove <路径>`。
 - 宿主已先删除目录时，从主 checkout 运行 `deno task worktree:gc` 预览孤儿库，确认后加 `--apply` 删除。GC 只处理名称符合 `roster_wt_<12 位 hex>_preview` 且不属于任何已登记 worktree 的库；其他 `*_preview` 库只报告不处理。
+- Claude Code 通过 [`.claude/settings.json`](../../../.claude/settings.json) 自动接入：`SessionStart` 运行幂等的 `worktree:setup --if-needed`，`WorktreeRemove` 运行精确清理（只删除该路径对应的库；路径已不存在或为主 checkout 时跳过）。不配置 `WorktreeCreate`，保留 Claude 默认的 Git 创建逻辑。其他宿主没有删除事件，删除前显式运行 `worktree:clean`，或事后用 GC 收敛。
 - 不使用 `git worktree remove --force`，不强制移除 dirty worktree，不静默丢弃未提交或未推送内容。
 - 停止进程只停自己启动的那个（按 PID），不用 `pkill -f` 之类的模式匹配，避免误杀主 checkout 或其他 worktree 的预览。
 

@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && deno task worktree:setup --if-needed",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "deno run --allow-env --allow-net --allow-read --allow-write --allow-run \"${CLAUDE_PROJECT_DIR}/scripts/worktree-runtime.ts\" cleanup-hook",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}
