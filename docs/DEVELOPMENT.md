@@ -11,7 +11,7 @@ DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview 
 VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --strictPort
 ```
 
-独立 worktree 可为后端设置 `PORT` 和 `PREVIEW_FRONTEND_PORT`，前端设置对应的 `VITE_PREVIEW_API_PORT` 并通过 `--port` 指定端口；数据库也应使用独立的 `*_preview` 库。未配置时保持上述默认端口。
+主 checkout 也可用 `deno task preview:api` 和 `deno task preview:web` 以上述默认值启动。次级 worktree 用 `scripts/new-worktree <branch>` 创建，或在其根目录运行 `deno task worktree:setup`：它分配稳定的独立端口和 `roster_wt_<id>_preview` 库并执行 migrations，之后同样用这两个 task 启动。分支与 worktree 的完整规则（位置、清理、GC）见 [git-workflow skill](../.agents/skills/git-workflow/SKILL.md)。
 
 访问 `http://127.0.0.1:5178/roster`。修改保存在该本地数据库，重启不覆盖已有工作区。预览只有一个固定用户，不能用于验证多用户登录或 OAuth；生产构建即使设置 `VITE_LOCAL_PREVIEW=true` 也不会启用免登录。
 

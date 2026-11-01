@@ -16,3 +16,6 @@ __pycache__/
 *.pyc
 *.db
 *.dump
+
+# Claude Code managed worktrees (host-owned lifecycle).
+.claude/worktrees/
