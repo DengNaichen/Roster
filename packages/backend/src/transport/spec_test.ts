@@ -1,5 +1,6 @@
+import type { Service } from '../application/mod.ts';
 /** Exercised from the real Postgres Spec suite, never with a stub service. */
-import type { RequestContext, Service } from '../../../contracts/mod.ts';
+import type { RequestContext } from '../../../contracts/mod.ts';
 import type {
   Spec,
   SpecContent,
@@ -7,8 +8,8 @@ import type {
   SpecRevisionSummary,
   SpecSummary,
 } from '../../../contracts/spec.ts';
-import { createHttpApp } from './http.ts';
-import { createMcpFetch } from './mcp.ts';
+import { createHttpApp } from './http/app.ts';
+import { createMcpFetch } from './mcp/server.ts';
 function assert(value: unknown, message = 'Spec transport assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }

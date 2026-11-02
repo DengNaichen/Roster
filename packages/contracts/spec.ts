@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Identity, RequestContext } from './mod.ts';
+import type { Identity } from './mod.ts';
 function validUnicode(value: unknown): boolean {
   if (typeof value === 'string') {
     return Array.from(value).every((c) => {
@@ -122,31 +122,3 @@ export type SpecRevisionSummary = {
   created_at: string;
 };
 export type SpecRevision = SpecRevisionSummary & { content: SpecContent };
-export interface SpecService {
-  listSpecs(
-    ctx: RequestContext,
-    slug: string,
-    input?: z.input<typeof listSpecsSchema>,
-  ): Promise<SpecSummary[]>;
-  getSpec(ctx: RequestContext, slug: string, identifier: string): Promise<Spec>;
-  createSpec(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof createSpecSchema>,
-  ): Promise<Spec>;
-  updateSpec(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof updateSpecSchema>,
-  ): Promise<Spec>;
-  listSpecRevisions(
-    ctx: RequestContext,
-    slug: string,
-    identifier: string,
-  ): Promise<SpecRevisionSummary[]>;
-  getSpecRevision(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof getSpecRevisionSchema>,
-  ): Promise<SpecRevision>;
-}

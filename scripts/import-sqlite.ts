@@ -1,5 +1,5 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { importSQLite } from '../packages/backend/src/integrations/import-sqlite.ts';
+import { importSQLite } from '../packages/backend/src/integrations/imports/postgres.ts';
 const [snapshotPath, mapPath] = Deno.args;
 if (!snapshotPath || !mapPath || !Deno.env.get('DATABASE_URL')) {
   throw new Error(

@@ -4,16 +4,16 @@
 
 | 原 InfTask | Roster 实现 | 主要验证 |
 | --- | --- | --- |
-| 工作区、邀请、成员、Team、私有权限 | `service.ts` / `modules/shared.ts` | 活动成员、最后 Admin、公开/私有 Team、幂等退出、事务 |
-| Projects / Initiatives / Labels | `modules/catalog.ts` | 隐藏关联保留、归档、日期、互斥组、批量回滚、合并隐私 |
-| 独立 Specs / 不可变修订 | `modules/spec.ts` / `contracts/spec.ts` | 可信作者、私有 Team、稳定 ID 不复用、并发冲突、历史只读、6 REST + 6 MCP 真实联通 |
-| Cycles | `modules/cycles.ts` | DST、缺期结转、历史快照、停用重启、跨 Team 拒绝 |
-| 评论、工作记录、接票、关系、链接 | `modules/activity.ts` | 可信作者、分页、幂等登记、DAG、私有数据过滤 |
-| GitHub 同步 / webhook | `integrations/github.ts` / `jobs.ts` | 游标、租约、状态推进、私有内容不外发、签名 |
-| Linear 导入 | `integrations/import-linear.ts` | 号码保留、未知类型回滚、作者与项目保留 |
-| SQLite 全量迁移 | `integrations/import-sqlite.ts` | 身份/引用映射、空目标限制、失败全部回滚 |
+| 工作区、邀请、成员、Team、私有权限 | `modules/access` | 活动成员、最后 Admin、公开/私有 Team、幂等退出、事务 |
+| Projects / Initiatives / Labels | `modules/planning` / `modules/labels` | 隐藏关联保留、归档、日期、互斥组、批量回滚、合并隐私 |
+| 独立 Specs / 不可变修订 | `modules/specs` / `contracts/spec.ts` | 可信作者、私有 Team、稳定 ID 不复用、并发冲突、历史只读、6 REST + 6 MCP 真实联通 |
+| Cycles | `modules/cycles` | DST、缺期结转、历史快照、停用重启、跨 Team 拒绝 |
+| 评论、工作记录、接票、关系、链接 | `modules/activity` | 可信作者、分页、幂等登记、DAG、私有数据过滤 |
+| GitHub 同步 / webhook | `integrations/github` / `jobs.ts` | 游标、租约、状态推进、私有内容不外发、签名 |
+| Linear 导入 | `integrations/imports/application/linear.ts` | 号码保留、未知类型回滚、作者与项目保留 |
+| SQLite 全量迁移 | `integrations/imports/application/sqlite.ts` | 身份/引用映射、空目标限制、失败全部回滚 |
 | 本地备份 | `scripts/backup-postgres.py` | 原子 archive、恢复后任务数量验证 |
-| 原生产 MCP 45 个工具 | `transport/mcp.ts` | 工具清单、严格输入、结构化输出、真实 REST/MCP 联通 |
+| 原生产 MCP 45 个工具 | `transport/mcp/server.ts` | 工具清单、严格输入、结构化输出、真实 REST/MCP 联通 |
 
 前端来自原 `web/src`，保留原页面与样式结构，并包含后续项目样式调整。独立 Spec 的 `spec.css` 与 AL-80 原型逐字节一致。Workspace/Team/Issue 内部 ID 改为 UUID，任务编号保持 `<TEAM>-<number>`；Project/Initiative/Label/Group/Cycle 继续使用数字 ID，兼容原页面 URL。
 

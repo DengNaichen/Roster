@@ -1,10 +1,9 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
-import { createDatabase } from '../db/client.ts';
-import { createService } from '../service.ts';
-import { importSQLite, type SQLiteSnapshot } from './import-sqlite.ts';
-import { importLinear } from './import-linear.ts';
 import type { SpecContent } from '../../../contracts/spec.ts';
+import { createDatabase } from '../platform/database/client.ts';
+import { createService } from '../service.ts';
+import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
+import { importLinear, importSQLite, type SQLiteSnapshot } from './imports/postgres.ts';
 const assert = (v: unknown, m = 'Assertion failed') => {
   if (!v) throw new Error(m);
 };

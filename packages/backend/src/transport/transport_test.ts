@@ -1,8 +1,9 @@
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'npm:jose@6.1.3';
-import { AppError, type Service } from '../../../contracts/mod.ts';
-import { createIdentityVerifier } from '../auth/jwt.ts';
-import { createHttpApp } from './http.ts';
-import { createMcpFetch } from './mcp.ts';
+import { AppError } from '../../../contracts/mod.ts';
+import type { Service } from '../application/mod.ts';
+import { createIdentityVerifier } from '../platform/auth/jwt.ts';
+import { createHttpApp } from './http/app.ts';
+import { createMcpFetch } from './mcp/server.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }
