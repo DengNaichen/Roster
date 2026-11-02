@@ -42,7 +42,7 @@ grant connect on database postgres to roster_runtime;
 
 ### Codex 质量 Hook 的隔离约束
 
-以下是后续 lint、formatter 和 Codex 质量 Hook 实现必须满足的约束；当前尚未接入这些质量 Hook。
+实现入口为 [`.codex/hooks.json`](../.codex/hooks.json) 和 [质量检查脚本](../.codex/hooks/quality-core.mjs)。以下约束适用于当前实现及后续修改。
 
 - **状态归属**：以 worktree 的 canonical 路径、宿主提供的 `session_id` 和 `turn_id` 共同标识一次检查。路径别名必须先解析为真实路径；标识编码或哈希后再用于文件名，不直接拼接外部输入。不得使用全局“当前会话”、共享的单一状态文件或“最近一次运行”来推断归属。
 - **结果归属**：Hook 只通过本次进程的 stdout 返回宿主协议规定的结果，诊断日志与协议输出分离。不得调用会话消息接口、向其他会话注入修复任务，或读取其他会话的状态作为本次检查结果。
@@ -53,6 +53,31 @@ grant connect on database postgres to roster_runtime;
 - **只读与防循环**：`Stop` Hook 只检查，不格式化或修复文件；由接收诊断的 Codex 会话执行修复。每次原始检查最多触发一轮自动修复续轮，再次失败明确报告未解决项，不跨会话转交，也不无限继续。
 
 实现时必须通过契约测试验证：不同 worktree、同 worktree 不同会话、同会话不同回合、并发状态更新、续轮基线保留、缺失标识、超时与状态损坏、过期状态清理，以及“本回合已提交且工作区干净”仍被检查。宿主实际触发和结果归属还需用两个独立会话做冒烟验证，不能用脚本单测代替。
+
+### 质量工具与 Hook 接入
+
+- 前端：ESLint 的 JS/TypeScript 推荐规则及 React Hooks 规则；Biome 只负责格式化，不重复 lint。暂不接入尚未声明支持当前 ESLint 10 的 jsx-a11y 插件。
+- 后端、contracts、服务器入口、脚本和 Hook：`deno lint` 与 `deno fmt`。`require-await` 因异步端口的同步 stub 实现而排除；`no-import-prefix` 因已有 npm/jsr 显式版本导入而排除。其余推荐规则启用。URL 校验有一处明确注明原因的控制字符正则例外。
+- formatter 各管自己的目录，不修改 SQL migrations、lockfile 或生成的 emoji 数据。`format:write` 是显式写操作，Hook 不调用它。
+
+```sh
+corepack pnpm format:write  # 主动格式化；完成修改后、提交前执行
+corepack pnpm check         # 格式、lint、前后端类型、架构边界、Hook 契约测试
+```
+
+也可单独运行 `lint`、`format:check`、`typecheck`、`test:architecture`、`test:hooks`。`check` 不需要数据库，不启动预览或运行构建；完整应用测试仍按下方命令执行。
+
+Hook 运行需要 PATH 中已有 Node、Corepack 和 Deno，以及安装好的项目依赖；本次验证版本为 Node 22+、Corepack 0.36.0、Deno 2.9.6，pnpm 版本由根 `packageManager` 固定。`scripts/run-agent-hook` 保留宿主 PATH，并追加常见用户安装目录，不读取 shell profile。工具缺失或超时会报告检查失败，不静默通过，也不在 Hook 中安装工具或依赖。
+
+在 Codex 中打开**实际任务 worktree** 后，通过 `/hooks` 审阅并信任仓库 Hook，再开启一个新回合验证触发。项目 `.codex/` 层也必须被信任。新增或修改 Hook 需要重新审阅；仓库不会修改用户的全局信任记录。宿主行为以 [官方 Hooks 文档](https://learn.chatgpt.com/docs/hooks) 为准。
+
+Hook 只检查事件 `cwd` 对应的 Git worktree，不追踪 shell 命令曾经切换到的其他目录。从主 checkout 创建 worktree 后，应在 Codex 中打开该 worktree；否则不能依赖主 checkout 的 Hook 覆盖另一个 worktree 的修改，必须在目标目录手动执行 `corepack pnpm check`。
+
+`UserPromptSubmit` 记录起始 HEAD；`Stop` 发现代码或工具配置变动时执行完整 `check`，避免漏掉 contracts 的跨端依赖。纯文档或无改动时跳过。检查进程最多运行 100 秒，诊断限制为 6000 字符；宿主 Stop 超时设为 120 秒。失败最多触发一轮修复，随后仍失败会报告未解决项。续轮仅用同一会话中完全匹配的 Hook 返回 reason 关联原始检查；宿主未保留此关联时不会从其他记录猜测基线。
+
+状态位于 `git rev-parse --absolute-git-dir` 下的 `roster-quality/`，不进入版本控制。短时目录锁保护状态事务，原子替换防止部分写入。`Interrupt` 关闭当前回合，`SessionEnd` 关闭本会话记录；其他会话的活跃记录不会按时间自动过期。共享 worktree 的重叠会话会相互标记冲突并禁止自动修复；检查前后文件内容变化也会禁止自动修复，但两者不能识别所有外部写入。
+
+若宿主异常退出遗留活跃状态或目录锁，先确保该 worktree 没有运行中的会话或检查进程，再人工核对并移除对应状态或锁；不得清空其他仍活跃会话的记录。状态损坏、缺少标识或基线时执行完整只读检查并报告限制，不请求自动修复。脚本测试不等于宿主验收：首次启用仍需两个独立 Codex 会话验证各自的结果归属。
 
 ### 手动验证命令
 

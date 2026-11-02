@@ -1,14 +1,27 @@
 import { Dropdown } from "./Dropdown";
-import { FormEvent, ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import { X } from "lucide-react";
 import { api, apiPath, Label, LabelBadge, LabelGroup, ModalDialog, RequestError } from "./shared";
 
 import { Catalog, emptyLabelFilter, LabelFilterValue } from "./useLabels";
 import { useRequestScope } from "./useRequestScope";
 
-export function LabelDialog({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+export function LabelDialog({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) {
   return (
-    <ModalDialog className="issue-dialog label-dialog" aria-label={title} restoreFocus onClose={onClose}>
+    <ModalDialog
+      className="issue-dialog label-dialog"
+      aria-label={title}
+      restoreFocus
+      onClose={onClose}
+    >
       <header>
         <h2>{title}</h2>
         <button type="button" className="ghost" aria-label="Close labels" onClick={onClose}>
@@ -34,7 +47,11 @@ export function LabelPicker({
 }: {
   identifiers: string[];
   current: Label[] | null;
-  write?: (save: () => Promise<unknown>, success: (value: unknown) => void, failure: (cause: Error) => void) => Promise<boolean>;
+  write?: (
+    save: () => Promise<unknown>,
+    success: (value: unknown) => void,
+    failure: (cause: Error) => void,
+  ) => Promise<boolean>;
   catalog: Catalog;
   onChanged: () => Promise<void>;
   onClose: () => void;
@@ -49,7 +66,9 @@ export function LabelPicker({
   const options = catalog.labels.filter(
     (l) =>
       (!l.archived || operation === "remove" || current?.some((c) => c.id === l.id)) &&
-      `${labelTitle(l, catalog.groups)} ${l.description}`.toLowerCase().includes(search.toLowerCase()),
+      `${labelTitle(l, catalog.groups)} ${l.description}`
+        .toLowerCase()
+        .includes(search.toLowerCase()),
   );
   async function change(add: number[], remove: number[]) {
     setBusy(true);
@@ -57,10 +76,26 @@ export function LabelPicker({
     const path = apiPath("/issue-labels");
     await (write ?? ((save, success, failure) => requests.write("labels", save, success, failure)))(
       () => api(path, "POST", { identifiers, add, remove }),
-      () => { void onChanged().then(() => {
-        if (requests.isActive()) { setBusy(false); if (batch) onClose(); }
-      }, (cause: Error) => { if (requests.isActive()) { setError(cause.message); setBusy(false); } }); },
-      (cause) => { setError(cause.message); setBusy(false); },
+      () => {
+        void onChanged().then(
+          () => {
+            if (requests.isActive()) {
+              setBusy(false);
+              if (batch) onClose();
+            }
+          },
+          (cause: Error) => {
+            if (requests.isActive()) {
+              setError(cause.message);
+              setBusy(false);
+            }
+          },
+        );
+      },
+      (cause) => {
+        setError(cause.message);
+        setBusy(false);
+      },
     );
   }
 
@@ -76,7 +111,11 @@ export function LabelPicker({
         : [
             ...ids.filter((id) =>
               catalog.labels.some(
-                (existing) => existing.id === id && (operation === "remove" || !label.group_id || existing.group_id !== label.group_id),
+                (existing) =>
+                  existing.id === id &&
+                  (operation === "remove" ||
+                    !label.group_id ||
+                    existing.group_id !== label.group_id),
               ),
             ),
             label.id,
@@ -84,7 +123,12 @@ export function LabelPicker({
     );
   }
   return (
-    <LabelDialog title={batch ? `Labels for ${identifiers.length} issues` : "Issue labels"} onClose={() => { if (!busy) onClose(); }}>
+    <LabelDialog
+      title={batch ? `Labels for ${identifiers.length} issues` : "Issue labels"}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+    >
       <div className="label-dialog-body">
         {batch && (
           <label>
@@ -98,7 +142,10 @@ export function LabelPicker({
                 setOperation(next);
                 setSelected([]);
               }}
-              options={[{ value: "add", label: "Add labels" }, { value: "remove", label: "Remove labels" }]}
+              options={[
+                { value: "add", label: "Add labels" },
+                { value: "remove", label: "Remove labels" },
+              ]}
             />
           </label>
         )}
@@ -109,32 +156,39 @@ export function LabelPicker({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <p className="label-help">Selecting a grouped label replaces the current value in that group.</p>
+        <p className="label-help">
+          Selecting a grouped label replaces the current value in that group.
+        </p>
         <div className="label-options">
           {options.map((label) => (
             <label className="label-option" key={label.id}>
               <input
                 type="checkbox"
                 disabled={busy}
-                checked={batch ? selected.includes(label.id) : current.some((l) => l.id === label.id)}
+                checked={
+                  batch ? selected.includes(label.id) : current.some((l) => l.id === label.id)
+                }
                 onChange={() => toggle(label)}
               />
               <span>
                 <span className="label-option-title">
                   <LabelBadge label={label} />
                   {label.group_id !== 0 && (
-                    <small>{catalog.groups.find((g) => g.id === label.group_id)?.name ?? `Group ${label.group_id}`}</small>
+                    <small>
+                      {catalog.groups.find((g) => g.id === label.group_id)?.name ??
+                        `Group ${label.group_id}`}
+                    </small>
                   )}
                 </span>
                 <small>{label.description}</small>
               </span>
             </label>
           ))}
-          {options.length === 0 && <p className="empty">No matching labels. Create labels in Labels settings.</p>}
+          {options.length === 0 && (
+            <p className="empty">No matching labels. Create labels in Labels settings.</p>
+          )}
         </div>
-        {(error || catalog.error) && (
-          <RequestError message={error || catalog.error} />
-        )}
+        {(error || catalog.error) && <RequestError message={error || catalog.error} />}
         <footer>
           <button type="button" className="button" disabled={busy} onClick={onClose}>
             Done
@@ -144,7 +198,12 @@ export function LabelPicker({
               type="button"
               className="button primary"
               disabled={busy || selected.length === 0}
-              onClick={() => void change(operation === "add" ? selected : [], operation === "remove" ? selected : [])}
+              onClick={() =>
+                void change(
+                  operation === "add" ? selected : [],
+                  operation === "remove" ? selected : [],
+                )
+              }
             >
               {busy ? "Applying…" : "Apply"}
             </button>
@@ -169,7 +228,10 @@ export function LabelFilter({
   const [search, setSearch] = useState("");
   const count = value.labels.length + value.groups.length;
   function toggle(key: "labels" | "groups", id: number) {
-    setDraft((d) => ({ ...d, [key]: d[key].includes(id) ? d[key].filter((v) => v !== id) : [...d[key], id] }));
+    setDraft((d) => ({
+      ...d,
+      [key]: d[key].includes(id) ? d[key].filter((v) => v !== id) : [...d[key], id],
+    }));
   }
   return (
     <>
@@ -198,7 +260,13 @@ export function LabelFilter({
                 variant="block"
                 aria-label="Match"
                 value={draft.mode}
-                onChange={(next) => setDraft({ ...draft, mode: next, ...(next === "unlabeled" ? { labels: [], groups: [] } : {}) })}
+                onChange={(next) =>
+                  setDraft({
+                    ...draft,
+                    mode: next,
+                    ...(next === "unlabeled" ? { labels: [], groups: [] } : {}),
+                  })
+                }
                 options={[
                   { value: "any", label: "Any selected label or group" },
                   { value: "all", label: "All selected labels and groups" },
@@ -221,7 +289,11 @@ export function LabelFilter({
                     .filter((g) => g.name.toLowerCase().includes(search.toLowerCase()))
                     .map((g) => (
                       <label className="label-option" key={`g${g.id}`}>
-                        <input type="checkbox" checked={draft.groups.includes(g.id)} onChange={() => toggle("groups", g.id)} />
+                        <input
+                          type="checkbox"
+                          checked={draft.groups.includes(g.id)}
+                          onChange={() => toggle("groups", g.id)}
+                        />
                         <span>
                           {g.name}
                           <small>Any label in this group</small>
@@ -229,19 +301,23 @@ export function LabelFilter({
                       </label>
                     ))}
                   {catalog.labels
-                    .filter((l) => labelTitle(l, catalog.groups).toLowerCase().includes(search.toLowerCase()))
+                    .filter((l) =>
+                      labelTitle(l, catalog.groups).toLowerCase().includes(search.toLowerCase()),
+                    )
                     .map((l) => (
                       <label className="label-option" key={l.id}>
-                        <input type="checkbox" checked={draft.labels.includes(l.id)} onChange={() => toggle("labels", l.id)} />
+                        <input
+                          type="checkbox"
+                          checked={draft.labels.includes(l.id)}
+                          onChange={() => toggle("labels", l.id)}
+                        />
                         <span>{labelTitle(l, catalog.groups)}</span>
                       </label>
                     ))}
                 </div>
               </>
             )}
-            {catalog.error && (
-              <RequestError message={catalog.error} />
-            )}
+            {catalog.error && <RequestError message={catalog.error} />}
             <footer>
               <button
                 type="button"

@@ -2,12 +2,24 @@
   "name": "roster",
   "private": true,
   "packageManager": "pnpm@10.20.0",
-  "dependencies": { "zod": "4.6.7" },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
   "scripts": {
     "dev": "pnpm --filter @roster/web dev",
     "build": "pnpm --filter @roster/web build",
     "test:web": "pnpm --filter @roster/web test",
     "check:backend": "deno task check",
-    "test:backend": "deno task test"
+    "test:backend": "deno task test",
+    "lint": "pnpm --filter @roster/web lint && deno task lint",
+    "format:check": "biome format apps/web && deno task format:check",
+    "format:write": "biome format --write apps/web && deno task format:write",
+    "typecheck": "pnpm --filter @roster/web typecheck && deno task check",
+    "test:architecture": "deno test --allow-read packages/backend/src/architecture_test.ts",
+    "test:hooks": "node --test .codex/hooks/quality.test.mjs",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:architecture && pnpm test:hooks"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7"
   }
 }

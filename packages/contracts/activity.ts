@@ -52,7 +52,9 @@ export const addLinkSchema = z.strictObject({
   url: z.string().max(8192).url().refine((value) => {
     try {
       const u = new URL(value);
+      // Control characters are intentionally rejected in externally supplied URLs.
       return ['http:', 'https:'].includes(u.protocol) && !u.username && !u.password &&
+        // deno-lint-ignore no-control-regex
         !/[\x00-\x20\x7f]/.test(value);
     } catch {
       return false;

@@ -36,7 +36,14 @@ function publicAuditSnapshot(value: unknown) {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     // References are exposed only through the current permission-filtered DTO.
     // Historical snapshots must not reveal references that became private.
-    const { parent_id, project_id, cycle_id, workspace_id, team_id, ...snapshot } = value as Row;
+    const {
+      parent_id: _parent,
+      project_id: _project,
+      cycle_id: _cycle,
+      workspace_id: _workspace,
+      team_id: _team,
+      ...snapshot
+    } = value as Row;
     return snapshot;
   }
   return value;

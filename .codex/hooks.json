@@ -1,0 +1,53 @@
+{
+  "description": "Read-only quality checks with worktree, session and turn isolation.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh \"$(git rev-parse --show-toplevel)/scripts/run-agent-hook\" node \"$(git rev-parse --show-toplevel)/.codex/hooks/quality.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Recording quality baseline"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh \"$(git rev-parse --show-toplevel)/scripts/run-agent-hook\" node \"$(git rev-parse --show-toplevel)/.codex/hooks/quality.mjs\"",
+            "timeout": 120,
+            "statusMessage": "Checking code quality (read-only)"
+          }
+        ]
+      }
+    ],
+    "Interrupt": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh \"$(git rev-parse --show-toplevel)/scripts/run-agent-hook\" node \"$(git rev-parse --show-toplevel)/.codex/hooks/quality.mjs\"",
+            "timeout": 3,
+            "statusMessage": "Closing quality turn"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh \"$(git rev-parse --show-toplevel)/scripts/run-agent-hook\" node \"$(git rev-parse --show-toplevel)/.codex/hooks/quality.mjs\"",
+            "timeout": 3,
+            "statusMessage": "Closing quality session"
+          }
+        ]
+      }
+    ]
+  }
+}

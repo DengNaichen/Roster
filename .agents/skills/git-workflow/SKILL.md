@@ -65,6 +65,10 @@ scripts/new-worktree <branch> [--base <ref>] [--no-setup]
 
 ## 提交
 
+- 完成代码修改后，先在实际任务 worktree 执行 `corepack pnpm format:write`，再执行 `corepack pnpm check`；自动格式化后审阅 diff，不混入无关改动。纯文档修改执行 `git diff --check` 即可。
+- Codex 质量 Hook 是结束回合时的补充检查，不能代替提交前验证。Hook 仅覆盖宿主事件 `cwd` 的 worktree；创建 worktree 后须在 Codex 中打开目标 worktree，或在目标目录手动执行检查，不假定主 checkout 的 Hook 会覆盖它。
+- 不同会话并行写代码必须使用独立 worktree；Hook 状态隔离无法隔离同一目录里的文件。具体约束及启用步骤见 [开发说明](../../../docs/DEVELOPMENT.md#codex-质量-hook-的隔离约束)。
+
 - 提交信息为英文祈使句，首行不超过 72 字符，描述行为而不是过程（`Move settings into the workspace menu`）。
 - 逐文件 stage；不用 `git add -A` / `git add .`，不混入无关改动。逻辑上独立的改动拆成独立提交。
 - 工作告一段落即推送，不留只在本地的提交。
