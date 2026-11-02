@@ -14,13 +14,15 @@ type EditorProps = {
   onClose: () => void;
   onSaved: (spec: Spec) => void;
 };
-export function SpecEditor(
-  { initial, spec, teams = [], team: initialTeam = "", onClose, onSaved }:
-    EditorProps,
-) {
-  const [draft, setDraft] = useState<SpecContent>(() =>
-    structuredClone(initial)
-  );
+export function SpecEditor({
+  initial,
+  spec,
+  teams = [],
+  team: initialTeam = "",
+  onClose,
+  onSaved,
+}: EditorProps) {
+  const [draft, setDraft] = useState<SpecContent>(() => structuredClone(initial));
   const [team, setTeam] = useState(initialTeam);
   const [baseRevision, setBaseRevision] = useState(spec?.revision ?? 0);
   const [message, setMessage] = useState("");
@@ -38,18 +40,16 @@ export function SpecEditor(
     };
   }, []);
   const usedIds = useRef(
-    new Set(
-      [...initial.requirements, ...initial.success_criteria].map((item) =>
-        item.id
-      ),
-    ),
+    new Set([...initial.requirements, ...initial.success_criteria].map((item) => item.id)),
   );
   const nextID = (prefix: string) => {
-    let number = Math.max(
-      0,
-      ...Array.from(usedIds.current).filter((id) => id.startsWith(prefix + "-"))
-        .map((id) => Number(id.slice(prefix.length + 1))),
-    ) + 1;
+    let number =
+      Math.max(
+        0,
+        ...Array.from(usedIds.current)
+          .filter((id) => id.startsWith(prefix + "-"))
+          .map((id) => Number(id.slice(prefix.length + 1))),
+      ) + 1;
     while (usedIds.current.has(`${prefix}-${number}`)) number++;
     const id = `${prefix}-${number}`;
     usedIds.current.add(id);
@@ -63,15 +63,15 @@ export function SpecEditor(
     try {
       const saved = spec
         ? await api<Spec>(apiPath(`/specs/${spec.identifier}`), "PUT", {
-          base_revision: baseRevision,
-          content: draft,
-          message,
-        })
+            base_revision: baseRevision,
+            content: draft,
+            message,
+          })
         : await api<Spec>(apiPath("/specs"), "POST", {
-          team,
-          content: draft,
-          message,
-        });
+            team,
+            content: draft,
+            message,
+          });
       if (mounted.current) onSaved(saved);
     } catch (cause) {
       if (!mounted.current) return;
@@ -106,9 +106,7 @@ export function SpecEditor(
     >
       <form onSubmit={save}>
         <header>
-          <h2 id="spec-editor-title">
-            {spec ? `Edit ${spec.identifier}` : "New spec"}
-          </h2>
+          <h2 id="spec-editor-title">{spec ? `Edit ${spec.identifier}` : "New spec"}</h2>
           <button
             type="button"
             className="ghost"
@@ -122,31 +120,37 @@ export function SpecEditor(
         <fieldset disabled={saving || reviewing} className="spec-editor-fields">
           {!spec && (
             <label>
-              Team<Dropdown
+              Team
+              <Dropdown
                 variant="block"
                 aria-label="Team"
                 placeholder="Choose a team…"
                 required
                 value={team}
                 onChange={setTeam}
-                options={teams.filter((item) => item.accessible).map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))}
+                options={teams
+                  .filter((item) => item.accessible)
+                  .map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))}
               />
             </label>
           )}
           <label>
-            Title<input
+            Title
+            <input
               required
               value={draft.title}
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
                   title: event.target.value,
-                }))}
+                }))
+              }
             />
           </label>
           <div className="spec-editor-row">
             <label>
-              Status<Dropdown
+              Status
+              <Dropdown
                 variant="block"
                 aria-label="Status"
                 value={draft.status}
@@ -154,18 +158,24 @@ export function SpecEditor(
                   setDraft((current) => ({
                     ...current,
                     status: next as SpecContent["status"],
-                  }))}
-                options={["draft", "review", "approved", "superseded"].map((status) => ({ value: status, label: status }))}
+                  }))
+                }
+                options={["draft", "review", "approved", "superseded"].map((status) => ({
+                  value: status,
+                  label: status,
+                }))}
               />
             </label>
             <label>
-              Branch<input
+              Branch
+              <input
                 value={draft.branch ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
                     branch: event.target.value,
-                  }))}
+                  }))
+                }
               />
             </label>
           </div>
@@ -177,7 +187,8 @@ export function SpecEditor(
             {draft.requirements.map((item, index) => (
               <div className="spec-editor-item" key={index}>
                 <label>
-                  Requirement ID<input
+                  Requirement ID
+                  <input
                     required
                     pattern="FR-[0-9]+"
                     value={item.id}
@@ -185,51 +196,40 @@ export function SpecEditor(
                       usedIds.current.add(event.target.value);
                       setDraft((current) => ({
                         ...current,
-                        requirements: current.requirements.map((
-                          value,
-                          position,
-                        ) =>
-                          position === index
-                            ? { ...value, id: event.target.value }
-                            : value
+                        requirements: current.requirements.map((value, position) =>
+                          position === index ? { ...value, id: event.target.value } : value,
                         ),
                       }));
                     }}
                   />
                 </label>
                 <label>
-                  Requirement<textarea
+                  Requirement
+                  <textarea
                     required
                     value={item.text}
                     onChange={(event) =>
                       setDraft((current) => ({
                         ...current,
-                        requirements: current.requirements.map((
-                          value,
-                          position,
-                        ) =>
-                          position === index
-                            ? { ...value, text: event.target.value }
-                            : value
+                        requirements: current.requirements.map((value, position) =>
+                          position === index ? { ...value, text: event.target.value } : value,
                         ),
-                      }))}
+                      }))
+                    }
                   />
                 </label>
                 <label>
-                  Needs clarification<input
+                  Needs clarification
+                  <input
                     value={item.clarify ?? ""}
                     onChange={(event) =>
                       setDraft((current) => ({
                         ...current,
-                        requirements: current.requirements.map((
-                          value,
-                          position,
-                        ) =>
-                          position === index
-                            ? { ...value, clarify: event.target.value }
-                            : value
+                        requirements: current.requirements.map((value, position) =>
+                          position === index ? { ...value, clarify: event.target.value } : value,
                         ),
-                      }))}
+                      }))
+                    }
                   />
                 </label>
                 <button
@@ -238,10 +238,11 @@ export function SpecEditor(
                   onClick={() =>
                     setDraft((current) => ({
                       ...current,
-                      requirements: current.requirements.filter((_, position) =>
-                        position !== index
+                      requirements: current.requirements.filter(
+                        (_, position) => position !== index,
                       ),
-                    }))}
+                    }))
+                  }
                 >
                   Remove {item.id}
                 </button>
@@ -266,7 +267,8 @@ export function SpecEditor(
             {draft.success_criteria.map((item, index) => (
               <div className="spec-editor-item" key={index}>
                 <label>
-                  Criterion ID<input
+                  Criterion ID
+                  <input
                     required
                     pattern="SC-[0-9]+"
                     value={item.id}
@@ -274,34 +276,26 @@ export function SpecEditor(
                       usedIds.current.add(event.target.value);
                       setDraft((current) => ({
                         ...current,
-                        success_criteria: current.success_criteria.map((
-                          value,
-                          position,
-                        ) =>
-                          position === index
-                            ? { ...value, id: event.target.value }
-                            : value
+                        success_criteria: current.success_criteria.map((value, position) =>
+                          position === index ? { ...value, id: event.target.value } : value,
                         ),
                       }));
                     }}
                   />
                 </label>
                 <label>
-                  Success criterion<textarea
+                  Success criterion
+                  <textarea
                     required
                     value={item.text}
                     onChange={(event) =>
                       setDraft((current) => ({
                         ...current,
-                        success_criteria: current.success_criteria.map((
-                          value,
-                          position,
-                        ) =>
-                          position === index
-                            ? { ...value, text: event.target.value }
-                            : value
+                        success_criteria: current.success_criteria.map((value, position) =>
+                          position === index ? { ...value, text: event.target.value } : value,
                         ),
-                      }))}
+                      }))
+                    }
                   />
                 </label>
                 <button
@@ -310,13 +304,11 @@ export function SpecEditor(
                   onClick={() =>
                     setDraft((current) => ({
                       ...current,
-                      success_criteria: current.success_criteria.filter((
-                        _,
-                        position,
-                      ) =>
-                        position !== index
+                      success_criteria: current.success_criteria.filter(
+                        (_, position) => position !== index,
                       ),
-                    }))}
+                    }))
+                  }
                 >
                   Remove {item.id}
                 </button>
@@ -329,10 +321,13 @@ export function SpecEditor(
                 const id = nextID("SC");
                 setDraft((current) => ({
                   ...current,
-                  success_criteria: [...current.success_criteria, {
-                    id,
-                    text: "",
-                  }],
+                  success_criteria: [
+                    ...current.success_criteria,
+                    {
+                      id,
+                      text: "",
+                    },
+                  ],
                 }));
               }}
             >
@@ -340,12 +335,12 @@ export function SpecEditor(
             </button>
           </section>
           <p className="dialog-hint">
-            User stories, scenarios, edge cases, entities and clarifications
-            retain their current content. They can be maintained through the
-            shared MCP or REST interface.
+            User stories, scenarios, edge cases, entities and clarifications retain their current
+            content. They can be maintained through the shared MCP or REST interface.
           </p>
           <label>
-            Revision message<input
+            Revision message
+            <input
               maxLength={240}
               value={message}
               onChange={(event) => setMessage(event.target.value)}
@@ -356,8 +351,8 @@ export function SpecEditor(
         {conflict && (
           <div className="spec-conflict" role="alert">
             <p>
-              The server has a newer revision. Your draft is kept here. Review
-              the latest content before retrying.
+              The server has a newer revision. Your draft is kept here. Review the latest content
+              before retrying.
             </p>
             <button
               className="button"
@@ -373,13 +368,11 @@ export function SpecEditor(
           <section className="spec-conflict">
             <details>
               <summary>Server revision {latest.revision}</summary>
-              <SpecDocument
-                spec={specView(latest.content, latest.created_at)}
-              />
+              <SpecDocument spec={specView(latest.content, latest.created_at)} />
             </details>
             <p>
-              Reconcile the latest content with your draft. Saving applies your
-              complete draft as the next revision.
+              Reconcile the latest content with your draft. Saving applies your complete draft as
+              the next revision.
             </p>
             <button
               className="button"
@@ -387,9 +380,7 @@ export function SpecEditor(
               disabled={saving || reviewing}
               onClick={() => {
                 const previousBase = baseline.current;
-                setDraft((current) =>
-                  rebaseSpecDraft(previousBase, current, latest.content)
-                );
+                setDraft((current) => rebaseSpecDraft(previousBase, current, latest.content));
                 baseline.current = structuredClone(latest.content);
                 setBaseRevision(latest.revision);
                 setConflict(false);
@@ -401,16 +392,9 @@ export function SpecEditor(
             </button>
           </section>
         )}
-        {spec && (
-          <p className="dialog-hint">Based on revision {baseRevision}.</p>
-        )}
+        {spec && <p className="dialog-hint">Based on revision {baseRevision}.</p>}
         <footer>
-          <button
-            className="button"
-            type="button"
-            disabled={saving || reviewing}
-            onClick={onClose}
-          >
+          <button className="button" type="button" disabled={saving || reviewing} onClick={onClose}>
             Cancel
           </button>
           <button

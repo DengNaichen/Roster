@@ -5,9 +5,21 @@ import { useRequestScope } from "./useRequestScope";
 
 type IssueList = { issues: IssueSummary[] };
 
-export type IssueQuery = { cycleID?: number; assignee?: string; projectID?: number; team: string; type: string; query: string; priority: Priority | ""; labelFilter: LabelFilterValue };
+export type IssueQuery = {
+  cycleID?: number;
+  assignee?: string;
+  projectID?: number;
+  team: string;
+  type: string;
+  query: string;
+  priority: Priority | "";
+  labelFilter: LabelFilterValue;
+};
 
-export function useIssues({ cycleID, projectID, team, type, query, priority, labelFilter, assignee = "" }: IssueQuery, setError: (message: string) => void) {
+export function useIssues(
+  { cycleID, projectID, team, type, query, priority, labelFilter, assignee = "" }: IssueQuery,
+  setError: (message: string) => void,
+) {
   const confirmedStatuses = useRef(new Map<string, Status>());
   const [issues, setIssues] = useState<IssueSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,31 +45,64 @@ export function useIssues({ cycleID, projectID, team, type, query, priority, lab
     setLoading(true);
     await requests.read(
       () => api<IssueList>(path),
-      (data) => { if (!queryScope.isActive()) return; data.issues.forEach((issue) => confirmedStatuses.current.set(issue.identifier, issue.status)); setIssues(data.issues); setLoadError(""); setLoading(false); },
-      (cause) => { if (!queryScope.isActive()) return; setLoadError(cause.message); setLoading(false); },
+      (data) => {
+        if (!queryScope.isActive()) return;
+        data.issues.forEach((issue) =>
+          confirmedStatuses.current.set(issue.identifier, issue.status),
+        );
+        setIssues(data.issues);
+        setLoadError("");
+        setLoading(false);
+      },
+      (cause) => {
+        if (!queryScope.isActive()) return;
+        setLoadError(cause.message);
+        setLoading(false);
+      },
     );
   }, [path, queryScope, requests]);
   useEffect(() => {
     // Changing a filter invalidates reads for the previous query as well.
     requests.invalidate();
     void loadIssues();
-    const load = () => { void loadIssues(); };
+    const load = () => {
+      void loadIssues();
+    };
     window.addEventListener("focus", load);
-    return () => { requests.invalidate(); window.removeEventListener("focus", load); };
+    return () => {
+      requests.invalidate();
+      window.removeEventListener("focus", load);
+    };
   }, [loadIssues, requests]);
 
   async function moveIssue(identifier: string, status: Status) {
     const previous = issues.find((issue) => issue.identifier === identifier)?.status;
-    setIssues((items) => items.map((issue) => issue.identifier === identifier ? { ...issue, status } : issue));
+    setIssues((items) =>
+      items.map((issue) => (issue.identifier === identifier ? { ...issue, status } : issue)),
+    );
     const url = apiPath(`/issues/${identifier}/status`);
-    await requests.write(identifier, () => api<Issue>(url, "PATCH", { status }),
-      (updated) => { confirmedStatuses.current.set(identifier, updated.status); if (queryScope.isActive()) setIssues((items) => items.map((issue) => issue.identifier === identifier ? updated : issue)); },
+    await requests.write(
+      identifier,
+      () => api<Issue>(url, "PATCH", { status }),
+      (updated) => {
+        confirmedStatuses.current.set(identifier, updated.status);
+        if (queryScope.isActive())
+          setIssues((items) =>
+            items.map((issue) => (issue.identifier === identifier ? updated : issue)),
+          );
+      },
       (cause) => {
         if (!queryScope.isActive()) return;
         const restored = confirmedStatuses.current.get(identifier) ?? previous;
-        if (restored) setIssues((items) => items.map((issue) => issue.identifier === identifier ? { ...issue, status: restored } : issue));
+        if (restored)
+          setIssues((items) =>
+            items.map((issue) =>
+              issue.identifier === identifier ? { ...issue, status: restored } : issue,
+            ),
+          );
         setError(cause.message);
-      });
+      },
+    );
     await loadIssues();
   }
 
@@ -65,12 +110,32 @@ export function useIssues({ cycleID, projectID, team, type, query, priority, lab
     setSavingPriorities((items) => [...items, identifier]);
     setError("");
     const url = apiPath(`/issues/${identifier}`);
-    await requests.write(identifier, () => api<Issue>(url, "PATCH", { priority: next }),
-      (updated) => { confirmedStatuses.current.set(identifier, updated.status); if (queryScope.isActive()) setIssues((items) => items.map((issue) => issue.identifier === identifier ? updated : issue)); },
-      (cause) => { if (queryScope.isActive()) setError(cause.message); });
+    await requests.write(
+      identifier,
+      () => api<Issue>(url, "PATCH", { priority: next }),
+      (updated) => {
+        confirmedStatuses.current.set(identifier, updated.status);
+        if (queryScope.isActive())
+          setIssues((items) =>
+            items.map((issue) => (issue.identifier === identifier ? updated : issue)),
+          );
+      },
+      (cause) => {
+        if (queryScope.isActive()) setError(cause.message);
+      },
+    );
     setSavingPriorities((items) => items.filter((id) => id !== identifier));
     await loadIssues();
   }
 
-  return { issues, loading, loadError, savingPriorities, loadIssues, moveIssue, changePriority, writeLabels: requests.write };
+  return {
+    issues,
+    loading,
+    loadError,
+    savingPriorities,
+    loadIssues,
+    moveIssue,
+    changePriority,
+    writeLabels: requests.write,
+  };
 }

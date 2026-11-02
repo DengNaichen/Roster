@@ -12,7 +12,9 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
   const [groupEditor, setGroupEditor] = useState<LabelGroup | "new" | null>(null);
   const [merge, setMerge] = useState<Label | null>(null);
   const labels = catalog.labels.filter(
-    (l) => (archived || !l.archived) && labelTitle(l, catalog.groups).toLowerCase().includes(search.toLowerCase()),
+    (l) =>
+      (archived || !l.archived) &&
+      labelTitle(l, catalog.groups).toLowerCase().includes(search.toLowerCase()),
   );
   return (
     <section className="label-manager" aria-label="Label settings">
@@ -25,7 +27,12 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
           onChange={(e) => setSearch(e.target.value)}
         />
         <label>
-          <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} /> Show archived
+          <input
+            type="checkbox"
+            checked={archived}
+            onChange={(e) => setArchived(e.target.checked)}
+          />{" "}
+          Show archived
         </label>
         <span className="label-toolbar-actions">
           <button className="button" onClick={() => setGroupEditor("new")}>
@@ -36,9 +43,7 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
           </button>
         </span>
       </div>
-      {catalog.error && (
-        <RequestError message={catalog.error} />
-      )}
+      {catalog.error && <RequestError message={catalog.error} />}
       {[{ id: 0, name: "Ungrouped" }, ...catalog.groups].map((group) => (
         <section className="label-section" key={group.id}>
           <header>
@@ -68,16 +73,35 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
                 </div>
               </div>
             ))}
-          {!labels.some((l) => l.group_id === group.id) && <p className="label-help label-empty">No labels</p>}
+          {!labels.some((l) => l.group_id === group.id) && (
+            <p className="label-help label-empty">No labels</p>
+          )}
         </section>
       ))}
       {editor && <LabelEditor label={editor} catalog={catalog} onClose={() => setEditor(null)} />}
-      {groupEditor && <GroupEditor group={groupEditor} catalog={catalog} onClose={() => setGroupEditor(null)} />}
-      {merge && <MergeEditor source={merge} catalog={catalog} onClose={() => setMerge(null)} onMerged={onMerged} />}
+      {groupEditor && (
+        <GroupEditor group={groupEditor} catalog={catalog} onClose={() => setGroupEditor(null)} />
+      )}
+      {merge && (
+        <MergeEditor
+          source={merge}
+          catalog={catalog}
+          onClose={() => setMerge(null)}
+          onMerged={onMerged}
+        />
+      )}
     </section>
   );
 }
-function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalog: Catalog; onClose: () => void }) {
+function LabelEditor({
+  label,
+  catalog,
+  onClose,
+}: {
+  label: Label | "new";
+  catalog: Catalog;
+  onClose: () => void;
+}) {
   const requests = useRequestScope("label-editor");
   const isNew = label === "new";
   const [name, setName] = useState(isNew ? "" : label.name);
@@ -88,7 +112,10 @@ function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const similar = name.trim()
-    ? catalog.labels.filter((l) => (isNew || l.id !== label.id) && l.name.toLowerCase().includes(name.trim().toLowerCase()))
+    ? catalog.labels.filter(
+        (l) =>
+          (isNew || l.id !== label.id) && l.name.toLowerCase().includes(name.trim().toLowerCase()),
+      )
     : [];
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -110,20 +137,35 @@ function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalo
     }
   }
   return (
-    <LabelDialog title={isNew ? "New label" : "Edit label"} onClose={() => { if (!busy) onClose(); }}>
+    <LabelDialog
+      title={isNew ? "New label" : "Edit label"}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+    >
       <form onSubmit={save}>
         <label>
           Name
           <input disabled={busy} required value={name} onChange={(e) => setName(e.target.value)} />
         </label>
-        {similar.length > 0 && <p className="label-help">Similar labels: {similar.map((l) => labelTitle(l, catalog.groups)).join(", ")}</p>}
+        {similar.length > 0 && (
+          <p className="label-help">
+            Similar labels: {similar.map((l) => labelTitle(l, catalog.groups)).join(", ")}
+          </p>
+        )}
         <label>
           Color
-          <input disabled={busy} type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+          <input
+            disabled={busy}
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+          />
         </label>
         <label>
           Description
-          <textarea disabled={busy}
+          <textarea
+            disabled={busy}
             rows={3}
             placeholder="When should this label be used?"
             value={description}
@@ -132,22 +174,35 @@ function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalo
         </label>
         <label>
           Group
-          <Dropdown variant="block" aria-label="Group" disabled={busy || !isNew} value={String(group)} onChange={(next) => setGroup(Number(next))} options={[
-            { value: "0", label: "Ungrouped (multiple labels)" },
-            ...catalog.groups.map((g) => ({ value: String(g.id), label: `${g.name} (single select)` })),
-          ]} />
+          <Dropdown
+            variant="block"
+            aria-label="Group"
+            disabled={busy || !isNew}
+            value={String(group)}
+            onChange={(next) => setGroup(Number(next))}
+            options={[
+              { value: "0", label: "Ungrouped (multiple labels)" },
+              ...catalog.groups.map((g) => ({
+                value: String(g.id),
+                label: `${g.name} (single select)`,
+              })),
+            ]}
+          />
         </label>
         {!isNew && (
           <label className="label-option">
-            <input disabled={busy} type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} />
+            <input
+              disabled={busy}
+              type="checkbox"
+              checked={archived}
+              onChange={(e) => setArchived(e.target.checked)}
+            />
             <span>
               Archived<small>Keep existing associations; prevent new uses.</small>
             </span>
           </label>
         )}
-        {error && (
-          <RequestError message={error} />
-        )}
+        {error && <RequestError message={error} />}
         <footer>
           <button type="button" className="button" disabled={busy} onClick={onClose}>
             Cancel
@@ -160,7 +215,15 @@ function LabelEditor({ label, catalog, onClose }: { label: Label | "new"; catalo
     </LabelDialog>
   );
 }
-function GroupEditor({ group, catalog, onClose }: { group: LabelGroup | "new"; catalog: Catalog; onClose: () => void }) {
+function GroupEditor({
+  group,
+  catalog,
+  onClose,
+}: {
+  group: LabelGroup | "new";
+  catalog: Catalog;
+  onClose: () => void;
+}) {
   const requests = useRequestScope("label-editor");
   const [name, setName] = useState(group === "new" ? "" : group.name);
   const [error, setError] = useState("");
@@ -170,7 +233,10 @@ function GroupEditor({ group, catalog, onClose }: { group: LabelGroup | "new"; c
     setBusy(true);
     setError("");
     try {
-      await api(apiPath("/label-groups"), "POST", { name, ...(group === "new" ? {} : { id: group.id }) });
+      await api(apiPath("/label-groups"), "POST", {
+        name,
+        ...(group === "new" ? {} : { id: group.id }),
+      });
       await catalog.reload();
       if (requests.isActive()) onClose();
     } catch (cause) {
@@ -180,16 +246,19 @@ function GroupEditor({ group, catalog, onClose }: { group: LabelGroup | "new"; c
     }
   }
   return (
-    <LabelDialog title={group === "new" ? "New label group" : "Rename label group"} onClose={() => { if (!busy) onClose(); }}>
+    <LabelDialog
+      title={group === "new" ? "New label group" : "Rename label group"}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+    >
       <form onSubmit={save}>
         <label>
           Name
           <input disabled={busy} required value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <p className="label-help">Each issue can have only one label from this group.</p>
-        {error && (
-          <RequestError message={error} />
-        )}
+        {error && <RequestError message={error} />}
         <footer>
           <button className="button primary" disabled={busy}>
             Save group
@@ -219,7 +288,10 @@ function MergeEditor({
     setBusy(true);
     setError("");
     try {
-      await api(apiPath("/labels/merge"), "POST", { source_id: source.id, target_id: Number(target) });
+      await api(apiPath("/labels/merge"), "POST", {
+        source_id: source.id,
+        target_id: Number(target),
+      });
       if (requests.isActive()) onMerged();
       await catalog.reload();
       if (requests.isActive()) onClose();
@@ -230,21 +302,33 @@ function MergeEditor({
     }
   }
   return (
-    <LabelDialog title={`Merge ${source.name}`} onClose={() => { if (!busy) onClose(); }}>
+    <LabelDialog
+      title={`Merge ${source.name}`}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+    >
       <form onSubmit={save}>
         <p>
-          All issues using “{source.name}” will use the target label. The source label will be deleted. Filters referencing its ID will need
-          updating.
+          All issues using “{source.name}” will use the target label. The source label will be
+          deleted. Filters referencing its ID will need updating.
         </p>
         <label>
           Target label
-          <Dropdown variant="block" aria-label="Target label" placeholder="Choose a label…" required disabled={busy} value={target} onChange={setTarget} options={catalog.labels
-            .filter((l) => l.id !== source.id && !l.archived && l.group_id === source.group_id)
-            .map((l) => ({ value: String(l.id), label: l.name }))} />
+          <Dropdown
+            variant="block"
+            aria-label="Target label"
+            placeholder="Choose a label…"
+            required
+            disabled={busy}
+            value={target}
+            onChange={setTarget}
+            options={catalog.labels
+              .filter((l) => l.id !== source.id && !l.archived && l.group_id === source.group_id)
+              .map((l) => ({ value: String(l.id), label: l.name }))}
+          />
         </label>
-        {error && (
-          <RequestError message={error} />
-        )}
+        {error && <RequestError message={error} />}
         <footer>
           <button type="button" className="button" disabled={busy} onClick={onClose}>
             Cancel

@@ -8,22 +8,117 @@ import { api, apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 
 type TeamDirectory = { teams: Team[] };
 
-export function SettingsPage({ teams, loading, onSaved }: { teams: Team[]; loading: boolean; onSaved: (team: Team) => void }) {
+export function SettingsPage({
+  teams,
+  loading,
+  onSaved,
+}: {
+  teams: Team[];
+  loading: boolean;
+  onSaved: (team: Team) => void;
+}) {
   const capabilities = useCapabilities();
   const [directory, setDirectory] = useState<Team[] | null>(null);
   const [directoryError, setDirectoryError] = useState("");
-  useEffect(() => { let active = true; api<TeamDirectory>(apiPath("/team-directory")).then((result) => { if (active) setDirectory(result.teams); }, (cause: Error) => { if (active) setDirectoryError(cause.message); }); return () => { active = false; }; }, []);
+  useEffect(() => {
+    let active = true;
+    api<TeamDirectory>(apiPath("/team-directory")).then(
+      (result) => {
+        if (active) setDirectory(result.teams);
+      },
+      (cause: Error) => {
+        if (active) setDirectoryError(cause.message);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
   const [tab, setTab] = useState<"members" | "teams" | "labels">("teams");
   const entries = directory ?? teams;
-  return <><PageHeader><span>Settings</span></PageHeader>
-  <div className="project-toolbar"><div className="segmented" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected={tab === "teams"} aria-pressed={tab === "teams"} onClick={() => setTab("teams")}>Teams</button><button type="button" role="tab" aria-selected={tab === "members"} aria-pressed={tab === "members"} onClick={() => setTab("members")}>Members</button><button type="button" role="tab" aria-selected={tab === "labels"} aria-pressed={tab === "labels"} onClick={() => setTab("labels")}>Labels</button></div></div>
-  <div className="settings-page">
-    {tab === "members" && <MembersSettings />}
-    {tab === "labels" && <section className="team-settings" aria-label="Labels"><div className="settings-field"><div><span>Workspace and team labels</span><p>Manage labels and groups used to organize issues.</p></div><NavLink className="button" unavailable={!capabilities.labels} to={pagePath("/labels")}>Manage labels</NavLink></div></section>}
-    {tab === "teams" && <header className="settings-heading"><p>Manage team names, icons and access in this workspace.</p></header>}
-    {tab === "teams" && directoryError && <RequestError message={directoryError} />}
-    {tab === "teams" && (entries.length === 0 ? <p className="empty">{loading ? "Loading teams…" : "No teams yet. Use + beside Teams to create one."}</p> : entries.map((team) => <TeamSettings key={team.key} team={team} onSaved={(updated) => { setDirectory((items) => (items ?? teams).map((item) => item.key === updated.key ? updated : item)); onSaved(updated); }} />))}
-  </div></>;
+  return (
+    <>
+      <PageHeader>
+        <span>Settings</span>
+      </PageHeader>
+      <div className="project-toolbar">
+        <div className="segmented" role="tablist" aria-label="Settings sections">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "teams"}
+            aria-pressed={tab === "teams"}
+            onClick={() => setTab("teams")}
+          >
+            Teams
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "members"}
+            aria-pressed={tab === "members"}
+            onClick={() => setTab("members")}
+          >
+            Members
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "labels"}
+            aria-pressed={tab === "labels"}
+            onClick={() => setTab("labels")}
+          >
+            Labels
+          </button>
+        </div>
+      </div>
+      <div className="settings-page">
+        {tab === "members" && <MembersSettings />}
+        {tab === "labels" && (
+          <section className="team-settings" aria-label="Labels">
+            <div className="settings-field">
+              <div>
+                <span>Workspace and team labels</span>
+                <p>Manage labels and groups used to organize issues.</p>
+              </div>
+              <NavLink
+                className="button"
+                unavailable={!capabilities.labels}
+                to={pagePath("/labels")}
+              >
+                Manage labels
+              </NavLink>
+            </div>
+          </section>
+        )}
+        {tab === "teams" && (
+          <header className="settings-heading">
+            <p>Manage team names, icons and access in this workspace.</p>
+          </header>
+        )}
+        {tab === "teams" && directoryError && <RequestError message={directoryError} />}
+        {tab === "teams" &&
+          (entries.length === 0 ? (
+            <p className="empty">
+              {loading ? "Loading teams…" : "No teams yet. Use + beside Teams to create one."}
+            </p>
+          ) : (
+            entries.map((team) => (
+              <TeamSettings
+                key={team.key}
+                team={team}
+                onSaved={(updated) => {
+                  setDirectory((items) =>
+                    (items ?? teams).map((item) => (item.key === updated.key ? updated : item)),
+                  );
+                  onSaved(updated);
+                }}
+              />
+            ))
+          ))}
+      </div>
+    </>
+  );
 }
 
 function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => void }) {
@@ -32,7 +127,12 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const value = draft ?? team;
   const dirty = value.name !== team.name || value.emoji !== team.emoji;
 
@@ -47,7 +147,10 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
     setError("");
     setSaved(false);
     try {
-      const updated = await api<Team>(apiPath(`/teams/${encodeURIComponent(team.key)}`), "PATCH", { name: value.name, emoji: value.emoji });
+      const updated = await api<Team>(apiPath(`/teams/${encodeURIComponent(team.key)}`), "PATCH", {
+        name: value.name,
+        emoji: value.emoji,
+      });
       if (!mounted.current) return;
       onSaved(updated);
       setDraft(null);
@@ -59,16 +162,65 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
     }
   }
 
-  return <section className="team-settings" aria-labelledby={`settings-team-${team.key}`}>
-    <h2 id={`settings-team-${team.key}`}>{team.name}</h2>
-    <form onSubmit={save}>
-      <div className="settings-field"><label htmlFor={`team-name-${team.key}`}>Name</label><div className="settings-name"><EmojiPicker value={value.emoji} teamKey={team.key} label={`Choose icon for ${team.name}`} onChange={(emoji) => edit({ emoji })} disabled={saving} /><input id={`team-name-${team.key}`} value={value.name} onChange={(event) => edit({ name: event.target.value })} required disabled={saving} /></div></div>
-      <div className="settings-field"><div><span>Identifier</span><p>Used in issue IDs. Cannot be changed.</p></div><span className="settings-identifier">{team.key}</span></div>
-      {error && <RequestError message={error} />}
-      <footer><span role="status">{saved ? "Changes saved." : dirty ? "Unsaved changes" : ""}</span><button type="button" className="button" disabled={saving || !dirty} onClick={() => { setDraft(null); setError(""); setSaved(false); }}>Reset</button><button type="submit" className="button primary" disabled={saving || !dirty || !value.name.trim()}>{saving ? "Saving…" : "Save changes"}</button></footer>
-    </form>
-    {team.membership_enabled && <TeamAccess team={team} onChanged={() => window.location.reload()} />}
-  </section>;
+  return (
+    <section className="team-settings" aria-labelledby={`settings-team-${team.key}`}>
+      <h2 id={`settings-team-${team.key}`}>{team.name}</h2>
+      <form onSubmit={save}>
+        <div className="settings-field">
+          <label htmlFor={`team-name-${team.key}`}>Name</label>
+          <div className="settings-name">
+            <EmojiPicker
+              value={value.emoji}
+              teamKey={team.key}
+              label={`Choose icon for ${team.name}`}
+              onChange={(emoji) => edit({ emoji })}
+              disabled={saving}
+            />
+            <input
+              id={`team-name-${team.key}`}
+              value={value.name}
+              onChange={(event) => edit({ name: event.target.value })}
+              required
+              disabled={saving}
+            />
+          </div>
+        </div>
+        <div className="settings-field">
+          <div>
+            <span>Identifier</span>
+            <p>Used in issue IDs. Cannot be changed.</p>
+          </div>
+          <span className="settings-identifier">{team.key}</span>
+        </div>
+        {error && <RequestError message={error} />}
+        <footer>
+          <span role="status">{saved ? "Changes saved." : dirty ? "Unsaved changes" : ""}</span>
+          <button
+            type="button"
+            className="button"
+            disabled={saving || !dirty}
+            onClick={() => {
+              setDraft(null);
+              setError("");
+              setSaved(false);
+            }}
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            className="button primary"
+            disabled={saving || !dirty || !value.name.trim()}
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </footer>
+      </form>
+      {team.membership_enabled && (
+        <TeamAccess team={team} onChanged={() => window.location.reload()} />
+      )}
+    </section>
+  );
 }
 
 export default SettingsPage;

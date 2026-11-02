@@ -9,29 +9,25 @@ import SpecDocument from "./SpecDocument";
 import { SpecHistory } from "./SpecHistory";
 import { specView } from "./specView";
 export default function SpecPage({ id }: { id: string }) {
-  const resource = useResource<Spec | null>(
-    apiPath(`/specs/${encodeURIComponent(id)}`),
-    null,
-  );
+  const resource = useResource<Spec | null>(apiPath(`/specs/${encodeURIComponent(id)}`), null);
   const [editing, setEditing] = useState(false);
   const [history, setHistory] = useState(false);
   const spec = resource.data?.identifier === id ? resource.data : null;
   return (
     <>
       <PageHeader
-        actions={spec && (
-          <div className="spec-action-row">
-            <button
-              className="button"
-              onClick={() => setHistory(!history)}
-            >
-              {history ? "Current content" : "Revision history"}
-            </button>
-            <button className="button" onClick={() => setEditing(true)}>
-              Edit spec
-            </button>
-          </div>
-        )}
+        actions={
+          spec && (
+            <div className="spec-action-row">
+              <button className="button" onClick={() => setHistory(!history)}>
+                {history ? "Current content" : "Revision history"}
+              </button>
+              <button className="button" onClick={() => setEditing(true)}>
+                Edit spec
+              </button>
+            </div>
+          )
+        }
       >
         <FileText className="icon" />
         <NavLink to={pagePath("/specs")}>Specs</NavLink>
@@ -46,9 +42,12 @@ export default function SpecPage({ id }: { id: string }) {
         </div>
       )}
       {!spec && resource.loading && <p className="empty">Loading spec…</p>}
-      {spec && (history
-        ? <SpecHistory key={`${id}/${spec.revision}`} spec={spec} />
-        : <SpecDocument spec={specView(spec.content, spec.created_at)} />)}
+      {spec &&
+        (history ? (
+          <SpecHistory key={`${id}/${spec.revision}`} spec={spec} />
+        ) : (
+          <SpecDocument spec={specView(spec.content, spec.created_at)} />
+        ))}
       {editing && spec && (
         <SpecEditor
           key={id}

@@ -1,12 +1,10 @@
 import type { SpecContent } from "../../../packages/contracts/spec";
-export type SpecView =
-  & Omit<SpecContent, "edge_cases" | "success_criteria" | "stories">
-  & {
-    created: string;
-    edgeCases: string[];
-    successCriteria: SpecContent["success_criteria"];
-    stories: (SpecContent["stories"][number] & { independentTest: string })[];
-  };
+export type SpecView = Omit<SpecContent, "edge_cases" | "success_criteria" | "stories"> & {
+  created: string;
+  edgeCases: string[];
+  successCriteria: SpecContent["success_criteria"];
+  stories: (SpecContent["stories"][number] & { independentTest: string })[];
+};
 export function specView(content: SpecContent, createdAt: string): SpecView {
   return {
     ...content,
@@ -41,10 +39,10 @@ export type SpecDifference = {
 };
 function text(entry: object): string {
   if ("text" in entry) {
-    return String(entry.text) +
-      ("clarify" in entry && entry.clarify
-        ? ` [NEEDS CLARIFICATION: ${entry.clarify}]`
-        : "");
+    return (
+      String(entry.text) +
+      ("clarify" in entry && entry.clarify ? ` [NEEDS CLARIFICATION: ${entry.clarify}]` : "")
+    );
   }
   const story = entry as SpecContent["stories"][number];
   return [
@@ -53,40 +51,33 @@ function text(entry: object): string {
     story.description,
     story.why,
     story.independent_test,
-    ...story.scenarios.map((scenario) =>
-      `Given ${scenario.given}; When ${scenario.when}; Then ${scenario.then}`
+    ...story.scenarios.map(
+      (scenario) => `Given ${scenario.given}; When ${scenario.when}; Then ${scenario.then}`,
     ),
   ].join("\n");
 }
-export function compareSpecContent(
-  before: SpecContent,
-  after: SpecContent,
-): SpecDifference[] {
+export function compareSpecContent(before: SpecContent, after: SpecContent): SpecDifference[] {
   const result: SpecDifference[] = [];
-  for (
-    const [key, section] of [["stories", "User story"], [
-      "requirements",
-      "Requirement",
-    ], ["success_criteria", "Success criterion"]] as const
-  ) {
-    const oldEntries = new Map(
-      before[key].map((entry) => [entry.id, entry] as const),
-    );
-    const newEntries = new Map(
-      after[key].map((entry) => [entry.id, entry] as const),
-    );
+  for (const [key, section] of [
+    ["stories", "User story"],
+    ["requirements", "Requirement"],
+    ["success_criteria", "Success criterion"],
+  ] as const) {
+    const oldEntries = new Map(before[key].map((entry) => [entry.id, entry] as const));
+    const newEntries = new Map(after[key].map((entry) => [entry.id, entry] as const));
     for (const id of new Set([...oldEntries.keys(), ...newEntries.keys()])) {
-      const old = oldEntries.get(id), current = newEntries.get(id);
+      const old = oldEntries.get(id),
+        current = newEntries.get(id);
       result.push({
         section,
         id,
         kind: !old
           ? "added"
           : !current
-          ? "removed"
-          : JSON.stringify(old) === JSON.stringify(current)
-          ? "unchanged"
-          : "changed",
+            ? "removed"
+            : JSON.stringify(old) === JSON.stringify(current)
+              ? "unchanged"
+              : "changed",
         before: old ? text(old) : "",
         after: current ? text(current) : "",
       });
@@ -95,16 +86,10 @@ export function compareSpecContent(
   return result;
 }
 
-function mergeStableEntries<T extends { id: string }>(
-  base: T[],
-  draft: T[],
-  latest: T[],
-): T[] {
+function mergeStableEntries<T extends { id: string }>(base: T[], draft: T[], latest: T[]): T[] {
   const old = new Map(base.map((entry) => [entry.id, entry]));
   const edited = new Map(draft.map((entry) => [entry.id, entry]));
-  const merged = new Map(
-    latest.map((entry) => [entry.id, structuredClone(entry)]),
-  );
+  const merged = new Map(latest.map((entry) => [entry.id, structuredClone(entry)]));
   for (const entry of base) {
     const change = edited.get(entry.id);
     if (!change) merged.delete(entry.id);
@@ -128,11 +113,7 @@ export function rebaseSpecDraft(
     title: base.title !== draft.title ? draft.title : latest.title,
     status: base.status !== draft.status ? draft.status : latest.status,
     branch: base.branch !== draft.branch ? draft.branch : latest.branch,
-    requirements: mergeStableEntries(
-      base.requirements,
-      draft.requirements,
-      latest.requirements,
-    ),
+    requirements: mergeStableEntries(base.requirements, draft.requirements, latest.requirements),
     success_criteria: mergeStableEntries(
       base.success_criteria,
       draft.success_criteria,

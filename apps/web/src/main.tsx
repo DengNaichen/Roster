@@ -11,6 +11,8 @@ import "./navigation.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthBoundary><App /></AuthBoundary>
+    <AuthBoundary>
+      <App />
+    </AuthBoundary>
   </StrictMode>,
 );

@@ -44,10 +44,10 @@
 
 当前开发机的免登录预览在 `http://127.0.0.1:5178/roster`，使用独立 `roster_preview` 数据库；启动命令见 [本机免登录预览](docs/DEVELOPMENT.md#本机免登录预览)。
 
-前置：Node 22、Corepack、Deno 2、Supabase CLI 与 Docker。前端依赖由 pnpm 管理，后端 npm 依赖由 Deno 解析；两份锁文件均需保留。
+代码检查只需预装 Node 22+（含 npm）；pnpm、Deno、lint 和 formatter 均由仓库固定版本并安装到本地 `node_modules`，不需要全局 Corepack/pnpm/Deno。运行本地 Supabase 还需 Supabase CLI 与 Docker。前端依赖由 pnpm 管理，后端 npm 依赖由 Deno 解析；两份锁文件均需保留。
 
 ```sh
-corepack pnpm install
+node scripts/toolchain.mjs setup
 supabase start
 supabase db reset
 ```
@@ -57,8 +57,8 @@ supabase db reset
 复制根 `.env.example` 为 `.env`，复制 `apps/web/.env.example` 为 `apps/web/.env`，填入本地配置。然后分别运行：
 
 ```sh
-deno task dev
-corepack pnpm dev
+node scripts/toolchain.mjs deno task dev
+node scripts/toolchain.mjs dev
 ```
 
 默认前端地址 `http://localhost:5173`，后端 `http://127.0.0.1:18471`。如果端口已占用，换端口并同步 API、Origin、Auth callback 和 MCP 地址。
@@ -66,10 +66,10 @@ corepack pnpm dev
 ## 验证
 
 ```sh
-corepack pnpm build
-corepack pnpm test:web
-deno task check
-deno task test
+node scripts/toolchain.mjs build
+node scripts/toolchain.mjs test:web
+node scripts/toolchain.mjs deno task check
+node scripts/toolchain.mjs deno task test
 ```
 
 数据库集成测试需要显式提供隔离测试数据库地址，详见 [开发说明](docs/DEVELOPMENT.md)。未提供数据库时跳过的测试不表示集成测试通过。真实 Supabase 登录、OAuth 客户端授权、Edge 网关和 Vercel 部署需单独验收。

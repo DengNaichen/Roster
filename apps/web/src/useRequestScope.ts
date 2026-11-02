@@ -12,16 +12,21 @@ export function useRequestScope(key: string) {
     let deferredRead: (() => void) | undefined;
     const queues = new Map<string, Promise<unknown>>();
     const current = (started: number) => active && generation === started;
-    const read = async <T,>(request: () => Promise<T>, success: (value: T) => void, failure: (cause: Error) => void) => {
+    const read = async <T>(
+      request: () => Promise<T>,
+      success: (value: T) => void,
+      failure: (cause: Error) => void,
+    ) => {
       if (!active) return;
-      if (writes) return new Promise<void>((resolve) => {
-        waitingReads.push(resolve);
-        deferredRead = () => {
-          const waiting = waitingReads;
-          waitingReads = [];
-          void read(request, success, failure).finally(() => waiting.forEach((done) => done()));
-        };
-      });
+      if (writes)
+        return new Promise<void>((resolve) => {
+          waitingReads.push(resolve);
+          deferredRead = () => {
+            const waiting = waitingReads;
+            waitingReads = [];
+            void read(request, success, failure).finally(() => waiting.forEach((done) => done()));
+          };
+        });
       const started = generation;
       const readVersion = ++version;
       try {
@@ -34,15 +39,30 @@ export function useRequestScope(key: string) {
     return {
       // key defines the lifetime; keeping it on the scope makes that ownership explicit.
       key,
-      activate() { active = true; },
-      dispose() {
-        active = false; generation++; version++; deferredRead = undefined;
-        waitingReads.forEach((done) => done()); waitingReads = [];
+      activate() {
+        active = true;
       },
-      invalidate() { version++; },
-      isActive() { return active; },
+      dispose() {
+        active = false;
+        generation++;
+        version++;
+        deferredRead = undefined;
+        waitingReads.forEach((done) => done());
+        waitingReads = [];
+      },
+      invalidate() {
+        version++;
+      },
+      isActive() {
+        return active;
+      },
       read,
-      async write<T>(entity: string | string[], request: () => Promise<T>, success: (value: T) => void, failure: (cause: Error) => void) {
+      async write<T>(
+        entity: string | string[],
+        request: () => Promise<T>,
+        success: (value: T) => void,
+        failure: (cause: Error) => void,
+      ) {
         const started = generation;
         if (!current(started)) return false;
         version++;
@@ -61,9 +81,12 @@ export function useRequestScope(key: string) {
           }
         });
         entities.forEach((id) => queues.set(id, operation));
-        try { return await operation; }
-        finally {
-          entities.forEach((id) => { if (queues.get(id) === operation) queues.delete(id); });
+        try {
+          return await operation;
+        } finally {
+          entities.forEach((id) => {
+            if (queues.get(id) === operation) queues.delete(id);
+          });
           writes--;
           version++;
           if (!writes && current(started)) {
@@ -75,6 +98,9 @@ export function useRequestScope(key: string) {
       },
     };
   }, [key]);
-  useEffect(() => { scope.activate(); return () => scope.dispose(); }, [scope]);
+  useEffect(() => {
+    scope.activate();
+    return () => scope.dispose();
+  }, [scope]);
   return scope;
 }

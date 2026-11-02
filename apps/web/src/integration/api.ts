@@ -2,20 +2,17 @@ import { createClient } from "@supabase/supabase-js";
 import { localPreview } from "./preview";
 export { localPreview } from "./preview";
 export const configured = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY &&
+  import.meta.env.VITE_SUPABASE_URL &&
+    import.meta.env.VITE_SUPABASE_ANON_KEY &&
     import.meta.env.VITE_API_BASE_URL,
 );
-export const supabase = configured && !localPreview
-  ? createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY,
-    { auth: { flowType: "pkce", detectSessionInUrl: true } },
-  )
-  : null;
-export async function apiFetch(
-  path: string,
-  init: RequestInit = {},
-): Promise<Response> {
+export const supabase =
+  configured && !localPreview
+    ? createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+        auth: { flowType: "pkce", detectSessionInUrl: true },
+      })
+    : null;
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!path.startsWith("/api/") || path.includes("://")) {
     throw new Error("API path must start with /api/");
   }
@@ -33,7 +30,8 @@ export async function apiFetch(
     headers.set("Authorization", `Bearer ${session.data.session.access_token}`);
   }
   const previewPort = Number(import.meta.env.VITE_PREVIEW_API_PORT || "18471");
-  const safePreviewPort = Number.isInteger(previewPort) && previewPort > 0 && previewPort <= 65535 ? previewPort : 18471;
+  const safePreviewPort =
+    Number.isInteger(previewPort) && previewPort > 0 && previewPort <= 65535 ? previewPort : 18471;
   const base = localPreview
     ? `http://127.0.0.1:${safePreviewPort}`
     : import.meta.env.VITE_API_BASE_URL;
@@ -46,22 +44,24 @@ export async function apiFetch(
   }
   return response;
 }
-export async function api<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
+export async function api<T>(path: string, method = "GET", body?: object): Promise<T> {
   const response = await apiFetch(path, {
     method,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json();
   if (!response.ok) {
-    throw Object.assign(new Error(
-      typeof data.error === "string"
-        ? data.error
-        : data.error?.message || `Request failed (${response.status})`,
-    ), { status: response.status, code: typeof data.error === "object" ? data.error?.code : undefined });
+    throw Object.assign(
+      new Error(
+        typeof data.error === "string"
+          ? data.error
+          : data.error?.message || `Request failed (${response.status})`,
+      ),
+      {
+        status: response.status,
+        code: typeof data.error === "object" ? data.error?.code : undefined,
+      },
+    );
   }
   return data as T;
 }

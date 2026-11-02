@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+# GUI hosts do not necessarily inherit the interactive shell's PATH.
+for tool_dir in "$HOME/.local/bin" /opt/homebrew/bin /usr/local/bin; do
+  if [ -d "$tool_dir" ]; then PATH="$PATH:$tool_dir"; fi
+done
+export PATH
+exec "$@"

@@ -101,8 +101,8 @@ else
 fi
 
 if [ "$run_setup" -eq 1 ]; then
-	if ! (cd "$target" && deno task worktree:setup) >&2; then
-		printf '%s\n' "scripts/new-worktree: worktree created at $target, but setup failed; fix the cause, then run deno task worktree:setup in that worktree." >&2
+	if ! (cd "$target" && node scripts/toolchain.mjs setup && node scripts/toolchain.mjs deno task worktree:setup) >&2; then
+		printf '%s\n' "scripts/new-worktree: worktree created at $target, but setup failed; fix the cause, then run node scripts/toolchain.mjs setup, then node scripts/toolchain.mjs deno task worktree:setup in that worktree." >&2
 		exit 1
 	fi
 fi

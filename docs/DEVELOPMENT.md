@@ -7,11 +7,11 @@
 先在隔离的本地 Postgres 创建 `roster_preview` 库、应用 migrations，并为本地 login 授予 `roster_app`。当前开发机已经在端口 55439 完成这一初始化。分别运行：
 
 ```sh
-DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview deno run --allow-env --allow-net apps/server/preview.ts
-VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --strictPort
+DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview node scripts/toolchain.mjs deno run --allow-env --allow-net apps/server/preview.ts
+VITE_LOCAL_PREVIEW=true node scripts/toolchain.mjs --filter @roster/web dev --port 5178 --strictPort
 ```
 
-主 checkout 也可用 `deno task preview:api` 和 `deno task preview:web` 以上述默认值启动。次级 worktree 用 `scripts/new-worktree <branch>` 创建，或在其根目录运行 `deno task worktree:setup`：它分配稳定的独立端口和 `roster_wt_<id>_preview` 库并执行 migrations，之后同样用这两个 task 启动。分支与 worktree 的完整规则（位置、清理、GC）见 [git-workflow skill](../.agents/skills/git-workflow/SKILL.md)。
+主 checkout 也可用 `node scripts/toolchain.mjs deno task preview:api` 和 `node scripts/toolchain.mjs deno task preview:web` 以上述默认值启动。次级 worktree 用 `scripts/new-worktree <branch>` 创建，或在其根目录运行 `node scripts/toolchain.mjs deno task worktree:setup`：它分配稳定的独立端口和 `roster_wt_<id>_preview` 库并执行 migrations，之后同样用这两个 task 启动。分支与 worktree 的完整规则（位置、清理、GC）见 [git-workflow skill](../.agents/skills/git-workflow/SKILL.md)。
 
 访问 `http://127.0.0.1:5178/roster`。修改保存在该本地数据库，重启不覆盖已有工作区。预览只有一个固定用户，不能用于验证多用户登录或 OAuth；生产构建即使设置 `VITE_LOCAL_PREVIEW=true` 也不会启用免登录。
 
@@ -40,12 +40,55 @@ grant connect on database postgres to roster_runtime;
 
 ## 本地验证
 
+### Codex 质量 Hook 的隔离约束
+
+实现入口为 [`.codex/hooks.json`](../.codex/hooks.json) 和 [质量检查脚本](../.codex/hooks/quality-core.mjs)。以下约束适用于当前实现及后续修改。
+
+- **状态归属**：以 worktree 的 canonical 路径、宿主提供的 `session_id` 和 `turn_id` 共同标识一次检查。路径别名必须先解析为真实路径；标识编码或哈希后再用于文件名，不直接拼接外部输入。不得使用全局“当前会话”、共享的单一状态文件或“最近一次运行”来推断归属。
+- **结果归属**：Hook 只通过本次进程的 stdout 返回宿主协议规定的结果，诊断日志与协议输出分离。不得调用会话消息接口、向其他会话注入修复任务，或读取其他会话的状态作为本次检查结果。
+- **基线与续轮**：记录本回合开始时的 HEAD，检查该基线之后的提交与当前暂存、未暂存、未跟踪改动的并集，包含重命名和删除。自动修复续轮必须显式关联原始检查，保留原基线与重试计数；不能因产生新的 turn 而重置基线或重试上限。无法验证关联时，退回无状态只读检查并说明覆盖限制，不猜测归属。
+- **并发与清理**：状态写入使用原子替换；同一检查的并发更新需要互斥或等效保护。锁、缓存、重试计数和清理均限定在对应 worktree、会话及检查内。过期进程不能覆盖新检查结果或删除其他会话的状态。
+- **缺失标识**：缺少或无法验证会话、回合标识时，不读写持久会话状态，也不触发依赖归属的自动修复续轮；只执行无状态只读检查，并明确报告无法保证增量覆盖。缺少工具、超时和状态损坏不能当作检查通过。
+- **共享工作区边界**：不同会话在同一 worktree 中仍会看到同一份文件，状态隔离不能识别修改者。并行写代码必须使用独立 worktree；发现共享 worktree 的并行写入时，报告冲突并停止自动修复，不能把其他会话的修改当作自己的修复目标。不得宣称仅凭 Git 状态就能可靠检测所有并发写入。
+- **只读与防循环**：`Stop` Hook 只检查，不格式化或修复文件；由接收诊断的 Codex 会话执行修复。每次原始检查最多触发一轮自动修复续轮，再次失败明确报告未解决项，不跨会话转交，也不无限继续。
+
+实现时必须通过契约测试验证：不同 worktree、同 worktree 不同会话、同会话不同回合、并发状态更新、续轮基线保留、缺失标识、超时与状态损坏、过期状态清理，以及“本回合已提交且工作区干净”仍被检查。宿主实际触发和结果归属还需用两个独立会话做冒烟验证，不能用脚本单测代替。
+
+### 质量工具与 Hook 接入
+
+- 前端：ESLint 的 JS/TypeScript 推荐规则及 React Hooks 规则；Biome 只负责格式化，不重复 lint。暂不接入尚未声明支持当前 ESLint 10 的 jsx-a11y 插件。
+- 后端、contracts、服务器入口、脚本和 Hook：`deno lint` 与 `deno fmt`。`require-await` 因异步端口的同步 stub 实现而排除；`no-import-prefix` 因已有 npm/jsr 显式版本导入而排除。其余推荐规则启用。URL 校验有一处明确注明原因的控制字符正则例外。
+- formatter 各管自己的目录，不修改 SQL migrations、lockfile 或生成的 emoji 数据。`format:write` 是显式写操作，Hook 不调用它。
+
 ```sh
-corepack pnpm install --frozen-lockfile
-corepack pnpm build
-corepack pnpm test:web
-deno task check
-deno task test
+node scripts/toolchain.mjs format:write  # 主动格式化；完成修改后、提交前执行
+node scripts/toolchain.mjs check         # 格式、lint、前后端类型、架构边界、Hook 契约测试
+```
+
+也可单独运行 `lint`、`format:check`、`typecheck`、`test:architecture`、`test:hooks`。`check` 不需要数据库，不启动预览或运行构建；完整应用测试仍按下方命令执行。
+
+新机器只需 Node 22+（含 npm）。先运行 `node scripts/toolchain.mjs setup`：使用根 `package.json` 固定的 pnpm 10.20.0 和 `pnpm-lock.yaml` 安装依赖到本 worktree 的 `node_modules`，包括 Deno 2.9.6、Biome 和 ESLint；首次引导使用 npm 的缓存，不全局安装。Deno 的安装脚本在 `pnpm-workspace.yaml` 中明确允许。两个锁文件都应提交；不提交工具二进制或 `node_modules`。
+
+Hook 通过当前 Node 进程直接调用仓库的 `scripts/toolchain.mjs`，该入口优先使用本 worktree 的工具并验证 pnpm/Deno 版本；缺失或不匹配时明确报错，不退回全局工具、不自动安装。`scripts/run-agent-hook` 只帮助 GUI 宿主寻找基础 Node；不读取 shell profile。`setup` 是显式安装步骤，`check` 与 Stop 不安装工具。创建 worktree 的脚本也调用同一入口完成依赖引导，预览与清理使用仓库内 Deno。
+
+在 Codex 中打开**实际任务 worktree** 后，通过 `/hooks` 审阅并信任仓库 Hook，再开启一个新回合验证触发。项目 `.codex/` 层也必须被信任。新增或修改 Hook 需要重新审阅；仓库不会修改用户的全局信任记录。宿主行为以 [官方 Hooks 文档](https://learn.chatgpt.com/docs/hooks) 为准。
+
+Hook 只检查事件 `cwd` 对应的 Git worktree，不追踪 shell 命令曾经切换到的其他目录。从主 checkout 创建 worktree 后，应在 Codex 中打开该 worktree；否则不能依赖主 checkout 的 Hook 覆盖另一个 worktree 的修改，必须在目标目录手动执行 `node scripts/toolchain.mjs check`。
+
+`UserPromptSubmit` 记录起始 HEAD；`Stop` 发现代码或工具配置变动时执行完整 `check`，避免漏掉 contracts 的跨端依赖。纯文档或无改动时跳过。检查进程最多运行 100 秒，诊断限制为 6000 字符；宿主 Stop 超时设为 120 秒。失败最多触发一轮修复，随后仍失败会报告未解决项。续轮仅用同一会话中完全匹配的 Hook 返回 reason 关联原始检查；宿主未保留此关联时不会从其他记录猜测基线。
+
+状态位于 `git rev-parse --absolute-git-dir` 下的 `roster-quality/`，不进入版本控制。短时目录锁保护状态事务，原子替换防止部分写入。`Interrupt` 关闭当前回合，`SessionEnd` 关闭本会话记录；其他会话的活跃记录不会按时间自动过期。共享 worktree 的重叠会话会相互标记冲突并禁止自动修复；检查前后文件内容变化也会禁止自动修复，但两者不能识别所有外部写入。
+
+若宿主异常退出遗留活跃状态或目录锁，先确保该 worktree 没有运行中的会话或检查进程，再人工核对并移除对应状态或锁；不得清空其他仍活跃会话的记录。状态损坏、缺少标识或基线时执行完整只读检查并报告限制，不请求自动修复。脚本测试不等于宿主验收：首次启用仍需两个独立 Codex 会话验证各自的结果归属。
+
+### 手动验证命令
+
+```sh
+node scripts/toolchain.mjs setup
+node scripts/toolchain.mjs build
+node scripts/toolchain.mjs test:web
+node scripts/toolchain.mjs deno task check
+node scripts/toolchain.mjs deno task test
 ```
 
 真实数据库测试要求一个**可创建测试角色、名称以 `_test` 结尾的隔离数据库**。测试会应用 schema、创建受限测试 login，并清理本次随机工作区；不要填写开发者已有数据库或生产地址。
@@ -55,7 +98,7 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_test deno test 
 ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno test --allow-env --allow-net --allow-read packages/backend/src/modules/spec_test.ts
 ```
 
-全套真实数据库测试还读取 `ROSTER_ACTIVITY_TEST_DATABASE_URL`（数据库名必须为 `roster_activity_test`）、`ROSTER_INTEGRATIONS_TEST_DATABASE_URL` 和 `ROSTER_IMPORT_TEST_DATABASE_URL`；后两者使用隔离 `_test` 库，导入测试要求没有工作区。每个测试创建自己的数据并清理。`deno task test` 未设置相应变量时会跳过该数据库测试。传输单元测试使用签名 JWT 与 stub；活动与独立 Spec 测试另通过真实数据库跨 REST/MCP 写读；Spec 套件覆盖全部 6 个 REST 路由、6 个 MCP 工具、版本冲突和历史只读。
+全套真实数据库测试还读取 `ROSTER_ACTIVITY_TEST_DATABASE_URL`（数据库名必须为 `roster_activity_test`）、`ROSTER_INTEGRATIONS_TEST_DATABASE_URL` 和 `ROSTER_IMPORT_TEST_DATABASE_URL`；后两者使用隔离 `_test` 库，导入测试要求没有工作区。每个测试创建自己的数据并清理。`node scripts/toolchain.mjs deno task test` 未设置相应变量时会跳过该数据库测试。传输单元测试使用签名 JWT 与 stub；活动与独立 Spec 测试另通过真实数据库跨 REST/MCP 写读；Spec 套件覆盖全部 6 个 REST 路由、6 个 MCP 工具、版本冲突和历史只读。
 
 ## 配置
 
@@ -119,4 +162,4 @@ GitHub 同步通过数据库租约防止并行 worker 重复执行；只有完�
 
 ## 本地追加迁移
 
-使用管理员连接运行 `DATABASE_URL=... deno run --allow-env --allow-net --allow-read scripts/migrate.ts`。此脚本只接受 loopback 数据库并保存迁移校验和，拒绝修改已经应用的迁移。仅当数据库原来手动应用了首个迁移时，首次加 `--baseline-initial`；它不会跳过后续迁移。托管环境仍统一使用 Supabase CLI。
+使用管理员连接运行 `DATABASE_URL=... node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read scripts/migrate.ts`。此脚本只接受 loopback 数据库并保存迁移校验和，拒绝修改已经应用的迁移。仅当数据库原来手动应用了首个迁移时，首次加 `--baseline-initial`；它不会跳过后续迁移。托管环境仍统一使用 Supabase CLI。
