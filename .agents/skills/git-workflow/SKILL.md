@@ -18,8 +18,8 @@ description: "管理 Roster 的分支、worktree 及其本地预览隔离、提�
 
 - `main` 是唯一长期分支，只通过 PR 修改；不直接在 `main` 上提交，也不把未提交改动留在主 checkout。
 - 一个分支只交付一件事。命名为 `<短英文名>`：全小写、连字符分隔，描述内容而不是阶段（`settings-labels-tab`，而不是 `bootstrap`、`wip`、`fix`）。
-- 有实现依赖时用堆叠分支 `<短名>-on-<基分支短名>`，以前置分支为基线；前置分支合并后接回 `main`。
-- 分支合并后即删除，**不复用**。合并后的新工作从最新 `main` 另开分支。分支名不能作为“已合并”或“可丢弃”的证据，以提交是否为 `main` 的祖先为准。
+- 有实现依赖时用堆叠分支 `<短名>-on-<基分支短名>`，以前置分支为基线。前置分支 squash 合并后，它的提交不在 `main` 里，堆叠分支要用 `git rebase --onto origin/main <前置分支合并时的 head> <堆叠分支>` 接回 `main`，只保留自己的提交。
+- 分支合并后即删除，**不复用**。合并后的新工作从最新 `main` 另开分支。分支名不能作为“已合并”或“可丢弃”的证据。因为采用 squash 合并，分支提交也不会是 `main` 的祖先；判断依据是对应 PR 的状态为 `MERGED`，且 PR 合并时的 head 与分支 tip 完全一致（见[合并后清理](#合并后清理)）。
 
 ## Worktree
 
@@ -71,7 +71,7 @@ scripts/new-worktree <branch> [--base <ref>] [--no-setup]
 
 ## Pull Request
 
-- 独立 PR 的 base 为 `main`；堆叠 PR 的 base 为前置分支，前置分支合并后改回 `main`，并读回 PR 确认 diff 没有带入无关提交。
+- 独立 PR 的 base 为 `main`；堆叠 PR 的 base 为前置分支，前置分支合并后按上面的 `rebase --onto` 接回、推送并把 base 改回 `main`，再读回 PR 确认 diff 没有带入无关提交。
 - 用 `git push -u origin <branch>` 显式推送后再创建 PR。标题和正文用中文；正文写入临时文件或 heredoc，保留真实换行：
 
 ```sh
@@ -91,22 +91,43 @@ deno task test
 ```
 
 - **“开 PR”与“合并”是两次授权**：只要求开 PR 时，创建并交付审核后停止，不自动合并或启用 auto-merge。
-- 用户授权合并后，用普通 merge commit 合并（不 squash / rebase），并绑定已审查的 head：
+- 用户授权合并后，用 **squash** 合并：一个 PR 在 `main` 上对应一个提交，回退时 revert 这一个提交即可。仓库设置只允许 squash。合并时绑定已审查的 head，并用英文祈使句作为提交标题（PR 标题是中文，不直接用作提交信息）；提交正文保留 GitHub 默认生成的分支提交列表：
 
 ```sh
-gh pr merge <number> --repo DengNaichen/Roster --merge --match-head-commit <已审查的 SHA>
+gh pr merge <number> --repo DengNaichen/Roster --squash \
+  --match-head-commit <已审查的 SHA> --subject '<英文祈使句> (#<number>)'
 ```
+
+- 分支内的提交仍按“提交”一节拆分，方便审查；它们保留在 PR 页面里，不进入 `main`。
 
 - 合并冲突在工作分支上 rebase 或 merge `origin/main` 解决，解决后重新验证再推送；冲突的取舍（保留哪边的设计）在 PR 正文说明。
 
 ## 合并后清理
 
-1. 核对工作分支的精确 head 已是 `origin/main` 的祖先：`git merge-base --is-ancestor <head> origin/main`，并确认没有待保留的提交或文件。
-2. 按上面的流程清理 worktree：`deno task worktree:clean`，再 `git worktree remove`。
-3. 删除本地分支 `git branch -d <branch>`（不用 `-D`）。删除远端分支时绑定已核对的 tip，避免删掉被并发推进的分支：
+squash 合并后，分支提交不是 `main` 的祖先，`git branch -d` 和 `merge-base --is-ancestor` 都无法判断是否已合并。改为核对 PR 记录，核对通过后才允许 `-D`。
+
+默认用脚本完成全部步骤，先 `--dry-run` 读一遍计划。脚本必须从**主 checkout** 运行（不能从要删除的 worktree 里运行），任何一步核对不通过就停止，不删除任何东西：
 
 ```sh
-git push origin --force-with-lease=<branch>:<已核对 SHA> --delete <branch>
+scripts/finish-branch <branch> --dry-run
+scripts/finish-branch <branch>
 ```
 
-4. `git fetch --prune origin`，并把主 checkout 的 `main` fast-forward 到 `origin/main`（只在主 checkout 干净时）。
+脚本依次执行下面的步骤；脚本不可用或需要排查时，按同样顺序手工执行：
+
+1. 读取 PR 状态，确认 `state` 为 `MERGED`，并记下 `headRefOid`：
+
+```sh
+gh pr view <number> --repo DengNaichen/Roster --json state,headRefOid,mergeCommit
+```
+
+2. 确认本地分支 tip 和 `origin/<branch>` 都**等于** `headRefOid`。不相等说明合并后又有新提交，这些提交没有进入 `main`，停止清理并另行处理，不删除分支。
+3. 先同步主 checkout：`git fetch --prune origin`，在主 checkout 干净时把 `main` fast-forward 到 `origin/main`，并确认 `mergeCommit` 已在 `main` 上。
+4. 按上面的流程清理 worktree：在目标 worktree 内 `deno task worktree:clean`，再从主 checkout `git worktree remove <路径>`。
+5. 删除本地分支 `git branch -D <branch>`（仅限第 2 步核对通过的分支）。删除远端分支时绑定已核对的 tip，避免删掉被并发推进的分支：
+
+```sh
+git push origin --force-with-lease=<branch>:<headRefOid> --delete <branch>
+```
+
+6. `git fetch --prune origin`，读回 `git branch -a` 与 `git worktree list` 确认已清理。
