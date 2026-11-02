@@ -34,7 +34,8 @@
 .spec-editor-item textarea {
   min-height: var(--space-64);
 }
-.spec-directory, .spec-history {
+.spec-directory,
+.spec-history {
   padding: var(--space-24);
   overflow-y: auto;
 }
@@ -55,7 +56,8 @@
   flex: 1;
   min-width: 0;
 }
-.spec-directory-list small, .spec-revision-meta {
+.spec-directory-list small,
+.spec-revision-meta {
   color: var(--muted);
 }
 .spec-history-controls {
@@ -87,7 +89,8 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.spec-diff-entry del, .spec-diff-entry ins {
+.spec-diff-entry del,
+.spec-diff-entry ins {
   display: block;
   margin-top: var(--space-8);
   text-decoration: none;
@@ -107,7 +110,8 @@
   gap: var(--space-8);
 }
 
-.spec-directory, .spec-history {
+.spec-directory,
+.spec-history {
   flex: 1;
   min-height: 0;
 }

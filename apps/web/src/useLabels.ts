@@ -8,9 +8,24 @@ export const emptyLabelFilter: LabelFilterValue = { mode: "any", labels: [], gro
 
 export function useLabels() {
   const capabilities = useCapabilities();
-  const { data: labels, error: labelError, reload: reloadLabels } = useResource<{ labels: Label[] }>(capabilities.labels ? apiPath("/labels?include_archived=true") : null, { labels: [] });
-  const { data: groups, error: groupError, reload: reloadGroups } = useResource<{ groups: LabelGroup[] }>(capabilities.labels ? apiPath("/label-groups") : null, { groups: [] });
-  const reload = useCallback(async () => { await Promise.all([reloadLabels(), reloadGroups()]); }, [reloadLabels, reloadGroups]);
+  const {
+    data: labels,
+    error: labelError,
+    reload: reloadLabels,
+  } = useResource<{ labels: Label[] }>(
+    capabilities.labels ? apiPath("/labels?include_archived=true") : null,
+    { labels: [] },
+  );
+  const {
+    data: groups,
+    error: groupError,
+    reload: reloadGroups,
+  } = useResource<{ groups: LabelGroup[] }>(capabilities.labels ? apiPath("/label-groups") : null, {
+    groups: [],
+  });
+  const reload = useCallback(async () => {
+    await Promise.all([reloadLabels(), reloadGroups()]);
+  }, [reloadLabels, reloadGroups]);
   return { labels: labels.labels, groups: groups.groups, error: labelError || groupError, reload };
 }
 export type Catalog = ReturnType<typeof useLabels>;

@@ -1,10 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { Spec, SpecContent } from "../../../packages/contracts/spec";
 import SpecPage from "./SpecPage";
@@ -25,9 +19,7 @@ vi.mock("./shared", async (importOriginal) => {
       const data = await response.json();
       if (!response.ok) {
         throw Object.assign(
-          new Error(
-            typeof data.error === "string" ? data.error : data.error.message,
-          ),
+          new Error(typeof data.error === "string" ? data.error : data.error.message),
           { status: response.status, code: data.error?.code },
         );
       }
@@ -39,31 +31,39 @@ const content: SpecContent = {
   title: "Real specification",
   status: "draft",
   branch: "feature/specs",
-  stories: [{
-    id: "US-1",
-    title: "Read a spec",
-    priority: "P1",
-    description: "See current content",
-    why: "Shared understanding",
-    independent_test: "Open its page",
-    scenarios: [{
-      given: "A saved spec",
-      when: "The page opens",
-      then: "Its content is visible",
-    }],
-  }],
+  stories: [
+    {
+      id: "US-1",
+      title: "Read a spec",
+      priority: "P1",
+      description: "See current content",
+      why: "Shared understanding",
+      independent_test: "Open its page",
+      scenarios: [
+        {
+          given: "A saved spec",
+          when: "The page opens",
+          then: "Its content is visible",
+        },
+      ],
+    },
+  ],
   edge_cases: ["Concurrent edits"],
-  requirements: [{
-    id: "FR-001",
-    text: "Persist revisions",
-    clarify: "Retention policy",
-  }],
+  requirements: [
+    {
+      id: "FR-001",
+      text: "Persist revisions",
+      clarify: "Retention policy",
+    },
+  ],
   entities: [{ name: "Revision", description: "Immutable snapshot" }],
   success_criteria: [{ id: "SC-001", text: "No lost updates" }],
-  clarifications: [{
-    date: "2026-11-01",
-    items: [{ question: "Source of truth?", answer: "The shared service" }],
-  }],
+  clarifications: [
+    {
+      date: "2026-11-01",
+      items: [{ question: "Source of truth?", answer: "The shared service" }],
+    },
+  ],
 };
 const spec: Spec = {
   identifier: "SPEC-42",
@@ -97,16 +97,13 @@ beforeEach(() => {
 });
 it("retains prototype template section order, title and persisted creation date", () => {
   render(<SpecDocument spec={specView(content, spec.created_at)} />);
-  expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent))
-    .toEqual([
-      "User Scenarios & Testing",
-      "Requirements",
-      "Success Criteria",
-      "Clarifications",
-    ]);
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-    content.title,
-  );
+  expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([
+    "User Scenarios & Testing",
+    "Requirements",
+    "Success Criteria",
+    "Clarifications",
+  ]);
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(content.title);
   expect(screen.getByText("2026-11-01")).toBeTruthy();
 });
 it("retains prioritized story notes and Given/When/Then scenarios", () => {
@@ -120,11 +117,10 @@ it("retains prioritized story notes and Given/When/Then scenarios", () => {
 });
 it("renders stable FR/SC IDs with clarification markers", () => {
   render(<SpecDocument spec={specView(content, spec.created_at)} />);
-  expect(document.querySelector("#FR-001 .spec-clarify")?.textContent)
-    .toContain("Retention policy");
-  expect(document.querySelector("#SC-001")?.textContent).toContain(
-    "No lost updates",
+  expect(document.querySelector("#FR-001 .spec-clarify")?.textContent).toContain(
+    "Retention policy",
   );
+  expect(document.querySelector("#SC-001")?.textContent).toContain("No lost updates");
 });
 it("preserves clarification question/answer sessions", () => {
   render(<SpecDocument spec={specView(content, spec.created_at)} />);
@@ -134,33 +130,40 @@ it("preserves clarification question/answer sessions", () => {
 it("matches revisions by stable IDs, independent of order, retaining removed entries", () => {
   const before = {
     ...content,
-    requirements: [{ id: "FR-001", text: "Old text" }, {
-      id: "FR-002",
-      text: "Removed",
-    }],
+    requirements: [
+      { id: "FR-001", text: "Old text" },
+      {
+        id: "FR-002",
+        text: "Removed",
+      },
+    ],
   };
   const after = {
     ...content,
-    requirements: [{ id: "FR-003", text: "Added" }, {
-      id: "FR-001",
-      text: "New text",
-    }],
+    requirements: [
+      { id: "FR-003", text: "Added" },
+      {
+        id: "FR-001",
+        text: "New text",
+      },
+    ],
   };
   expect(
-    compareSpecContent(before, after).filter((entry) =>
-      entry.section === "Requirement"
-    ).map((entry) => [entry.id, entry.kind]),
-  ).toEqual([["FR-001", "changed"], ["FR-002", "removed"], [
-    "FR-003",
-    "added",
-  ]]);
+    compareSpecContent(before, after)
+      .filter((entry) => entry.section === "Requirement")
+      .map((entry) => [entry.id, entry.kind]),
+  ).toEqual([
+    ["FR-001", "changed"],
+    ["FR-002", "removed"],
+    ["FR-003", "added"],
+  ]);
   expect(
     compareSpecContent(before, {
       ...before,
       requirements: [...before.requirements].reverse(),
-    }).filter((entry) => entry.section === "Requirement").every((entry) =>
-      entry.kind === "unchanged"
-    ),
+    })
+      .filter((entry) => entry.section === "Requirement")
+      .every((entry) => entry.kind === "unchanged"),
   ).toBe(true);
 });
 it("retains drafts through conflicts and requires explicit latest-revision review before retry", async () => {
@@ -172,18 +175,21 @@ it("retains drafts through conflicts and requires explicit latest-revision revie
         const body = JSON.parse(String(init.body));
         writes.push(body);
         return writes.length === 1
-          ? json({
-            error: { code: "conflict", message: "Spec revision conflict" },
-          }, 409)
+          ? json(
+              {
+                error: { code: "conflict", message: "Spec revision conflict" },
+              },
+              409,
+            )
           : json({ ...spec, revision: 3, content: body.content });
       }
       return json(
         writes.length > 0
           ? {
-            ...spec,
-            revision: 2,
-            content: { ...content, title: "Server changed title" },
-          }
+              ...spec,
+              revision: 2,
+              content: { ...content, title: "Server changed title" },
+            }
           : spec,
       );
     }),
@@ -195,38 +201,35 @@ it("retains drafts through conflicts and requires explicit latest-revision revie
     target: { value: "My unsaved title" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Save revision" }));
-  expect(await screen.findByText(/The server has a newer revision/))
-    .toBeTruthy();
-  expect(
-    (screen.getByRole("textbox", { name: "Title" }) as HTMLInputElement).value,
-  ).toBe("My unsaved title");
+  expect(await screen.findByText(/The server has a newer revision/)).toBeTruthy();
+  expect((screen.getByRole("textbox", { name: "Title" }) as HTMLInputElement).value).toBe(
+    "My unsaved title",
+  );
   expect(writes[0].base_revision).toBe(1);
   expect(writes[0].content.stories).toEqual(content.stories);
   expect(
-    (screen.getByRole("button", { name: "Save revision" }) as HTMLButtonElement)
-      .disabled,
+    (screen.getByRole("button", { name: "Save revision" }) as HTMLButtonElement).disabled,
   ).toBe(true);
-  fireEvent.click(
-    screen.getByRole("button", { name: "Review latest revision" }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Review latest revision" }));
   fireEvent.click(
     await screen.findByRole("button", {
       name: "Use revision 2 as base, keep my draft",
     }),
   );
   fireEvent.click(screen.getByRole("button", { name: "Save revision" }));
-  expect(
-    await screen.findByRole("heading", { name: "My unsaved title", level: 1 }),
-  ).toBeTruthy();
+  expect(await screen.findByRole("heading", { name: "My unsaved title", level: 1 })).toBeTruthy();
   expect(writes[1].base_revision).toBe(2);
 });
 it("reads immutable history and compares stable requirements", async () => {
   const old = {
     ...content,
-    requirements: [{ id: "FR-001", text: "Old text" }, {
-      id: "FR-002",
-      text: "Removed text",
-    }],
+    requirements: [
+      { id: "FR-001", text: "Old text" },
+      {
+        id: "FR-002",
+        text: "Removed text",
+      },
+    ],
   };
   vi.stubGlobal(
     "fetch",
@@ -254,19 +257,14 @@ it("reads immutable history and compares stable requirements", async () => {
     }),
   );
   render(<SpecPage id="SPEC-42" />);
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Revision history" }),
-  );
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Compare revisions" }),
-  );
+  fireEvent.click(await screen.findByRole("button", { name: "Revision history" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Compare revisions" }));
   expect(
     await screen.findByRole("heading", {
       name: "Requirement FR-001 · changed",
     }),
   ).toBeTruthy();
-  expect(screen.getByRole("heading", { name: "Requirement FR-002 · removed" }))
-    .toBeTruthy();
+  expect(screen.getByRole("heading", { name: "Requirement FR-002 · removed" })).toBeTruthy();
 });
 it("creates using REST and navigates to the returned identifier", async () => {
   history.replaceState(null, "", "/demo/specs");
@@ -288,9 +286,7 @@ it("creates using REST and navigates to the returned identifier", async () => {
     target: { value: "Created via UI" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Create spec" }));
-  await waitFor(() =>
-    expect(window.location.pathname).toBe("/demo/spec/SPEC-42")
-  );
+  await waitFor(() => expect(window.location.pathname).toBe("/demo/spec/SPEC-42"));
   expect(created?.team).toBe("AL");
   expect(created?.content.title).toBe("Created via UI");
   expect(workspaceRoute("/demo/specs")).toEqual({ kind: "specs", team: "" });
@@ -303,20 +299,14 @@ it("retries missing/forbidden reads without substituting prototype content", asy
   let failed = true;
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () =>
-      failed ? json({ error: "Spec not found" }, 404) : json(spec)
-    ),
+    vi.fn(async () => (failed ? json({ error: "Spec not found" }, 404) : json(spec))),
   );
   render(<SpecPage id="SPEC-42" />);
-  expect(await screen.findByRole("alert")).toHaveProperty(
-    "textContent",
-    "Spec not found",
-  );
+  expect(await screen.findByRole("alert")).toHaveProperty("textContent", "Spec not found");
   expect(screen.queryByRole("heading", { name: content.title })).toBeNull();
   failed = false;
   fireEvent.click(screen.getByRole("button", { name: "Retry spec" }));
-  expect(await screen.findByRole("heading", { name: content.title }))
-    .toBeTruthy();
+  expect(await screen.findByRole("heading", { name: content.title })).toBeTruthy();
 });
 
 it("rebases only form edits while preserving newer server content in untouched sections", () => {
@@ -339,15 +329,15 @@ it("keeps independently added server IDs when a reviewed draft edits another req
   };
   const latest = {
     ...content,
-    requirements: [...content.requirements, {
-      id: "FR-002",
-      text: "Added on server",
-    }],
+    requirements: [
+      ...content.requirements,
+      {
+        id: "FR-002",
+        text: "Added on server",
+      },
+    ],
   };
   const merged = rebaseSpecDraft(content, draft, latest);
-  expect(merged.requirements.map((entry) => entry.id)).toEqual([
-    "FR-001",
-    "FR-002",
-  ]);
+  expect(merged.requirements.map((entry) => entry.id)).toEqual(["FR-001", "FR-002"]);
   expect(merged.requirements[0].text).toBe("My requirement edit");
 });

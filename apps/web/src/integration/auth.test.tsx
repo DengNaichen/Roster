@@ -18,24 +18,22 @@ vi.mock("./api", () => ({
   supabase: {
     auth: {
       getSession: vi.fn(async () => ({ data: { session }, error: null })),
-      onAuthStateChange: vi.fn(
-        (callback: (event: string, session: unknown) => void) => {
-          auth.callback = callback;
-          return { data: { subscription: { unsubscribe: vi.fn() } } };
-        },
-      ),
+      onAuthStateChange: vi.fn((callback: (event: string, session: unknown) => void) => {
+        auth.callback = callback;
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      }),
       oauth: {
         getAuthorizationDetails: vi.fn(async () =>
           auth.oauthError
             ? { data: null, error: new Error("Consent unavailable") }
             : {
-              data: {
-                authorization_id: "stale-id",
-                client: { name: "Stale client" },
-                scope: "openid",
+                data: {
+                  authorization_id: "stale-id",
+                  client: { name: "Stale client" },
+                  scope: "openid",
+                },
+                error: null,
               },
-              error: null,
-            }
         ),
         approveAuthorization: vi.fn(),
         denyAuthorization: vi.fn(),
@@ -66,9 +64,7 @@ describe("authentication recovery", () => {
     await act(async () => {
       auth.callback?.("SIGNED_IN", session);
     });
-    await waitFor(() =>
-      expect(screen.queryByText(/Your unsaved text stays here/)).toBeNull()
-    );
+    await waitFor(() => expect(screen.queryByText(/Your unsaved text stays here/)).toBeNull());
     expect(screen.getByRole("textbox", { name: "Draft" })).toBe(draft);
   });
 });
@@ -92,29 +88,19 @@ it("remounts the app when a different user signs in", async () => {
   expect(screen.getByRole("textbox", { name: "Draft" })).not.toBe(before);
 });
 it("does not approve stale authorization details", async () => {
-  window.history.replaceState(
-    {},
-    "",
-    "/oauth/consent?authorization_id=current-id",
-  );
+  window.history.replaceState({}, "", "/oauth/consent?authorization_id=current-id");
   render(
     <AuthBoundary>
       <p>Application</p>
     </AuthBoundary>,
   );
   const approve = await screen.findByRole("button", { name: "Approve" });
-  await waitFor(() =>
-    expect((approve as HTMLButtonElement).disabled).toBe(true)
-  );
+  await waitFor(() => expect((approve as HTMLButtonElement).disabled).toBe(true));
   expect(screen.queryByText("Stale client")).toBeNull();
 });
 it("shows consent errors without a loading message", async () => {
   auth.oauthError = true;
-  window.history.replaceState(
-    {},
-    "",
-    "/oauth/consent?authorization_id=current-id",
-  );
+  window.history.replaceState({}, "", "/oauth/consent?authorization_id=current-id");
   render(
     <AuthBoundary>
       <p>Application</p>

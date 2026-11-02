@@ -5,19 +5,45 @@ import { ProjectDialog } from "./ProjectManagement";
 import { Project } from "./shared";
 import { json } from "./test/fixtures";
 
-const project: Project = { id: 1, name: "Release", description: "", teams: ["AL"], archived: false, emoji: "", start_date: "2026-10-01", target_date: "2026-10-31" };
+const project: Project = {
+  id: 1,
+  name: "Release",
+  description: "",
+  teams: ["AL"],
+  archived: false,
+  emoji: "",
+  start_date: "2026-10-01",
+  target_date: "2026-10-31",
+};
 beforeEach(() => {
- window.history.replaceState(null, "", "/default/projects");
- HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
- HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+  window.history.replaceState(null, "", "/default/projects");
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
 });
 
 it("shows complete, single-date and unscheduled projects, and switches scale", () => {
   const edit = vi.fn();
-  render(<ProjectTimeline projects={[project, { ...project, id: 2, name: "Launch", start_date: undefined }, { ...project, id: 3, name: "Later", start_date: undefined, target_date: undefined }]} onEdit={edit} />);
+  render(
+    <ProjectTimeline
+      projects={[
+        project,
+        { ...project, id: 2, name: "Launch", start_date: undefined },
+        { ...project, id: 3, name: "Later", start_date: undefined, target_date: undefined },
+      ]}
+      onEdit={edit}
+    />,
+  );
   fireEvent.change(screen.getByLabelText("Go to date"), { target: { value: "2026-10-14" } });
-  expect(screen.getByRole("link", { name: "Release" }).getAttribute("href")).toBe("/default/project/1");
-  expect(screen.getByRole("button", { name: /Edit schedule for Launch/ }).className).toContain("timeline-point");
+  expect(screen.getByRole("link", { name: "Release" }).getAttribute("href")).toBe(
+    "/default/project/1",
+  );
+  expect(screen.getByRole("button", { name: /Edit schedule for Launch/ }).className).toContain(
+    "timeline-point",
+  );
   fireEvent.click(screen.getByRole("button", { name: "Weeks" }));
   expect(screen.getByRole("button", { name: "Weeks" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Set dates" }));

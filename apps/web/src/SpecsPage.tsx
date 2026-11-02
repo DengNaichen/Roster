@@ -3,21 +3,12 @@ import { FileText } from "lucide-react";
 import { useState } from "react";
 import type { SpecSummary } from "../../../packages/contracts/spec";
 import { PageHeader } from "./PageHeader";
-import {
-  apiPath,
-  navigate,
-  NavLink,
-  pagePath,
-  RequestError,
-  Team,
-} from "./shared";
+import { apiPath, navigate, NavLink, pagePath, RequestError, Team } from "./shared";
 import { useResource } from "./useResource";
 import { SpecEditor } from "./SpecEditor";
 import { emptySpec } from "./specView";
 import "./spec-interaction.css";
-export default function SpecsPage(
-  { team, teams }: { team: string; teams: Team[] },
-) {
+export default function SpecsPage({ team, teams }: { team: string; teams: Team[] }) {
   const resource = useResource<{ specs: SpecSummary[] }>(
     apiPath(`/specs${team ? `?team=${encodeURIComponent(team)}` : ""}`),
     { specs: [] },
@@ -42,15 +33,21 @@ export default function SpecsPage(
       </PageHeader>
       <section className="spec-directory" aria-label="Specs directory">
         <label>
-          Team scope<Dropdown
+          Team scope
+          <Dropdown
             variant="block"
             aria-label="Team scope"
             value={team}
             onChange={(next) =>
-              navigate(pagePath(
-                next ? `/team/${encodeURIComponent(next)}/specs` : "/specs",
-              ))}
-            options={[{ value: "", label: "All teams" }, ...visibleTeams.map((item) => ({ value: item.key, label: `${item.name} (${item.key})` }))]}
+              navigate(pagePath(next ? `/team/${encodeURIComponent(next)}/specs` : "/specs"))
+            }
+            options={[
+              { value: "", label: "All teams" },
+              ...visibleTeams.map((item) => ({
+                value: item.key,
+                label: `${item.name} (${item.key})`,
+              })),
+            ]}
           />
         </label>
         {resource.error && (
@@ -62,29 +59,20 @@ export default function SpecsPage(
           </>
         )}
         {resource.loading && <p className="empty">Loading specs…</p>}
-        {!resource.loading && !resource.error &&
-          resource.data.specs.length === 0 && (
+        {!resource.loading && !resource.error && resource.data.specs.length === 0 && (
           <p className="empty">No specs in this scope yet.</p>
         )}
         {visibleTeams.length === 0 && (
-          <p className="dialog-hint">
-            Create or join a team before creating a spec.
-          </p>
+          <p className="dialog-hint">Create or join a team before creating a spec.</p>
         )}
         <div className="spec-directory-list">
           {resource.data.specs.map((spec) => (
-            <NavLink
-              key={spec.identifier}
-              to={pagePath(`/spec/${spec.identifier}`)}
-            >
+            <NavLink key={spec.identifier} to={pagePath(`/spec/${spec.identifier}`)}>
               <span className="spec-id">{spec.identifier}</span>
               <strong>{spec.title}</strong>
-              <span className={`spec-status ${spec.status}`}>
-                {spec.status}
-              </span>
+              <span className={`spec-status ${spec.status}`}>{spec.status}</span>
               <small>
-                {spec.team} · r{spec.revision} ·{" "}
-                {new Date(spec.updated_at).toLocaleDateString()}
+                {spec.team} · r{spec.revision} · {new Date(spec.updated_at).toLocaleDateString()}
               </small>
             </NavLink>
           ))}

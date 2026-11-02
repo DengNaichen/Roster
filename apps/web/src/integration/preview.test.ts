@@ -11,18 +11,13 @@ describe("local preview boundary", () => {
     expect(isLocalPreview(false, "true", "localhost")).toBe(false);
     expect(isLocalPreview(false, "true", "127.0.0.1")).toBe(false);
   });
-  it.each([
-    "roster.example.com",
-    "localhost.example.com",
-    "127.0.0.1.example.com",
-    "",
-  ])("rejects remote or unknown host %s", (hostname) => {
-    expect(isLocalPreview(true, "true", hostname)).toBe(false);
-  });
-  it.each([undefined, "false", "TRUE", ""])(
-    "requires literal opt-in %s",
-    (flag) => {
-      expect(isLocalPreview(true, flag, "localhost")).toBe(false);
+  it.each(["roster.example.com", "localhost.example.com", "127.0.0.1.example.com", ""])(
+    "rejects remote or unknown host %s",
+    (hostname) => {
+      expect(isLocalPreview(true, "true", hostname)).toBe(false);
     },
   );
+  it.each([undefined, "false", "TRUE", ""])("requires literal opt-in %s", (flag) => {
+    expect(isLocalPreview(true, flag, "localhost")).toBe(false);
+  });
 });
