@@ -4,8 +4,10 @@ import { isValidEmoji } from '../../../contracts/catalog.ts';
 import { AppError, type RequestContext } from '../../../contracts/mod.ts';
 import { createDatabase } from '../platform/database/client.ts';
 import { rows } from '../platform/database/query.ts';
+import { createUnitOfWork } from '../platform/database/session.ts';
 import { hydrateIssueCatalog } from './issues/index.ts';
-import { buildLabelFilter, createLabelService } from './labels/index.ts';
+import { createLabelService } from './labels/index.ts';
+import { buildLabelFilter } from './labels/postgres.ts';
 import { createPlanningService, resolveIssueProject } from './planning/index.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
@@ -44,7 +46,10 @@ Deno.test({
     runtimeUrl.searchParams.set('options', '-c role=roster_app');
     const runtime = createDatabase(runtimeUrl.toString());
     const db = runtime.db;
-    const catalog = { ...createPlanningService(db), ...createLabelService(db) };
+    const catalog = {
+      ...createPlanningService(createUnitOfWork(db)),
+      ...createLabelService(createUnitOfWork(db)),
+    };
     const people: RequestContext[] = ['Owner', 'Member', 'Admin'].map((name) => ({
       identity: { subject: crypto.randomUUID(), name, email: `${name}@example.test` },
     }));
@@ -216,36 +221,49 @@ Deno.test({
             undefined,
           );
           equal(
-            await resolveIssueProject(db, owner, wid, ts.PUB, { project_id: publicId }, null),
+            await resolveIssueProject(createUnitOfWork(db), owner, wid, ts.PUB, {
+              project_id: publicId,
+            }, null),
             publicId,
           );
           await catalog.updateProject(owner, slug, { id: publicId, archived: true });
           await rejects(
-            () => resolveIssueProject(db, owner, wid, ts.PUB, { project_id: publicId }, null),
+            () =>
+              resolveIssueProject(createUnitOfWork(db), owner, wid, ts.PUB, {
+                project_id: publicId,
+              }, null),
             'conflict',
           );
           equal(
-            await resolveIssueProject(db, owner, wid, ts.PUB, { project_id: publicId }, publicId),
+            await resolveIssueProject(createUnitOfWork(db), owner, wid, ts.PUB, {
+              project_id: publicId,
+            }, publicId),
             publicId,
           );
           equal(
-            await resolveIssueProject(db, owner, wid, ts.PUB, { project_id: 0 }, publicId),
+            await resolveIssueProject(
+              createUnitOfWork(db),
+              owner,
+              wid,
+              ts.PUB,
+              { project_id: 0 },
+              publicId,
+            ),
             null,
           );
           await rejects(
-            () => resolveIssueProject(db, owner, wid, ts.ALT, { project_id: publicId }, null),
+            () =>
+              resolveIssueProject(createUnitOfWork(db), owner, wid, ts.ALT, {
+                project_id: publicId,
+              }, null),
             'invalid_input',
           );
           await rejects(
             () =>
-              resolveIssueProject(
-                db,
-                owner,
-                wid,
-                ts.PUB,
-                { project_id: publicId, project: '' },
-                null,
-              ),
+              resolveIssueProject(createUnitOfWork(db), owner, wid, ts.PUB, {
+                project_id: publicId,
+                project: '',
+              }, null),
             'invalid_input',
           );
           equal((await catalog.listProjects(member, slug)).some((p) => p.id === publicId), false);
@@ -365,7 +383,9 @@ Deno.test({
             add: [first, first, loose],
           });
           await catalog.changeIssueLabels(member, slug, { identifiers: ['PUB-1'], add: [second] });
-          const hydrated = await hydrateIssueCatalog(db, member, wid, [{ id: issueIds['PUB-1'] }]);
+          const hydrated = await hydrateIssueCatalog(createUnitOfWork(db), member, wid, [{
+            id: issueIds['PUB-1'],
+          }]);
           equal(
             (hydrated[0].labels as { id: number }[]).map((l) => l.id).sort((a, b) => a - b),
             [second, loose].sort((a, b) => a - b),

@@ -1,1 +1,3 @@
-export { createPlanningService, resolveIssueProject, visibleProject } from './service.ts';
+export { createPlanningService, resolveIssueProject } from './application/service.ts';
+
+export type { PlanningRepository } from './application/repository.ts';

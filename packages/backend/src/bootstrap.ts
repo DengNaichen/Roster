@@ -1,8 +1,8 @@
 import { createIdentityVerifier } from './platform/auth/jwt.ts';
 import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
-import { createHttpApp } from './transport/http.ts';
-import { createMcpFetch } from './transport/mcp.ts';
+import { createHttpApp } from './transport/http/app.ts';
+import { createMcpFetch } from './transport/mcp/server.ts';
 export type Environment = Record<string, string | undefined>;
 function required(env: Environment, key: string) {
   const value = env[key]?.trim();

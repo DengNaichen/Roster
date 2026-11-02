@@ -1,5 +1,5 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { importLinear } from '../packages/backend/src/integrations/import-linear.ts';
+import { importLinear } from '../packages/backend/src/integrations/imports/postgres.ts';
 const [slug, team, directory] = Deno.args;
 if (!slug || !team || !directory || !Deno.env.get('DATABASE_URL')) {
   throw new Error(

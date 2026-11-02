@@ -3,7 +3,7 @@ import { AppError, type RequestContext } from '../../contracts/mod.ts';
 import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from './test_support.ts';
-import { createHttpApp } from './transport/http.ts';
+import { createHttpApp } from './transport/http/app.ts';
 
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);

@@ -2,6 +2,7 @@ import { Pool } from 'npm:pg@8.23.1';
 import { AppError, type RequestContext } from '../../contracts/mod.ts';
 import { advanceAllCycles, cycleBoundary } from './modules/cycles/index.ts';
 import { createDatabase } from './platform/database/client.ts';
+import { createUnitOfWork } from './platform/database/session.ts';
 import { createService } from './service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from './test_support.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
@@ -142,7 +143,7 @@ Deno.test({
       });
       assert(renamed.name === 'Sprint one');
       clock = new Date('2026-03-23T12:00:00Z');
-      await advanceAllCycles(runtime.db, clock);
+      await advanceAllCycles(createUnitOfWork(runtime.db), clock);
       page = await s.listCycles(owner, w.slug, 'AA');
       const closed = page.cycles.find((c) => c.id === first.id)!;
       const current = page.cycles.find((c) => c.state === 'current')!;

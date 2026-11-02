@@ -2,6 +2,8 @@ export {
   advanceAllCycles,
   advanceTeamCycles,
   createCycleService,
-  cycleBoundary,
   validateIssueCycle,
-} from './service.ts';
+} from './application/service.ts';
+
+export type { CyclesRepository } from './application/repository.ts';
+export { cycleBoundary } from './domain/calendar.ts';

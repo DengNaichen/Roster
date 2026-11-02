@@ -1,1 +1,4 @@
-export { createSpecService, encodeSpec } from './service.ts';
+export { createSpecService } from './application/service.ts';
+
+export type { SpecsRepository } from './application/repository.ts';
+export { encodeSpec } from './domain/content.ts';

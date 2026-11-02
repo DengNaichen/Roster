@@ -3,14 +3,17 @@ import { type Issue, type RequestContext, statuses } from '../../../../../contra
 import type { Service } from '../../../application/mod.ts';
 import type { Database } from '../../../platform/database/client.ts';
 import { type Executor, one, type Row, rows } from '../../../platform/database/query.ts';
+import { createSession } from '../../../platform/database/session.ts';
 import { fail } from '../../../platform/errors/validation.ts';
 import { iso } from '../../../platform/time.ts';
-import { visible, workspace } from '../../access/index.ts';
+import { workspace } from '../../access/index.ts';
+import { visible } from '../../access/postgres.ts';
 import { hydrateIssueActivity } from '../../activity/index.ts';
-import { buildLabelFilter } from '../../labels/index.ts';
-import { visibleProject } from '../../planning/index.ts';
+import { buildLabelFilter } from '../../labels/postgres.ts';
+import { visibleProject } from '../../planning/postgres.ts';
+import { issueDTO } from '../domain/mapper.ts';
 import { hydrateIssueCatalog } from './catalog-query.ts';
-import { issueDTO, issueSelect, readIssue } from './read-model.ts';
+import { issueSelect, readIssue } from './read-model.ts';
 
 export async function assignee(
   db: Executor,
@@ -81,9 +84,10 @@ export async function validateParent(
 }
 
 export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | 'getIssue'> {
+  const session = createSession(db);
   return {
     async listIssues(ctx, slug, input = {}) {
-      const w = await workspace(db, ctx, slug);
+      const w = await workspace(session, ctx, slug);
       const limit = input.limit === undefined || input.limit === 0 ? 50 : input.limit;
       if (!Number.isSafeInteger(limit)) fail('invalid_input', 'Limit must be an integer');
       const all = limit < 0;
@@ -190,7 +194,7 @@ export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | '
       };
     },
     async getIssue(ctx, slug, identifier) {
-      const w = await workspace(db, ctx, slug);
+      const w = await workspace(session, ctx, slug);
       const r = await readIssue(db, ctx, w, identifier);
       const events = await rows(
         db,
@@ -214,7 +218,7 @@ export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | '
           ReturnType<Service['getIssue']>
         >['audit'],
       };
-      return hydrateIssueActivity(db, ctx, w, detail);
+      return hydrateIssueActivity(session, ctx, w, detail);
     },
   };
 }

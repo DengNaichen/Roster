@@ -1,13 +1,14 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import type { Database } from '../../../platform/database/client.ts';
 import { one, type Row } from '../../../platform/database/query.ts';
-import { team, workspace } from '../../access/index.ts';
+import { createSession } from '../../../platform/database/session.ts';
+import { allocateIssueNumber, team, workspace } from '../../access/index.ts';
 import { audit } from '../../audit/index.ts';
 import { validateIssueCycle } from '../../cycles/index.ts';
 import { resolveIssueProject } from '../../planning/index.ts';
 import type { IssueDependencies, IssueSnapshot, StoredIssue } from '../application/ports.ts';
-import { readIssue } from './read-model.ts';
 import { assignee, createIssueQueries, hydrateCoreIssues, validateParent } from './queries.ts';
+import { readIssue } from './read-model.ts';
 
 function snapshot(row: Row): IssueSnapshot {
   return {
@@ -25,27 +26,23 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
   return {
     ...createIssueQueries(db),
     transaction: (run) =>
-      db.transaction((tx) =>
-        run({
-          workspace: async (ctx, slug) => await workspace(tx, ctx, slug, true) as { id: string },
+      db.transaction((tx) => {
+        const session = createSession(tx);
+        return run({
+          workspace: async (ctx, slug) =>
+            await workspace(session, ctx, slug, true) as { id: string },
           team: async (ctx, w, key) =>
-            await team(tx, ctx, w, key) as { id: string; private: boolean },
+            await team(session, ctx, w, key) as { id: string; private: boolean },
           read: async (ctx, w, id) => snapshot(await readIssue(tx, ctx, w, id)),
           assignee: (w, t, subject) => assignee(tx, w, t, subject),
           project: (ctx, w, t, input, current) =>
-            resolveIssueProject(tx, ctx, w.id, t.id, input, current),
-          cycle: (t, input, current, now) => validateIssueCycle(tx, t, input, current, now),
+            resolveIssueProject(session, ctx, w.id, t.id, input, current),
+          cycle: (t, input, current, now) => validateIssueCycle(session, t, input, current, now),
           parent: async (ctx, w, input, current) => {
             const id = await validateParent(tx, ctx, w, input, current);
             return id == null ? null : String(id);
           },
-          nextNumber: async (t) =>
-            Number(
-              (await one(
-                tx,
-                sql`update roster.teams set next_number=next_number+1 where id=${t.id} returning next_number-1 as n`,
-              )).n,
-            ),
+          nextNumber: (t) => allocateIssueNumber(session, t.id),
           insert: async (w, t, number, input, refs) => {
             const row = await one(
               tx,
@@ -75,9 +72,10 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
               },assignee_subject=${refs.assignee},project_id=${refs.project},cycle_id=${refs.cycle},parent_id=${refs.parent},updated_at=clock_timestamp() where id=${r.id}`,
             );
           },
-          audit: (ctx, w, kind, before, after) => audit(tx, ctx, w, kind, before, after, after.id),
+          audit: (ctx, w, kind, before, after) =>
+            audit(session, ctx, w, kind, before, after, after.id),
           output: async (ctx, w, r) => (await hydrateCoreIssues(tx, ctx, w, [r]))[0],
-        })
-      ),
+        });
+      }),
   };
 }

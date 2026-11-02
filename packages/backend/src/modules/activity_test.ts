@@ -2,10 +2,11 @@ import { Pool } from 'npm:pg@8.23.1';
 import { AppError, type RequestContext } from '../../../contracts/mod.ts';
 import type { Service } from '../application/mod.ts';
 import { createDatabase } from '../platform/database/client.ts';
+import { createUnitOfWork } from '../platform/database/session.ts';
 import { createService } from '../service.ts';
 import { prepareTestDatabase } from '../test_support.ts';
-import { createHttpApp } from '../transport/http.ts';
-import { createMcpFetch } from '../transport/mcp.ts';
+import { createHttpApp } from '../transport/http/app.ts';
+import { createMcpFetch } from '../transport/mcp/server.ts';
 import { workspace } from './access/index.ts';
 import { createActivityService, hydrateIssueActivity } from './activity/index.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
@@ -46,7 +47,7 @@ Deno.test({
       runtime = createDatabase(runtimeUrl.toString());
       const db = runtime.db;
       const core = createService(db);
-      const activity = createActivityService(db);
+      const activity = createActivityService(createUnitOfWork(db));
       const service = { ...core, ...activity } as Service;
       const ctx = (name: string): RequestContext => ({
         identity: { subject: crypto.randomUUID(), name, email: `${name}@example.test` },
@@ -231,9 +232,9 @@ Deno.test({
         'Concurrent DAG writers must reject one edge',
       );
       const detail = await hydrateIssueActivity(
-        db,
+        createUnitOfWork(db),
         member,
-        await workspace(db, member, slug),
+        await workspace(createUnitOfWork(db), member, slug),
         await core.getIssue(member, slug, a.identifier),
       );
       assert(
@@ -245,9 +246,9 @@ Deno.test({
         'Private relation targets must be hidden',
       );
       const owned = await hydrateIssueActivity(
-        db,
+        createUnitOfWork(db),
         owner,
-        await workspace(db, owner, slug),
+        await workspace(createUnitOfWork(db), owner, slug),
         await core.getIssue(owner, slug, a.identifier),
       );
       assert(owned.blocks[0].identifier === secret.identifier);
@@ -358,7 +359,7 @@ Deno.test({
         logs.work_logs.some((log: { summary: string }) => log.summary === 'MCP decision'),
         'MCP work logs must be readable through REST',
       );
-      const workspaceId = (await workspace(db, owner, slug)).id;
+      const workspaceId = (await workspace(createUnitOfWork(db), owner, slug)).id;
       await runtime.pool.query(
         'insert into roster.comments(workspace_id,issue_id,body,actor_subject,author) values($1,$2,$3,null,$4)',
         [workspaceId, a.id, 'Imported comment', 'Historical Author'],
@@ -392,7 +393,7 @@ Deno.test({
       let denied = false;
       try {
         await runtime.pool.query('insert into roster.relations values($1,$2,$3,$4)', [
-          (await workspace(db, owner, slug)).id,
+          (await workspace(createUnitOfWork(db), owner, slug)).id,
           a.id,
           'related',
           other.id,

@@ -2,13 +2,8 @@ import { Pool } from 'npm:pg@8.23.1';
 import { createDatabase } from '../platform/database/client.ts';
 import { createService } from '../service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
-import {
-  createGitHubSync,
-  githubWebhook,
-  identifiers,
-  parseBindings,
-  type Pull,
-} from './github.ts';
+import { githubWebhook, identifiers, parseBindings, type Pull } from './github/index.ts';
+import { createGitHubIntegration } from './github/postgres.ts';
 const assert = (v: unknown, m = 'Assertion failed') => {
   if (!v) throw new Error(m);
 };
@@ -113,7 +108,7 @@ Deno.test({
         updated_at: '2026-01-01T00:00:00Z',
         head: { ref: 'feature/' + issue.identifier },
       }];
-      const sync = createGitHubSync(runtime.db, {
+      const sync = createGitHubIntegration(runtime.db, {
         bindings: [binding],
         token: 'fake-test-token',
         linkback: true,

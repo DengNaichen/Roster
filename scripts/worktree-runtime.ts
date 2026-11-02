@@ -344,7 +344,7 @@ async function preview(part: string): Promise<void> {
   };
   const command = part === 'api'
     ? new Deno.Command(Deno.execPath(), {
-      args: ['run', '--allow-env', '--allow-net', 'scripts/preview.ts'],
+      args: ['run', '--allow-env', '--allow-net', 'apps/server/preview.ts'],
       cwd: root,
       env: {
         DATABASE_URL: env.DATABASE_URL,

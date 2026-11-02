@@ -6,7 +6,9 @@ export {
   saveIdentity,
   team,
   teamDTO,
-  visible,
   workspace,
-} from './context.ts';
-export { createAccessService } from './service.ts';
+} from './application/context.ts';
+export { createAccessService } from './application/service.ts';
+
+export { allocateIssueNumber, ensureGitHubIdentity, lockWorkspace } from './application/context.ts';
+export type { AccessRepository } from './application/repository.ts';

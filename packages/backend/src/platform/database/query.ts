@@ -1,7 +1,8 @@
 import type { SQL } from 'npm:drizzle-orm@0.45.4';
 import { fail } from '../errors/validation.ts';
 import type { Database } from './client.ts';
-export type Row = Record<string, unknown>;
+import type { Row } from '../../application/records.ts';
+export type { Row } from '../../application/records.ts';
 export type Executor = Pick<Database, 'execute'>;
 export async function rows(db: Executor, query: SQL): Promise<Row[]> {
   return (await db.execute(query)).rows as Row[];
