@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && deno task worktree:setup --if-needed",
+            "command": "cd \"${CLAUDE_PROJECT_DIR}\" && node scripts/toolchain.mjs setup && node scripts/toolchain.mjs deno task worktree:setup --if-needed",
             "timeout": 600
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "deno run --allow-env --allow-net --allow-read --allow-write --allow-run \"${CLAUDE_PROJECT_DIR}/scripts/worktree-runtime.ts\" cleanup-hook",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/toolchain.mjs\" deno run --allow-env --allow-net --allow-read --allow-write --allow-run \"${CLAUDE_PROJECT_DIR}/scripts/worktree-runtime.ts\" cleanup-hook",
             "timeout": 180
           }
         ]

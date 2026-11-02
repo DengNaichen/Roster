@@ -89,7 +89,7 @@ git -C "$primary" merge-base --is-ancestor "$merge_commit" origin/main ||
 
 if [ -n "$worktree" ]; then
 	step "Clean the worktree runtime and remove $worktree"
-	run sh -c "cd \"\$1\" && deno task worktree:clean" sh "$worktree"
+	run sh -c "cd \"\$1\" && node scripts/toolchain.mjs deno task worktree:clean" sh "$worktree"
 	run git -C "$primary" worktree remove "$worktree"
 else
 	step "No worktree checks out $branch"

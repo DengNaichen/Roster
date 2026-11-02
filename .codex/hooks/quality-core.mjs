@@ -42,7 +42,9 @@ function readStates(dir) {
       !['active', 'checking', 'pending', 'done', 'interrupted'].includes(state.status) ||
       ![0, 1].includes(state.retries) || !validId(state.generation)
     ) {
-      throw new Error('Invalid hook state; run pnpm check manually and inspect local hook state.');
+      throw new Error(
+        'Invalid hook state; run node scripts/toolchain.mjs check manually and inspect local hook state.',
+      );
     }
     if (f !== `${stateKey(state.root, state.session, state.turn)}.json`) {
       throw new Error('Hook state identity mismatch');
@@ -93,7 +95,11 @@ function fingerprint(root) {
   }
   return digest.digest('hex');
 }
-export function runCheck(root, timeout = 100_000, command = ['corepack', 'pnpm', 'check']) {
+export function runCheck(
+  root,
+  timeout = 100_000,
+  command = [process.execPath, path.join(root, 'scripts/toolchain.mjs'), 'check'],
+) {
   return new Promise((resolve) => {
     const child = spawn(command[0], command.slice(1), {
       cwd: root,
@@ -257,7 +263,7 @@ async function handleEvent(event, check) {
     if (collision || changedDuringCheck) {
       save(dir, current);
       return warning(
-        'Shared worktree activity or file changes during checks detected. Automatic repair disabled; rerun pnpm check in an isolated worktree.',
+        'Shared worktree activity or file changes during checks detected. Automatic repair disabled; rerun node scripts/toolchain.mjs check in an isolated worktree.',
       );
     }
     if (unlinkedContinuation) {
@@ -273,7 +279,7 @@ async function handleEvent(event, check) {
       return {};
     }
     const message =
-      `Checks failed. Run corepack pnpm format:write if needed, fix the diagnostics, then corepack pnpm check. Do not modify unrelated changes.\n${
+      `Checks failed. Run node scripts/toolchain.mjs format:write if needed, fix the diagnostics, then node scripts/toolchain.mjs check. Do not modify unrelated changes.\n${
         bounded(result.output)
       }`;
     if (event.stop_hook_active || current.retries >= 1) {

@@ -16,10 +16,15 @@
     "format:write": "biome format --write apps/web && deno task format:write",
     "typecheck": "pnpm --filter @roster/web typecheck && deno task check",
     "test:architecture": "deno test --allow-read packages/backend/src/architecture_test.ts",
-    "test:hooks": "node --test .codex/hooks/quality.test.mjs",
+    "test:hooks": "node --test .codex/hooks/quality.test.mjs scripts/toolchain.test.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:architecture && pnpm test:hooks"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.7"
+    "@biomejs/biome": "2.5.7",
+    "deno": "2.9.6",
+    "pnpm": "10.20.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

@@ -14,7 +14,7 @@ try {
       JSON.stringify({
         systemMessage: `Roster quality checks incomplete: ${
           String(error.message).slice(0, 2000)
-        }. Run corepack pnpm check manually; no automatic continuation was requested.`,
+        }. Run node scripts/toolchain.mjs check manually; no automatic continuation was requested.`,
       })
     }\n`,
   );

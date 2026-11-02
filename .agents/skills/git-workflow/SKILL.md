@@ -40,7 +40,7 @@ scripts/new-worktree <branch> [--base <ref>] [--no-setup]
 - 新分支以 `--no-track` 创建，不会把 `origin/main` 继承为 upstream；首次推送时用 `git push -u origin <branch>` 设置自己的 upstream。
 - 已有分支直接检出，此时不要传 `--base`。
 - Git 创建失败不自动删除分支；检查 `git worktree list`、分支 tip 与目标路径后再重试。
-- 创建后自动在新 worktree 根运行 `deno task worktree:setup`；setup 失败时保留 worktree，修复原因后在其根目录重跑。宿主管理或用 `git worktree add` 手工创建的 worktree 必须显式运行同一 setup，不另写初始化步骤。
+- 创建后先在新 worktree 根运行 `node scripts/toolchain.mjs setup` 安装固定版本工具，再运行 `node scripts/toolchain.mjs deno task worktree:setup`；setup 失败时保留 worktree，修复原因后在其根目录重跑。宿主管理或用 `git worktree add` 手工创建的 worktree 必须显式运行同一 setup，不另写初始化步骤。
 
 ### 运行时隔离
 
@@ -52,20 +52,20 @@ scripts/new-worktree <branch> [--base <ref>] [--no-setup]
   - 预览库 `roster_wt_<id>_preview`，位于本机预览 Postgres（默认 `127.0.0.1:55439`，可用 `ROSTER_PREVIEW_ADMIN_URL` 覆盖），setup 建库、授予 `roster_preview_runtime` 连接权并执行全部 migrations。
 - 配置写入 Git 忽略的 `.env.worktree`（带固定 marker、权限 0600）。发现非托管同名文件，或 marker 身份与当前路径不符（目录被移动或复制）时拒绝执行，不覆盖。
 - 不复制任何 secret。隔离只覆盖免登录预览链路；真实 Supabase 登录、OAuth 回调仍按 [开发说明](../../../docs/DEVELOPMENT.md) 在主 checkout 单独配置。
-- 启动预览用 `deno task preview:api` 和 `deno task preview:web`，它们读取本 worktree 的配置。端口被仓库外进程占用时直接失败，不在运行中换端口。
+- 启动预览用 `node scripts/toolchain.mjs deno task preview:api` 和 `node scripts/toolchain.mjs deno task preview:web`，它们读取本 worktree 的配置。端口被仓库外进程占用时直接失败，不在运行中换端口。
 - 依赖安装按 `pnpm-lock.yaml` 等文件的摘要判断；`--if-needed` 在摘要未变时跳过安装。
 
 ### 清理
 
-- 分支合并、放弃或转正后清理对应 worktree：先在**目标 worktree 内**运行 `deno task worktree:clean`（要求工作区干净；删除本 worktree 的预览库和 `.env.worktree`），成功后从主 checkout 执行 `git worktree remove <路径>`。
-- 宿主已先删除目录时，从主 checkout 运行 `deno task worktree:gc` 预览孤儿库，确认后加 `--apply` 删除。GC 只处理名称符合 `roster_wt_<12 位 hex>_preview` 且不属于任何已登记 worktree 的库；其他 `*_preview` 库只报告不处理。
+- 分支合并、放弃或转正后清理对应 worktree：先在**目标 worktree 内**运行 `node scripts/toolchain.mjs deno task worktree:clean`（要求工作区干净；删除本 worktree 的预览库和 `.env.worktree`），成功后从主 checkout 执行 `git worktree remove <路径>`。
+- 宿主已先删除目录时，从主 checkout 运行 `node scripts/toolchain.mjs deno task worktree:gc` 预览孤儿库，确认后加 `--apply` 删除。GC 只处理名称符合 `roster_wt_<12 位 hex>_preview` 且不属于任何已登记 worktree 的库；其他 `*_preview` 库只报告不处理。
 - Claude Code 通过 [`.claude/settings.json`](../../../.claude/settings.json) 自动接入：`SessionStart` 运行幂等的 `worktree:setup --if-needed`，`WorktreeRemove` 运行精确清理（只删除该路径对应的库；路径已不存在或为主 checkout 时跳过）。不配置 `WorktreeCreate`，保留 Claude 默认的 Git 创建逻辑。其他宿主没有删除事件，删除前显式运行 `worktree:clean`，或事后用 GC 收敛。
 - 不使用 `git worktree remove --force`，不强制移除 dirty worktree，不静默丢弃未提交或未推送内容。
 - 停止进程只停自己启动的那个（按 PID），不用 `pkill -f` 之类的模式匹配，避免误杀主 checkout 或其他 worktree 的预览。
 
 ## 提交
 
-- 完成代码修改后，先在实际任务 worktree 执行 `corepack pnpm format:write`，再执行 `corepack pnpm check`；自动格式化后审阅 diff，不混入无关改动。纯文档修改执行 `git diff --check` 即可。
+- 完成代码修改后，先在实际任务 worktree 执行 `node scripts/toolchain.mjs format:write`，再执行 `node scripts/toolchain.mjs check`；自动格式化后审阅 diff，不混入无关改动。纯文档修改执行 `git diff --check` 即可。
 - Codex 质量 Hook 是结束回合时的补充检查，不能代替提交前验证。Hook 仅覆盖宿主事件 `cwd` 的 worktree；创建 worktree 后须在 Codex 中打开目标 worktree，或在目标目录手动执行检查，不假定主 checkout 的 Hook 会覆盖它。
 - 不同会话并行写代码必须使用独立 worktree；Hook 状态隔离无法隔离同一目录里的文件。具体约束及启用步骤见 [开发说明](../../../docs/DEVELOPMENT.md#codex-质量-hook-的隔离约束)。
 
@@ -87,11 +87,11 @@ gh pr create --repo DengNaichen/Roster --base main --head <branch> \
 - 验证按改动范围选择，PR 中如实记录；跳过的项目要写明，未提供数据库时被跳过的测试不能写成集成测试通过：
 
 ```sh
-corepack pnpm build
-corepack pnpm test:web
-corepack pnpm --filter @roster/web lint
-deno task check
-deno task test
+node scripts/toolchain.mjs build
+node scripts/toolchain.mjs test:web
+node scripts/toolchain.mjs --filter @roster/web lint
+node scripts/toolchain.mjs deno task check
+node scripts/toolchain.mjs deno task test
 ```
 
 - **“开 PR”与“合并”是两次授权**：只要求开 PR 时，创建并交付审核后停止，不自动合并或启用 auto-merge。
@@ -127,7 +127,7 @@ gh pr view <number> --repo DengNaichen/Roster --json state,headRefOid,mergeCommi
 
 2. 确认本地分支 tip 和 `origin/<branch>` 都**等于** `headRefOid`。不相等说明合并后又有新提交，这些提交没有进入 `main`，停止清理并另行处理，不删除分支。
 3. 先同步主 checkout：`git fetch --prune origin`，在主 checkout 干净时把 `main` fast-forward 到 `origin/main`，并确认 `mergeCommit` 已在 `main` 上。
-4. 按上面的流程清理 worktree：在目标 worktree 内 `deno task worktree:clean`，再从主 checkout `git worktree remove <路径>`。
+4. 按上面的流程清理 worktree：在目标 worktree 内 `node scripts/toolchain.mjs deno task worktree:clean`，再从主 checkout `git worktree remove <路径>`。
 5. 删除本地分支 `git branch -D <branch>`（仅限第 2 步核对通过的分支）。删除远端分支时绑定已核对的 tip，避免删掉被并发推进的分支：
 
 ```sh
