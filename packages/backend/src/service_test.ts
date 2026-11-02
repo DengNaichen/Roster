@@ -1,9 +1,9 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { createDatabase } from './db/client.ts';
+import { AppError, type RequestContext } from '../../contracts/mod.ts';
+import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from './test_support.ts';
 import { createHttpApp } from './transport/http.ts';
-import { AppError, type RequestContext } from '../../contracts/mod.ts';
 
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);

@@ -1,6 +1,9 @@
 import { Hono } from 'npm:hono@4.11.4';
 import { cors } from 'npm:hono@4.11.4/cors';
 import { z } from 'npm:zod@4.6.7';
+import * as activity from '../../../contracts/activity.ts';
+import * as catalog from '../../../contracts/catalog.ts';
+import * as cycles from '../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
@@ -9,12 +12,14 @@ import {
   joinTeamSchema,
   joinWorkspaceSchema,
   type RequestContext,
-  type Service,
   updateIssueSchema,
   updateMemberSchema,
   updateTeamSchema,
   updateWorkspaceSchema,
 } from '../../../contracts/mod.ts';
+import * as specs from '../../../contracts/spec.ts';
+import type { Service } from '../application/mod.ts';
+import type { VerifyIdentity } from '../platform/auth/jwt.ts';
 import {
   capabilities,
   restCreateIssueSchema,
@@ -24,11 +29,6 @@ import {
   restTeam,
   restUpdateIssueSchema,
 } from './compat.ts';
-import type { VerifyIdentity } from '../auth/jwt.ts';
-import * as activity from '../../../contracts/activity.ts';
-import * as catalog from '../../../contracts/catalog.ts';
-import * as cycles from '../../../contracts/cycles.ts';
-import * as specs from '../../../contracts/spec.ts';
 export interface TransportOptions {
   service: Service;
   verify: VerifyIdentity;

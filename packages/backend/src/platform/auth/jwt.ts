@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'npm:jose@6.1.3';
-import { AppError, type RequestContext } from '../../../contracts/mod.ts';
+import { AppError, type RequestContext } from '../../../../contracts/mod.ts';
 export type VerifyIdentity = (request: Request) => Promise<RequestContext>;
 export interface AuthConfig {
   issuer: string;

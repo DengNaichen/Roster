@@ -1,6 +1,7 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
-import type { Database } from '../db/client.ts';
-import { one, rows } from '../modules/shared.ts';
+import { applyPullRequestStatus } from '../modules/issues/index.ts';
+import type { Database } from '../platform/database/client.ts';
+import { one, rows } from '../platform/database/query.ts';
 
 export type GitHubBinding = { workspace: string; repo: string };
 export type Pull = {
@@ -50,14 +51,6 @@ function state(pull: Pull) {
     : pull.draft
     ? 'draft'
     : 'open';
-}
-function nextStatus(current: string, pullState: string) {
-  if (pullState === 'merged' && !['done', 'canceled'].includes(current)) return 'done';
-  if (
-    pullState === 'open' &&
-    ['triage', 'backlog', 'todo', 'agent_ready', 'in_progress'].includes(current)
-  ) return 'in_review';
-  return current;
 }
 export function createGitHubSync(db: Database, options: GitHubOptions) {
   if (options.bindings.length && !options.token) throw new Error('GITHUB_TOKEN is required');
@@ -146,22 +139,13 @@ export function createGitHubSync(db: Database, options: GitHubOptions) {
                 sql`select i.*,t.private from roster.issues i join roster.teams t on t.id=i.team_id where i.workspace_id=${w.id} and i.identifier=${id}`,
               ))[0];
               if (!issue) return;
-              const status = nextStatus(String(issue.status), ps);
-              if (status !== issue.status) {
-                await tx.execute(
-                  sql`insert into roster.users(subject,name,email) values('system:github','GitHub','') on conflict do nothing`,
-                );
-                await tx.execute(
-                  sql`update roster.issues set status=${status},updated_at=now() where id=${issue.id}`,
-                );
-                await tx.execute(
-                  sql`insert into roster.audit_events(workspace_id,issue_id,actor_subject,kind,before,after) values(${w.id},${issue.id},'system:github','issue.status_changed',${
-                    JSON.stringify({ status: issue.status })
-                  }::jsonb,${
-                    JSON.stringify({ status, source: `${binding.repo}#${p.number}` })
-                  }::jsonb)`,
-                );
-              }
+              await applyPullRequestStatus(
+                tx,
+                String(w.id),
+                issue,
+                ps,
+                `${binding.repo}#${p.number}`,
+              );
               if (options.linkback && !link.linkback_posted_at && p.state === 'open') {
                 const marker = `<!-- roster:${w.id}:${id} -->`;
                 // Reconcile a successful post whose local commit was interrupted.

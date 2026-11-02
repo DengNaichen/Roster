@@ -1,6 +1,6 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import { z } from 'zod';
-import type { Database } from '../db/client.ts';
+import type { Identity, RequestContext } from '../../../../contracts/mod.ts';
 import {
   createSpecSchema,
   getSpecRevisionSchema,
@@ -10,22 +10,14 @@ import {
   specContentSchema,
   type SpecRevision,
   type SpecRevisionSummary,
-  type SpecService,
   updateSpecSchema,
-} from '../../../contracts/spec.ts';
-import type { Identity, RequestContext } from '../../../contracts/mod.ts';
-import {
-  type Executor,
-  fail,
-  iso,
-  one,
-  type Row,
-  rows,
-  saveIdentity,
-  team,
-  visible,
-  workspace,
-} from './shared.ts';
+} from '../../../../contracts/spec.ts';
+import type { SpecService } from '../../application/spec.ts';
+import type { Database } from '../../platform/database/client.ts';
+import { type Executor, one, type Row, rows } from '../../platform/database/query.ts';
+import { fail } from '../../platform/errors/validation.ts';
+import { iso } from '../../platform/time.ts';
+import { saveIdentity, team, visible, workspace } from '../access/index.ts';
 function parse<T>(schema: z.ZodType<T>, input: unknown): T {
   const r = schema.safeParse(input);
   return r.success

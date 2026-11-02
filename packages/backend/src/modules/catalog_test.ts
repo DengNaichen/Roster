@@ -1,15 +1,12 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import { Pool } from 'npm:pg@8.23.1';
-import { createDatabase } from '../db/client.ts';
-import { AppError, type RequestContext } from '../../../contracts/mod.ts';
 import { isValidEmoji } from '../../../contracts/catalog.ts';
-import {
-  buildLabelFilter,
-  createCatalogService,
-  hydrateIssueCatalog,
-  resolveIssueProject,
-} from './catalog.ts';
-import { rows } from './shared.ts';
+import { AppError, type RequestContext } from '../../../contracts/mod.ts';
+import { createDatabase } from '../platform/database/client.ts';
+import { rows } from '../platform/database/query.ts';
+import { hydrateIssueCatalog } from './issues/index.ts';
+import { buildLabelFilter, createLabelService } from './labels/index.ts';
+import { createPlanningService, resolveIssueProject } from './planning/index.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }
@@ -47,7 +44,7 @@ Deno.test({
     runtimeUrl.searchParams.set('options', '-c role=roster_app');
     const runtime = createDatabase(runtimeUrl.toString());
     const db = runtime.db;
-    const catalog = createCatalogService(db);
+    const catalog = { ...createPlanningService(db), ...createLabelService(db) };
     const people: RequestContext[] = ['Owner', 'Member', 'Admin'].map((name) => ({
       identity: { subject: crypto.randomUUID(), name, email: `${name}@example.test` },
     }));

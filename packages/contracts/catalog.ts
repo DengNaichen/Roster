@@ -1,6 +1,5 @@
-import emojiCatalog from './emoji.json' with { type: 'json' };
 import { z } from 'zod';
-import type { RequestContext } from './mod.ts';
+import emojiCatalog from './emoji.json' with { type: 'json' };
 const id = z.number().int().positive().max(2147483647);
 const name = z.string().trim().min(1).max(200);
 const description = z.string().max(100000);
@@ -131,64 +130,3 @@ export type LabelFilterInput = {
   label_ids?: number[];
   label_group_ids?: number[];
 };
-export interface CatalogService {
-  listProjects(
-    ctx: RequestContext,
-    slug: string,
-    input?: z.infer<typeof listProjectsSchema>,
-  ): Promise<Project[]>;
-  getProject(
-    ctx: RequestContext,
-    slug: string,
-    input: z.infer<typeof getProjectSchema>,
-  ): Promise<Project>;
-  createProject(ctx: RequestContext, slug: string, input: CreateProjectInput): Promise<Project>;
-  updateProject(ctx: RequestContext, slug: string, input: UpdateProjectInput): Promise<Project>;
-  listInitiatives(
-    ctx: RequestContext,
-    slug: string,
-    input?: z.infer<typeof listInitiativesSchema>,
-  ): Promise<Initiative[]>;
-  getInitiative(
-    ctx: RequestContext,
-    slug: string,
-    input: z.infer<typeof getInitiativeSchema>,
-  ): Promise<Initiative>;
-  createInitiative(
-    ctx: RequestContext,
-    slug: string,
-    input: CreateInitiativeInput,
-  ): Promise<Initiative>;
-  updateInitiative(
-    ctx: RequestContext,
-    slug: string,
-    input: UpdateInitiativeInput,
-  ): Promise<Initiative>;
-  listLabels(
-    ctx: RequestContext,
-    slug: string,
-    input?: z.infer<typeof listLabelsSchema>,
-  ): Promise<Label[]>;
-  listLabelGroups(
-    ctx: RequestContext,
-    slug: string,
-    input?: Record<string, never>,
-  ): Promise<LabelGroup[]>;
-  saveLabelGroup(
-    ctx: RequestContext,
-    slug: string,
-    input: z.infer<typeof saveLabelGroupSchema>,
-  ): Promise<LabelGroup>;
-  createLabel(ctx: RequestContext, slug: string, input: CreateLabelInput): Promise<Label>;
-  updateLabel(ctx: RequestContext, slug: string, input: UpdateLabelInput): Promise<Label>;
-  changeIssueLabels(
-    ctx: RequestContext,
-    slug: string,
-    input: z.infer<typeof changeIssueLabelsSchema>,
-  ): Promise<void>;
-  mergeLabels(
-    ctx: RequestContext,
-    slug: string,
-    input: z.infer<typeof mergeLabelsSchema>,
-  ): Promise<void>;
-}

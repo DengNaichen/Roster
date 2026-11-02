@@ -37,6 +37,8 @@
 
 导入、备份和功能对照见 [迁移说明](docs/MIGRATION.md)，后台任务配置见 [开发说明](docs/DEVELOPMENT.md#后台任务与-github)。
 
+后端模块边界、事务归属及后续迁移范围见 [架构说明](docs/ARCHITECTURE.md)。
+
 ## 本地开发
 
 当前开发机的免登录预览在 `http://127.0.0.1:5178/roster`，使用独立 `roster_preview` 数据库；启动命令见 [本机免登录预览](docs/DEVELOPMENT.md#本机免登录预览)。

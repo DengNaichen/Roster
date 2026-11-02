@@ -1,6 +1,6 @@
-import { createDatabase } from './db/client.ts';
 import { createGitHubSync, githubWebhook, parseBindings } from './integrations/github.ts';
-import { advanceAllCycles } from './modules/cycles.ts';
+import { advanceAllCycles } from './modules/cycles/index.ts';
+import { createDatabase } from './platform/database/client.ts';
 function equal(a: string, b: string) {
   let mismatch = a.length ^ b.length;
   for (let i = 0; i < b.length; i++) mismatch |= (a.charCodeAt(i) || 0) ^ b.charCodeAt(i);

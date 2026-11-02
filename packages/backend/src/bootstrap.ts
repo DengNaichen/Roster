@@ -1,6 +1,6 @@
-import { createDatabase } from './db/client.ts';
+import { createIdentityVerifier } from './platform/auth/jwt.ts';
+import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
-import { createIdentityVerifier } from './auth/jwt.ts';
 import { createHttpApp } from './transport/http.ts';
 import { createMcpFetch } from './transport/mcp.ts';
 export type Environment = Record<string, string | undefined>;

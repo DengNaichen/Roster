@@ -1,11 +1,11 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { createDatabase } from '../db/client.ts';
+import { AppError, type RequestContext } from '../../../contracts/mod.ts';
+import { createSpecSchema, type SpecContent } from '../../../contracts/spec.ts';
+import { createDatabase } from '../platform/database/client.ts';
 import { createService } from '../service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
 import { exerciseSpecTransports } from '../transport/spec_test.ts';
-import { AppError, type RequestContext } from '../../../contracts/mod.ts';
-import { createSpecSchema, type SpecContent } from '../../../contracts/spec.ts';
-import { encodeSpec } from './spec.ts';
+import { encodeSpec } from './specs/index.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }

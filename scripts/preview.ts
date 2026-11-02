@@ -1,9 +1,9 @@
 // Local preview only: deliberately not imported by any deployed function.
-import { createDatabase } from '../packages/backend/src/db/client.ts';
+import { createDatabase } from '../packages/backend/src/platform/database/client.ts';
 import { createService } from '../packages/backend/src/service.ts';
 import { createHttpApp } from '../packages/backend/src/transport/http.ts';
 import type { IssueStatus, RequestContext } from '../packages/contracts/mod.ts';
-import { advanceAllCycles } from '../packages/backend/src/modules/cycles.ts';
+import { advanceAllCycles } from '../packages/backend/src/modules/cycles/index.ts';
 
 const connection = Deno.env.get('DATABASE_URL');
 if (!connection) throw new Error('DATABASE_URL is required');

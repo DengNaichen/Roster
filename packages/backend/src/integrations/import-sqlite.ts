@@ -1,7 +1,7 @@
 import type { Pool } from 'npm:pg@8.23.1';
 import { addLinkSchema } from '../../../contracts/activity.ts';
 import { createSpecSchema, type SpecContent, specContentSchema } from '../../../contracts/spec.ts';
-import { encodeSpec } from '../modules/spec.ts';
+import { encodeSpec } from '../modules/specs/index.ts';
 type Row = Record<string, unknown>;
 export type SQLiteSnapshot = { format: 'inftask-sqlite-v1'; tables: Record<string, Row[]> };
 export type IdentityMap = {

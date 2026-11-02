@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Identity, Issue, RequestContext } from './mod.ts';
+import type { Identity, Issue } from './mod.ts';
 const identifier = z.string().regex(/^[A-Z][A-Z0-9]{1,5}-[1-9][0-9]*$/);
 const singleLine = (max: number, bytes = false) =>
   z.string().min(1).refine(
@@ -104,38 +104,5 @@ export type IssueActivity = {
     updated_at: string;
   }[];
 };
-export interface ActivityService {
-  addComment(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof addCommentSchema>,
-  ): Promise<Comment>;
-  addWorkLog(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof addWorkLogSchema>,
-  ): Promise<WorkLog>;
-  listWorkLogs(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof listWorkLogsSchema>,
-  ): Promise<WorkLogPage>;
-  getWorkLog(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof getWorkLogSchema>,
-  ): Promise<WorkLog>;
-  delegateIssue(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof delegateIssueSchema>,
-  ): Promise<Delegation>;
-  addRelation(
-    ctx: RequestContext,
-    slug: string,
-    input: z.input<typeof addRelationSchema>,
-  ): Promise<void>;
-  addLink(ctx: RequestContext, slug: string, input: z.input<typeof addLinkSchema>): Promise<Link>;
-}
 
 export type ActivityIssueDetails = IssueActivity;

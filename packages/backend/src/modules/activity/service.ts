@@ -1,7 +1,6 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import { z } from 'zod';
 import {
-  type ActivityService,
   addCommentSchema,
   addLinkSchema,
   addRelationSchema,
@@ -13,25 +12,16 @@ import {
   type IssueActivity,
   listWorkLogsSchema,
   type WorkLogSummary,
-} from '../../../contracts/activity.ts';
-import type { Identity, Issue, RequestContext } from '../../../contracts/mod.ts';
-import { hydrateIssueCatalog } from './catalog.ts';
-import type { Database } from '../db/client.ts';
-import {
-  audit,
-  type Executor,
-  fail,
-  iso,
-  issueDTO,
-  issueSelect,
-  one,
-  readIssue,
-  type Row,
-  rows,
-  saveIdentity,
-  visible,
-  workspace,
-} from './shared.ts';
+} from '../../../../contracts/activity.ts';
+import type { Identity, Issue, RequestContext } from '../../../../contracts/mod.ts';
+import type { ActivityService } from '../../application/activity.ts';
+import type { Database } from '../../platform/database/client.ts';
+import { type Executor, one, type Row, rows } from '../../platform/database/query.ts';
+import { fail } from '../../platform/errors/validation.ts';
+import { iso } from '../../platform/time.ts';
+import { saveIdentity, visible, workspace } from '../access/index.ts';
+import { audit } from '../audit/index.ts';
+import { hydrateIssueCatalog, issueDTO, issueSelect, readIssue } from '../issues/index.ts';
 function parse<T>(schema: z.ZodType<T>, input: unknown): T {
   const r = schema.safeParse(input);
   return r.success

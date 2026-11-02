@@ -1,5 +1,5 @@
 import { Pool } from 'npm:pg@8.23.1';
-import { createDatabase } from '../db/client.ts';
+import { createDatabase } from '../platform/database/client.ts';
 import { createService } from '../service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
 import {

@@ -1,5 +1,5 @@
-import { capabilities, restCreateIssueSchema, restIssue, restListInput } from './compat.ts';
 import type { Issue } from '../../../contracts/mod.ts';
+import { capabilities, restCreateIssueSchema, restIssue, restListInput } from './compat.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }

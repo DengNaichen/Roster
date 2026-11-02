@@ -1,5 +1,6 @@
+import type { Service } from '../application/mod.ts';
 /** Exercised from the real Postgres Spec suite, never with a stub service. */
-import type { RequestContext, Service } from '../../../contracts/mod.ts';
+import type { RequestContext } from '../../../contracts/mod.ts';
 import type {
   Spec,
   SpecContent,

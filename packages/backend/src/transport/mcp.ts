@@ -1,5 +1,8 @@
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@2.4.0';
 import { z } from 'npm:zod@4.6.7';
+import * as activity from '../../../contracts/activity.ts';
+import * as catalog from '../../../contracts/catalog.ts';
+import * as cycles from '../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
@@ -10,17 +13,14 @@ import {
   joinWorkspaceSchema,
   listIssuesSchema,
   type RequestContext,
-  type Service,
   updateIssueSchema,
   updateMemberSchema,
   updateTeamSchema,
   updateWorkspaceSchema,
 } from '../../../contracts/mod.ts';
-import type { VerifyIdentity } from '../auth/jwt.ts';
-import * as activity from '../../../contracts/activity.ts';
-import * as catalog from '../../../contracts/catalog.ts';
-import * as cycles from '../../../contracts/cycles.ts';
 import * as specs from '../../../contracts/spec.ts';
+import type { Service } from '../application/mod.ts';
+import type { VerifyIdentity } from '../platform/auth/jwt.ts';
 import { restCreateIssueSchema, restUpdateIssueSchema } from './compat.ts';
 const compatibleIssueFields = {
   type: z.union([createIssueSchema.shape.type, z.literal('')]),

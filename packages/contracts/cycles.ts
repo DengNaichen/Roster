@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { RequestContext } from './mod.ts';
 export type CycleSettings = {
   enabled: boolean;
   timezone: string;
@@ -35,19 +34,3 @@ export const updateCycleSchema = z.strictObject({
   name: z.string().trim().max(500).optional(),
   description: z.string().max(100000).optional(),
 });
-export interface CycleService {
-  listCycles(ctx: RequestContext, slug: string, team: string): Promise<CyclePage>;
-  configureCycles(
-    ctx: RequestContext,
-    slug: string,
-    team: string,
-    input: CycleSettings,
-  ): Promise<CyclePage>;
-  getCycle(ctx: RequestContext, slug: string, id: number): Promise<Cycle>;
-  updateCycle(
-    ctx: RequestContext,
-    slug: string,
-    id: number,
-    input: { name?: string; description?: string },
-  ): Promise<Cycle>;
-}
