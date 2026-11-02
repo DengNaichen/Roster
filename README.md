@@ -29,15 +29,16 @@
 | 路径 | 职责 |
 | --- | --- |
 | `apps/web` | React/Vite 前端 |
+| `apps/server` | 本地服务与隔离预览入口 |
 | `packages/contracts` | 公共 DTO 和严格输入 schema |
 | `packages/backend/src` | 业务、权限、数据库、HTTP/MCP |
 | `supabase/functions` | Edge 部署入口 |
 | `supabase/migrations` | 唯一 SQL 迁移历史 |
-| `scripts` | 本地开发入口 |
+| `scripts` | 数据迁移、导入、备份与 worktree 工具 |
 
 导入、备份和功能对照见 [迁移说明](docs/MIGRATION.md)，后台任务配置见 [开发说明](docs/DEVELOPMENT.md#后台任务与-github)。
 
-后端模块边界、事务归属及后续迁移范围见 [架构说明](docs/ARCHITECTURE.md)。
+后端模块边界、事务归属及扩展规则见 [架构说明](docs/ARCHITECTURE.md)。
 
 ## 本地开发
 

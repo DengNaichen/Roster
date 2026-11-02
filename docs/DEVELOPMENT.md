@@ -2,12 +2,12 @@
 
 ## 本机免登录预览
 
-独立入口 `scripts/preview.ts` 固定使用本地开发者身份，首次启动创建示例 Workspace、两个 Team 和七条任务。它只接受 loopback 上、名称以 `_preview` 结尾的数据库，HTTP 只监听 `127.0.0.1:18471`，允许前端 Origin `127.0.0.1:5178` / `localhost:5178`。该入口不被 Edge Functions 引用。
+独立入口 `apps/server/preview.ts` 固定使用本地开发者身份，首次启动创建示例 Workspace、两个 Team 和七条任务。它只接受 loopback 上、名称以 `_preview` 结尾的数据库，HTTP 只监听 `127.0.0.1:18471`，允许前端 Origin `127.0.0.1:5178` / `localhost:5178`。该入口不被 Edge Functions 引用。
 
 先在隔离的本地 Postgres 创建 `roster_preview` 库、应用 migrations，并为本地 login 授予 `roster_app`。当前开发机已经在端口 55439 完成这一初始化。分别运行：
 
 ```sh
-DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview deno run --allow-env --allow-net scripts/preview.ts
+DATABASE_URL=postgresql://roster_preview_runtime@127.0.0.1:55439/roster_preview deno run --allow-env --allow-net apps/server/preview.ts
 VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --strictPort
 ```
 
@@ -23,7 +23,7 @@ VITE_LOCAL_PREVIEW=true corepack pnpm --filter @roster/web dev --port 5178 --str
 
 `GET /api/w/:workspace/capabilities` 在页面挂载前声明已实现能力，当前全部启用；获取失败会阻断并提供重试。原组件读取的项目、标签、周期、评论、工作记录、关系和 PR 均来自真实存储；独立 Specs 的文档与修订同样来自真实服务。
 
-`packages/backend/src/transport/compat.ts` 负责 REST 兼容：列表提供原 `{issues}`，详情/状态更新按原形状返回，处理原表单的清空字段，并保留真实负责人筛选和历史。MCP 保留旧工具名称/输入语义；`list_issues` 的零 limit 使用默认值，负 limit 返回全部，支持优先级和更新时间排序。
+`packages/backend/src/transport/http/compat.ts` 负责 REST 兼容：列表提供原 `{issues}`，详情/状态更新按原形状返回，处理原表单的清空字段，并保留真实负责人筛选和历史。MCP 保留旧工具名称/输入语义；`list_issues` 的零 limit 使用默认值，负 limit 返回全部，支持优先级和更新时间排序。
 
 `roster` schema 不加入 Supabase Data API 的暴露名单。迁移撤销 `public`、`anon`、`authenticated` 的访问，并创建 `roster_app` NOLOGIN 权限角色。业务权限由 Service 每次读取成员关系后执行；数据库客户端并不自动传递用户 JWT。应用连接不能使用 `postgres` 超级用户。
 
