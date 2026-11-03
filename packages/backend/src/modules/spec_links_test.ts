@@ -65,6 +65,7 @@ Deno.test({
       const privateIssue = await s.createIssue(member, w.slug, {
         team: 'SEC',
         title: 'Private issue',
+        status: 'done',
       });
       const change = { identifier: spec.identifier, issues: [issue.identifier] };
       await Promise.all(Array.from({ length: 5 }, () => s.linkSpecIssues(owner, w.slug, change)));
@@ -97,6 +98,12 @@ Deno.test({
         'Private spec leaked',
       );
       assert((await s.listIssueSpecs(member, w.slug, { issue: issue.identifier })).length === 3);
+      const publicProgress = (await s.listSpecs(owner, w.slug)).find((x) =>
+        x.identifier === spec.identifier
+      )!.issue_progress;
+      assert(publicProgress.total === 1 && publicProgress.done === 0, 'Private progress leaked');
+      const memberProgress = (await s.getSpec(member, w.slug, spec.identifier)).issue_progress;
+      assert(memberProgress.total === 2 && memberProgress.done === 1);
       await rejects(
         () =>
           s.linkSpecIssues(owner, w.slug, {

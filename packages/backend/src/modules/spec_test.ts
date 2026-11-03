@@ -1,6 +1,10 @@
 import { Pool } from 'npm:pg@8.23.1';
 import { AppError, type RequestContext } from '../../../contracts/mod.ts';
-import { createSpecSchema, type SpecContent } from '../../../contracts/spec.ts';
+import {
+  createSpecSchema,
+  type EditableSpecContent,
+  type SpecContent,
+} from '../../../contracts/spec.ts';
 import { createDatabase } from '../platform/database/client.ts';
 import { createService } from '../service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
@@ -28,7 +32,7 @@ async function dbReject(fn: () => Promise<unknown>, code?: string) {
   }
   throw new Error('Database accepted a forbidden mutation');
 }
-function sample(): SpecContent {
+function sample(): EditableSpecContent {
   return {
     title: 'Specs as entities',
     status: 'draft',
@@ -333,9 +337,52 @@ Deno.test({
       )).rows[0];
       await admin.query(
         "insert into roster.spec_revisions(spec_id,number,content,message,author_subject) values($1,1,$2::json,'Imported',null)",
-        [legacy.id, encodeSpec(sample())],
+        [legacy.id, JSON.stringify({ ...sample(), status: 'approved' })],
       );
-      assert((await s.getSpec(owner, w.slug, 'SPEC-99')).author === null);
+      const legacySpec = await s.getSpec(owner, w.slug, 'SPEC-99');
+      assert(legacySpec.author === null && legacySpec.content.status === 'active');
+      assert(legacySpec.active_revision?.number === 1);
+      const proposed = { ...sample(), status: 'review' as const, title: 'Proposed new title' };
+      const inReview = await s.updateSpec(owner, w.slug, {
+        identifier: 'SPEC-99',
+        base_revision: 1,
+        content: proposed,
+      });
+      assert(inReview.content.status === 'review' && inReview.active_revision?.number === 1);
+      const listed = (await s.listSpecs(owner, w.slug)).find((x) => x.identifier === 'SPEC-99');
+      assert(listed?.active_revision?.title === legacySpec.content.title && listed.revision === 2);
+      const adopted = await s.updateSpec(owner, w.slug, {
+        identifier: 'SPEC-99',
+        base_revision: 2,
+        content: { ...proposed, status: 'active' },
+      });
+      assert(
+        adopted.active_revision?.number === 3 && adopted.active_revision.title === proposed.title,
+      );
+      // A retired legacy spec stays retired even if a new draft is subsequently proposed.
+      await admin.query(
+        'insert into roster.spec_revisions(spec_id,number,content) values($1,4,$2::json)',
+        [
+          legacy.id,
+          JSON.stringify({ ...sample(), status: 'superseded' }),
+        ],
+      );
+      await admin.query('update roster.specs set current_revision=4 where id=$1', [legacy.id]);
+      assert(
+        (await s.getSpecRevision(owner, w.slug, { identifier: 'SPEC-99', number: 4 })).content
+          .status === 'superseded',
+      );
+      const reopened = await s.updateSpec(owner, w.slug, {
+        identifier: 'SPEC-99',
+        base_revision: 4,
+        content: sample(),
+      });
+      assert(reopened.active_revision === null && reopened.content.status === 'draft');
+      for (const status of ['superseded', 'archived']) {
+        assert(
+          !createSpecSchema.safeParse({ team: 'AL', content: { ...sample(), status } }).success,
+        );
+      }
       await exerciseSpecTransports(s, owner, w.slug, 'AL');
       await s.updateMember(owner, w.slug, {
         subject: member.identity.subject,

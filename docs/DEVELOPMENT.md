@@ -164,6 +164,12 @@ GitHub 同步通过数据库租约防止并行 worker 重复执行；只有完�
 
 使用管理员连接运行 `DATABASE_URL=... node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read scripts/migrate.ts`。此脚本只接受 loopback 数据库并保存迁移校验和，拒绝修改已经应用的迁移。仅当数据库原来手动应用了首个迁移时，首次加 `--baseline-initial`；它不会跳过后续迁移。托管环境仍统一使用 Supabase CLI。
 
+### Spec 修订状态
+
+新修订使用 `draft`、`review`、`active`，界面对应 Draft、In review、Active。编辑生效版时默认起草新修订；只有显式选择 Active 才替换现行版本。目录与详情 API 的 `revision` 是可编辑的最新修订，`active_revision` 是当前生效修订的编号与标题（尚无生效版时为 null）。详情默认展示生效正文，评审仍可查看最新修订。Issue 完成数独立计算。
+
+历史 `approved` 按 Active 读取，旧客户端提交该别名也会写为 `active`；历史 `superseded` 仅可读取，且不会使更早的生效版重新生效。无需改写历史行或执行数据库迁移。
+
 ### Spec–Issue 关联回归
 
 在独立 `_test` 数据库上运行：

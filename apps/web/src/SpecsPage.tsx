@@ -1,6 +1,8 @@
-import { Dropdown } from "./Dropdown";
-import { FileText } from "lucide-react";
-import { useState } from "react";
+import { SpecStatusBadge } from "./SpecStatus";
+import { SpecIssueProgress } from "./SpecIssueProgress";
+import { EntityEmoji } from "./EmojiPicker";
+import { ChevronDown, DraftingCompass } from "lucide-react";
+import { type CSSProperties, useState } from "react";
 import type { SpecSummary } from "../../../packages/contracts/spec";
 import { PageHeader } from "./PageHeader";
 import { apiPath, navigate, NavLink, pagePath, RequestError, Team } from "./shared";
@@ -15,6 +17,18 @@ export default function SpecsPage({ team, teams }: { team: string; teams: Team[]
   );
   const [creating, setCreating] = useState(false);
   const visibleTeams = teams.filter((item) => item.accessible);
+  const groups = visibleTeams.filter((item) => !team || item.key === team);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const byTeam = new Map<string, SpecSummary[]>();
+  for (const spec of resource.data.specs) {
+    const group = byTeam.get(spec.team);
+    if (group) group.push(spec);
+    else byTeam.set(spec.team, [spec]);
+  }
+  const idWidth = resource.data.specs.reduce(
+    (width, spec) => Math.max(width, spec.identifier.length),
+    6,
+  );
   return (
     <>
       <PageHeader
@@ -28,28 +42,14 @@ export default function SpecsPage({ team, teams }: { team: string; teams: Team[]
           </button>
         }
       >
-        <FileText className="icon" />
+        <DraftingCompass className="icon" />
         <span>{team ? `${team} / Specs` : "Specs"}</span>
       </PageHeader>
-      <section className="spec-directory" aria-label="Specs directory">
-        <label>
-          Team scope
-          <Dropdown
-            variant="block"
-            aria-label="Team scope"
-            value={team}
-            onChange={(next) =>
-              navigate(pagePath(next ? `/team/${encodeURIComponent(next)}/specs` : "/specs"))
-            }
-            options={[
-              { value: "", label: "All teams" },
-              ...visibleTeams.map((item) => ({
-                value: item.key,
-                label: `${item.name} (${item.key})`,
-              })),
-            ]}
-          />
-        </label>
+      <section
+        className="spec-directory"
+        aria-label="Specs directory"
+        style={{ "--spec-id-width": `${idWidth}ch` } as CSSProperties}
+      >
         {resource.error && (
           <>
             <RequestError message={resource.error} />
@@ -59,24 +59,62 @@ export default function SpecsPage({ team, teams }: { team: string; teams: Team[]
           </>
         )}
         {resource.loading && <p className="empty">Loading specs…</p>}
-        {!resource.loading && !resource.error && resource.data.specs.length === 0 && (
-          <p className="empty">No specs in this scope yet.</p>
-        )}
+        {!resource.loading &&
+          !resource.error &&
+          groups.map((item) => {
+            const specs = byTeam.get(item.key) ?? [];
+            const open = !collapsed.has(item.key);
+            const id = `specs-team-${item.key}`;
+            return (
+              <section key={item.key} className="spec-team" aria-label={item.name}>
+                <div className="group-header-wrap">
+                  <button
+                    type="button"
+                    className="group-header"
+                    aria-label={`${item.name}, ${specs.length} ${specs.length === 1 ? "spec" : "specs"}`}
+                    aria-expanded={open}
+                    aria-controls={id}
+                    onClick={() =>
+                      setCollapsed((current) => {
+                        const next = new Set(current);
+                        if (next.has(item.key)) next.delete(item.key);
+                        else next.add(item.key);
+                        return next;
+                      })
+                    }
+                  >
+                    <ChevronDown className="icon chevron" />
+                    <EntityEmoji emoji={item.emoji} teamKey={item.key} />
+                    <span className="group-label">
+                      {item.name}
+                      <small>{specs.length}</small>
+                    </span>
+                  </button>
+                </div>
+                <div id={id} className="spec-directory-list" hidden={!open}>
+                  {specs.length === 0 && <p className="list-empty">No specs yet.</p>}
+                  {specs.map((spec) => (
+                    <div className="spec-directory-row" key={spec.identifier}>
+                      <NavLink to={pagePath(`/spec/${spec.identifier}`)}>
+                        <span className="spec-id">{spec.identifier}</span>
+                        <strong>{spec.active_revision?.title ?? spec.title}</strong>
+                      </NavLink>
+                      <SpecIssueProgress progress={spec.issue_progress} />
+                      <span className="spec-row-statuses">
+                        <SpecStatusBadge status={spec.active_revision ? "active" : spec.status} />
+                        {spec.active_revision && spec.active_revision.number < spec.revision && (
+                          <SpecStatusBadge status={spec.status} revision={spec.revision} />
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         {visibleTeams.length === 0 && (
           <p className="dialog-hint">Create or join a team before creating a spec.</p>
         )}
-        <div className="spec-directory-list">
-          {resource.data.specs.map((spec) => (
-            <NavLink key={spec.identifier} to={pagePath(`/spec/${spec.identifier}`)}>
-              <span className="spec-id">{spec.identifier}</span>
-              <strong>{spec.title}</strong>
-              <span className={`spec-status ${spec.status}`}>{spec.status}</span>
-              <small>
-                {spec.team} · r{spec.revision} · {new Date(spec.updated_at).toLocaleDateString()}
-              </small>
-            </NavLink>
-          ))}
-        </div>
       </section>
       {creating && (
         <SpecEditor

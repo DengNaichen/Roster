@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { specStatuses } from './spec-status.ts';
 import type { Identity } from './mod.ts';
 function validUnicode(value: unknown): boolean {
   if (typeof value === 'string') {
@@ -40,9 +41,14 @@ export const specRequirementSchema = z.strictObject({
   clarify: z.string().optional(),
 });
 export const specCriterionSchema = z.strictObject({ id: stable('SC'), text: nonblank });
+const writableStatus = z.union([
+  z.enum(specStatuses),
+  z.literal('approved').transform(() => 'active' as const),
+]);
+export const specStoredStatusSchema = z.union([writableStatus, z.literal('superseded')]);
 export const specContentSchema = z.strictObject({
   title: nonblank,
-  status: z.enum(['draft', 'review', 'approved', 'superseded']),
+  status: specStoredStatusSchema,
   branch: z.string().optional(),
   stories: list(specStorySchema),
   edge_cases: list(z.string()),
@@ -67,6 +73,10 @@ export const specContentSchema = z.strictObject({
     ids.add(entry.id);
   }
 });
+// Accept the old spelling from existing clients without writing it into new revisions.
+const writableContent = specContentSchema.safeExtend({
+  status: writableStatus,
+});
 const message = z.string().refine(
   (value) =>
     Array.from(value).length <= 240 && !/\p{Cc}/u.test(value) && Array.from(value).every((c) => {
@@ -81,23 +91,29 @@ export const getSpecSchema = z.strictObject({ identifier });
 export const listSpecRevisionsSchema = getSpecSchema;
 export const createSpecSchema = z.strictObject({
   team: z.string().min(1),
-  content: specContentSchema,
+  content: writableContent,
   message: message.optional(),
 });
 export const updateSpecSchema = z.strictObject({
   identifier,
   base_revision: z.number().int().min(1).max(2147483647),
-  content: specContentSchema,
+  content: writableContent,
   message: message.optional(),
 });
 export const getSpecRevisionSchema = z.strictObject({
   identifier,
   number: z.number().int().min(1).max(2147483647),
 });
+export type EditableSpecContent = z.output<typeof writableContent>;
 export type SpecContent = z.output<typeof specContentSchema>;
 export type SpecContentJSON = SpecContent;
 export type SpecStory = z.output<typeof specStorySchema>;
+export type SpecIssueProgress = { done: number; total: number };
+// The editable head (revision/content) can be newer than the version adopted by the team.
+export type SpecActiveRevision = { number: number; title: string };
 export type SpecSummary = {
+  active_revision: SpecActiveRevision | null;
+  issue_progress: SpecIssueProgress;
   identifier: string;
   team: string;
   title: string;
@@ -106,6 +122,8 @@ export type SpecSummary = {
   updated_at: string;
 };
 export type Spec = {
+  active_revision: SpecActiveRevision | null;
+  issue_progress: SpecIssueProgress;
   identifier: string;
   team: string;
   revision: number;

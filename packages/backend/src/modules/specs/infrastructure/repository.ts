@@ -7,6 +7,27 @@ const revisionColumns =
 const revisionFrom =
   sql`from roster.spec_revisions r left join roster.users u on u.subject=r.author_subject`;
 
+// The inner t is the issue team: linked private issues must not leak through counts.
+function progress(subject: string) {
+  return sql`cross join lateral (select count(*)::int as total,
+    (count(*) filter (where i.status='done'))::int as done
+    from roster.spec_issues link join roster.issues i on i.id=link.issue_id
+    join roster.teams t on t.id=i.team_id
+    where link.workspace_id=sp.workspace_id and link.spec_id=sp.id and ${
+    visible(subject)
+  }) progress`;
+}
+
+// The most recent adoption is still in effect while a newer revision is under review.
+// A historical supersession cancels earlier adoptions instead of reviving them.
+const activeRevision = sql`left join lateral (
+  select a.number, a.content->>'title' as title, a.content->>'status' as status
+  from roster.spec_revisions a where a.spec_id=sp.id and a.number <= sp.current_revision
+    and a.content->>'status' in ('active','approved','superseded')
+  order by a.number desc limit 1
+) adopted on adopted.status in ('active','approved')`;
+const activeFields = sql`adopted.number as active_number,adopted.title as active_title`;
+
 export function createSpecsRepository(db: Executor): SpecsRepository {
   return {
     async linkIssues({ workspaceId, specId, issueIds, subject, now }) {
@@ -31,7 +52,9 @@ export function createSpecsRepository(db: Executor): SpecsRepository {
     async listIssueSpecs({ workspaceId, issueId, subject }) {
       return rows(
         db,
-        sql`select sp.number,t.key as team,r.content->>'title' as title,r.content->>'status' as status,sp.current_revision,sp.updated_at from roster.spec_issues si join roster.specs sp on sp.id=si.spec_id join roster.teams t on t.id=sp.team_id join roster.spec_revisions r on r.spec_id=sp.id and r.number=sp.current_revision where si.workspace_id=${workspaceId} and si.issue_id=${issueId}::uuid and ${
+        sql`select sp.number,t.key as team,r.content->>'title' as title,r.content->>'status' as status,sp.current_revision,sp.updated_at,progress.total,progress.done,${activeFields} from roster.spec_issues si join roster.specs sp on sp.id=si.spec_id join roster.teams t on t.id=sp.team_id join roster.spec_revisions r on r.spec_id=sp.id and r.number=sp.current_revision ${
+          progress(subject)
+        } ${activeRevision} where si.workspace_id=${workspaceId} and si.issue_id=${issueId}::uuid and ${
           visible(subject)
         } order by sp.updated_at desc,sp.id desc`,
       );
@@ -39,7 +62,9 @@ export function createSpecsRepository(db: Executor): SpecsRepository {
     async findSpec({ workspaceId, number, subject }) {
       return one(
         db,
-        sql`select sp.*,t.key as team from roster.specs sp join roster.teams t on t.id=sp.team_id where sp.workspace_id=${workspaceId} and sp.number=${number} and ${
+        sql`select sp.*,t.key as team,progress.total,progress.done,${activeFields} from roster.specs sp join roster.teams t on t.id=sp.team_id ${
+          progress(subject)
+        } ${activeRevision} where sp.workspace_id=${workspaceId} and sp.number=${number} and ${
           visible(subject)
         }`,
       );
@@ -53,9 +78,9 @@ export function createSpecsRepository(db: Executor): SpecsRepository {
     async listSpecs({ workspaceId, subject, hasTeam, teamId }) {
       return rows(
         db,
-        sql`select sp.number,t.key as team,r.content->>'title' as title,r.content->>'status' as status,sp.current_revision,sp.updated_at from roster.specs sp join roster.teams t on t.id=sp.team_id join roster.spec_revisions r on r.spec_id=sp.id and r.number=sp.current_revision where sp.workspace_id=${workspaceId} and ${
-          visible(subject)
-        } ${
+        sql`select sp.number,t.key as team,r.content->>'title' as title,r.content->>'status' as status,sp.current_revision,sp.updated_at,progress.total,progress.done,${activeFields} from roster.specs sp join roster.teams t on t.id=sp.team_id join roster.spec_revisions r on r.spec_id=sp.id and r.number=sp.current_revision ${
+          progress(subject)
+        } ${activeRevision} where sp.workspace_id=${workspaceId} and ${visible(subject)} ${
           hasTeam ? sql`and sp.team_id=${teamId}` : sql``
         } order by sp.updated_at desc,sp.id desc`,
       );

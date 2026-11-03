@@ -7,10 +7,10 @@ import {
   listIssueSpecsSchema,
   listSpecsSchema,
   type Spec,
-  type SpecContent,
   specContentSchema,
   type SpecRevision,
   type SpecRevisionSummary,
+  specStoredStatusSchema,
   updateSpecSchema,
 } from '../../../../../contracts/spec.ts';
 import type { Row } from '../../../application/records.ts';
@@ -36,6 +36,11 @@ function author(r: Row): Identity | null {
       email: String(r.author_email),
     }
     : null;
+}
+function activeRevision(r: Row) {
+  return r.active_number == null
+    ? null
+    : { number: Number(r.active_number), title: String(r.active_title) };
 }
 function revisionSummary(r: Row): SpecRevisionSummary {
   return {
@@ -67,7 +72,9 @@ async function get(db: Session, ctx: RequestContext, w: Row, identifier: string)
   });
   return {
     identifier,
+    active_revision: activeRevision(sp),
     team: String(sp.team),
+    issue_progress: { done: Number(sp.done), total: Number(sp.total) },
     revision: Number(sp.current_revision),
     message: String(r.message),
     author: author(r),
@@ -79,9 +86,11 @@ async function get(db: Session, ctx: RequestContext, w: Row, identifier: string)
 function specSummary(r: Row) {
   return {
     identifier: 'SPEC-' + r.number,
+    active_revision: activeRevision(r),
     team: String(r.team),
+    issue_progress: { done: Number(r.done), total: Number(r.total) },
     title: String(r.title),
-    status: r.status as SpecContent['status'],
+    status: parse(specStoredStatusSchema, r.status),
     revision: Number(r.current_revision),
     updated_at: iso(r.updated_at),
   };

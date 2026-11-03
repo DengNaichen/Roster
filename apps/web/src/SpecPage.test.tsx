@@ -67,6 +67,8 @@ const content: SpecContent = {
   ],
 };
 const spec: Spec = {
+  active_revision: null,
+  issue_progress: { done: 0, total: 0 },
   identifier: "SPEC-42",
   team: "AL",
   revision: 1,
@@ -222,6 +224,27 @@ it("retains drafts through conflicts and requires explicit latest-revision revie
   expect(await screen.findByRole("heading", { name: "My unsaved title", level: 1 })).toBeTruthy();
   expect(writes[1].base_revision).toBe(2);
 });
+it("opens the active revision while a proposed replacement is in review", async () => {
+  const active = { ...content, title: "Current agreement", status: "active" };
+  const proposed = { ...content, title: "Proposed change", status: "review" };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (path: string) => {
+      if (path.includes("/issues?")) return json({ issues: [] });
+      if (path.endsWith("/revisions/1")) return json({ number: 1, content: active });
+      return json({
+        ...spec,
+        revision: 2,
+        active_revision: { number: 1, title: active.title },
+        content: proposed,
+      });
+    }),
+  );
+  render(<SpecPage id={spec.identifier} />);
+  expect(await screen.findByRole("heading", { level: 1, name: active.title })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: /r2 · In review/ }));
+  expect(await screen.findByRole("heading", { level: 1, name: proposed.title })).toBeTruthy();
+});
 it("reads immutable history and compares stable requirements", async () => {
   const old = {
     ...content,
@@ -267,6 +290,19 @@ it("reads immutable history and compares stable requirements", async () => {
   ).toBeTruthy();
   expect(screen.getByRole("heading", { name: "Requirement FR-002 · removed" })).toBeTruthy();
 });
+it("shows spec titles and counts by team before any selection", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => json({ specs: [{ ...spec, title: content.title, status: "draft" }] })),
+  );
+  render(<SpecsPage team="" teams={[team, { ...team, key: "OPS", name: "Operations" }]} />);
+  const populated = await screen.findByRole("region", { name: team.name });
+  const toggle = within(populated).getByRole("button", { name: team.name + ", 1 spec" });
+  expect(within(populated).getByRole("link", { name: /Real specification/ })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Operations, 0 specs" })).toBeTruthy();
+  fireEvent.click(toggle);
+  expect(within(populated).queryByRole("link")).toBeNull();
+});
 it("creates using REST and navigates to the returned identifier", async () => {
   history.replaceState(null, "", "/demo/specs");
   let created: { team: string; content: SpecContent } | undefined;
@@ -281,7 +317,7 @@ it("creates using REST and navigates to the returned identifier", async () => {
     }),
   );
   render(<SpecsPage team="AL" teams={[team]} />);
-  await screen.findByText("No specs in this scope yet.");
+  await screen.findByText("No specs yet.");
   fireEvent.click(screen.getByRole("button", { name: "New spec" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Title" }), {
     target: { value: "Created via UI" },
