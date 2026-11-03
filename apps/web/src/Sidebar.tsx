@@ -8,7 +8,7 @@ import {
   ListTodo,
   Menu,
   Plus,
-  Target,
+  Telescope,
 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
@@ -78,7 +78,7 @@ export function Sidebar({
           className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`}
           to={pagePath("/initiatives")}
         >
-          <Target className="icon" />
+          <Telescope className="icon" />
           <span className="nav-label">Initiatives</span>
           {!capabilities.initiatives && <small>Not migrated</small>}
         </NavLink>
