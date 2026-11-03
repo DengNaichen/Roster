@@ -1,15 +1,15 @@
-.prototype-link-options {
+.spec-link-options {
   max-height: 45vh;
   overflow-y: auto;
 }
-.issue-dialog .prototype-link-options .label-option {
+.issue-dialog .spec-link-options .label-option {
   display: flex;
   align-items: center;
   flex-direction: row;
   gap: var(--space-8);
   padding: var(--space-8) 0;
 }
-.issue-dialog .prototype-link-options input {
+.issue-dialog .spec-link-options input {
   width: auto;
 }
 

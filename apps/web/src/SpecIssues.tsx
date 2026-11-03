@@ -6,6 +6,7 @@ import { useIssues } from "./useIssues";
 import { emptyLabelFilter, useLabels, type LabelFilterValue } from "./useLabels";
 import { useResource } from "./useResource";
 import {
+  api,
   apiPath,
   columns,
   ModalDialog,
@@ -17,32 +18,22 @@ import {
   type Team,
 } from "./shared";
 
-// Preview-only associations; issue contents and editing use the existing API.
-export function prototypeLinks(id: string): string[] {
-  try {
-    const saved = localStorage.getItem(`roster-prototype-links:${id}`);
-    if (saved) return JSON.parse(saved);
-    // The isolated preview database contains these 50 seeded demo issues.
-    return import.meta.env.DEV && import.meta.env.VITE_LOCAL_PREVIEW === "true" && id === "SPEC-1"
-      ? Array.from({ length: 50 }, (_, index) => `RO-${index + 7}`)
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-export default function SpecIssuesPrototype({
+export default function SpecIssues({
   id,
   team,
   title,
-  onCount,
+  linked,
+  linksError,
+  onLinksChanged,
 }: {
   id: string;
   team: string;
   title: string;
-  onCount: (count: number) => void;
+  linked: string[];
+  linksError: string;
+  onLinksChanged: () => Promise<void>;
 }) {
-  const [linked, setLinked] = useState(() => prototypeLinks(id));
+  const [savingLinks, setSavingLinks] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [filter, setFilter] = useState<Status | "all">("all");
   const [priority, setPriority] = useState<Priority | "">("");
@@ -63,15 +54,19 @@ export default function SpecIssuesPrototype({
   const [pending, setPending] = useState<string[]>([]);
   const catalog = useLabels();
   const teams = useResource<{ teams: Team[] }>(apiPath("/teams"), { teams: [] });
-  const candidates = useResource<{ issues: IssueSummary[] }>(linking ? apiPath("/issues") : null, {
-    issues: [],
-  });
+  const candidates = useResource<{ issues: IssueSummary[] }>(
+    linking ? apiPath("/issues?limit=-1") : null,
+    {
+      issues: [],
+    },
+  );
   const { issues, loading, loadError, loadIssues, savingPriorities, changePriority, moveIssue } =
-    useIssues({ team: "", type, query, priority, labelFilter, assignee }, setError);
+    useIssues(
+      { team: "", type, query, priority, labelFilter, assignee, specIdentifier: id },
+      setError,
+    );
   const visible = issues
-    .filter(
-      (issue) => linked.includes(issue.identifier) && (filter === "all" || issue.status === filter),
-    )
+    .filter((issue) => filter === "all" || issue.status === filter)
     .sort((a, b) =>
       sort === "priority"
         ? (a.priority || 5) - (b.priority || 5)
@@ -79,17 +74,32 @@ export default function SpecIssuesPrototype({
           ? b.updated_at.localeCompare(a.updated_at)
           : 0,
     );
+  const selectedVisible = selected.filter((identifier) =>
+    visible.some((issue) => issue.identifier === identifier),
+  );
   const grouped = Object.fromEntries(
     columns.map((column) => [
       column.status,
       visible.filter((issue) => issue.status === column.status),
     ]),
   ) as Record<Status, IssueSummary[]>;
-  function saveLinks(next: string[]) {
-    localStorage.setItem(`roster-prototype-links:${id}`, JSON.stringify(next));
-    setLinked(next);
-    onCount(next.length);
-    setSelected([]);
+  async function changeLinks(identifiers: string[], linked: boolean) {
+    if (savingLinks || !identifiers.length) return false;
+    setSavingLinks(true);
+    setError("");
+    try {
+      await api(apiPath(`/specs/${encodeURIComponent(id)}/issues`), linked ? "POST" : "DELETE", {
+        issues: identifiers,
+      });
+      setSelected([]);
+      await Promise.all([loadIssues(), onLinksChanged()]);
+      return true;
+    } catch (cause) {
+      setError((cause as Error).message);
+      return false;
+    } finally {
+      setSavingLinks(false);
+    }
   }
   return (
     <>
@@ -98,7 +108,9 @@ export default function SpecIssuesPrototype({
         <div className="spec-action-row">
           <button
             className="button"
+            disabled={savingLinks}
             onClick={() => {
+              setError("");
               setPending([]);
               setLinkQuery("");
               setLinking(true);
@@ -106,7 +118,11 @@ export default function SpecIssuesPrototype({
           >
             Link issues
           </button>
-          <button className="button" onClick={() => setCreating(true)}>
+          <button
+            className="button"
+            disabled={savingLinks || teams.loading || !!teams.error}
+            onClick={() => setCreating(true)}
+          >
             New issue
           </button>
         </div>
@@ -138,13 +154,16 @@ export default function SpecIssuesPrototype({
         selectVisible={() => setSelected(visible.map((i) => i.identifier))}
         selectionDisabled={loading}
       />
-      {(error || loadError) && <RequestError message={error || loadError} />}
-      {selected.length > 0 && (
+      {(error || loadError || linksError) && (
+        <RequestError message={error || loadError || linksError} />
+      )}
+      {selectedVisible.length > 0 && (
         <div className="selection-toolbar" role="toolbar" aria-label="Selected issues">
-          <span>{selected.length} selected</span>
+          <span>{selectedVisible.length} selected</span>
           <button
             className="button"
-            onClick={() => saveLinks(linked.filter((identifier) => !selected.includes(identifier)))}
+            disabled={savingLinks}
+            onClick={() => void changeLinks(selectedVisible, false)}
           >
             Unlink from spec
           </button>
@@ -153,7 +172,18 @@ export default function SpecIssuesPrototype({
           </button>
         </div>
       )}
-      {!loading && visible.length === 0 && (
+      {(loadError || linksError) && (
+        <button
+          className="button"
+          onClick={() => {
+            void loadIssues();
+            void onLinksChanged();
+          }}
+        >
+          Retry linked issues
+        </button>
+      )}
+      {!loading && !loadError && !linksError && visible.length === 0 && (
         <p className="scope-description">
           {linked.length
             ? "No linked issues match these filters."
@@ -191,10 +221,13 @@ export default function SpecIssuesPrototype({
           projects={[]}
           onClose={() => setCreating(false)}
           onCreate={async (issue) => {
-            saveLinks([...linked, issue.identifier]);
-            setCollapsed((current) => ({ ...current, [issue.status]: false }));
-            await loadIssues();
             setCreating(false);
+            const linked = await changeLinks([issue.identifier], true);
+            if (!linked)
+              setError(
+                `Created ${issue.identifier}, but linking failed. Use Link issues to retry without creating another issue.`,
+              );
+            setCollapsed((current) => ({ ...current, [issue.status]: false }));
           }}
         />
       )}
@@ -205,11 +238,9 @@ export default function SpecIssuesPrototype({
           aria-label="Link issues"
         >
           <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              saveLinks([...new Set([...linked, ...pending])]);
-              setLinking(false);
-              void loadIssues();
+              if (await changeLinks(pending, true)) setLinking(false);
             }}
           >
             <header>
@@ -227,7 +258,8 @@ export default function SpecIssuesPrototype({
                 placeholder="Search by title or identifier"
               />
             </label>
-            <div className="prototype-link-options">
+            <div className="spec-link-options">
+              {error && <RequestError message={error} />}
               {candidates.error && <RequestError message={candidates.error} />}{" "}
               {candidates.loading && <p>Loading…</p>}
               {candidates.data.issues
@@ -260,7 +292,12 @@ export default function SpecIssuesPrototype({
               <button type="button" className="ghost" onClick={() => setLinking(false)}>
                 Cancel
               </button>
-              <button className="button" disabled={!pending.length}>
+              <button
+                className="button"
+                disabled={
+                  !pending.length || savingLinks || candidates.loading || !!candidates.error
+                }
+              >
                 Link {pending.length || ""} issues
               </button>
             </footer>

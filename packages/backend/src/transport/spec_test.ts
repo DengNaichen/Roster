@@ -131,6 +131,36 @@ export async function exerciseSpecTransports(
     assert(!document.result.isError, text);
     return document.result.structuredContent.result as T;
   };
+  const issue = await service.createIssue(ctx, slug, {
+    team,
+    title: 'Spec link transport fixture',
+  });
+  const linksPath = `/specs/${created.identifier}/issues`;
+  await rest(linksPath, 'POST', { issues: [issue.identifier] });
+  const linkedRest = await rest(linksPath + '?limit=-1') as { issues: { identifier: string }[] };
+  assert(linkedRest.issues.some((item) => item.identifier === issue.identifier));
+  await rest(linksPath, 'POST', { issues: [] }, 400);
+  await rest(linksPath, 'POST', { identifier: 'SPEC-999', issues: [issue.identifier] }, 400);
+  await rest(linksPath + '?spec=SPEC-999', 'GET', undefined, 400);
+  await rest(`/issues/${issue.identifier}/specs`);
+  const mcpLinked = await call<{ items: { identifier: string }[] }>('list_spec_issues', {
+    identifier: created.identifier,
+  });
+  assert(mcpLinked.items.some((item) => item.identifier === issue.identifier));
+  await call('unlink_spec_issue', { identifier: created.identifier, issue: issue.identifier });
+  assert((await rest(linksPath) as { issues: unknown[] }).issues.length === 0);
+  await call('unlink_spec_issue', { identifier: created.identifier, issue: issue.identifier });
+  await call('link_spec_issue', { identifier: created.identifier, issue: issue.identifier });
+  await call('link_spec_issue', { identifier: created.identifier, issue: issue.identifier });
+  const reverse = await call<SpecSummary[]>('list_issue_specs', { issue: issue.identifier });
+  assert(reverse.some((item) => item.identifier === created.identifier));
+  await rest(linksPath, 'DELETE', { issues: [issue.identifier] });
+  assert((await call<SpecSummary[]>('list_issue_specs', { issue: issue.identifier })).length === 0);
+  await call(
+    'link_spec_issue',
+    { identifier: created.identifier, issue: 'XX-999999' },
+    'not_found',
+  );
   const mcpContent = { ...initial, title: 'MCP transport spec' };
   const mcpCreated = await call<Spec>('create_spec', {
     team,

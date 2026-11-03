@@ -122,6 +122,18 @@ const specOutput = z.object({
   content: specContentOutput,
 }).passthrough();
 const resultSchemas: Record<string, z.ZodType> = {
+  list_spec_issues: z.object({ items: z.array(issueOutput), next_cursor: z.string().nullable() }),
+  list_issue_specs: z.array(specSummaryOutput),
+  link_spec_issue: z.object({
+    identifier: specIdentifierOutput,
+    issues: z.array(z.string()),
+    linked: z.boolean(),
+  }),
+  unlink_spec_issue: z.object({
+    identifier: specIdentifierOutput,
+    issues: z.array(z.string()),
+    linked: z.boolean(),
+  }),
   list_specs: z.array(specSummaryOutput),
   get_spec: specOutput,
   create_spec: specOutput,
@@ -515,6 +527,37 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     { id: z.number().int().positive(), ...cycles.updateCycleSchema.shape },
     false,
     ({ id, ...i }) => service.updateCycle(ctx, workspace, id, i),
+  );
+  tool(
+    'list_spec_issues',
+    'List issues linked to a readable spec. Supports the same filters and pagination as list_issues; private issues remain hidden.',
+    { ...listIssuesSchema.omit({ spec: true }).shape, ...specs.getSpecSchema.shape },
+    true,
+    ({ identifier, ...input }) =>
+      service.listIssues(ctx, workspace, { ...input, spec: identifier }),
+  );
+  tool(
+    'list_issue_specs',
+    'List readable specs linked to an issue.',
+    specs.listIssueSpecsSchema.shape,
+    true,
+    (input) => service.listIssueSpecs(ctx, workspace, input),
+  );
+  tool(
+    'link_spec_issue',
+    'Link an issue to a spec in the same workspace. Both must be readable. Idempotent; does not change document revisions or issue status.',
+    specs.specIssueSchema.shape,
+    false,
+    ({ identifier, issue }) =>
+      service.linkSpecIssues(ctx, workspace, { identifier, issues: [issue] }),
+  );
+  tool(
+    'unlink_spec_issue',
+    'Remove a spec–issue link. Both must be readable. Idempotent; preserves both entities and their states.',
+    specs.specIssueSchema.shape,
+    false,
+    ({ identifier, issue }) =>
+      service.unlinkSpecIssues(ctx, workspace, { identifier, issues: [issue] }),
   );
   tool(
     'list_specs',

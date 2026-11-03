@@ -19,6 +19,7 @@ export async function prepareTestDatabase(pool: Pool) {
       '20261102000300_activity.sql': 'comments',
       '20261102000400_github.sql': 'pull_requests',
       '20261102000500_specs.sql': 'specs',
+      '20261103000100_spec_issues.sql': 'spec_issues',
     };
     for (const [file, table] of Object.entries(markers)) {
       const exists = await connection.query('select to_regclass($1) as name', ['roster.' + table]);

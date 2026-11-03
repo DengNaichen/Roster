@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import type { Identity, RequestContext } from '../../../../../contracts/mod.ts';
 import {
+  changeSpecIssuesSchema,
   createSpecSchema,
   getSpecRevisionSchema,
+  listIssueSpecsSchema,
   listSpecsSchema,
   type Spec,
   type SpecContent,
@@ -19,6 +21,7 @@ import { encodeSpec, ids } from '../domain/content.ts';
 import { fail } from '../../../platform/errors/validation.ts';
 import { iso } from '../../../platform/time.ts';
 import { saveIdentity, team, workspace } from '../../access/index.ts';
+import { readIssue } from '../../issues/index.ts';
 function parse<T>(schema: z.ZodType<T>, input: unknown): T {
   const r = schema.safeParse(input);
   return r.success
@@ -45,14 +48,19 @@ function revisionSummary(r: Row): SpecRevisionSummary {
 function revision(r: Row): SpecRevision {
   return { ...revisionSummary(r), content: parse(specContentSchema, r.content) };
 }
-async function ref(db: Session, ctx: RequestContext, w: Row, identifier: string): Promise<Row> {
+export async function readSpec(
+  db: Session,
+  ctx: RequestContext,
+  w: Row,
+  identifier: string,
+): Promise<Row> {
   if (!/^SPEC-[1-9][0-9]*$/.test(identifier)) fail('not_found', 'Spec not found');
   const number = Number(identifier.slice(5));
   if (!Number.isSafeInteger(number) || number > 2147483647) fail('not_found', 'Spec not found');
   return db.specs.findSpec({ workspaceId: w.id, number, subject: ctx.identity.subject });
 }
 async function get(db: Session, ctx: RequestContext, w: Row, identifier: string): Promise<Spec> {
-  const sp = await ref(db, ctx, w, identifier);
+  const sp = await readSpec(db, ctx, w, identifier);
   const r = await db.specs.currentRevision({
     specId: sp.id,
     current_revision: sp.current_revision,
@@ -68,9 +76,55 @@ async function get(db: Session, ctx: RequestContext, w: Row, identifier: string)
     content: parse(specContentSchema, r.content),
   };
 }
+function specSummary(r: Row) {
+  return {
+    identifier: 'SPEC-' + r.number,
+    team: String(r.team),
+    title: String(r.title),
+    status: r.status as SpecContent['status'],
+    revision: Number(r.current_revision),
+    updated_at: iso(r.updated_at),
+  };
+}
 export function createSpecService(db: UnitOfWork, options: { now?: () => Date } = {}): SpecService {
   const clock = options.now ?? (() => new Date());
+  async function changeLinks(ctx: RequestContext, slug: string, input: unknown, linked: boolean) {
+    const value = parse(changeSpecIssuesSchema, input);
+    return db.transaction(async (tx) => {
+      const w = await workspace(tx, ctx, slug, true);
+      const spec = await readSpec(tx, ctx, w, value.identifier);
+      const issueIds = [];
+      for (const identifier of value.issues) {
+        issueIds.push((await readIssue(tx, ctx, w, identifier)).id);
+      }
+      if (linked) {
+        await saveIdentity(tx, ctx);
+        await tx.specs.linkIssues({
+          workspaceId: w.id,
+          specId: spec.id,
+          issueIds,
+          subject: ctx.identity.subject,
+          now: clock(),
+        });
+      } else {
+        await tx.specs.unlinkIssues({ specId: spec.id, issueIds });
+      }
+      return { identifier: value.identifier, issues: value.issues, linked };
+    });
+  }
   return {
+    linkSpecIssues: (ctx, slug, input) => changeLinks(ctx, slug, input, true),
+    unlinkSpecIssues: (ctx, slug, input) => changeLinks(ctx, slug, input, false),
+    async listIssueSpecs(ctx, slug, input) {
+      const value = parse(listIssueSpecsSchema, input);
+      const w = await workspace(db, ctx, slug);
+      const issue = await readIssue(db, ctx, w, value.issue);
+      return (await db.specs.listIssueSpecs({
+        workspaceId: w.id,
+        issueId: issue.id,
+        subject: ctx.identity.subject,
+      })).map(specSummary);
+    },
     async listSpecs(ctx, slug, input = {}) {
       const q = parse(listSpecsSchema, input);
       const w = await workspace(db, ctx, slug);
@@ -81,14 +135,7 @@ export function createSpecService(db: UnitOfWork, options: { now?: () => Date } 
         hasTeam: Boolean(t),
         teamId: t ? (t.id) : undefined,
       });
-      return result.map((r) => ({
-        identifier: 'SPEC-' + r.number,
-        team: String(r.team),
-        title: String(r.title),
-        status: r.status as SpecContent['status'],
-        revision: Number(r.current_revision),
-        updated_at: iso(r.updated_at),
-      }));
+      return result.map(specSummary);
     },
     async getSpec(ctx, slug, identifier) {
       const w = await workspace(db, ctx, slug);
@@ -122,7 +169,7 @@ export function createSpecService(db: UnitOfWork, options: { now?: () => Date } 
       const incoming = ids(value.content);
       return db.transaction(async (tx) => {
         const w = await workspace(tx, ctx, slug, true);
-        const sp = await ref(tx, ctx, w, value.identifier);
+        const sp = await readSpec(tx, ctx, w, value.identifier);
         if (Number(sp.current_revision) !== value.base_revision) {
           fail('conflict', 'Spec changed since base_revision; reload before saving');
         }
@@ -162,13 +209,13 @@ export function createSpecService(db: UnitOfWork, options: { now?: () => Date } 
     },
     async listSpecRevisions(ctx, slug, identifier) {
       const w = await workspace(db, ctx, slug);
-      const sp = await ref(db, ctx, w, identifier);
+      const sp = await readSpec(db, ctx, w, identifier);
       return (await db.specs.listRevisions({ specId: sp.id })).map(revisionSummary);
     },
     async getSpecRevision(ctx, slug, input) {
       const value = parse(getSpecRevisionSchema, input);
       const w = await workspace(db, ctx, slug);
-      const sp = await ref(db, ctx, w, value.identifier);
+      const sp = await readSpec(db, ctx, w, value.identifier);
       return revision(
         await db.specs.findRevision({ specId: sp.id, number: value.number }),
       );

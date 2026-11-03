@@ -163,3 +163,13 @@ GitHub 同步通过数据库租约防止并行 worker 重复执行；只有完�
 ## 本地追加迁移
 
 使用管理员连接运行 `DATABASE_URL=... node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read scripts/migrate.ts`。此脚本只接受 loopback 数据库并保存迁移校验和，拒绝修改已经应用的迁移。仅当数据库原来手动应用了首个迁移时，首次加 `--baseline-initial`；它不会跳过后续迁移。托管环境仍统一使用 Supabase CLI。
+
+### Spec–Issue 关联回归
+
+在独立 `_test` 数据库上运行：
+
+```sh
+ROSTER_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55439/roster_spec_links_test node scripts/toolchain.mjs deno test --allow-env --allow-net --allow-read packages/backend/src/modules/spec_links_test.ts packages/backend/src/modules/spec_test.ts packages/backend/src/transport/transport_test.ts
+```
+
+覆盖双端与跨 Team 权限、跨 Workspace 外键、成员停用、并发重复关联、批量回滚、解除关联的幂等性、状态与修订独立、超过 50 条数据的完整查询和分页，以及 REST/MCP 交叉读写。部署前须应用 `20261103000100_spec_issues.sql`；前端需要同版本后端。

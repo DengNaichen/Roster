@@ -4,8 +4,9 @@ import type { Spec, SpecContent } from "../../../packages/contracts/spec";
 import SpecPage from "./SpecPage";
 import SpecsPage from "./SpecsPage";
 import SpecDocument from "./SpecDocument";
+import { SpecHistory } from "./SpecHistory";
 import { compareSpecContent, rebaseSpecDraft, specView } from "./specView";
-import { json } from "./test/fixtures";
+import { fixtureIssue, json } from "./test/fixtures";
 import { workspaceRoute } from "./shared";
 vi.mock("./shared", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./shared")>();
@@ -170,7 +171,8 @@ it("retains drafts through conflicts and requires explicit latest-revision revie
   const writes: { base_revision: number; content: SpecContent }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (_path: string, init?: RequestInit) => {
+    vi.fn(async (path: string, init?: RequestInit) => {
+      if (path.includes("/issues?")) return json({ issues: [] });
       if (init?.method === "PUT") {
         const body = JSON.parse(String(init.body));
         writes.push(body);
@@ -256,8 +258,7 @@ it("reads immutable history and compares stable requirements", async () => {
       return json({ ...spec, revision: 2 });
     }),
   );
-  render(<SpecPage id="SPEC-42" />);
-  fireEvent.click(await screen.findByRole("button", { name: "Revision history" }));
+  render(<SpecHistory spec={{ ...spec, revision: 2 }} />);
   fireEvent.click(await screen.findByRole("button", { name: "Compare revisions" }));
   expect(
     await screen.findByRole("heading", {
@@ -299,7 +300,13 @@ it("retries missing/forbidden reads without substituting prototype content", asy
   let failed = true;
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => (failed ? json({ error: "Spec not found" }, 404) : json(spec))),
+    vi.fn(async (path: string) =>
+      path.includes("/issues?")
+        ? json({ issues: [] })
+        : failed
+          ? json({ error: "Spec not found" }, 404)
+          : json(spec),
+    ),
   );
   render(<SpecPage id="SPEC-42" />);
   expect(await screen.findByRole("alert")).toHaveProperty("textContent", "Spec not found");
@@ -340,4 +347,74 @@ it("keeps independently added server IDs when a reviewed draft edits another req
   const merged = rebaseSpecDraft(content, draft, latest);
   expect(merged.requirements.map((entry) => entry.id)).toEqual(["FR-001", "FR-002"]);
   expect(merged.requirements[0].text).toBe("My requirement edit");
+});
+
+it("loads real scoped links beyond 50 rows and persists link/unlink through remounts", async () => {
+  const fixtures = Array.from({ length: 55 }, (_, i) => ({
+    ...fixtureIssue,
+    identifier: `AL-${i + 1}`,
+    title: `Linked issue ${i + 1}`,
+    status: i % 2 === 0 ? "todo" : "in_progress",
+  }));
+  const candidate = { ...fixtureIssue, identifier: "AL-100", title: "Existing candidate" };
+  let linked = fixtures;
+  const writes: { method: string; issues: string[] }[] = [];
+  let failUnlink = false;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (path: string, init?: RequestInit) => {
+      if (
+        path.endsWith("/specs/SPEC-42/issues") &&
+        ["POST", "DELETE"].includes(init?.method ?? "")
+      ) {
+        const { issues } = JSON.parse(String(init?.body));
+        writes.push({ method: init!.method!, issues });
+        if (init?.method === "DELETE") {
+          if (failUnlink) return json({ error: "Cannot unlink right now" }, 500);
+          linked = linked.filter((i) => !issues.includes(i.identifier));
+        } else linked = [...linked, candidate];
+        return json({ identifier: "SPEC-42", issues, linked: init?.method === "POST" });
+      }
+      if (path.includes("/specs/SPEC-42/issues?")) {
+        expect(path).toContain("limit=-1");
+        return json({ issues: linked });
+      }
+      if (path.includes("/issues?")) return json({ issues: [...fixtures, candidate] });
+      if (path.endsWith("/teams")) return json({ teams: [team] });
+      if (path.endsWith("/labels")) return json({ labels: [], groups: [] });
+      if (path.endsWith("/label-groups")) return json({ groups: [] });
+      return json(spec);
+    }),
+  );
+  const mounted = render(<SpecPage id="SPEC-42" />);
+  fireEvent.click(await screen.findByRole("tab", { name: "Issues · 55" }));
+  expect(await screen.findByText("Linked issue 55")).toBeTruthy();
+  expect(screen.queryByRole("tab", { name: "History" })).toBeNull();
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select AL-1" }));
+  failUnlink = true;
+  fireEvent.click(screen.getByRole("button", { name: "Unlink from spec" }));
+  expect(await screen.findByText("Cannot unlink right now")).toBeTruthy();
+  expect(screen.getByRole("tab", { name: "Issues · 55" })).toBeTruthy();
+  failUnlink = false;
+  fireEvent.click(screen.getByRole("button", { name: "Unlink from spec" }));
+  await screen.findByRole("tab", { name: "Issues · 54" });
+  fireEvent.click(screen.getByRole("button", { name: "Link issues" }));
+  const dialog = await screen.findByRole("dialog", { name: "Link issues" });
+  fireEvent.change(within(dialog).getByRole("textbox"), {
+    target: { value: "Existing candidate" },
+  });
+  fireEvent.click(await within(dialog).findByRole("checkbox"));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Link 1 issues" }));
+  await screen.findByRole("tab", { name: "Issues · 55" });
+  expect(await screen.findByText("Existing candidate")).toBeTruthy();
+  expect(writes).toEqual([
+    { method: "DELETE", issues: ["AL-1"] },
+    { method: "DELETE", issues: ["AL-1"] },
+    { method: "POST", issues: ["AL-100"] },
+  ]);
+  mounted.unmount();
+  render(<SpecPage id="SPEC-42" />);
+  fireEvent.click(await screen.findByRole("tab", { name: "Issues · 55" }));
+  expect(await screen.findByText("Existing candidate")).toBeTruthy();
+  expect(screen.queryByText("Linked issue 1")).toBeNull();
 });

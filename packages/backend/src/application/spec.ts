@@ -1,16 +1,34 @@
 import type { z } from 'zod';
 import type { RequestContext } from '../../../contracts/mod.ts';
 import type {
+  changeSpecIssuesSchema,
   createSpecSchema,
   getSpecRevisionSchema,
+  listIssueSpecsSchema,
   listSpecsSchema,
   Spec,
+  SpecIssueChange,
   SpecRevision,
   SpecRevisionSummary,
   SpecSummary,
   updateSpecSchema,
 } from '../../../contracts/spec.ts';
 export interface SpecService {
+  linkSpecIssues(
+    ctx: RequestContext,
+    slug: string,
+    input: z.input<typeof changeSpecIssuesSchema>,
+  ): Promise<SpecIssueChange>;
+  unlinkSpecIssues(
+    ctx: RequestContext,
+    slug: string,
+    input: z.input<typeof changeSpecIssuesSchema>,
+  ): Promise<SpecIssueChange>;
+  listIssueSpecs(
+    ctx: RequestContext,
+    slug: string,
+    input: z.input<typeof listIssueSpecsSchema>,
+  ): Promise<SpecSummary[]>;
   listSpecs(
     ctx: RequestContext,
     slug: string,

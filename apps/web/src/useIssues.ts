@@ -6,6 +6,7 @@ import { useRequestScope } from "./useRequestScope";
 type IssueList = { issues: IssueSummary[] };
 
 export type IssueQuery = {
+  specIdentifier?: string;
   cycleID?: number;
   assignee?: string;
   projectID?: number;
@@ -17,7 +18,17 @@ export type IssueQuery = {
 };
 
 export function useIssues(
-  { cycleID, projectID, team, type, query, priority, labelFilter, assignee = "" }: IssueQuery,
+  {
+    cycleID,
+    projectID,
+    team,
+    type,
+    query,
+    priority,
+    labelFilter,
+    assignee = "",
+    specIdentifier,
+  }: IssueQuery,
   setError: (message: string) => void,
 ) {
   const confirmedStatuses = useRef(new Map<string, Status>());
@@ -35,7 +46,12 @@ export function useIssues(
   if (priority !== "") params.set("priority", String(priority));
   labelFilter.labels.forEach((id) => params.append("label_id", String(id)));
   labelFilter.groups.forEach((id) => params.append("label_group_id", String(id)));
-  const path = apiPath(`/issues?${params}`);
+  if (specIdentifier) params.set("limit", "-1");
+  const path = apiPath(
+    specIdentifier
+      ? `/specs/${encodeURIComponent(specIdentifier)}/issues?${params}`
+      : `/issues?${params}`,
+  );
   // The write queue belongs to the mounted page, across changes to its filters.
   const requests = useRequestScope(apiPath("/issues"));
   const queryScope = useRequestScope(path);

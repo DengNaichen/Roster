@@ -13,6 +13,7 @@
 - Workspace 创建与切换、Admin/Member、停用与恢复、可重置的邀请链接。
 - Team、公开/私有可见性、成员与 Owner 管理。
 - 任务创建、列表、详情、更新与审计记录；事务分配编号。
+- Spec 与 Issue 的独立多对多关联：双端可见性校验、批量关联/解除关联、双向查询，REST 与 MCP 共用业务逻辑。
 - 独立 `SPEC-n` 文档：结构化 Spec Kit 内容、Team 可见性、可信作者、并发版本检查与不可变修订。它与任务的 `type=spec` 是两个独立概念。
 - Projects 与多 Team 关联、归档、日期与时间轴；Initiatives 与项目关联。
 - Labels、互斥分组、归档、批量变更、合并与筛选。

@@ -666,6 +666,45 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     );
     return c.json({ updated: true });
   });
+  app.get('/api/w/:workspace/specs/:identifier/issues', async (c) => {
+    const input = restListInput(c.req.queries());
+    if (input.spec !== undefined) {
+      throw new AppError('invalid_input', 'Spec is selected by the URL');
+    }
+    const page = await s.listIssues(c.get('requestContext'), c.req.param('workspace'), {
+      ...input,
+      spec: specs.getSpecSchema.parse({ identifier: c.req.param('identifier') }).identifier,
+    });
+    const issues = page.items.map(restIssue);
+    return c.json({ ...page, items: issues, issues });
+  });
+  app.post('/api/w/:workspace/specs/:identifier/issues', async (c) => {
+    const input = await body(c, specs.changeSpecIssuesSchema.omit({ identifier: true }));
+    return c.json(
+      await s.linkSpecIssues(c.get('requestContext'), c.req.param('workspace'), {
+        ...input,
+        identifier: c.req.param('identifier'),
+      }),
+    );
+  });
+  app.delete('/api/w/:workspace/specs/:identifier/issues', async (c) => {
+    const input = await body(c, specs.changeSpecIssuesSchema.omit({ identifier: true }));
+    return c.json(
+      await s.unlinkSpecIssues(c.get('requestContext'), c.req.param('workspace'), {
+        ...input,
+        identifier: c.req.param('identifier'),
+      }),
+    );
+  });
+  app.get(
+    '/api/w/:workspace/issues/:identifier/specs',
+    async (c) =>
+      c.json({
+        specs: await s.listIssueSpecs(c.get('requestContext'), c.req.param('workspace'), {
+          issue: c.req.param('identifier'),
+        }),
+      }),
+  );
   app.get('/api/w/:workspace/specs', async (c) => {
     const query = c.req.queries();
     const input: Record<string, string> = {};

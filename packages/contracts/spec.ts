@@ -122,3 +122,12 @@ export type SpecRevisionSummary = {
   created_at: string;
 };
 export type SpecRevision = SpecRevisionSummary & { content: SpecContent };
+
+const issueIdentifier = z.string().trim().min(1).max(100);
+export const changeSpecIssuesSchema = z.strictObject({
+  identifier,
+  issues: z.array(issueIdentifier).min(1).max(100).transform((value) => [...new Set(value)]),
+});
+export const specIssueSchema = z.strictObject({ identifier, issue: issueIdentifier });
+export const listIssueSpecsSchema = z.strictObject({ issue: issueIdentifier });
+export type SpecIssueChange = { identifier: string; issues: string[]; linked: boolean };

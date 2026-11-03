@@ -2,21 +2,24 @@ import { FileText } from "lucide-react";
 import { useState } from "react";
 import type { Spec } from "../../../packages/contracts/spec";
 import { PageHeader } from "./PageHeader";
-import { apiPath, NavLink, pagePath, RequestError } from "./shared";
+import { apiPath, NavLink, pagePath, RequestError, type IssueSummary } from "./shared";
 import { useResource } from "./useResource";
 import { SpecEditor } from "./SpecEditor";
 import SpecDocument from "./SpecDocument";
 import { specView } from "./specView";
-import SpecIssuesPrototype, { prototypeLinks } from "./SpecIssuesPrototype";
-import "./spec-prototype.css";
+import SpecIssues from "./SpecIssues";
+import "./spec-issues.css";
 export default function SpecPage({ id }: { id: string }) {
   const resource = useResource<Spec | null>(apiPath(`/specs/${encodeURIComponent(id)}`), null);
   const [editing, setEditing] = useState(false);
   const [tab, setTab] = useState(() =>
     new URLSearchParams(window.location.search).get("section") === "issues" ? "issues" : "overview",
   );
-  const [issueCount, setIssueCount] = useState(() => prototypeLinks(id).length);
-  const prototype = import.meta.env.DEV && import.meta.env.VITE_LOCAL_PREVIEW === "true";
+  const linkedIssues = useResource<{ issues: IssueSummary[] }>(
+    apiPath(`/specs/${encodeURIComponent(id)}/issues?limit=-1`),
+    { issues: [] },
+  );
+  const issueCount = linkedIssues.data.issues.length;
   const spec = resource.data?.identifier === id ? resource.data : null;
   return (
     <>
@@ -35,7 +38,7 @@ export default function SpecPage({ id }: { id: string }) {
         <NavLink to={pagePath("/specs")}>Specs</NavLink>
         <span>/ {id}</span>
       </PageHeader>
-      {spec && prototype && (
+      {spec && (
         <div className="project-toolbar project-tabs spec-page-tabs">
           <div className="segmented" role="tablist" aria-label="Spec sections">
             {[
@@ -66,13 +69,15 @@ export default function SpecPage({ id }: { id: string }) {
       )}
       {!spec && resource.loading && <p className="empty">Loading spec…</p>}
       {spec &&
-        (prototype && tab === "issues" ? (
-          <SpecIssuesPrototype
+        (tab === "issues" ? (
+          <SpecIssues
             key={id}
             id={id}
             team={spec.team}
             title={spec.content.title}
-            onCount={setIssueCount}
+            linked={linkedIssues.data.issues.map((issue) => issue.identifier)}
+            linksError={linkedIssues.error}
+            onLinksChanged={linkedIssues.reload}
           />
         ) : (
           <SpecDocument spec={specView(spec.content, spec.created_at)} />

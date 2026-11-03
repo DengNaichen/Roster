@@ -91,6 +91,7 @@ export type CreateIssueInput = {
 };
 export type UpdateIssueInput = Partial<Omit<CreateIssueInput, 'team'>>;
 export type ListIssuesInput = {
+  spec?: string;
   team?: string;
   status?: IssueStatus;
   type?: IssueType | '';

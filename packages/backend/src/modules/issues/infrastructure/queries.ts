@@ -12,6 +12,7 @@ import { hydrateIssueActivity } from '../../activity/index.ts';
 import { buildLabelFilter } from '../../labels/postgres.ts';
 import { visibleProject } from '../../planning/postgres.ts';
 import { issueDTO } from '../domain/mapper.ts';
+import { readSpec } from '../../specs/index.ts';
 import { hydrateIssueCatalog } from './catalog-query.ts';
 import { issueSelect, readIssue } from './read-model.ts';
 
@@ -109,6 +110,12 @@ export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | '
         sql`i.workspace_id=${w.id}`,
         visible(ctx.identity.subject),
       ];
+      if (input.spec) {
+        const spec = await readSpec(session, ctx, w, input.spec);
+        predicates.push(
+          sql`exists(select 1 from roster.spec_issues si where si.spec_id=${spec.id} and si.issue_id=i.id and si.workspace_id=${w.id})`,
+        );
+      }
       if (input.team) predicates.push(sql`t.key=${input.team}`);
       if (input.status) predicates.push(sql`i.status=${input.status}`);
       if (input.type !== undefined) {

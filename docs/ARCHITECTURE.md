@@ -22,7 +22,7 @@ packages/
       planning/              Project、Initiative
       labels/                标签、互斥分组与批量变更
       cycles/                周期、补算、结转与快照
-      specs/                 文档、不可变修订与版本检查
+      specs/                 文档、不可变修订、版本检查与 Spec–Issue 关联
       activity/              评论、工作记录、接票、链接与依赖关系
       audit/                 审计记录
     integrations/
@@ -95,7 +95,7 @@ HTTP / MCP / Jobs
 | Planning | projects、project_teams、initiatives、initiative_projects |
 | Labels | labels、label_groups、issue_labels |
 | Cycles | cycles、team_cycle_settings |
-| Specs | specs、spec_revisions |
+| Specs | specs、spec_revisions、spec_issues |
 | Activity | comments、work_logs、issue_delegations、links、relations |
 | Audit | audit_events |
 | GitHub | pull_requests、github_sync |
@@ -119,3 +119,13 @@ GitHub 同步用例依赖注入的 `GitHubClient` 和 repository。HTTP 认证�
 - 真实数据库回归覆盖权限、事务回滚、并发编号、trigger、Spec 历史、REST/MCP、GitHub 及两种导入。
 - 增加业务时先明确模块和表归属，在用例中定义需要的数据能力，再实现适配器；跨模块操作传递现有 Session。
 - 改变 SQL/事务/权限时跑数据库回归；只改纯规则时可先运行对应单元测试。
+
+## Spec 与 Issue 关联
+
+`spec_issues` 是 Specs 模块管理的独立多对多关联表，记录创建者和时间。复合外键保证两端属于同一 Workspace；唯一键使重复关联幂等。关联操作在 Workspace 行锁保护的事务内验证所有 Issue 与 Spec 的当前可见性，批量失败全部回滚。关联不生成 Spec 修订，不改变 Issue 状态或两端更新时间。
+
+Issues 列表接受 `spec` 过滤条件，先通过 Specs 的 `readSpec` 能力校验文档可见性，再按当前 Issue 权限查询关联。反向查询先校验 Issue，再过滤当前可见的 Spec，因此私有 Team 内容及关联不会通过另一端泄漏。
+
+REST 提供 `GET /specs/:identifier/issues`（沿用 Issue 列表的筛选和分页）、`POST` / `DELETE /specs/:identifier/issues`（请求体 `{ "issues": ["RO-1"] }`，每批 1–100 个）、`GET /issues/:identifier/specs`。MCP 提供 `list_spec_issues`、`list_issue_specs`、`link_spec_issue`、`unlink_spec_issue`；单条变更接受 `{ "identifier": "SPEC-1", "issue": "RO-1" }`，列表也可通过 `list_issues` 的 `spec` 参数筛选。
+
+前端 Spec 的 Overview 与 Issues 页签在所有环境启用。关联及计数从服务端读取，不再使用 prototype localStorage；Spec 下新建 Issue 后调用关联接口。若创建成功但关联失败，保留新建 Issue 并显示编号，用户可从“Link issues”重试，不会自动重复创建。
