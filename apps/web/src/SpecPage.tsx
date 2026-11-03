@@ -74,7 +74,6 @@ export default function SpecPage({ id }: { id: string }) {
             key={id}
             id={id}
             team={spec.team}
-            title={spec.content.title}
             linked={linkedIssues.data.issues.map((issue) => issue.identifier)}
             linksError={linkedIssues.error}
             onLinksChanged={linkedIssues.reload}

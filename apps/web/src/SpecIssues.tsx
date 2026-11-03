@@ -21,14 +21,12 @@ import {
 export default function SpecIssues({
   id,
   team,
-  title,
   linked,
   linksError,
   onLinksChanged,
 }: {
   id: string;
   team: string;
-  title: string;
   linked: string[];
   linksError: string;
   onLinksChanged: () => Promise<void>;
@@ -104,7 +102,6 @@ export default function SpecIssues({
   return (
     <>
       <div className="project-toolbar spec-issues-toolbar">
-        <span className="view-count">{title}</span>
         <div className="spec-action-row">
           <button
             className="button"
