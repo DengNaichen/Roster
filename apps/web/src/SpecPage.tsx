@@ -6,7 +6,6 @@ import { apiPath, NavLink, pagePath, RequestError } from "./shared";
 import { useResource } from "./useResource";
 import { SpecEditor } from "./SpecEditor";
 import SpecDocument from "./SpecDocument";
-import { SpecHistory } from "./SpecHistory";
 import { specView } from "./specView";
 import SpecIssuesPrototype, { prototypeLinks } from "./SpecIssuesPrototype";
 import "./spec-prototype.css";
@@ -18,7 +17,6 @@ export default function SpecPage({ id }: { id: string }) {
   );
   const [issueCount, setIssueCount] = useState(() => prototypeLinks(id).length);
   const prototype = import.meta.env.DEV && import.meta.env.VITE_LOCAL_PREVIEW === "true";
-  const history = tab === "history";
   const spec = resource.data?.identifier === id ? resource.data : null;
   return (
     <>
@@ -26,11 +24,6 @@ export default function SpecPage({ id }: { id: string }) {
         actions={
           spec && (
             <div className="spec-action-row">
-              {!prototype && (
-                <button className="button" onClick={() => setTab(history ? "overview" : "history")}>
-                  {history ? "Current content" : "Revision history"}
-                </button>
-              )}
               <button className="button" onClick={() => setEditing(true)}>
                 Edit spec
               </button>
@@ -48,7 +41,6 @@ export default function SpecPage({ id }: { id: string }) {
             {[
               ["overview", "Overview"],
               ["issues", `Issues · ${issueCount}`],
-              ["history", "History"],
             ].map(([value, label]) => (
               <button
                 key={value}
@@ -82,8 +74,6 @@ export default function SpecPage({ id }: { id: string }) {
             title={spec.content.title}
             onCount={setIssueCount}
           />
-        ) : history ? (
-          <SpecHistory key={`${id}/${spec.revision}`} spec={spec} />
         ) : (
           <SpecDocument spec={specView(spec.content, spec.created_at)} />
         ))}
