@@ -153,6 +153,7 @@
 .row-date {
   grid-column: 6;
   min-width: var(--list-date-width);
+  padding-right: var(--space-8);
   color: var(--muted);
   font-size: var(--font-size-12);
   text-align: right;
