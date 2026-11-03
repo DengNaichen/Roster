@@ -43,6 +43,7 @@ export default function SpecPage({ id }: { id: string }) {
   return (
     <>
       <PageHeader
+        className="spec-page-header"
         actions={
           spec && (
             <div className="spec-action-row">

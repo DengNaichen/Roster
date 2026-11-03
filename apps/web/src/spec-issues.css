@@ -60,3 +60,25 @@
     padding-block: 0;
   }
 }
+
+.spec-page-header {
+  padding-inline: var(--space-16);
+}
+/* Align the visible strokes, compensating for each Lucide icon's viewBox inset. */
+.spec-page-header .breadcrumb > .icon {
+  transform: translateX(calc(-1 * var(--icon-size) / 6));
+}
+.issue-toolbar-spec > .toolbar-controls > .toolbar-button:first-child > .icon {
+  transform: translateX(calc(-1 * var(--icon-size) / 12));
+}
+.spec-page-tabs > .segmented {
+  gap: var(--space-8);
+}
+.issue-toolbar-spec > .toolbar-controls {
+  gap: var(--space-16);
+}
+@media (max-width: 760px) {
+  .spec-page-header {
+    padding-inline: var(--space-8);
+  }
+}
