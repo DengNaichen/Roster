@@ -36,7 +36,7 @@ export default function SpecPage({ id }: { id: string }) {
         <span>/ {id}</span>
       </PageHeader>
       {spec && prototype && (
-        <div className="project-toolbar project-tabs">
+        <div className="project-toolbar project-tabs spec-page-tabs">
           <div className="segmented" role="tablist" aria-label="Spec sections">
             {[
               ["overview", "Overview"],

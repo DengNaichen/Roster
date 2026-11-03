@@ -93,7 +93,7 @@ export default function SpecIssuesPrototype({
   }
   return (
     <>
-      <div className="project-toolbar">
+      <div className="project-toolbar spec-issues-toolbar">
         <span className="view-count">{title}</span>
         <div className="spec-action-row">
           <button

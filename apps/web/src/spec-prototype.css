@@ -12,3 +12,21 @@
 .issue-dialog .prototype-link-options input {
   width: auto;
 }
+
+.spec-page-tabs,
+.spec-issues-toolbar {
+  padding-inline: var(--space-16);
+}
+.spec-issues-toolbar {
+  flex-wrap: wrap;
+}
+.spec-issues-toolbar > .view-count {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .spec-page-tabs,
+  .spec-issues-toolbar {
+    padding-inline: var(--space-8);
+  }
+}
