@@ -1,14 +1,14 @@
 import { useCapabilities } from "./Capabilities";
 import {
-  CalendarRange,
-  FileText,
+  Orbit,
+  DraftingCompass,
   Box,
   ChevronDown,
   ChevronRight,
-  List,
+  ListTodo,
   Menu,
   Plus,
-  Target,
+  Telescope,
 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
@@ -54,14 +54,14 @@ export function Sidebar({
       >
         <div className="sidebar-label">Workspace</div>
         <NavLink className={`nav-item ${active("issues") ? "active" : ""}`} to={pagePath("/")}>
-          <List className="icon" />
+          <ListTodo className="icon" />
           <span className="nav-label">All issues</span>
         </NavLink>
         <NavLink
           className={`nav-item ${route.kind === "specs" || route.kind === "spec" ? "active" : ""}`}
           to={pagePath("/specs")}
         >
-          <FileText className="icon" />
+          <DraftingCompass className="icon" />
           <span className="nav-label">Specs</span>
         </NavLink>
         <NavLink
@@ -78,7 +78,7 @@ export function Sidebar({
           className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`}
           to={pagePath("/initiatives")}
         >
-          <Target className="icon" />
+          <Telescope className="icon" />
           <span className="nav-label">Initiatives</span>
           {!capabilities.initiatives && <small>Not migrated</small>}
         </NavLink>
@@ -139,14 +139,14 @@ function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) 
           className={`nav-item team-destination ${active("issues") ? "active" : ""}`}
           to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}
         >
-          <List className="icon" />
+          <ListTodo className="icon" />
           <span className="nav-label">Issues</span>
         </NavLink>
         <NavLink
           className={`nav-item team-destination ${route.kind === "specs" && route.team === team.key ? "active" : ""}`}
           to={pagePath(`/team/${encodeURIComponent(team.key)}/specs`)}
         >
-          <FileText className="icon" />
+          <DraftingCompass className="icon" />
           <span className="nav-label">Specs</span>
         </NavLink>
         <NavLink
@@ -163,7 +163,7 @@ function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) 
           className={`nav-item team-destination ${(route.kind === "cycles" || route.kind === "cycle") && route.team === team.key ? "active" : ""}`}
           to={pagePath(`/team/${encodeURIComponent(team.key)}/cycles`)}
         >
-          <CalendarRange className="icon" />
+          <Orbit className="icon" />
           <span className="nav-label">Cycles</span>
           {!capabilities.cycles && <small>Not migrated</small>}
         </NavLink>

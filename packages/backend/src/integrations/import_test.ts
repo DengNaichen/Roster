@@ -1,5 +1,5 @@
 import { Pool } from 'npm:pg@8.23.1';
-import type { SpecContent } from '../../../contracts/spec.ts';
+import type { EditableSpecContent } from '../../../contracts/spec.ts';
 import { createDatabase } from '../platform/database/client.ts';
 import { createService } from '../service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from '../test_support.ts';
@@ -19,7 +19,7 @@ Deno.test({
     await prepareTestDatabase(setup);
     const subject = crypto.randomUUID();
     const at = '2026-01-01T00:00:00.000Z';
-    const originalSpec: SpecContent = {
+    const originalSpec: EditableSpecContent = {
       title: 'Imported SPEC',
       status: 'draft',
       branch: '001-import',
@@ -38,15 +38,15 @@ Deno.test({
       success_criteria: [{ id: 'SC-001', text: 'History is exact' }],
       clarifications: [],
     };
-    const removedSpec: SpecContent = {
+    const removedSpec: EditableSpecContent = {
       ...originalSpec,
       stories: [],
       requirements: [],
       success_criteria: [],
     };
-    const currentSpec: SpecContent = {
+    const currentSpec: EditableSpecContent = {
       ...originalSpec,
-      status: 'approved',
+      status: 'active',
       stories: originalSpec.stories.map((story) => ({ ...story, id: 'US-2' })),
       requirements: [{ id: 'FR-002', text: 'Use a fresh requirement ID' }],
       success_criteria: [{ id: 'SC-002', text: 'Never recycle a retired ID' }],
@@ -242,7 +242,7 @@ Deno.test({
           id: 73,
           spec_id: 41,
           number: 3,
-          content: JSON.stringify(currentSpec),
+          content: JSON.stringify({ ...currentSpec, status: 'approved' }),
           message: '审核通过',
           author_subject: 'old-uc',
           created_at: '2026-01-03T00:00:00.000Z',
@@ -319,7 +319,7 @@ Deno.test({
       assert(result.counts.specs === 1 && result.counts.spec_revisions === 3);
       const importedSpec = await service.getSpec(ctx, 'import-fixture', 'SPEC-7');
       assert(
-        importedSpec.revision === 3 && importedSpec.content.status === 'approved' &&
+        importedSpec.revision === 3 && importedSpec.content.status === 'active' &&
           importedSpec.author?.subject === subject && importedSpec.message === '审核通过',
       );
       const importedHistory = await service.listSpecRevisions(ctx, 'import-fixture', 'SPEC-7');

@@ -18,6 +18,7 @@ import {
   updateTeamSchema,
   updateWorkspaceSchema,
 } from '../../../../contracts/mod.ts';
+import { specStatuses } from '../../../../contracts/spec-status.ts';
 import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
@@ -59,7 +60,7 @@ const issueOutput = z.object({
   created_at: z.string(),
   updated_at: z.string(),
 }).passthrough();
-const specStatusOutput = z.enum(['draft', 'review', 'approved', 'superseded']);
+const specStatusOutput = z.enum([...specStatuses, 'superseded']);
 const specIdentifierOutput = z.string().regex(/^SPEC-[1-9][0-9]*$/);
 const specContentOutput = z.object({
   title: z.string(),
@@ -103,7 +104,10 @@ const specRevisionOutput = z.object({
   author: identityOutput.nullable(),
   created_at: z.string(),
 }).passthrough();
+const activeRevisionOutput = z.object({ number: z.number().int().positive(), title: z.string() })
+  .nullable();
 const specSummaryOutput = z.object({
+  active_revision: activeRevisionOutput,
   identifier: specIdentifierOutput,
   team: z.string(),
   title: z.string(),
@@ -112,6 +116,7 @@ const specSummaryOutput = z.object({
   updated_at: z.string(),
 }).passthrough();
 const specOutput = z.object({
+  active_revision: activeRevisionOutput,
   identifier: specIdentifierOutput,
   team: z.string(),
   revision: z.number().int().positive(),
@@ -568,7 +573,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   );
   tool(
     'get_spec',
-    'Read the current structured Spec Kit content and trusted author.',
+    'Read the latest editable revision. active_revision identifies the adopted text when a newer draft or review exists.',
     specs.getSpecSchema.shape,
     true,
     (i) => service.getSpec(ctx, workspace, i.identifier),

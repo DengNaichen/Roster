@@ -1,7 +1,10 @@
+import { SpecStatusBadge } from "./SpecStatus";
+import type { SpecIssueProgress as Progress } from "../../../packages/contracts/spec";
+import { SpecIssueProgress } from "./SpecIssueProgress";
 import type { SpecView } from "./specView";
 import "./spec.css";
 
-export default function SpecDocument({ spec }: { spec: SpecView }) {
+export default function SpecDocument({ spec, progress }: { spec: SpecView; progress?: Progress }) {
   return (
     <>
       <div className="spec-scroll">
@@ -13,7 +16,7 @@ export default function SpecDocument({ spec }: { spec: SpecView }) {
               <div>
                 <dt>Status</dt>
                 <dd>
-                  <span className={`spec-status ${spec.status.toLowerCase()}`}>{spec.status}</span>
+                  <SpecStatusBadge status={spec.status} />
                 </dd>
               </div>
               <div>
@@ -26,6 +29,7 @@ export default function SpecDocument({ spec }: { spec: SpecView }) {
               </div>
             </dl>
           </header>
+          {progress && <SpecIssueProgress progress={progress} />}
 
           <section className="spec-section" aria-labelledby="spec-scenarios">
             <h2 id="spec-scenarios">User Scenarios &amp; Testing</h2>

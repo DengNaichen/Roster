@@ -37,23 +37,6 @@
 .spec-id {
   font-family: var(--mono);
 }
-.spec-status {
-  display: inline-block;
-  height: var(--space-20);
-  padding: 0 var(--space-8);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  color: var(--text-3);
-  font-size: var(--font-size-12);
-  line-height: var(--line-badge);
-}
-.spec-status.ready {
-  color: var(--status-in-progress);
-}
-.spec-status.implemented {
-  color: var(--success);
-}
-
 .spec-section {
   margin-top: var(--space-28);
   min-width: 0;

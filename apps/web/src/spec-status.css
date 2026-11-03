@@ -1,0 +1,45 @@
+[data-spec-status="draft"],
+[data-spec-status="superseded"] {
+  --spec-state-color: var(--muted);
+}
+[data-spec-status="review"] {
+  --spec-state-color: var(--status-in-progress);
+}
+[data-spec-status="active"] {
+  --spec-state-color: var(--status-in-review);
+}
+.spec-status-icon {
+  width: var(--space-12);
+  height: var(--space-12);
+  color: var(--spec-state-color);
+  flex: none;
+}
+.spec-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--space-20);
+  padding-inline: var(--space-6);
+  border: var(--border-width) solid color-mix(in srgb, var(--spec-state-color) 26%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--spec-state-color) 8%, var(--panel));
+  color: color-mix(in srgb, var(--spec-state-color) 72%, var(--text));
+  font-size: var(--font-size-12);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.spec-reading-version {
+  justify-content: flex-start;
+  gap: var(--space-8);
+  color: var(--muted);
+}
+.spec-reading-version button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: var(--radius-pill);
+}
+.spec-reading-version button[aria-pressed="true"] {
+  box-shadow: 0 0 0 1px var(--text-3);
+}

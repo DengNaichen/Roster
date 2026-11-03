@@ -1,3 +1,4 @@
+import { specStatusOptions } from "./SpecStatus";
 import { Dropdown } from "./Dropdown";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { Spec, SpecContent } from "../../../packages/contracts/spec";
@@ -5,6 +6,14 @@ import { api, apiPath, ModalDialog, RequestError, Team } from "./shared";
 import SpecDocument from "./SpecDocument";
 import { rebaseSpecDraft, specView } from "./specView";
 import "./spec-interaction.css";
+
+function draftFrom(content: SpecContent): SpecContent {
+  return {
+    ...structuredClone(content),
+    status:
+      content.status === "active" || content.status === "superseded" ? "draft" : content.status,
+  };
+}
 
 type EditorProps = {
   initial: SpecContent;
@@ -22,7 +31,7 @@ export function SpecEditor({
   onClose,
   onSaved,
 }: EditorProps) {
-  const [draft, setDraft] = useState<SpecContent>(() => structuredClone(initial));
+  const [draft, setDraft] = useState(() => draftFrom(initial));
   const [team, setTeam] = useState(initialTeam);
   const [baseRevision, setBaseRevision] = useState(spec?.revision ?? 0);
   const [message, setMessage] = useState("");
@@ -31,7 +40,7 @@ export function SpecEditor({
   const [conflict, setConflict] = useState(false);
   const [latest, setLatest] = useState<Spec | null>(null);
   const [reviewing, setReviewing] = useState(false);
-  const baseline = useRef<SpecContent>(structuredClone(initial));
+  const baseline = useRef(draft);
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
@@ -160,10 +169,7 @@ export function SpecEditor({
                     status: next as SpecContent["status"],
                   }))
                 }
-                options={["draft", "review", "approved", "superseded"].map((status) => ({
-                  value: status,
-                  label: status,
-                }))}
+                options={specStatusOptions}
               />
             </label>
             <label>
@@ -179,6 +185,13 @@ export function SpecEditor({
               />
             </label>
           </div>
+          {spec?.active_revision && (
+            <p className="dialog-hint">
+              {draft.status === "active"
+                ? `Saving makes this revision active in place of r${spec.active_revision.number}.`
+                : `Revision r${spec.active_revision.number} stays active while this change is drafted or reviewed.`}
+            </p>
+          )}
           <section>
             <h3>Functional requirements</h3>
             <p className="dialog-hint">
@@ -380,8 +393,9 @@ export function SpecEditor({
               disabled={saving || reviewing}
               onClick={() => {
                 const previousBase = baseline.current;
-                setDraft((current) => rebaseSpecDraft(previousBase, current, latest.content));
-                baseline.current = structuredClone(latest.content);
+                const nextBase = draftFrom(latest.content);
+                setDraft((current) => rebaseSpecDraft(previousBase, current, nextBase));
+                baseline.current = nextBase;
                 setBaseRevision(latest.revision);
                 setConflict(false);
                 setError("");

@@ -1,10 +1,11 @@
 import { FileText } from "lucide-react";
 import { useState } from "react";
-import type { Spec } from "../../../packages/contracts/spec";
+import type { Spec, SpecRevision } from "../../../packages/contracts/spec";
 import { PageHeader } from "./PageHeader";
 import { apiPath, NavLink, pagePath, RequestError, type IssueSummary } from "./shared";
 import { useResource } from "./useResource";
 import { SpecEditor } from "./SpecEditor";
+import { SpecStatusBadge } from "./SpecStatus";
 import SpecDocument from "./SpecDocument";
 import { specView } from "./specView";
 import SpecIssues from "./SpecIssues";
@@ -79,10 +80,12 @@ export default function SpecPage({ id }: { id: string }) {
             tabs={sectionTabs}
             linked={linkedIssues.data.issues.map((issue) => issue.identifier)}
             linksError={linkedIssues.error}
-            onLinksChanged={linkedIssues.reload}
+            onLinksChanged={async () => {
+              await Promise.all([linkedIssues.reload(), resource.reload()]);
+            }}
           />
         ) : (
-          <SpecDocument spec={specView(spec.content, spec.created_at)} />
+          <SpecOverview key={`overview-${id}`} spec={spec} />
         ))}
       {editing && spec && (
         <SpecEditor
@@ -95,6 +98,56 @@ export default function SpecPage({ id }: { id: string }) {
             setEditing(false);
           }}
         />
+      )}
+    </>
+  );
+}
+
+// Keep the editable head separate from the adopted text that readers land on.
+function SpecOverview({ spec }: { spec: Spec }) {
+  const active =
+    spec.active_revision && spec.active_revision.number < spec.revision
+      ? spec.active_revision
+      : null;
+  const [showLatest, setShowLatest] = useState(false);
+  const readActive = !!active && !showLatest;
+  const saved = useResource<SpecRevision | null>(
+    readActive ? apiPath(`/specs/${spec.identifier}/revisions/${active.number}`) : null,
+    null,
+  );
+  const content = readActive
+    ? saved.data?.number === active.number
+      ? saved.data.content
+      : null
+    : spec.content;
+  return (
+    <>
+      {active && (
+        <div
+          className="project-toolbar spec-reading-version"
+          role="group"
+          aria-label="Choose spec revision"
+        >
+          <span>Version</span>
+          <button type="button" aria-pressed={readActive} onClick={() => setShowLatest(false)}>
+            <SpecStatusBadge status="active" revision={active.number} />
+          </button>
+          <button type="button" aria-pressed={!readActive} onClick={() => setShowLatest(true)}>
+            <SpecStatusBadge status={spec.content.status} revision={spec.revision} />
+          </button>
+        </div>
+      )}
+      {readActive && saved.error ? (
+        <div className="scope-message">
+          <RequestError message={saved.error} />
+          <button className="button" onClick={() => void saved.reload()}>
+            Retry active revision
+          </button>
+        </div>
+      ) : content ? (
+        <SpecDocument progress={spec.issue_progress} spec={specView(content, spec.created_at)} />
+      ) : (
+        <p className="empty">Loading active revision…</p>
       )}
     </>
   );
