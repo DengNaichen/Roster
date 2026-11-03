@@ -21,6 +21,25 @@ export default function SpecPage({ id }: { id: string }) {
   );
   const issueCount = linkedIssues.data.issues.length;
   const spec = resource.data?.identifier === id ? resource.data : null;
+  const sectionTabs = (
+    <div className="segmented" role="tablist" aria-label="Spec sections">
+      {[
+        ["overview", "Overview"],
+        ["issues", `Issues · ${issueCount}`],
+      ].map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          role="tab"
+          aria-selected={tab === value}
+          aria-pressed={tab === value}
+          onClick={() => setTab(value)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
   return (
     <>
       <PageHeader
@@ -38,26 +57,8 @@ export default function SpecPage({ id }: { id: string }) {
         <NavLink to={pagePath("/specs")}>Specs</NavLink>
         <span>/ {id}</span>
       </PageHeader>
-      {spec && (
-        <div className="project-toolbar project-tabs spec-page-tabs">
-          <div className="segmented" role="tablist" aria-label="Spec sections">
-            {[
-              ["overview", "Overview"],
-              ["issues", `Issues · ${issueCount}`],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                role="tab"
-                aria-selected={tab === value}
-                aria-pressed={tab === value}
-                onClick={() => setTab(value)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {spec && tab !== "issues" && (
+        <div className="project-toolbar project-tabs spec-page-tabs">{sectionTabs}</div>
       )}
       {resource.error && (
         <div className="scope-message">
@@ -74,6 +75,7 @@ export default function SpecPage({ id }: { id: string }) {
             key={id}
             id={id}
             team={spec.team}
+            tabs={sectionTabs}
             linked={linkedIssues.data.issues.map((issue) => issue.identifier)}
             linksError={linkedIssues.error}
             onLinksChanged={linkedIssues.reload}
