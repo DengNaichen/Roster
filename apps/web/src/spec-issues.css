@@ -74,3 +74,8 @@
     padding-inline: var(--space-8);
   }
 }
+
+.spec-page-header .spec-action-row > .button,
+.spec-issues-toolbar .spec-action-row > .button {
+  border-color: var(--border);
+}
