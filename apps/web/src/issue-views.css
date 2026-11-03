@@ -75,7 +75,7 @@
 .group-header > .chevron,
 .list-row > .issue-selection {
   position: relative;
-  inset-inline-start: var(--space-2);
+  inset-inline-start: var(--space-4);
 }
 .group-label {
   display: flex;
