@@ -9,6 +9,33 @@ const revisionFrom =
 
 export function createSpecsRepository(db: Executor): SpecsRepository {
   return {
+    async linkIssues({ workspaceId, specId, issueIds, subject, now }) {
+      await db.execute(
+        sql`insert into roster.spec_issues(workspace_id,spec_id,issue_id,created_by,created_at) values ${
+          sql.join(
+            issueIds.map((issueId) =>
+              sql`(${workspaceId},${specId},${issueId}::uuid,${subject},${now})`
+            ),
+            sql`,`,
+          )
+        } on conflict(spec_id,issue_id) do nothing`,
+      );
+    },
+    async unlinkIssues({ specId, issueIds }) {
+      await db.execute(
+        sql`delete from roster.spec_issues where spec_id=${specId} and issue_id in (${
+          sql.join(issueIds.map((id) => sql`${id}::uuid`), sql`,`)
+        })`,
+      );
+    },
+    async listIssueSpecs({ workspaceId, issueId, subject }) {
+      return rows(
+        db,
+        sql`select sp.number,t.key as team,r.content->>'title' as title,r.content->>'status' as status,sp.current_revision,sp.updated_at from roster.spec_issues si join roster.specs sp on sp.id=si.spec_id join roster.teams t on t.id=sp.team_id join roster.spec_revisions r on r.spec_id=sp.id and r.number=sp.current_revision where si.workspace_id=${workspaceId} and si.issue_id=${issueId}::uuid and ${
+          visible(subject)
+        } order by sp.updated_at desc,sp.id desc`,
+      );
+    },
     async findSpec({ workspaceId, number, subject }) {
       return one(
         db,

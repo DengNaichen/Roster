@@ -56,6 +56,7 @@ export const createIssueSchema = z.strictObject({
 });
 export const updateIssueSchema = createIssueSchema.omit({ team: true }).partial();
 export const listIssuesSchema = z.strictObject({
+  spec: z.string().regex(/^SPEC-[1-9][0-9]*$/).optional(),
   project_id: z.number().int().min(0).max(2147483647).optional(),
   project: z.string().max(200).optional(),
   cycle_id: z.number().int().min(0).max(2147483647).optional(),

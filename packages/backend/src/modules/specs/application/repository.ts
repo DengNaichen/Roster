@@ -1,5 +1,18 @@
 import type { Row } from '../../../application/records.ts';
 export interface SpecsRepository {
+  linkIssues(
+    input: {
+      workspaceId: unknown;
+      specId: unknown;
+      issueIds: unknown[];
+      subject: string;
+      now: Date;
+    },
+  ): Promise<void>;
+  unlinkIssues(input: { specId: unknown; issueIds: unknown[] }): Promise<void>;
+  listIssueSpecs(
+    input: { workspaceId: unknown; issueId: unknown; subject: string },
+  ): Promise<Row[]>;
   findSpec(input: { workspaceId: unknown; number: number; subject: string }): Promise<Row>;
   currentRevision(input: { specId: unknown; current_revision: unknown }): Promise<Row>;
   listSpecs(

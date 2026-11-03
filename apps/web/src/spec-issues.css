@@ -1,0 +1,32 @@
+.spec-link-options {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+.issue-dialog .spec-link-options .label-option {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: var(--space-8);
+  padding: var(--space-8) 0;
+}
+.issue-dialog .spec-link-options input {
+  width: auto;
+}
+
+.spec-page-tabs,
+.spec-issues-toolbar {
+  padding-inline: var(--space-16);
+}
+.spec-issues-toolbar {
+  flex-wrap: wrap;
+}
+.spec-issues-toolbar > .view-count {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .spec-page-tabs,
+  .spec-issues-toolbar {
+    padding-inline: var(--space-8);
+  }
+}

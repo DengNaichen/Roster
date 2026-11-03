@@ -256,7 +256,15 @@ Deno.test('All original MCP tools are genuinely registered with input and output
     inputSchema: unknown;
     outputSchema: unknown;
   }[];
-  for (const name of originalMcpTools) {
+  for (
+    const name of [
+      ...originalMcpTools,
+      'list_spec_issues',
+      'list_issue_specs',
+      'link_spec_issue',
+      'unlink_spec_issue',
+    ]
+  ) {
     const tool = tools.find((t) => t.name === name);
     assert(tool, `Missing migrated tool: ${name}`);
     assert(tool.inputSchema && tool.outputSchema, `Missing contracts for ${name}`);
