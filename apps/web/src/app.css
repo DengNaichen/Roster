@@ -167,18 +167,14 @@
   --sidebar-identity-weight: var(--weight-strong);
   --sidebar-avatar-size: var(--space-24);
   --sidebar-icon-size: var(--space-14);
-  --sidebar-emoji-size: var(--font-size-14);
+  --sidebar-emoji-size: var(--font-size-12);
   --sidebar-inset: var(--space-8);
   --sidebar-content-gap: var(--space-8);
   --sidebar-row-gap: var(--space-1);
   --sidebar-section-gap: var(--space-8);
   --sidebar-label-space: var(--space-16);
   --sidebar-label-gap: var(--space-4);
-  --sidebar-child-inset: calc(
-    var(--sidebar-inset) +
-    (var(--sidebar-icon-size) + var(--sidebar-content-gap)) /
-    2
-  );
+  --sidebar-child-inset: calc(var(--sidebar-inset) + var(--space-8));
   --sidebar-radius: var(--radius);
   --sidebar-color: var(--text-3);
   --sidebar-hover-color: var(--text-2);
