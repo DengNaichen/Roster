@@ -1,3 +1,15 @@
+:root {
+  /* Shared outer edge for the Spec header, tabs and issue filters. */
+  --spec-page-inset: var(--space-16);
+  /* Align breadcrumb text with tab labels and filter control content. */
+  --spec-control-inset: var(--space-12);
+}
+@media (max-width: 760px) {
+  :root {
+    --spec-page-inset: var(--space-8);
+  }
+}
+
 .spec-link-options {
   max-height: 45vh;
   overflow-y: auto;
@@ -13,21 +25,15 @@
   width: auto;
 }
 
+.spec-page-header,
 .spec-page-tabs,
-.spec-issues-toolbar {
-  padding-inline: var(--space-16);
+.issue-toolbar-spec {
+  padding-inline: var(--spec-page-inset);
 }
 .spec-issues-toolbar {
   flex-wrap: wrap;
   justify-content: space-between;
 }
-@media (max-width: 760px) {
-  .spec-page-tabs,
-  .spec-issues-toolbar {
-    padding-inline: var(--space-8);
-  }
-}
-
 .spec-page-tabs > .segmented {
   gap: var(--space-8);
 }
@@ -59,20 +65,13 @@
   }
 }
 
-.spec-page-header {
-  padding-inline: var(--space-16);
-}
-.spec-page-header > .breadcrumb {
-  padding-inline: var(--space-12);
-}
+.spec-page-header > .breadcrumb,
+.spec-page-header .spec-action-row > .button,
+.spec-page-tabs > .segmented > button,
+.spec-issues-toolbar .spec-action-row > .button,
 .issue-toolbar-spec .toolbar-button,
 .issue-toolbar-spec .toolbar-search {
-  padding-inline: var(--space-12);
-}
-@media (max-width: 760px) {
-  .spec-page-header {
-    padding-inline: var(--space-8);
-  }
+  padding-inline: var(--spec-control-inset);
 }
 
 .spec-page-header .spec-action-row > .button,
