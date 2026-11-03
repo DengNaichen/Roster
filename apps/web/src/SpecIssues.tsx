@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { NewIssueDialog } from "./Dialogs";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, type ViewMode } from "./IssueViews";
@@ -21,14 +21,14 @@ import {
 export default function SpecIssues({
   id,
   team,
-  title,
+  tabs,
   linked,
   linksError,
   onLinksChanged,
 }: {
   id: string;
   team: string;
-  title: string;
+  tabs: ReactNode;
   linked: string[];
   linksError: string;
   onLinksChanged: () => Promise<void>;
@@ -103,8 +103,8 @@ export default function SpecIssues({
   }
   return (
     <>
-      <div className="project-toolbar spec-issues-toolbar">
-        <span className="view-count">{title}</span>
+      <div className="project-toolbar project-tabs spec-page-tabs spec-issues-toolbar">
+        {tabs}
         <div className="spec-action-row">
           <button
             className="button"
@@ -128,6 +128,7 @@ export default function SpecIssues({
         </div>
       </div>
       <IssueFilters
+        layout="spec"
         assignee={assignee}
         setAssignee={setAssignee}
         membershipEnabled={teams.data.teams.some((t) => t.membership_enabled)}

@@ -21,6 +21,7 @@ import {
 
 // Filter and display preferences share a compact toolbar above the results.
 export function IssueFilters({
+  layout = "default",
   assignee,
   setAssignee,
   membershipEnabled,
@@ -47,6 +48,7 @@ export function IssueFilters({
   selectVisible,
   selectionDisabled,
 }: {
+  layout?: "default" | "spec";
   assignee: string;
   setAssignee: (value: string) => void;
   membershipEnabled: boolean;
@@ -89,7 +91,7 @@ export function IssueFilters({
     Number(Boolean(assignee));
   const statusColumn = columns.find((column) => column.status === filter);
   return (
-    <div className="issue-toolbar">
+    <div className={`issue-toolbar${layout === "spec" ? " issue-toolbar-spec" : ""}`}>
       <div className="chips toolbar-filters">
         {statusColumn && (
           <span className="chip">
@@ -197,7 +199,7 @@ export function IssueFilters({
             </button>
           </span>
         )}
-        <span className="view-count">{visibleCount} issues</span>
+        {layout !== "spec" && <span className="view-count">{visibleCount} issues</span>}
       </div>
       <div className="toolbar-controls">
         <Popover.Root>
