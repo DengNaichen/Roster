@@ -188,8 +188,10 @@ export function IssueViews({
             >
               <ChevronDown className="icon chevron" />
               <StatusIcon status={column.status} />
-              <span>{column.label}</span>
-              <small>{grouped[column.status].length}</small>
+              <span className="group-label">
+                <span>{column.label}</span>
+                <small>{grouped[column.status].length}</small>
+              </span>
             </button>
           </div>
           {/* A collapsed group renders no rows; the empty container keeps the header's aria-controls target. */}
