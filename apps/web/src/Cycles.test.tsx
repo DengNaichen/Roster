@@ -113,4 +113,6 @@ it("lists cycles newest first and expands only the current one", async () => {
   expect(screen.getAllByRole("progressbar")).toHaveLength(1);
   expect(screen.getByText("50% success")).toBeTruthy();
   expect(screen.getByText("5 carried over")).toBeTruthy();
+  expect(screen.getByText("10 issues")).toBeTruthy();
+  expect(screen.queryByText(/scope/i)).toBeNull();
 });

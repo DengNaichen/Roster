@@ -36,7 +36,9 @@ function CycleRow({ cycle }: { cycle: Cycle }) {
 }
 
 function CycleMetrics({ cycle }: { cycle: Cycle }) {
-  const scope = <span key="scope">{cycle.total} scope</span>;
+  const issues = (
+    <span key="issues">{cycle.total === 1 ? "1 issue" : `${cycle.total} issues`}</span>
+  );
   return (
     <span className="cycle-metrics">
       {cycle.state === "completed" ? (
@@ -44,10 +46,10 @@ function CycleMetrics({ cycle }: { cycle: Cycle }) {
           <span>{percent(cycle.done, cycle.total)}% success</span>
           <span>{cycle.done} completed</span>
           {cycle.rolled_over > 0 && <span>{cycle.rolled_over} carried over</span>}
-          {scope}
+          {issues}
         </>
       ) : (
-        scope
+        issues
       )}
     </span>
   );
@@ -57,7 +59,6 @@ function CycleOverview({ cycle }: { cycle: Cycle }) {
   const remaining = Math.max(0, cycle.total - cycle.done - cycle.canceled);
   const days = daysLeft(cycle);
   const rows = [
-    { key: "scope", label: "Scope", value: cycle.total },
     { key: "done", label: "Completed", value: cycle.done, share: true },
     ...(cycle.canceled > 0
       ? [{ key: "canceled", label: "Canceled", value: cycle.canceled, share: true }]
