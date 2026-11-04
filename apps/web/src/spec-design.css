@@ -123,14 +123,8 @@
   background: color-mix(in srgb, var(--success) 7%, var(--surface-card));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--success) 20%, transparent);
 }
-.design-in-scope h3 svg {
+.design-in-scope h3 {
   color: var(--success);
-}
-.design-goals h3,
-.design-risks h2 {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
 }
 .design-goals h3 {
   margin: 0 0 var(--space-4);
@@ -180,14 +174,4 @@
 }
 .design-plate .design-figure {
   border: 0;
-}
-
-.design-risks {
-  padding: var(--space-16);
-  border-inline-start: 3px solid color-mix(in srgb, var(--priority-urgent) 66%, var(--panel));
-  background: color-mix(in srgb, var(--priority-urgent) 5%, var(--surface-card));
-  border-radius: var(--radius);
-}
-.design-risks h2 svg {
-  color: var(--priority-urgent);
 }

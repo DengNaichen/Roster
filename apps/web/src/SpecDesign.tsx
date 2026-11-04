@@ -1,5 +1,4 @@
 import { lazy, Suspense, useState } from "react";
-import { CircleCheck, CircleMinus, FileText, Scale } from "lucide-react";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
 import { localPreview } from "./integration/preview";
@@ -76,7 +75,7 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
       <article className="spec-content design-content">
         <header className="spec-heading">
           <p className="spec-kicker design-kicker">
-            <FileText size={14} aria-hidden="true" /> Design <span> / </span>
+            Design <span> / </span>
             {spec.identifier}
           </p>
           <h1>{spec.content.title}</h1>
@@ -258,14 +257,7 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
               (k) =>
                 c[k] && (
                   <div key={k} className={k === "goals" ? "design-in-scope" : undefined}>
-                    <h3 className="spec-subheading">
-                      {k === "goals" ? (
-                        <CircleCheck aria-hidden="true" size={15} />
-                      ) : (
-                        <CircleMinus aria-hidden="true" size={15} />
-                      )}
-                      {labels[k]}
-                    </h3>
+                    <h3 className="spec-subheading">{labels[k]}</h3>
                     <p className="design-prose">{c[k]}</p>
                   </div>
                 ),
@@ -288,10 +280,8 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
         </div>
       </section>
       {c.risks && (
-        <section className="spec-section design-risks">
-          <h2>
-            <Scale size={17} aria-hidden="true" /> Risks / Trade-offs
-          </h2>
+        <section className="spec-section">
+          <h2>Risks / Trade-offs</h2>
           <p className="design-prose">{c.risks}</p>
         </section>
       )}
