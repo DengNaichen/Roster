@@ -58,7 +58,10 @@
   letter-spacing: -0.025em;
 }
 .roster-login button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
   min-height: 44px;
   border-radius: 999px;
@@ -70,6 +73,10 @@
   font-weight: 500;
   cursor: pointer;
 }
+.roster-login button img {
+  object-fit: contain;
+  border-radius: 50%;
+}
 .roster-login button + button {
   margin-top: 16px;
 }
@@ -77,11 +84,12 @@
   background: #2a2a2d;
 }
 .roster-login button.roster-login-primary {
-  background: #5863bb;
-  border-color: #6570c8;
+  background: #f2f2f2;
+  color: #1f1f1f;
+  border-color: transparent;
 }
 .roster-login button.roster-login-primary:hover {
-  background: #616cc3;
+  background: #fff;
 }
 .roster-login button:focus-visible {
   outline: 2px solid #b7bcff;

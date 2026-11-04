@@ -1,3 +1,5 @@
+import googleMark from "../assets/google-sign-in.png";
+import githubMark from "../assets/github-invertocat.svg";
 import {
   createContext,
   Fragment,
@@ -93,6 +95,12 @@ function Login({ error: initial }: { error?: unknown }) {
               disabled={pending !== null}
               onClick={() => void signIn(provider)}
             >
+              <img
+                src={provider === "google" ? googleMark : githubMark}
+                width="20"
+                height="20"
+                alt=""
+              />
               {pending === provider ? `Connecting to ${name}…` : `Continue with ${name}`}
             </button>
           );
