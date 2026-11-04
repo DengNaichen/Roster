@@ -135,3 +135,41 @@ it("keeps Triage in its own team inbox and out of the issue list", async () => {
   await screen.findByText("Planned work");
   expect(screen.queryByText("Needs a decision")).toBeNull();
 });
+it("narrows the team issue list with Active, Backlog and All issues views", async () => {
+  const issue = (identifier: string, status: string) => ({
+    ...fixtureIssue,
+    identifier,
+    title: `${status} issue`,
+    status,
+  });
+  const issues = [
+    issue("AL-2", "in_progress"),
+    issue("AL-3", "backlog"),
+    issue("AL-4", "done"),
+    issue("AL-5", "triage"),
+  ];
+  const original = window.fetch;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url, options) => {
+      if (String(url).includes("/issues?")) return Promise.resolve(json({ issues }));
+      return original(url, options);
+    }),
+  );
+  window.history.replaceState(null, "", "/default/team/AL/issues");
+  render(<App />);
+  const tab = (name: string) => screen.getByRole("tab", { name });
+  await screen.findByText("in_progress issue");
+  expect(tab("Active").getAttribute("aria-selected")).toBe("true");
+  expect(screen.queryByText("backlog issue")).toBeNull();
+  expect(screen.queryByText(/\d+ issues$/)).toBeNull();
+  fireEvent.click(tab("Backlog"));
+  await screen.findByText("backlog issue");
+  expect(screen.queryByText("in_progress issue")).toBeNull();
+  fireEvent.click(tab("All issues"));
+  await screen.findByText("in_progress issue");
+  expect(screen.getByText("backlog issue")).toBeTruthy();
+  // Done stays collapsed and Triage never joins the list.
+  expect(screen.queryByText("done issue")).toBeNull();
+  expect(screen.queryByText("triage issue")).toBeNull();
+});

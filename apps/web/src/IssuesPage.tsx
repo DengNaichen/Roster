@@ -16,6 +16,8 @@ import {
   apiPath,
   columns,
   columnsFor,
+  IssueScope,
+  issueScopes,
   triageChanged,
   IssueSummary,
   NavLink,
@@ -59,6 +61,7 @@ export default function IssuesPage({
   const [error, setError] = useState("");
   const triage = route.kind === "triage";
   const [chosenFilter, setFilter] = useState<Status | "all">("all");
+  const [chosenScope, setScope] = useState<IssueScope>("active");
   // The Triage inbox is a fixed view of the triage status.
   const filter: Status | "all" = triage ? "triage" : chosenFilter;
   const [teamFilter, setTeamFilter] = useState("");
@@ -134,10 +137,17 @@ export default function IssuesPage({
     [issues, sort],
   );
 
+  // Only the team and workspace lists have Active / Backlog / All issues views.
+  const scoped = route.kind === "issues";
+  const scope = scoped ? chosenScope : "all";
+  const scopeStatuses = issueScopes.find((item) => item.value === scope)?.statuses;
   // Triage lives in its own inbox, so the other lists leave it out unless asked for.
   const visibleColumns = columnsFor(view).filter((column) =>
-    filter === "all" ? column.status !== "triage" : column.status === filter,
+    filter === "all"
+      ? column.status !== "triage" && (!scopeStatuses || scopeStatuses.includes(column.status))
+      : column.status === filter,
   );
+  const visibleStatuses = new Set<Status>(visibleColumns.map((column) => column.status));
   // Listing every status without a search starts with Done and Canceled collapsed; a header click overrides the default until filters change.
   const defaultCollapsed = (status: Status) =>
     filter === "all" && !query && (status === "done" || status === "canceled");
@@ -170,14 +180,10 @@ export default function IssuesPage({
     !projects.error &&
     !activeProject?.archived &&
     (activeProject === null || activeProject.teams.length > 0);
-  const selectedVisible = useMemo(() => {
-    const visible = new Set(
-      issues
-        .filter((issue) => filter === "all" || issue.status === filter)
-        .map((issue) => issue.identifier),
-    );
-    return selected.filter((id) => visible.has(id));
-  }, [selected, issues, filter]);
+  const visibleIdentifiers = new Set(
+    issues.filter((issue) => visibleStatuses.has(issue.status)).map((issue) => issue.identifier),
+  );
+  const selectedVisible = selected.filter((id) => visibleIdentifiers.has(id));
   function toggleIssue(id: string) {
     setSelected((ids) => (ids.includes(id) ? ids.filter((v) => v !== id) : [...ids, id]));
   }
@@ -186,8 +192,17 @@ export default function IssuesPage({
     0,
   );
 
+  // A status filter and an issue view are two ways to narrow by status: the last choice wins.
   function changeStatusFilter(status: Status | "all") {
     setFilter(status);
+    if (status !== "all") setScope("all");
+    setCollapsed({});
+    setSelected([]);
+  }
+
+  function changeScope(next: IssueScope) {
+    setScope(next);
+    setFilter("all");
     setCollapsed({});
     setSelected([]);
   }
@@ -304,6 +319,7 @@ export default function IssuesPage({
           filter={filter}
           setFilter={changeStatusFilter}
           statusLocked={triage}
+          scope={scoped ? { value: scope, onChange: changeScope } : undefined}
           team={teamFilter}
           teams={
             route.kind === "project" && activeProject
@@ -330,7 +346,7 @@ export default function IssuesPage({
           selectVisible={() =>
             setSelected(
               issues
-                .filter((issue) => filter === "all" || issue.status === filter)
+                .filter((issue) => visibleStatuses.has(issue.status))
                 .map((issue) => issue.identifier),
             )
           }
@@ -392,7 +408,7 @@ export default function IssuesPage({
             onClick={() =>
               setSelected(
                 issues
-                  .filter((issue) => filter === "all" || issue.status === filter)
+                  .filter((issue) => visibleStatuses.has(issue.status))
                   .map((issue) => issue.identifier),
               )
             }

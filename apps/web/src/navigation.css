@@ -804,9 +804,6 @@
   .toolbar-search input {
     width: 100%;
   }
-  .toolbar-filters .view-count {
-    display: inline;
-  }
   .selection-toolbar {
     margin-inline: var(--space-8);
   }
