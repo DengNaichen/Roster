@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { FileText } from "lucide-react";
+import { CircleCheck, CircleMinus, FileText, Scale } from "lucide-react";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
 import { localPreview } from "./integration/preview";
@@ -257,8 +257,15 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
             {(["goals", "nonGoals"] as const).map(
               (k) =>
                 c[k] && (
-                  <div key={k}>
-                    <h3 className="spec-subheading">{labels[k]}</h3>
+                  <div key={k} className={k === "goals" ? "design-in-scope" : undefined}>
+                    <h3 className="spec-subheading">
+                      {k === "goals" ? (
+                        <CircleCheck aria-hidden="true" size={15} />
+                      ) : (
+                        <CircleMinus aria-hidden="true" size={15} />
+                      )}
+                      {labels[k]}
+                    </h3>
                     <p className="design-prose">{c[k]}</p>
                   </div>
                 ),
@@ -281,8 +288,10 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
         </div>
       </section>
       {c.risks && (
-        <section className="spec-section">
-          <h2>Risks / Trade-offs</h2>
+        <section className="spec-section design-risks">
+          <h2>
+            <Scale size={17} aria-hidden="true" /> Risks / Trade-offs
+          </h2>
           <p className="design-prose">{c.risks}</p>
         </section>
       )}
