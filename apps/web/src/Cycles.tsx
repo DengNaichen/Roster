@@ -75,21 +75,19 @@ export function CycleSelect({
   onChange,
   disabled = false,
   label = "Cycle",
-  filter = false,
 }: {
   team: string;
   value: number | "";
   onChange: (id: number | "") => void;
   disabled?: boolean;
   label?: string;
-  filter?: boolean;
 }) {
   const resource = useResource<CyclePage>(
     team ? apiPath(`/teams/${encodeURIComponent(team)}/cycles`) : null,
     emptyCycles,
   );
   const available = resource.data.cycles.filter(
-    (c) => filter || (resource.data.settings.enabled && c.state !== "completed") || c.id === value,
+    (c) => (resource.data.settings.enabled && c.state !== "completed") || c.id === value,
   );
   return (
     <span className="cycle-select">
@@ -100,7 +98,6 @@ export function CycleSelect({
         disabled={disabled || !team || resource.loading || !!resource.error}
         onChange={(next) => onChange(next === "" ? "" : Number(next))}
         options={[
-          ...(filter ? [{ value: "", label: "All cycles" }] : []),
           { value: "0", label: "No cycle" },
           ...(value !== "" && value !== 0 && !available.some((c) => c.id === value)
             ? [{ value: String(value), label: "Cycle unavailable", disabled: true }]

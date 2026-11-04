@@ -1,5 +1,5 @@
 import { useCapabilities } from "./Capabilities";
-import { Cycle, CyclePage, CycleSelect, cycleName, emptyCycles } from "./Cycles";
+import { Cycle, CyclePage, cycleName, emptyCycles } from "./Cycles";
 import "./cycles.css";
 import { Orbit } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -65,7 +65,6 @@ export default function IssuesPage({
   const [projectDialog, setProjectDialog] = useState(false);
   const [projectTab, setProjectTab] = useState<"overview" | "issues">("overview");
   const [savedIssue, setSavedIssue] = useState<IssueSummary | null>(null);
-  const [cycleFilter, setCycleFilter] = useState<number | "">("");
   const cycle = useResource<Cycle | null>(
     route.kind === "cycle" ? apiPath(`/cycles/${route.id}`) : null,
     null,
@@ -97,7 +96,7 @@ export default function IssuesPage({
     writeLabels,
   } = useIssues(
     {
-      cycleID: route.kind === "cycle" ? route.id : cycleFilter === "" ? undefined : cycleFilter,
+      cycleID: route.kind === "cycle" ? route.id : undefined,
       projectID: route.kind === "project" ? route.id : undefined,
       team,
       type,
@@ -184,7 +183,6 @@ export default function IssuesPage({
 
   function changeTeamFilter(value: string) {
     setTeamFilter(value);
-    setCycleFilter("");
     setCollapsed({});
     setSelected([]);
   }
@@ -325,21 +323,6 @@ export default function IssuesPage({
         />
       )}
 
-      {capabilities.cycles && route.kind !== "cycle" && team && (
-        <label className="cycle-filter">
-          Cycle{" "}
-          <CycleSelect
-            key={team}
-            team={team}
-            value={cycleFilter}
-            filter
-            onChange={(id) => {
-              setCycleFilter(id);
-              setSelected([]);
-            }}
-          />
-        </label>
-      )}
       {showOverview && activeProject && (
         <ProjectOverview
           project={activeProject}
