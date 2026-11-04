@@ -55,17 +55,6 @@ export function Sidebar({
         aria-label="Workspace navigation"
       >
         <div className="sidebar-label">Workspace</div>
-        <NavLink className={`nav-item ${active("issues") ? "active" : ""}`} to={pagePath("/")}>
-          <ListTodo className="icon" />
-          <span className="nav-label">All issues</span>
-        </NavLink>
-        <NavLink
-          className={`nav-item ${route.kind === "specs" || route.kind === "spec" ? "active" : ""}`}
-          to={pagePath("/specs")}
-        >
-          <DraftingCompass className="icon" />
-          <span className="nav-label">Specs</span>
-        </NavLink>
         <NavLink
           unavailable={!capabilities.projects}
           className={`nav-item ${active("projects") ? "active" : ""}`}
