@@ -219,12 +219,55 @@
   display: none;
 }
 .scope-navigation,
-.team-navigation,
-.team-destinations:not([hidden]) {
+.team-destinations-list {
   display: flex;
   flex: none;
   flex-direction: column;
   gap: var(--sidebar-row-gap);
+}
+.team-navigation {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+}
+/* Collapsing animates the row track from 0fr to 1fr, so no height is hardcoded. */
+.team-destinations {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--duration-collapse) var(--ease-collapse),
+    opacity var(--duration-collapse) var(--ease-collapse),
+    visibility 0s linear 0s;
+}
+.team-destinations[data-expanded="false"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--duration-collapse) var(--ease-collapse),
+    opacity var(--duration-collapse) var(--ease-collapse),
+    visibility 0s linear var(--duration-collapse);
+}
+.team-destinations-list {
+  min-height: 0;
+  overflow: hidden;
+}
+.team-destinations-list > :first-child {
+  margin-top: var(--sidebar-row-gap);
+}
+.team-chevron {
+  transition: transform var(--duration-collapse) var(--ease-collapse);
+}
+.team-heading[aria-expanded="false"] .team-chevron {
+  transform: rotate(-90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .team-destinations,
+  .team-destinations[data-expanded="false"],
+  .team-chevron {
+    transition: none;
+  }
 }
 .scope-navigation a {
   text-decoration: none;

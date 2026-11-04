@@ -5,7 +5,6 @@ import {
   Box,
   Inbox,
   ChevronDown,
-  ChevronRight,
   ListTodo,
   Menu,
   Plus,
@@ -150,53 +149,51 @@ function TeamNavigation({
         <span className="nav-label" title={team.name}>
           {team.name}
         </span>
-        {expanded ? (
-          <ChevronDown className="icon" aria-hidden="true" />
-        ) : (
-          <ChevronRight className="icon" aria-hidden="true" />
-        )}
+        <ChevronDown className="icon team-chevron" aria-hidden="true" />
       </button>
-      <div id={destinationsId} className="team-destinations" hidden={!expanded}>
-        <NavLink
-          className={`nav-item team-destination ${active("triage") ? "active" : ""}`}
-          to={pagePath(`/team/${encodeURIComponent(team.key)}/triage`)}
-        >
-          <Inbox className="icon" />
-          <span className="nav-label">Triage</span>
-          {triageCount > 0 && <small className="nav-count">{triageCount}</small>}
-        </NavLink>
-        <NavLink
-          className={`nav-item team-destination ${active("issues") ? "active" : ""}`}
-          to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}
-        >
-          <ListTodo className="icon" />
-          <span className="nav-label">Issues</span>
-        </NavLink>
-        <NavLink
-          className={`nav-item team-destination ${route.kind === "specs" && route.team === team.key ? "active" : ""}`}
-          to={pagePath(`/team/${encodeURIComponent(team.key)}/specs`)}
-        >
-          <DraftingCompass className="icon" />
-          <span className="nav-label">Specs</span>
-        </NavLink>
-        <NavLink
-          unavailable={!capabilities.projects}
-          className={`nav-item team-destination ${active("projects") ? "active" : ""}`}
-          to={pagePath(`/team/${encodeURIComponent(team.key)}/projects`)}
-        >
-          <Box className="icon" />
-          <span className="nav-label">Projects</span>
-          {!capabilities.projects && <small>Not migrated</small>}
-        </NavLink>
-        <NavLink
-          unavailable={!capabilities.cycles}
-          className={`nav-item team-destination ${(route.kind === "cycles" || route.kind === "cycle") && route.team === team.key ? "active" : ""}`}
-          to={pagePath(`/team/${encodeURIComponent(team.key)}/cycles`)}
-        >
-          <Orbit className="icon" />
-          <span className="nav-label">Cycles</span>
-          {!capabilities.cycles && <small>Not migrated</small>}
-        </NavLink>
+      <div id={destinationsId} className="team-destinations" data-expanded={expanded}>
+        <div className="team-destinations-list">
+          <NavLink
+            className={`nav-item team-destination ${active("triage") ? "active" : ""}`}
+            to={pagePath(`/team/${encodeURIComponent(team.key)}/triage`)}
+          >
+            <Inbox className="icon" />
+            <span className="nav-label">Triage</span>
+            {triageCount > 0 && <small className="nav-count">{triageCount}</small>}
+          </NavLink>
+          <NavLink
+            className={`nav-item team-destination ${active("issues") ? "active" : ""}`}
+            to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}
+          >
+            <ListTodo className="icon" />
+            <span className="nav-label">Issues</span>
+          </NavLink>
+          <NavLink
+            className={`nav-item team-destination ${route.kind === "specs" && route.team === team.key ? "active" : ""}`}
+            to={pagePath(`/team/${encodeURIComponent(team.key)}/specs`)}
+          >
+            <DraftingCompass className="icon" />
+            <span className="nav-label">Specs</span>
+          </NavLink>
+          <NavLink
+            unavailable={!capabilities.projects}
+            className={`nav-item team-destination ${active("projects") ? "active" : ""}`}
+            to={pagePath(`/team/${encodeURIComponent(team.key)}/projects`)}
+          >
+            <Box className="icon" />
+            <span className="nav-label">Projects</span>
+            {!capabilities.projects && <small>Not migrated</small>}
+          </NavLink>
+          <NavLink
+            unavailable={!capabilities.cycles}
+            className={`nav-item team-destination ${(route.kind === "cycles" || route.kind === "cycle") && route.team === team.key ? "active" : ""}`}
+            to={pagePath(`/team/${encodeURIComponent(team.key)}/cycles`)}
+          >
+            <Orbit className="icon" />
+            <span className="nav-label">Cycles</span>
+            {!capabilities.cycles && <small>Not migrated</small>}
+          </NavLink>
+        </div>
       </div>
     </section>
   );
