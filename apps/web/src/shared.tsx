@@ -26,6 +26,19 @@ export const columns = [
 /** Fired after issues move in or out of Triage so the sidebar count can refresh. */
 export const triageChanged = "triage-changed";
 
+// Issue views narrow the list by status, like Linear's Active / Backlog / All issues.
+// Triage lives in its own inbox, so even "All issues" leaves it out.
+export type IssueScope = "active" | "backlog" | "all";
+export const issueScopes: { value: IssueScope; label: string; statuses: Status[] | null }[] = [
+  {
+    value: "active",
+    label: "Active",
+    statuses: ["in_review", "in_progress", "agent_ready", "todo"],
+  },
+  { value: "backlog", label: "Backlog", statuses: ["backlog"] },
+  { value: "all", label: "All issues", statuses: null },
+];
+
 // Lists lead with the work closest to done and end with the closed groups.
 // Pickers, filters and boards keep the workflow order of `columns`.
 const listOrder: Status[] = [

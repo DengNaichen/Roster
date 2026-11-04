@@ -9,6 +9,8 @@ import { LabelFilter } from "./Labels";
 import { Catalog, emptyLabelFilter, LabelFilterValue } from "./useLabels";
 import {
   columns,
+  IssueScope,
+  issueScopes,
   IssueSort,
   issueTypes,
   priorities,
@@ -28,6 +30,7 @@ export function IssueFilters({
   filter,
   setFilter,
   statusLocked = false,
+  scope,
   team,
   teams,
   setTeam,
@@ -56,6 +59,7 @@ export function IssueFilters({
   filter: Status | "all";
   setFilter: (status: Status | "all") => void;
   statusLocked?: boolean;
+  scope?: { value: IssueScope; onChange: (scope: IssueScope) => void };
   team: string;
   teams: Team[];
   setTeam: (team: string) => void;
@@ -97,6 +101,22 @@ export function IssueFilters({
   return (
     <div className={`issue-toolbar${layout === "spec" ? " issue-toolbar-spec" : ""}`}>
       <div className="chips toolbar-filters">
+        {scope && (
+          <div className="segmented" role="tablist" aria-label="Issue views">
+            {issueScopes.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                role="tab"
+                aria-selected={scope.value === item.value}
+                aria-pressed={scope.value === item.value}
+                onClick={() => scope.onChange(item.value)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
         {statusColumn && (
           <span className="chip">
             <StatusIcon status={statusColumn.status} />
@@ -203,7 +223,6 @@ export function IssueFilters({
             </button>
           </span>
         )}
-        {layout !== "spec" && <span className="view-count">{visibleCount} issues</span>}
       </div>
       <div className="toolbar-controls">
         <Popover.Root>
