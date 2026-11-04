@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { planSections, type PlanNotes } from "./planSections";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
 import {
@@ -17,7 +18,15 @@ const diagramFields = [
 ] as const;
 const parts = ["given", "when", "then"] as const;
 
-export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: string }) {
+export function SpecDesign({
+  spec,
+  storageKey,
+  openIssues,
+}: {
+  spec: Spec;
+  storageKey: string;
+  openIssues: () => void;
+}) {
   const [loaded] = useState(() => {
     try {
       return { design: readDesign(storageKey), error: "" };
@@ -61,17 +70,17 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
     <div className="spec-scroll">
       <article className="spec-content design-content">
         <header className="spec-heading">
-          <p className="spec-kicker">Technical design · {spec.identifier}</p>
+          <p className="spec-kicker">Spec Kit · Implementation plan · {spec.identifier}</p>
           <h1>{spec.content.title}</h1>
           <div className="design-tools">
             <span>
-              {design ? `Based on spec r${design.revision}` : "Example · PR merge handling"}
+              {design ? `Based on spec r${design.revision}` : "Example · Spec–issue links"}
             </span>
             <span>Local to this browser</span>
             {!editing && !loaded.error && (
               <>
                 <button className="button" onClick={() => edit(design?.content ?? emptyDesign)}>
-                  {design ? "Edit design" : "New design"}
+                  {design ? "Edit plan" : "New plan"}
                 </button>
                 {!design && (
                   <button className="button" onClick={() => edit(exampleDesign)}>
@@ -104,19 +113,23 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
                 Cancel
               </button>
               <button className="button" disabled={!draft.approach.trim()} onClick={save}>
-                Save design
+                Save plan
               </button>
             </div>
             {!preview && (
               <div className="design-fields">
                 <label>
-                  Implementation approach
+                  Summary
                   <textarea
                     required
                     value={draft.approach}
                     onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
                   />
                 </label>
+                <PlanSections
+                  notes={draft.plan}
+                  onChange={(plan) => setDraft({ ...draft, plan })}
+                />
                 {diagramFields.map(({ key, label, placeholder }) => (
                   <label key={key}>
                     {label}
@@ -179,6 +192,17 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
         {!loaded.error && (!editing || preview) && (
           <DesignDocument content={editing ? draft : (design?.content ?? exampleDesign)} />
         )}
+        {!editing && !loaded.error && (
+          <section className="spec-section">
+            <h2>Task handoff</h2>
+            <p>
+              Review the plan and its validation scenarios, then break the work into linked issues.
+            </p>
+            <button className="button" onClick={openIssues}>
+              Open linked issues
+            </button>
+          </section>
+        )}
       </article>
     </div>
   );
@@ -188,9 +212,10 @@ function DesignDocument({ content }: { content: DesignContent }) {
   return (
     <>
       <section className="spec-section">
-        <h2>Implementation approach</h2>
+        <h2>Summary</h2>
         <p className="design-prose">{content.approach || "No approach yet."}</p>
       </section>
+      <PlanSections notes={content.plan} />
       {diagramFields.map(({ key, label }) => (
         <section className="spec-section" key={key}>
           <h2>{label}</h2>
@@ -227,5 +252,49 @@ function DesignDocument({ content }: { content: DesignContent }) {
         )}
       </section>
     </>
+  );
+}
+
+function PlanSections({
+  notes = {},
+  onChange,
+}: {
+  notes?: PlanNotes;
+  onChange?: (notes: PlanNotes) => void;
+}) {
+  return (
+    <div className="plan-sections">
+      {planSections.map(({ title, artifact, fields }) => (
+        <details className="plan-section" key={title} open={onChange ? true : undefined}>
+          <summary>
+            {title}
+            <small>{artifact}</small>
+          </summary>
+          {onChange ? (
+            <div className="design-fields">
+              {fields.map(([key, label, hint]) => (
+                <label key={key}>
+                  {label}
+                  <textarea
+                    value={notes[key] ?? ""}
+                    placeholder={hint}
+                    onChange={(e) => onChange({ ...notes, [key]: e.target.value })}
+                  />
+                </label>
+              ))}
+            </div>
+          ) : (
+            <dl>
+              {fields.map(([key, label]) => (
+                <div key={key}>
+                  <dt>{label}</dt>
+                  <dd className="design-prose">{notes[key] || "Not recorded"}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </details>
+      ))}
+    </div>
   );
 }

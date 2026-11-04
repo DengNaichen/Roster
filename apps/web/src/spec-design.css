@@ -68,3 +68,28 @@
 .design-fields .button {
   justify-self: start;
 }
+.plan-sections {
+  margin-block: var(--space-24);
+  border-top: var(--border-width) solid var(--border);
+}
+.plan-section {
+  border-bottom: var(--border-width) solid var(--border);
+  padding-block: var(--space-12);
+}
+.plan-section summary {
+  cursor: pointer;
+  font-weight: var(--weight-medium);
+}
+.plan-section summary small {
+  margin-inline-start: var(--space-12);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--font-size-12);
+}
+.plan-section dt {
+  color: var(--muted);
+  font-size: var(--font-size-12);
+}
+.plan-section dd {
+  margin: var(--space-4) 0 var(--space-12);
+}
