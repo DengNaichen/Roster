@@ -69,7 +69,10 @@ it("defaults new team cycles to Mondays and one week, and keeps drafts after a f
   expect((screen.getByLabelText("Weeks per cycle") as HTMLInputElement).value).toBe("3");
 });
 it("shows cycle settings read-only without manage access", async () => {
-  vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(json(emptyCycles))));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(json(emptyCycles))),
+  );
   render(<CycleSettingsSection team="AL" canManage={false} />);
   expect(((await screen.findByLabelText("First Monday")) as HTMLInputElement).disabled).toBe(true);
   expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();

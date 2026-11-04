@@ -63,7 +63,9 @@ function CycleSettingsForm({
   onSaved: (page: CyclePage) => void;
 }) {
   const configured = !!settings.start_date;
-  const timezone = configured ? settings.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezone = configured
+    ? settings.timezone
+    : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const initial = {
     ...settings,
     timezone,
