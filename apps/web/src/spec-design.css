@@ -1,5 +1,6 @@
 .design-content {
   max-width: 960px;
+  margin-inline: auto;
 }
 .design-tools {
   display: flex;
@@ -12,37 +13,58 @@
 .design-tools button:first-of-type {
   margin-inline-start: auto;
 }
-.design-body,
 .design-editor {
   margin-top: var(--space-24);
   border-top: var(--border-width) solid var(--border);
   padding-top: var(--space-16);
 }
-.design-body pre:has(.design-diagram) {
+.design-figure {
+  display: grid;
+  place-items: center;
+  margin: 0;
   background: var(--surface-card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
   padding: var(--space-16);
-  text-align: center;
 }
 .design-diagram {
+  display: block;
   max-width: 100%;
   max-height: 380px;
-  vertical-align: middle;
-  background: white;
-  border-radius: var(--radius);
+  width: auto;
 }
-.design-error {
+.design-error,
+.design-prose {
   white-space: pre-wrap;
 }
-.design-editor > label {
+.design-fields,
+.design-fields label {
   display: grid;
-  margin-top: var(--space-16);
   gap: var(--space-8);
+  min-width: 0;
 }
-.design-editor textarea {
+.design-fields {
+  margin-block: var(--space-16);
+  gap: var(--space-16);
+}
+.design-fields label {
+  text-transform: capitalize;
+}
+.design-fields textarea {
   width: 100%;
-  min-height: 48vh;
+  min-height: 5em;
   resize: vertical;
   font: inherit;
-  font-family: var(--mono);
+  text-transform: none;
   padding: var(--space-12);
+}
+.design-fields textarea.diagram-source {
+  font-family: var(--mono);
+  min-height: 9em;
+}
+.design-fields fieldset textarea {
+  min-height: 3em;
+}
+.design-fields .button {
+  justify-self: start;
 }

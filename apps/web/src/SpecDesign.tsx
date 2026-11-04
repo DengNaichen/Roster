@@ -1,58 +1,21 @@
 import { lazy, Suspense, useState } from "react";
 import { Dropdown } from "./Dropdown";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { Spec } from "../../../packages/contracts/spec";
+import {
+  blankScenario,
+  emptyDesign,
+  exampleDesign,
+  readDesign,
+  type DesignContent,
+} from "./designContent";
 import "./spec-design.css";
 
 const Diagram = lazy(() => import("./DesignDiagram"));
-const components = {
-  code({ className, children }: { className?: string; children?: React.ReactNode }) {
-    if (className !== "language-mermaid") return <code className={className}>{children}</code>;
-    const source = String(children);
-    return (
-      <Suspense fallback="Loading diagram…">
-        <Diagram key={source} source={source} />
-      </Suspense>
-    );
-  },
-};
-const example = [
-  "## Approach",
-  "Track each linked pull request independently. Re-evaluate the issue after each merge event.",
-  "## Sequence",
-  "```mermaid",
-  "sequenceDiagram",
-  "  participant GitHub",
-  "  participant Roster",
-  "  participant Issue",
-  "  GitHub->>Roster: Pull request merged",
-  "  Roster->>Roster: Read all linked pull requests",
-  "  alt All merged",
-  "    Roster->>Issue: Mark eligible issue done",
-  "  else Another PR is open",
-  "    Roster-->>Issue: Keep in review",
-  "  end",
-  "```",
-  "## State transitions",
-  "```mermaid",
-  "stateDiagram-v2",
-  "  InReview --> InReview: Another PR is open",
-  "  InReview --> Done: All PRs merged",
-  "  InReview --> Canceled: Manually canceled",
-  "```",
-  "## Verification",
-  "Link two pull requests. Merge the first and verify the issue stays in review. Replay the event and verify its state is unchanged.",
-].join("\n");
-
-type Design = { body: string; revision: number };
-function readDesign(key: string): Design | null {
-  const value = JSON.parse(localStorage.getItem(key) ?? "null");
-  if (value === null) return null;
-  if (typeof value.body !== "string" || !Number.isInteger(value.revision))
-    throw new Error("Invalid design");
-  return value;
-}
+const diagramFields = [
+  { key: "sequence", label: "Sequence diagram", placeholder: "sequenceDiagram" },
+  { key: "state", label: "State diagram", placeholder: "stateDiagram-v2" },
+] as const;
+const parts = ["given", "when", "then"] as const;
 
 export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: string }) {
   const [loaded] = useState(() => {
@@ -66,14 +29,14 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
     }
   });
   const [design, setDesign] = useState(loaded.design);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(emptyDesign);
   const [editing, setEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [error, setError] = useState(loaded.error);
   const [base, setBase] = useState(
     design?.revision ?? spec.active_revision?.number ?? spec.revision,
   );
-  function edit(body: string) {
+  function edit(body: DesignContent) {
     setDraft(body);
     setBase(design?.revision ?? spec.active_revision?.number ?? spec.revision);
     setPreview(false);
@@ -85,7 +48,7 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
         setError("This design changed in another tab. Copy your edits and reload before saving.");
         return;
       }
-      const next = { body: draft.trim(), revision: base };
+      const next = { content: draft, revision: base };
       localStorage.setItem(storageKey, JSON.stringify(next));
       setDesign(next);
       setEditing(false);
@@ -107,19 +70,11 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
             <span>Local to this browser</span>
             {!editing && !loaded.error && (
               <>
-                <button
-                  className="button"
-                  onClick={() =>
-                    edit(
-                      design?.body ??
-                        "## Approach\n\n## Sequence\n\n## State transitions\n\n## Verification\n",
-                    )
-                  }
-                >
+                <button className="button" onClick={() => edit(design?.content ?? emptyDesign)}>
                   {design ? "Edit design" : "New design"}
                 </button>
                 {!design && (
-                  <button className="button" onClick={() => edit(example)}>
+                  <button className="button" onClick={() => edit(exampleDesign)}>
                     Use example
                   </button>
                 )}
@@ -148,30 +103,129 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
               <button className="button" onClick={() => setEditing(false)}>
                 Cancel
               </button>
-              <button className="button" disabled={!draft.trim()} onClick={save}>
+              <button className="button" disabled={!draft.approach.trim()} onClick={save}>
                 Save design
               </button>
             </div>
             {!preview && (
-              <label>
-                Design in Markdown
-                <textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  spellCheck={false}
-                />
-              </label>
+              <div className="design-fields">
+                <label>
+                  Implementation approach
+                  <textarea
+                    required
+                    value={draft.approach}
+                    onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
+                  />
+                </label>
+                {diagramFields.map(({ key, label, placeholder }) => (
+                  <label key={key}>
+                    {label}
+                    <textarea
+                      className="diagram-source"
+                      value={draft[key]}
+                      placeholder={placeholder}
+                      spellCheck={false}
+                      onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                    />
+                  </label>
+                ))}
+                <section className="spec-section">
+                  <h2>Verification scenarios</h2>
+                  {draft.scenarios.map((scenario, i) => (
+                    <fieldset className="spec-story design-fields" key={i}>
+                      <legend>Scenario {i + 1}</legend>
+                      {parts.map((part) => (
+                        <label key={part}>
+                          {part}
+                          <textarea
+                            value={scenario[part]}
+                            onChange={(e) =>
+                              setDraft({
+                                ...draft,
+                                scenarios: draft.scenarios.map((s, j) =>
+                                  i === j ? { ...s, [part]: e.target.value } : s,
+                                ),
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                      <button
+                        className="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            scenarios: draft.scenarios.filter((_, j) => j !== i),
+                          })
+                        }
+                      >
+                        Remove scenario
+                      </button>
+                    </fieldset>
+                  ))}
+                  <button
+                    className="button"
+                    onClick={() =>
+                      setDraft({ ...draft, scenarios: [...draft.scenarios, { ...blankScenario }] })
+                    }
+                  >
+                    Add scenario
+                  </button>
+                </section>
+              </div>
             )}
           </div>
         )}
         {!loaded.error && (!editing || preview) && (
-          <section className="markdown design-body">
-            <Markdown remarkPlugins={[remarkGfm]} components={components}>
-              {editing ? draft : (design?.body ?? example)}
-            </Markdown>
-          </section>
+          <DesignDocument content={editing ? draft : (design?.content ?? exampleDesign)} />
         )}
       </article>
     </div>
+  );
+}
+
+function DesignDocument({ content }: { content: DesignContent }) {
+  return (
+    <>
+      <section className="spec-section">
+        <h2>Implementation approach</h2>
+        <p className="design-prose">{content.approach || "No approach yet."}</p>
+      </section>
+      {diagramFields.map(({ key, label }) => (
+        <section className="spec-section" key={key}>
+          <h2>{label}</h2>
+          {content[key].trim() ? (
+            <figure className="design-figure">
+              <Suspense fallback="Loading diagram…">
+                <Diagram key={content[key]} source={content[key]} />
+              </Suspense>
+            </figure>
+          ) : (
+            <p>No diagram yet.</p>
+          )}
+        </section>
+      ))}
+      <section className="spec-section">
+        <h2>Verification scenarios</h2>
+        {content.scenarios.length ? (
+          <ol className="spec-scenarios">
+            {content.scenarios.map((s, i) => (
+              <li key={i}>
+                {parts.map(
+                  (part) =>
+                    s[part] && (
+                      <span className="design-prose" key={part}>
+                        <b>{part[0].toUpperCase() + part.slice(1)}</b> {s[part]}
+                      </span>
+                    ),
+                )}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p>No scenarios yet.</p>
+        )}
+      </section>
+    </>
   );
 }
