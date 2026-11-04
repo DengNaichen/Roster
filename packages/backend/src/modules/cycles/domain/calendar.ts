@@ -5,7 +5,7 @@ export const defaults: CycleSettings = {
   enabled: false,
   timezone: 'UTC',
   start_date: '',
-  duration_weeks: 2,
+  duration_weeks: 1,
   upcoming_count: 2,
 };
 export function startDate(cfg: CycleSettings) {
@@ -25,4 +25,11 @@ export function cycleBoundary(date: string, timezone: string, weeks: number) {
     starts_at: start.toInstant().toString({ smallestUnit: 'millisecond' }),
     ends_at: start.add({ weeks }).toInstant().toString({ smallestUnit: 'millisecond' }),
   };
+}
+export function mondayOf(date: Temporal.PlainDate) {
+  return date.subtract({ days: date.dayOfWeek - 1 });
+}
+export function initialSettings(now: Date, timezone = defaults.timezone): CycleSettings {
+  const today = Temporal.Instant.from(now.toISOString()).toZonedDateTimeISO(timezone).toPlainDate();
+  return { ...defaults, enabled: true, timezone, start_date: mondayOf(today).toString() };
 }

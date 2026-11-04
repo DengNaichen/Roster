@@ -11,7 +11,7 @@ import type { Row } from '../../../application/records.ts';
 import type { Session, UnitOfWork } from '../../../application/session.ts';
 import { lockWorkspace } from '../../access/index.ts';
 import { clearPendingCycleIssues, rollCycleIssues } from '../../issues/index.ts';
-import { defaults, startDate } from '../domain/calendar.ts';
+import { defaults, initialSettings, mondayOf, startDate } from '../domain/calendar.ts';
 
 import { fail } from '../../../platform/errors/validation.ts';
 import { iso } from '../../../platform/time.ts';
@@ -28,6 +28,13 @@ function parse<T>(
 async function settings(db: Session, id: unknown): Promise<CycleSettings> {
   const r = (await db.cycles.settings({ id }))[0];
   return r ? r as unknown as CycleSettings : { ...defaults };
+}
+/** A team without a configuration row starts on the default weekly schedule. */
+async function ensureSettings(db: Session, t: Row, now: Date): Promise<CycleSettings> {
+  const existing = (await db.cycles.settings({ id: t.id }))[0];
+  if (existing) return existing as unknown as CycleSettings;
+  await db.cycles.insertSettingsIfMissing({ teamId: t.id, ...initialSettings(now) });
+  return await settings(db, t.id);
 }
 async function close(db: Session, t: Row, now: Date, roll: boolean) {
   const pending = await db.cycles.pendingCycles({
@@ -53,7 +60,7 @@ async function close(db: Session, t: Row, now: Date, roll: boolean) {
   }
 }
 export async function advanceTeamCycles(db: Session, t: Row, now: Date) {
-  const cfg = await settings(db, t.id);
+  const cfg = await ensureSettings(db, t, now);
   if (!cfg.enabled) return;
   let start = startDate(cfg);
   const tail = await db.cycles.cycleTail({ teamId: t.id });
@@ -146,9 +153,14 @@ export function createCycleService(
             old.duration_weeks !== cfg.duration_weeks)
         ) fail('conflict', 'Disable cycles before changing the schedule');
         if (!old.enabled && cfg.enabled) {
-          const today = Temporal.Instant.from(clock.toISOString()).toZonedDateTimeISO(cfg.timezone)
-            .toPlainDate().toString();
-          if (cfg.start_date < today) fail('invalid_input', 'A schedule must begin today or later');
+          if (start.dayOfWeek !== 1) fail('invalid_input', 'Cycles must start on a Monday');
+          const thisMonday = mondayOf(
+            Temporal.Instant.from(clock.toISOString()).toZonedDateTimeISO(cfg.timezone)
+              .toPlainDate(),
+          ).toString();
+          if (cfg.start_date < thisMonday) {
+            fail('invalid_input', 'A schedule must begin this week or later');
+          }
           const overlap = await tx.cycles.overlappingCycles({
             teamId: t.id,
             startsAt: start.toInstant().toString(),

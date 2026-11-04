@@ -46,6 +46,16 @@ export interface CyclesRepository {
       upcoming_count: number;
     },
   ): Promise<void>;
+  insertSettingsIfMissing(
+    input: {
+      teamId: unknown;
+      enabled: boolean;
+      timezone: string;
+      start_date: string;
+      duration_weeks: number;
+      upcoming_count: number;
+    },
+  ): Promise<void>;
   findCycle(input: { id: number }): Promise<Row>;
   updateCycle(input: { name: unknown; description: unknown; id: number }): Promise<void>;
   issueCycle(cycleId: { cycleId: number; teamId: unknown }): Promise<Row>;

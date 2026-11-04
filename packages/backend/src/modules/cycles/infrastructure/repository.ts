@@ -83,6 +83,13 @@ export function createCyclesRepository(db: Executor): CyclesRepository {
         sql`insert into roster.team_cycle_settings(team_id,enabled,timezone,start_date,duration_weeks,upcoming_count) values(${teamId},${enabled},${timezone},${start_date},${duration_weeks},${upcoming_count}) on conflict(team_id) do update set enabled=excluded.enabled,timezone=excluded.timezone,start_date=excluded.start_date,duration_weeks=excluded.duration_weeks,upcoming_count=excluded.upcoming_count`,
       );
     },
+    async insertSettingsIfMissing(
+      { teamId, enabled, timezone, start_date, duration_weeks, upcoming_count },
+    ) {
+      await db.execute(
+        sql`insert into roster.team_cycle_settings(team_id,enabled,timezone,start_date,duration_weeks,upcoming_count) values(${teamId},${enabled},${timezone},${start_date},${duration_weeks},${upcoming_count}) on conflict(team_id) do nothing`,
+      );
+    },
     async findCycle({ id }) {
       return one(db, sql`select * from roster.cycles where id=${id}`);
     },
