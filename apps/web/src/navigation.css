@@ -161,7 +161,7 @@
   background: var(--raised);
   border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-priority-menu);
+  box-shadow: var(--shadow-menu);
 }
 .workspace-menu,
 .account-menu {
@@ -455,12 +455,8 @@
   font-size: var(--font-size-12);
   color: var(--text-3);
 }
-.toolbar-field .dropdown {
-  font-size: var(--font-size-12);
-}
-.toolbar-label-field > .button {
-  padding: var(--space-5) var(--space-6);
-  text-align: left;
+.toolbar-field .dropdown,
+.toolbar-label-field .dropdown {
   font-size: var(--font-size-12);
 }
 .toolbar-popover-done,

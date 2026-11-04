@@ -1,4 +1,5 @@
 import { CircleCheck, CircleDashed, CirclePlay } from "lucide-react";
+import { ReactNode } from "react";
 import { Dropdown } from "./Dropdown";
 import { apiPath, RequestError } from "./shared";
 import { useResource } from "./useResource";
@@ -75,12 +76,14 @@ export function CycleSelect({
   onChange,
   disabled = false,
   label = "Cycle",
+  icon,
 }: {
   team: string;
   value: number | "";
   onChange: (id: number | "") => void;
   disabled?: boolean;
   label?: string;
+  icon?: ReactNode;
 }) {
   const resource = useResource<CyclePage>(
     team ? apiPath(`/teams/${encodeURIComponent(team)}/cycles`) : null,
@@ -94,6 +97,7 @@ export function CycleSelect({
       <Dropdown
         variant="ghost"
         aria-label={label}
+        icon={icon}
         value={String(value)}
         disabled={disabled || !team || resource.loading || !!resource.error}
         onChange={(next) => onChange(next === "" ? "" : Number(next))}

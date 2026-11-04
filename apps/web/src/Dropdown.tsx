@@ -1,6 +1,7 @@
 import * as Select from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { ReactNode } from "react";
+import { SelectMenu } from "./SelectMenu";
 import { useLazySelect } from "./shared";
 
 export type DropdownOption = { value: string; label: string; icon?: ReactNode; disabled?: boolean };
@@ -10,8 +11,8 @@ const EMPTY = "\u0000empty";
 const encode = (value: string) => (value === "" ? EMPTY : value);
 const decode = (value: string) => (value === EMPTY ? "" : value);
 
-// The one dropdown used everywhere. It shares its menu surface with the status
-// and priority menus; `variant` only changes how the trigger sits in its row.
+// The one dropdown used everywhere. It shares its menu with the status and
+// priority controls; `variant` only changes how the trigger sits in its row.
 export function Dropdown({
   value,
   onChange,
@@ -34,7 +35,8 @@ export function Dropdown({
   id?: string;
   "aria-label"?: string;
   placeholder?: string;
-  // field: bordered, sized to its content. block: bordered, full width. ghost: borderless, for property rows and toolbars.
+  // field: faintly bordered, sized to its content. block: the same at full width.
+  // ghost: borderless with no chevron, for property rows and toolbars.
   variant?: "field" | "block" | "ghost";
   icon?: ReactNode;
   className?: string;
@@ -67,35 +69,11 @@ export function Dropdown({
           <ChevronDown className="dropdown-chevron" aria-hidden="true" />
         </Select.Trigger>
         {open && (
-          <Select.Portal container={container || undefined}>
-            <Select.Content
-              className="priority-menu dropdown-menu"
-              position="popper"
-              sideOffset={5}
-              align="start"
-              collisionPadding={8}
-            >
-              <Select.Viewport>
-                {options.map((option) => (
-                  <Select.Item
-                    className="priority-option"
-                    value={encode(option.value)}
-                    key={option.value}
-                    disabled={option.disabled}
-                    textValue={option.label}
-                  >
-                    <span className="priority-check">
-                      <Select.ItemIndicator>
-                        <Check className="icon" />
-                      </Select.ItemIndicator>
-                    </span>
-                    {option.icon}
-                    <Select.ItemText>{option.label}</Select.ItemText>
-                  </Select.Item>
-                ))}
-              </Select.Viewport>
-            </Select.Content>
-          </Select.Portal>
+          <SelectMenu
+            container={container}
+            className="dropdown-menu"
+            options={options.map((option) => ({ ...option, value: encode(option.value) }))}
+          />
         )}
       </Select.Root>
       {required && (

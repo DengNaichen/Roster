@@ -9,8 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Box, Check, UserRound } from "lucide-react";
+import { Box, UserRound } from "lucide-react";
 import * as Select from "@radix-ui/react-select";
+import { SelectMenu } from "./SelectMenu";
 
 export const columns = [
   { status: "triage", label: "Triage", hint: "Worth keeping?" },
@@ -450,34 +451,15 @@ export function StatusSelect({
         <span className="status-select">{selected.label}</span>
       </Select.Trigger>
       {open && (
-        <Select.Portal container={container || undefined}>
-          <Select.Content
-            className="priority-menu status-menu"
-            position="popper"
-            sideOffset={5}
-            align="start"
-            collisionPadding={8}
-          >
-            <Select.Viewport>
-              {columns.map((option) => (
-                <Select.Item
-                  className="priority-option"
-                  value={option.status}
-                  key={option.status}
-                  textValue={option.label}
-                >
-                  <span className="priority-check">
-                    <Select.ItemIndicator>
-                      <Check className="icon" />
-                    </Select.ItemIndicator>
-                  </span>
-                  <StatusIcon status={option.status} />
-                  <Select.ItemText>{option.label}</Select.ItemText>
-                </Select.Item>
-              ))}
-            </Select.Viewport>
-          </Select.Content>
-        </Select.Portal>
+        <SelectMenu
+          container={container}
+          className="status-menu"
+          options={columns.map((option) => ({
+            value: option.status,
+            label: option.label,
+            icon: <StatusIcon status={option.status} />,
+          }))}
+        />
       )}
     </Select.Root>
   );
@@ -698,34 +680,14 @@ export function PrioritySelect({
           ))}
       </Select.Trigger>
       {open && (
-        <Select.Portal container={container || undefined}>
-          <Select.Content
-            className="priority-menu"
-            position="popper"
-            sideOffset={5}
-            align="start"
-            collisionPadding={8}
-          >
-            <Select.Viewport>
-              {priorities.map((option) => (
-                <Select.Item
-                  className="priority-option"
-                  value={String(option.value)}
-                  key={option.value}
-                  textValue={option.label}
-                >
-                  <span className="priority-check">
-                    <Select.ItemIndicator>
-                      <Check className="icon" />
-                    </Select.ItemIndicator>
-                  </span>
-                  <PriorityIcon priority={option.value} />
-                  <Select.ItemText>{option.label}</Select.ItemText>
-                </Select.Item>
-              ))}
-            </Select.Viewport>
-          </Select.Content>
-        </Select.Portal>
+        <SelectMenu
+          container={container}
+          options={priorities.map((option) => ({
+            value: String(option.value),
+            label: option.label,
+            icon: <PriorityIcon priority={option.value} />,
+          }))}
+        />
       )}
     </Select.Root>
   );

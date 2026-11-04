@@ -4,7 +4,7 @@ import { CycleSelect } from "./Cycles";
 import "./cycles.css";
 import { AssigneeSelect } from "./Assignee";
 import { codingAgentName, personName } from "./shared";
-import { ArrowUpRight, Box, CornerUpLeft, Plus, Users, X } from "lucide-react";
+import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
 import { WorkLogEntry, WorkLogList, ActivityTabs } from "./WorkLogs";
@@ -274,6 +274,7 @@ export function IssueDetail({
                       disabled={savingCycle}
                       onChange={(id) => void changeCycle(Number(id))}
                       label={`Change cycle for ${identifier}`}
+                      icon={<Orbit className="icon" aria-hidden="true" />}
                     />
                   )}
                   {issue.cycle_id && (
