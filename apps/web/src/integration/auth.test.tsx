@@ -1,7 +1,9 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 const auth = vi.hoisted(() => ({
   oauthError: false,
+  signedIn: true,
+  signInWithOAuth: vi.fn(),
   callback: null as null | ((event: string, session: unknown) => void),
 }));
 const session = {
@@ -17,7 +19,11 @@ vi.mock("./api", () => ({
   api: vi.fn(),
   supabase: {
     auth: {
-      getSession: vi.fn(async () => ({ data: { session }, error: null })),
+      getSession: vi.fn(async () => ({
+        data: { session: auth.signedIn ? session : null },
+        error: null,
+      })),
+      signInWithOAuth: auth.signInWithOAuth,
       onAuthStateChange: vi.fn((callback: (event: string, session: unknown) => void) => {
         auth.callback = callback;
         return { data: { subscription: { unsubscribe: vi.fn() } } };
@@ -46,6 +52,7 @@ import { AuthBoundary } from "./auth";
 afterEach(() => {
   window.history.replaceState({}, "", "/");
   auth.oauthError = false;
+  auth.signedIn = true;
 });
 describe("authentication recovery", () => {
   it("keeps the mounted app and its draft when the session expires and recovers", async () => {
@@ -108,4 +115,25 @@ it("shows consent errors without a loading message", async () => {
   );
   await screen.findByText("Consent unavailable");
   expect(screen.queryByText("Loading authorization…")).toBeNull();
+});
+
+it.each([
+  ["Google", "/join?token=invite", "/join?token=invite"],
+  ["GitHub", "/oauth/consent?authorization_id=request", "/oauth/consent?authorization_id=request"],
+  ["Google", "/auth/login?return_to=%2F..%2F%2Fevil.example", "/"],
+])("starts %s OAuth from %s and allows retry on failure", async (name, from, target) => {
+  auth.signedIn = false;
+  auth.signInWithOAuth.mockResolvedValue({ error: new Error("Provider unavailable") });
+  window.history.replaceState({}, "", from);
+  render(<AuthBoundary>Workspace</AuthBoundary>);
+  const button = await screen.findByRole("button", { name: "Continue with " + name });
+  fireEvent.click(button);
+  await screen.findByRole("alert");
+  const callback = new URL("/auth/callback", window.location.origin);
+  callback.searchParams.set("return_to", target);
+  expect(auth.signInWithOAuth).toHaveBeenLastCalledWith({
+    provider: name.toLowerCase(),
+    options: { redirectTo: callback.href },
+  });
+  expect((button as HTMLButtonElement).disabled).toBe(false);
 });
