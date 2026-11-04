@@ -23,6 +23,21 @@ export const columns = [
   { status: "canceled", label: "Canceled", hint: "No longer planned" },
 ] as const;
 
+// Lists lead with the work closest to done and end with the closed groups.
+// Pickers, filters and boards keep the workflow order of `columns`.
+const listOrder: Status[] = [
+  "triage",
+  "in_review",
+  "in_progress",
+  "agent_ready",
+  "todo",
+  "backlog",
+  "done",
+  "canceled",
+];
+export const listColumns = listOrder.map((status) => columns.find((c) => c.status === status)!);
+export const columnsFor = (view: "board" | "list") => (view === "list" ? listColumns : columns);
+
 export const priorities = [
   { value: 0, label: "No priority" },
   { value: 1, label: "Urgent" },

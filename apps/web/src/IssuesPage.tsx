@@ -15,6 +15,7 @@ import {
   api,
   apiPath,
   columns,
+  columnsFor,
   IssueSummary,
   NavLink,
   pagePath,
@@ -128,7 +129,9 @@ export default function IssuesPage({
     [issues, sort],
   );
 
-  const visibleColumns = columns.filter((column) => filter === "all" || column.status === filter);
+  const visibleColumns = columnsFor(view).filter(
+    (column) => filter === "all" || column.status === filter,
+  );
   // Listing every status without a search starts with Done and Canceled collapsed; a header click overrides the default until filters change.
   const defaultCollapsed = (status: Status) =>
     filter === "all" && !query && (status === "done" || status === "canceled");

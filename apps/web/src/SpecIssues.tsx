@@ -9,6 +9,7 @@ import {
   api,
   apiPath,
   columns,
+  columnsFor,
   ModalDialog,
   RequestError,
   type IssueSort,
@@ -193,7 +194,7 @@ export default function SpecIssues({
       )}
       <IssueViews
         view={view}
-        visibleColumns={columns.filter((c) => grouped[c.status].length > 0)}
+        visibleColumns={columnsFor(view).filter((c) => grouped[c.status].length > 0)}
         grouped={grouped}
         loading={loading}
         isCollapsed={(status) => !!collapsed[status]}
