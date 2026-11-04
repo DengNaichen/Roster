@@ -30,6 +30,20 @@ const activeFields = sql`adopted.number as active_number,adopted.title as active
 
 export function createSpecsRepository(db: Executor): SpecsRepository {
   return {
+    getDesign(specId) {
+      return rows(
+        db,
+        sql`select revision,spec_revision,content from roster.spec_designs where spec_id=${specId}`,
+      );
+    },
+    saveDesign({ specId, base, specRevision, content, subject, now }) {
+      const query = base === 0
+        ? sql`insert into roster.spec_designs(spec_id,revision,spec_revision,content,updated_by,updated_at)
+                values (${specId},1,${specRevision},${content}::json,${subject},${now}) on conflict(spec_id) do nothing`
+        : sql`update roster.spec_designs set revision=revision+1,spec_revision=${specRevision},content=${content}::json,updated_by=${subject},updated_at=${now}
+              where spec_id=${specId} and revision=${base}`;
+      return rows(db, sql`${query} returning revision,spec_revision,content`);
+    },
     async linkIssues({ workspaceId, specId, issueIds, subject, now }) {
       await db.execute(
         sql`insert into roster.spec_issues(workspace_id,spec_id,issue_id,created_by,created_at) values ${

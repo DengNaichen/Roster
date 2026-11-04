@@ -1,5 +1,16 @@
 import type { Row } from '../../../application/records.ts';
 export interface SpecsRepository {
+  getDesign(specId: unknown): Promise<Row[]>;
+  saveDesign(
+    input: {
+      specId: unknown;
+      base: number;
+      specRevision: number;
+      content: string;
+      subject: string;
+      now: Date;
+    },
+  ): Promise<Row[]>;
   linkIssues(
     input: {
       workspaceId: unknown;

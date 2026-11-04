@@ -6,14 +6,26 @@ import type {
   getSpecRevisionSchema,
   listIssueSpecsSchema,
   listSpecsSchema,
+  setSpecDesignSchema,
   Spec,
   SpecIssueChange,
   SpecRevision,
   SpecRevisionSummary,
   SpecSummary,
+  StoredDesign,
   updateSpecSchema,
 } from '../../../contracts/spec.ts';
 export interface SpecService {
+  getSpecDesign(
+    ctx: RequestContext,
+    slug: string,
+    identifier: string,
+  ): Promise<{ identifier: string; design: StoredDesign | null }>;
+  setSpecDesign(
+    ctx: RequestContext,
+    slug: string,
+    input: z.input<typeof setSpecDesignSchema>,
+  ): Promise<{ identifier: string; design: StoredDesign }>;
   linkSpecIssues(
     ctx: RequestContext,
     slug: string,

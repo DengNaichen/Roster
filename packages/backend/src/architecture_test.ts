@@ -24,6 +24,7 @@ const tableOwners: Record<string, string> = {
   team_cycle_settings: 'cycles',
   specs: 'specs',
   spec_issues: 'specs',
+  spec_designs: 'specs',
   spec_revisions: 'specs',
   comments: 'activity',
   work_logs: 'activity',

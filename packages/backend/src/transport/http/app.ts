@@ -743,6 +743,17 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
         ),
       ),
   );
+  app.get(
+    '/api/w/:workspace/specs/:identifier/design',
+    async (c) =>
+      c.json(
+        await s.getSpecDesign(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          c.req.param('identifier'),
+        ),
+      ),
+  );
   app.put('/api/w/:workspace/specs/:identifier', async (c) => {
     // The original REST body has no identifier; reject attempts to supply one,
     // even if it matches. Only the URL selects which spec is updated.

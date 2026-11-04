@@ -1,235 +1,67 @@
 import { lazy, Suspense, useState } from "react";
-import { Dropdown } from "./Dropdown";
-import type { Spec } from "../../../packages/contracts/spec";
-import { localPreview } from "./integration/preview";
-import { workspaceSlug } from "./shared";
-import {
-  blankDecision,
-  type Decision,
-  emptyDesign,
-  exampleDesign,
-  readDesign,
-  type DesignContent,
-} from "./designContent";
+import type { Spec, StoredDesign } from "../../../packages/contracts/spec";
+import { apiPath, RequestError } from "./shared";
+import { useResource } from "./useResource";
+import { readDesign, type DesignContent } from "./designContent";
 import "./spec-design.css";
-
 const Diagram = lazy(() => import("./DesignDiagram"));
 const diagramFields = [
-  { key: "sequence", label: "Sequence diagram", placeholder: "sequenceDiagram" },
-  { key: "state", label: "State diagram", placeholder: "stateDiagram-v2" },
+  { key: "sequence", label: "Sequence diagram" },
+  { key: "state", label: "State diagram" },
 ] as const;
+const labels = { goals: "Goals", nonGoals: "Non-Goals" };
 
 export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: string }) {
-  const [loaded] = useState(() => {
+  const resource = useResource<{ identifier: string; design: StoredDesign | null } | null>(
+    apiPath(`/specs/${encodeURIComponent(spec.identifier)}/design`),
+    null,
+  );
+  const [legacy] = useState(() => {
     try {
-      return { design: readDesign(storageKey), error: "" };
+      return readDesign(storageKey);
     } catch {
-      return {
-        design: null,
-        error: "Could not read the local design. Check browser storage and reload.",
-      };
+      return null;
     }
   });
-  const [design, setDesign] = useState(loaded.design);
-  const seed =
-    localPreview && workspaceSlug() === "roster" && spec.identifier === "SPEC-1"
-      ? exampleDesign
-      : null;
-  const current = design?.content ?? seed;
-  const [draft, setDraft] = useState(emptyDesign);
-  const [editing, setEditing] = useState(false);
-  const [preview, setPreview] = useState(false);
-  const [error, setError] = useState(loaded.error);
-  const [base, setBase] = useState(
-    design?.revision ?? spec.active_revision?.number ?? spec.revision,
-  );
-  function edit(body: DesignContent) {
-    setDraft(body);
-    setBase(design?.revision ?? spec.active_revision?.number ?? spec.revision);
-    setPreview(false);
-    setEditing(true);
-  }
-  function updateDecision(index: number, change: Partial<Decision>) {
-    setDraft({
-      ...draft,
-      decisions: draft.decisions.map((d, i) => (i === index ? { ...d, ...change } : d)),
-    });
-  }
-  function save() {
-    try {
-      if (JSON.stringify(readDesign(storageKey)) !== JSON.stringify(design)) {
-        setError("This design changed in another tab. Copy your edits and reload before saving.");
-        return;
-      }
-      const next = { content: draft, revision: base };
-      localStorage.setItem(storageKey, JSON.stringify(next));
-      setDesign(next);
-      setEditing(false);
-      setError("");
-    } catch {
-      setError("Could not save the design. Your edits are still in the editor.");
-    }
-  }
+  const stored = resource.data?.design;
+  const content = stored?.content ?? legacy?.content;
   return (
     <div className="spec-scroll">
       <article className="spec-content design-content">
         <header className="spec-heading">
           <p className="spec-kicker design-kicker">
-            Design <span> / </span>
+            Design <span>/</span>
             {spec.identifier}
           </p>
           <h1>{spec.content.title}</h1>
-          <div className="design-tools">
-            <span>
-              {design
-                ? `Based on spec r${design.revision}`
-                : seed
-                  ? "OpenSpec · Demo design"
+          {resource.data && (
+            <p className="spec-kicker">
+              {stored
+                ? `Design r${stored.revision} · Based on spec r${stored.spec_revision}`
+                : legacy
+                  ? "Local draft · Read only"
                   : "OpenSpec"}
-            </span>
-            <span>Local to this browser</span>
-            {!editing && !loaded.error && (
-              <button className="button" onClick={() => edit(current ?? emptyDesign)}>
-                {current ? "Edit design" : "New design"}
-              </button>
-            )}
-          </div>
+            </p>
+          )}
         </header>
-        {error && <p role="alert">{error}</p>}
-        {editing && (
-          <div className="design-editor">
-            <div className="design-tools">
-              <span>Based on spec revision</span>
-              <Dropdown
-                aria-label="Based on spec revision"
-                value={String(base)}
-                onChange={(value) => setBase(Number(value))}
-                options={[
-                  ...new Set([design?.revision, spec.active_revision?.number, spec.revision]),
-                ]
-                  .filter((n): n is number => typeof n === "number")
-                  .map((n) => ({ value: String(n), label: `r${n}` }))}
-              />
-              <button className="button" onClick={() => setPreview(!preview)}>
-                {preview ? "Write" : "Preview"}
-              </button>
-              <button className="button" onClick={() => setEditing(false)}>
-                Cancel
-              </button>
-              <button
-                className="button"
-                disabled={!draft.decisions.every((d) => d.title.trim())}
-                onClick={save}
-              >
-                Save design
-              </button>
-            </div>
-            {!preview && (
-              <div className="design-fields">
-                {(["context", "goals", "nonGoals"] as const).map((key) => (
-                  <label key={key}>
-                    {labels[key]}
-                    <textarea
-                      value={draft[key]}
-                      onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-                    />
-                  </label>
-                ))}
-                <h2>Decisions</h2>
-                {draft.decisions.map((d, i) => (
-                  <fieldset className="spec-story design-fields" key={i}>
-                    <legend>Decision {i + 1}</legend>
-                    <label>
-                      Decision title
-                      <input
-                        value={d.title}
-                        onChange={(e) => updateDecision(i, { title: e.target.value })}
-                      />
-                    </label>
-                    <label>
-                      Reason and alternatives
-                      <textarea
-                        value={d.reason}
-                        onChange={(e) => updateDecision(i, { reason: e.target.value })}
-                      />
-                    </label>
-
-                    {draft.decisions.length > 1 && (
-                      <button
-                        className="button"
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            decisions: draft.decisions.filter((_, j) => i !== j),
-                          })
-                        }
-                      >
-                        Remove decision
-                      </button>
-                    )}
-                  </fieldset>
-                ))}
-                <button
-                  className="button"
-                  onClick={() =>
-                    setDraft({ ...draft, decisions: [...draft.decisions, blankDecision] })
-                  }
-                >
-                  Add decision
-                </button>
-                <label>
-                  Risks / Trade-offs
-                  <textarea
-                    value={draft.risks}
-                    onChange={(e) => setDraft({ ...draft, risks: e.target.value })}
-                  />
-                </label>
-                {draft.notes !== undefined && (
-                  <label>
-                    Supporting notes
-                    <textarea
-                      value={draft.notes}
-                      onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-                    />
-                  </label>
-                )}
-                <details
-                  className="design-extras"
-                  open={draft.decisions.some((d) => d.sequence.trim() || d.state.trim())}
-                >
-                  <summary>Optional diagrams</summary>
-                  {draft.decisions.map((d, i) => (
-                    <fieldset className="spec-story design-fields" key={i}>
-                      <legend>
-                        Decision {i + 1} · {d.title}
-                      </legend>
-                      {diagramFields.map(({ key, label, placeholder }) => (
-                        <label key={key}>
-                          {label}
-                          <textarea
-                            className="diagram-source"
-                            value={d[key]}
-                            placeholder={placeholder}
-                            onChange={(e) => updateDecision(i, { [key]: e.target.value })}
-                          />
-                        </label>
-                      ))}
-                    </fieldset>
-                  ))}
-                </details>
-              </div>
-            )}
+        {resource.error ? (
+          <div className="scope-message">
+            <RequestError message={resource.error} />
+            <button className="button" onClick={() => void resource.reload()}>
+              Retry
+            </button>
           </div>
-        )}
-        {!loaded.error && (!editing || preview) && (editing || current) && (
-          <DesignDocument content={editing ? draft : (current ?? emptyDesign)} />
+        ) : !resource.data ? (
+          <p className="empty">Loading design…</p>
+        ) : content ? (
+          <DesignDocument content={content} />
+        ) : (
+          <p className="empty">No design yet.</p>
         )}
       </article>
     </div>
   );
 }
-
-const labels = { context: "Context", goals: "Goals", nonGoals: "Non-Goals" };
 function DesignItems({ text }: { text: string }) {
   const items = text
     .trim()

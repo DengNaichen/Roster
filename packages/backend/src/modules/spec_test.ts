@@ -261,6 +261,14 @@ Deno.test({
       for (
         const fn of [
           () => s.getSpec(owner, w.slug, hidden.identifier),
+          () => s.getSpecDesign(owner, w.slug, hidden.identifier),
+          () =>
+            s.setSpecDesign(owner, w.slug, {
+              identifier: hidden.identifier,
+              base_revision: 0,
+              spec_revision: 1,
+              content: { decisions: [{ title: 'Hidden' }] },
+            }),
           () =>
             s.updateSpec(owner, w.slug, {
               identifier: hidden.identifier,

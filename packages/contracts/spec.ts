@@ -86,6 +86,39 @@ const message = z.string().refine(
   'Message must be a single line of at most 240 Unicode characters',
 );
 const identifier = z.string().regex(/^SPEC-[1-9][0-9]*$/);
+const diagram = (header: string) =>
+  z.string().refine(
+    (source) =>
+      !source.trim() || (source.trimStart().split(/\s/)[0] === header && !source.includes('%%{')),
+    'Expected ' + header + ' without configuration directives',
+  ).default('');
+export const designContentSchema = z.strictObject({
+  context: z.string().default(''),
+  goals: z.string().default(''),
+  nonGoals: z.string().default(''),
+  risks: z.string().default(''),
+  decisions: z.array(
+    z.strictObject({
+      title: nonblank,
+      reason: z.string().default(''),
+      sequence: diagram('sequenceDiagram'),
+      state: diagram('stateDiagram-v2'),
+    }),
+  ).min(1),
+  notes: z.string().optional(),
+}).refine(validUnicode, 'Invalid Unicode');
+export const setSpecDesignSchema = z.strictObject({
+  identifier,
+  base_revision: z.number().int().min(0).max(2147483646),
+  spec_revision: z.number().int().positive().max(2147483647),
+  content: designContentSchema,
+});
+export const storedDesignSchema = z.object({
+  revision: z.number().int().positive(),
+  spec_revision: z.number().int().positive(),
+  content: designContentSchema,
+});
+export type StoredDesign = z.output<typeof storedDesignSchema>;
 export const listSpecsSchema = z.strictObject({ team: z.string().optional() });
 export const getSpecSchema = z.strictObject({ identifier });
 export const listSpecRevisionsSchema = getSpecSchema;

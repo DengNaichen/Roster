@@ -454,27 +454,35 @@ it("loads real scoped links beyond 50 rows and persists link/unlink through remo
   expect(await screen.findByText("Existing candidate")).toBeTruthy();
   expect(screen.queryByText("Linked issue 1")).toBeNull();
 });
-it("reopens a browser-local design from the section URL without modifying the spec", async () => {
-  const read = vi.fn(async (path: string) =>
-    json(path.includes("/issues?") ? { issues: [] } : spec),
+it("reads the shared design without exposing edit controls", async () => {
+  history.replaceState(null, "", "/demo/spec/SPEC-42?section=design");
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (path: string) =>
+      json(
+        path.endsWith("/design")
+          ? {
+              identifier: spec.identifier,
+              design: {
+                revision: 2,
+                spec_revision: 1,
+                content: {
+                  context: "Verify handoff",
+                  goals: "",
+                  nonGoals: "",
+                  risks: "",
+                  decisions: [],
+                },
+              },
+            }
+          : path.includes("/issues?")
+            ? { issues: [] }
+            : spec,
+      ),
+    ),
   );
-  vi.stubGlobal("fetch", read);
-  const view = render(<SpecPage id={spec.identifier} />);
-  fireEvent.click(await screen.findByRole("tab", { name: "Design" }));
-  fireEvent.click(screen.getByRole("button", { name: "New design" }));
-  fireEvent.change(screen.getByRole("textbox", { name: "Decision title" }), {
-    target: { value: "Verify handoff" },
-  });
-  fireEvent.change(screen.getByRole("textbox", { name: "Reason and alternatives" }), {
-    target: { value: "Keep records independent" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Save design" }));
-  view.unmount();
-  expect(location.search).toBe("?section=design");
   render(<SpecPage id={spec.identifier} />);
   expect(await screen.findByText("Verify handoff")).toBeTruthy();
-  expect(screen.getByText("Keep records independent")).toBeTruthy();
-  expect(screen.getByText("Based on spec r1")).toBeTruthy();
-  for (const call of read.mock.calls as unknown as [string, RequestInit][])
-    expect(call[1]?.method ?? "GET").toBe("GET");
+  expect(screen.getByText("Design r2 · Based on spec r1")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /edit design|save design|new design/i })).toBeNull();
 });
