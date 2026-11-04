@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { FileText } from "lucide-react";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
 import { localPreview } from "./integration/preview";
@@ -74,7 +75,10 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
     <div className="spec-scroll">
       <article className="spec-content design-content">
         <header className="spec-heading">
-          <p className="spec-kicker">Design · {spec.identifier}</p>
+          <p className="spec-kicker design-kicker">
+            <FileText size={14} aria-hidden="true" /> Design <span> / </span>
+            {spec.identifier}
+          </p>
           <h1>{spec.content.title}</h1>
           <div className="design-tools">
             <span>
@@ -86,11 +90,9 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
             </span>
             <span>Local to this browser</span>
             {!editing && !loaded.error && (
-              <>
-                <button className="button" onClick={() => edit(current ?? emptyDesign)}>
-                  {current ? "Edit design" : "New design"}
-                </button>
-              </>
+              <button className="button" onClick={() => edit(current ?? emptyDesign)}>
+                {current ? "Edit design" : "New design"}
+              </button>
             )}
           </div>
         </header>
@@ -251,27 +253,29 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
       {(c.goals || c.nonGoals) && (
         <section className="spec-section">
           <h2>Goals / Non-Goals</h2>
-          {(["goals", "nonGoals"] as const).map(
-            (k) =>
-              c[k] && (
-                <div key={k}>
-                  <h3 className="spec-subheading">{labels[k]}</h3>
-                  <p className="design-prose">{c[k]}</p>
-                </div>
-              ),
-          )}
+          <div className="design-goals">
+            {(["goals", "nonGoals"] as const).map(
+              (k) =>
+                c[k] && (
+                  <div key={k}>
+                    <h3 className="spec-subheading">{labels[k]}</h3>
+                    <p className="design-prose">{c[k]}</p>
+                  </div>
+                ),
+            )}
+          </div>
         </section>
       )}
       <section className="spec-section">
         <h2>Decisions</h2>
-        <div className="spec-stories">
+        <div className="design-decisions">
           {c.decisions.map((d, i) => (
-            <article className="spec-story" key={i}>
-              <header>
-                <span className="spec-id">{String(i + 1).padStart(2, "0")}</span>
+            <article className="design-decision" key={i}>
+              <span className="spec-id">{String(i + 1).padStart(2, "0")}</span>
+              <div>
                 <h3>{d.title}</h3>
-              </header>
-              <p className="design-prose">{d.reason}</p>
+                <p className="design-prose">{d.reason}</p>
+              </div>
             </article>
           ))}
         </div>
@@ -292,9 +296,9 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
         <section className="spec-section">
           <h2>Diagrams</h2>
           {diagrams.map(({ id, title, label, source }) => (
-            <figure className="design-extras" key={id}>
+            <figure className="design-plate" key={id}>
               <figcaption className="spec-subheading">
-                {label} · {title}
+                <span>{label}</span> {title}
               </figcaption>
               <div className="design-figure">
                 <Suspense fallback="Loading diagram…">
