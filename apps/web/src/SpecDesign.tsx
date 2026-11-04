@@ -152,21 +152,7 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
                         onChange={(e) => updateDecision(i, { reason: e.target.value })}
                       />
                     </label>
-                    <details className="design-extras">
-                      <summary>Optional diagrams</summary>
-                      <div className="design-fields">
-                        {diagramFields.map(({ key, label, placeholder }) => (
-                          <label key={key}>
-                            {label}
-                            <textarea
-                              value={d[key]}
-                              placeholder={placeholder}
-                              onChange={(e) => updateDecision(i, { [key]: e.target.value })}
-                            />
-                          </label>
-                        ))}
-                      </div>
-                    </details>
+
                     {draft.decisions.length > 1 && (
                       <button
                         className="button"
@@ -206,6 +192,27 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
                     />
                   </label>
                 )}
+                <details className="design-extras">
+                  <summary>Optional diagrams</summary>
+                  {draft.decisions.map((d, i) => (
+                    <fieldset className="spec-story design-fields" key={i}>
+                      <legend>
+                        Decision {i + 1} · {d.title}
+                      </legend>
+                      {diagramFields.map(({ key, label, placeholder }) => (
+                        <label key={key}>
+                          {label}
+                          <textarea
+                            className="diagram-source"
+                            value={d[key]}
+                            placeholder={placeholder}
+                            onChange={(e) => updateDecision(i, { [key]: e.target.value })}
+                          />
+                        </label>
+                      ))}
+                    </fieldset>
+                  ))}
+                </details>
               </div>
             )}
           </div>
@@ -220,6 +227,16 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
 
 const labels = { context: "Context", goals: "Goals", nonGoals: "Non-Goals" };
 function DesignDocument({ content: c }: { content: DesignContent }) {
+  const diagrams = c.decisions.flatMap((decision, index) =>
+    diagramFields
+      .filter(({ key }) => decision[key].trim())
+      .map(({ key, label }) => ({
+        id: `${index}-${key}`,
+        title: decision.title,
+        label,
+        source: decision[key],
+      })),
+  );
   return (
     <>
       {c.context && (
@@ -252,18 +269,6 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
                 <h3>{d.title}</h3>
               </header>
               <p className="design-prose">{d.reason}</p>
-              {diagramFields
-                .filter(({ key }) => d[key].trim())
-                .map(({ key, label }) => (
-                  <details className="design-extras" key={key}>
-                    <summary>{label}</summary>
-                    <figure className="design-figure">
-                      <Suspense fallback="Loading diagram…">
-                        <Diagram source={d[key]} key={d[key]} />
-                      </Suspense>
-                    </figure>
-                  </details>
-                ))}
             </article>
           ))}
         </div>
@@ -279,6 +284,23 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
           <summary>Supporting notes</summary>
           <p className="design-prose">{c.notes}</p>
         </details>
+      )}
+      {diagrams.length > 0 && (
+        <section className="spec-section">
+          <h2>Diagrams</h2>
+          {diagrams.map(({ id, title, label, source }) => (
+            <details className="design-extras" key={id}>
+              <summary>
+                {label} · {title}
+              </summary>
+              <figure className="design-figure">
+                <Suspense fallback="Loading diagram…">
+                  <Diagram key={source} source={source} />
+                </Suspense>
+              </figure>
+            </details>
+          ))}
+        </section>
       )}
     </>
   );
