@@ -42,9 +42,10 @@
 }
 .cycle-rail {
   position: relative;
-  padding: var(--space-16) var(--space-16) 0 0;
+  padding: var(--space-12) var(--space-16) 0 0;
   color: var(--muted);
   font-size: var(--font-size-12);
+  line-height: var(--row-height-sm);
   text-align: right;
   white-space: nowrap;
 }
@@ -60,7 +61,7 @@
 .cycle-rail::after {
   content: "";
   position: absolute;
-  top: calc(var(--space-16) + 4px);
+  top: calc(var(--space-12) + var(--row-height-sm) / 2 - 4px);
   right: -4px;
   box-sizing: border-box;
   width: 8px;
