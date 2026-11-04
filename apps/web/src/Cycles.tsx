@@ -1,8 +1,6 @@
-import { FormEvent, useState } from "react";
 import { Dropdown } from "./Dropdown";
-import { api, apiPath, ModalDialog, RequestError } from "./shared";
+import { apiPath, RequestError } from "./shared";
 import { useResource } from "./useResource";
-import { useRequestScope } from "./useRequestScope";
 
 export type CycleSettings = {
   enabled: boolean;
@@ -113,77 +111,5 @@ export function CycleSelect({
         </>
       )}
     </span>
-  );
-}
-
-export function CycleEditor({
-  cycle,
-  onClose,
-  onSaved,
-}: {
-  cycle: Cycle;
-  onClose: () => void;
-  onSaved: (cycle: Cycle) => void;
-}) {
-  const [name, setName] = useState(cycle.name);
-  const [description, setDescription] = useState(cycle.description);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const requests = useRequestScope(String(cycle.id));
-  async function save(e: FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    await requests.write(
-      "cycle",
-      () => api<Cycle>(apiPath(`/cycles/${cycle.id}`), "PATCH", { name, description }),
-      onSaved,
-      (cause) => {
-        setError(cause.message);
-        setSaving(false);
-      },
-    );
-  }
-  return (
-    <ModalDialog
-      className="issue-dialog"
-      aria-labelledby="edit-cycle-title"
-      restoreFocus
-      onClose={() => {
-        if (!saving) onClose();
-      }}
-    >
-      <form onSubmit={save}>
-        <header>
-          <h2 id="edit-cycle-title">Edit cycle</h2>
-        </header>
-        <label>
-          Name
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={saving}
-            placeholder={`Cycle ${cycle.number}`}
-          />
-        </label>
-        <label>
-          Description
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={saving}
-            rows={4}
-          />
-        </label>
-        {error && <RequestError message={error} />}
-        <footer>
-          <button type="button" className="button" disabled={saving} onClick={onClose}>
-            Cancel
-          </button>
-          <button className="button primary" disabled={saving}>
-            Save changes
-          </button>
-        </footer>
-      </form>
-    </ModalDialog>
   );
 }

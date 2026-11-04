@@ -1,13 +1,5 @@
 import { useCapabilities } from "./Capabilities";
-import {
-  Cycle,
-  CyclePage,
-  CycleEditor,
-  CycleSelect,
-  cycleDates,
-  cycleName,
-  emptyCycles,
-} from "./Cycles";
+import { Cycle, CyclePage, CycleSelect, cycleName, emptyCycles } from "./Cycles";
 import "./cycles.css";
 import { useMemo, useState } from "react";
 import { NewIssueDialog } from "./Dialogs";
@@ -73,7 +65,6 @@ export default function IssuesPage({
   const [projectTab, setProjectTab] = useState<"overview" | "issues">("overview");
   const [savedIssue, setSavedIssue] = useState<IssueSummary | null>(null);
   const [cycleFilter, setCycleFilter] = useState<number | "">("");
-  const [editingCycle, setEditingCycle] = useState(false);
   const cycle = useResource<Cycle | null>(
     route.kind === "cycle" ? apiPath(`/cycles/${route.id}`) : null,
     null,
@@ -316,30 +307,6 @@ export default function IssuesPage({
         />
       )}
 
-      {cycle.data && !scopeError && (
-        <div className="cycle-overview">
-          <NavLink to={pagePath(`/team/${encodeURIComponent(cycle.data.team)}/cycles`)}>
-            All cycles
-          </NavLink>
-          <p>
-            {cycleDates(cycle.data)} · {cycle.data.timezone}
-          </p>
-          <p>
-            {cycle.data.state} · {cycle.data.done} / {cycle.data.total} done · {cycle.data.canceled}{" "}
-            canceled · {cycle.data.rolled_over} carried over
-          </p>
-          {cycle.data.description && <p>{cycle.data.description}</p>}
-          {cycle.data.state === "completed" && (
-            <p>
-              Counts are a completion snapshot. The issues below reflect their current cycle
-              assignment and status.
-            </p>
-          )}
-          <button className="button" onClick={() => setEditingCycle(true)}>
-            Edit cycle
-          </button>
-        </div>
-      )}
       {capabilities.cycles && route.kind !== "cycle" && team && (
         <label className="cycle-filter">
           Cycle{" "}
@@ -354,16 +321,6 @@ export default function IssuesPage({
             }}
           />
         </label>
-      )}
-      {editingCycle && cycle.data && (
-        <CycleEditor
-          cycle={cycle.data}
-          onClose={() => setEditingCycle(false)}
-          onSaved={(updated) => {
-            cycle.update(() => updated);
-            setEditingCycle(false);
-          }}
-        />
       )}
       {showOverview && activeProject && (
         <ProjectOverview
