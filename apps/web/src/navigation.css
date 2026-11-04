@@ -65,6 +65,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.nav-count {
+  flex: none;
+  color: var(--sidebar-muted-color);
+  font-size: var(--sidebar-caption-size);
+}
 .sidebar-label {
   margin: var(--sidebar-label-space) var(--sidebar-inset) var(--sidebar-label-gap);
   color: var(--sidebar-muted-color);

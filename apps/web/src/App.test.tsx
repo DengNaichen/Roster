@@ -66,7 +66,9 @@ it("loads settings independently of project and label catalogs", async () => {
   window.history.replaceState(null, "", "/default/settings");
   render(<App />);
   await screen.findByRole("heading", { name: "Fixture team" });
-  expect(calls.some((path) => /projects|labels|issues/.test(path))).toBe(false);
+  // The sidebar counts a team's Triage on its own; nothing else may load catalogs.
+  const catalogCalls = calls.filter((path) => /projects|labels|issues/.test(path));
+  expect(catalogCalls.every((path) => /\/issues\?.*status=triage/.test(path))).toBe(true);
 });
 
 it("keeps the shell mounted, resets page state, and searches without reloading catalogs", async () => {
@@ -100,4 +102,36 @@ it("keeps the shell mounted, resets page state, and searches without reloading c
   expect(calls.filter((path) => path === "/auth/session")).toHaveLength(0);
   expect(calls.filter((path) => path.endsWith("/teams"))).toHaveLength(1);
   expect(calls.filter((path) => path === "/api/workspaces")).toHaveLength(1);
+});
+it("keeps Triage in its own team inbox and out of the issue list", async () => {
+  const triaged = {
+    ...fixtureIssue,
+    identifier: "AL-2",
+    title: "Needs a decision",
+    status: "triage",
+  };
+  const planned = { ...fixtureIssue, identifier: "AL-3", title: "Planned work", status: "todo" };
+  const original = window.fetch;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url, options) => {
+      const path = String(url);
+      if (path.includes("/issues?")) {
+        const items = path.includes("status=triage") ? [triaged] : [triaged, planned];
+        return Promise.resolve(json({ issues: items }));
+      }
+      return original(url, options);
+    }),
+  );
+  window.history.replaceState(null, "", "/default/team/AL/triage");
+  const inbox = render(<App />);
+  await screen.findByText("Needs a decision");
+  expect(screen.getByText("Fixture team / Triage")).toBeTruthy();
+  expect(screen.queryByText("Planned work")).toBeNull();
+  expect((await screen.findByRole("link", { name: /Triage/ })).textContent).toContain("1");
+  inbox.unmount();
+  window.history.replaceState(null, "", "/default/team/AL/issues");
+  render(<App />);
+  await screen.findByText("Planned work");
+  expect(screen.queryByText("Needs a decision")).toBeNull();
 });

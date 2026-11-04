@@ -27,6 +27,7 @@ export function IssueFilters({
   membershipEnabled,
   filter,
   setFilter,
+  statusLocked = false,
   team,
   teams,
   setTeam,
@@ -54,6 +55,7 @@ export function IssueFilters({
   membershipEnabled: boolean;
   filter: Status | "all";
   setFilter: (status: Status | "all") => void;
+  statusLocked?: boolean;
   team: string;
   teams: Team[];
   setTeam: (team: string) => void;
@@ -83,13 +85,15 @@ export function IssueFilters({
   const hasLabels = labelFilter.mode === "unlabeled" || labelCount > 0;
   const priorityLabel = priorities.find((item) => item.value === priority)?.label;
   const activeCount =
-    Number(filter !== "all") +
+    Number(!statusLocked && filter !== "all") +
     Number(Boolean(team)) +
     Number(Boolean(type)) +
     Number(priority !== "") +
     Number(hasLabels) +
     Number(Boolean(assignee));
-  const statusColumn = columns.find((column) => column.status === filter);
+  const statusColumn = statusLocked
+    ? undefined
+    : columns.find((column) => column.status === filter);
   return (
     <div className={`issue-toolbar${layout === "spec" ? " issue-toolbar-spec" : ""}`}>
       <div className="chips toolbar-filters">
@@ -231,23 +235,25 @@ export function IssueFilters({
               }}
             >
               <div className="toolbar-popover-heading">Filter issues</div>
-              <label className="toolbar-field">
-                Status
-                <Dropdown
-                  variant="block"
-                  aria-label="Filter by status"
-                  value={filter}
-                  onChange={(next) => setFilter(next as Status | "all")}
-                  options={[
-                    { value: "all", label: "All statuses" },
-                    ...columns.map((column) => ({
-                      value: column.status,
-                      label: column.label,
-                      icon: <StatusIcon status={column.status} />,
-                    })),
-                  ]}
-                />
-              </label>
+              {!statusLocked && (
+                <label className="toolbar-field">
+                  Status
+                  <Dropdown
+                    variant="block"
+                    aria-label="Filter by status"
+                    value={filter}
+                    onChange={(next) => setFilter(next as Status | "all")}
+                    options={[
+                      { value: "all", label: "All statuses" },
+                      ...columns.map((column) => ({
+                        value: column.status,
+                        label: column.label,
+                        icon: <StatusIcon status={column.status} />,
+                      })),
+                    ]}
+                  />
+                </label>
+              )}
               {teams.length > 0 && (
                 <label className="toolbar-field">
                   Team

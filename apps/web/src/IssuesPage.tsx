@@ -1,14 +1,7 @@
 import { useCapabilities } from "./Capabilities";
-import {
-  Cycle,
-  CyclePage,
-  CycleEditor,
-  CycleSelect,
-  cycleDates,
-  cycleName,
-  emptyCycles,
-} from "./Cycles";
+import { Cycle, CyclePage, cycleName, emptyCycles } from "./Cycles";
 import "./cycles.css";
+import { Orbit } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NewIssueDialog } from "./Dialogs";
 import { EmojiPicker, EntityEmoji } from "./EmojiPicker";
@@ -22,6 +15,8 @@ import {
   api,
   apiPath,
   columns,
+  columnsFor,
+  triageChanged,
   IssueSummary,
   NavLink,
   pagePath,
@@ -36,7 +31,7 @@ import {
 import { useIssues } from "./useIssues";
 import { useResource } from "./useResource";
 
-type IssueRoute = Extract<WorkspaceRoute, { kind: "issues" | "project" | "cycle" }>;
+type IssueRoute = Extract<WorkspaceRoute, { kind: "issues" | "triage" | "project" | "cycle" }>;
 export default function IssuesPage({
   route,
   teams,
@@ -62,7 +57,10 @@ export default function IssuesPage({
   const [selected, setSelected] = useState<string[]>([]);
   const [batchLabels, setBatchLabels] = useState(false);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState<Status | "all">("all");
+  const triage = route.kind === "triage";
+  const [chosenFilter, setFilter] = useState<Status | "all">("all");
+  // The Triage inbox is a fixed view of the triage status.
+  const filter: Status | "all" = triage ? "triage" : chosenFilter;
   const [teamFilter, setTeamFilter] = useState("");
   const [priority, setPriority] = useState<Priority | "">("");
   const [type, setType] = useState("");
@@ -72,8 +70,6 @@ export default function IssuesPage({
   const [projectDialog, setProjectDialog] = useState(false);
   const [projectTab, setProjectTab] = useState<"overview" | "issues">("overview");
   const [savedIssue, setSavedIssue] = useState<IssueSummary | null>(null);
-  const [cycleFilter, setCycleFilter] = useState<number | "">("");
-  const [editingCycle, setEditingCycle] = useState(false);
   const cycle = useResource<Cycle | null>(
     route.kind === "cycle" ? apiPath(`/cycles/${route.id}`) : null,
     null,
@@ -83,7 +79,8 @@ export default function IssuesPage({
     emptyCycles,
   );
   const [creating, setCreating] = useState(false);
-  const scopeTeam = route.kind === "issues" || route.kind === "cycle" ? route.team : "";
+  const scopeTeam =
+    route.kind === "issues" || route.kind === "triage" || route.kind === "cycle" ? route.team : "";
   const team = scopeTeam || teamFilter;
   const project = useResource<Project | null>(
     route.kind === "project" ? apiPath(`/projects/by-id/${route.id}`) : null,
@@ -105,7 +102,7 @@ export default function IssuesPage({
     writeLabels,
   } = useIssues(
     {
-      cycleID: route.kind === "cycle" ? route.id : cycleFilter === "" ? undefined : cycleFilter,
+      cycleID: route.kind === "cycle" ? route.id : undefined,
       projectID: route.kind === "project" ? route.id : undefined,
       team,
       type,
@@ -137,7 +134,10 @@ export default function IssuesPage({
     [issues, sort],
   );
 
-  const visibleColumns = columns.filter((column) => filter === "all" || column.status === filter);
+  // Triage lives in its own inbox, so the other lists leave it out unless asked for.
+  const visibleColumns = columnsFor(view).filter((column) =>
+    filter === "all" ? column.status !== "triage" : column.status === filter,
+  );
   // Listing every status without a search starts with Done and Canceled collapsed; a header click overrides the default until filters change.
   const defaultCollapsed = (status: Status) =>
     filter === "all" && !query && (status === "done" || status === "canceled");
@@ -147,7 +147,9 @@ export default function IssuesPage({
   const heading =
     (cycle.data ? cycleName(cycle.data) : "") ||
     activeProject?.name ||
-    (scopeTeam ? `${activeTeam?.name ?? scopeTeam} / Issues` : "All issues");
+    (scopeTeam
+      ? `${activeTeam?.name ?? scopeTeam} / ${triage ? "Triage" : "Issues"}`
+      : "All issues");
   const scopeError =
     cycle.error ||
     (cycle.data && route.kind === "cycle" && cycle.data.team !== route.team
@@ -192,7 +194,6 @@ export default function IssuesPage({
 
   function changeTeamFilter(value: string) {
     setTeamFilter(value);
-    setCycleFilter("");
     setCollapsed({});
     setSelected([]);
   }
@@ -204,10 +205,12 @@ export default function IssuesPage({
 
   async function moveIssue(identifier: string, status: Status) {
     await moveIssueRequest(identifier, status);
+    window.dispatchEvent(new Event(triageChanged));
     await cycle.reload();
   }
   async function addIssue(issue: IssueSummary) {
     setSavedIssue(issue);
+    window.dispatchEvent(new Event(triageChanged));
     await loadIssues();
     await cycle.reload();
     setCollapsed((current) => ({ ...current, [issue.status]: false }));
@@ -234,22 +237,39 @@ export default function IssuesPage({
             <span className="separator">›</span>
           </>
         )}
-        {activeProject ? (
-          <EmojiPicker
-            value={activeProject.emoji}
-            label={`Change emoji for project ${activeProject.name}`}
-            onChange={async (emoji) => {
-              const updated = await api<Project>(
-                apiPath(`/projects/by-id/${activeProject.id}`),
-                "PATCH",
-                { emoji },
-              );
-              project.update(() => updated);
-            }}
-          />
-        ) : activeTeam ? (
-          <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />
-        ) : null}
+        {route.kind === "cycle" ? (
+          <>
+            {activeTeam && <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />}
+            <NavLink to={pagePath(`/team/${encodeURIComponent(route.team)}/issues`)}>
+              {activeTeam?.name ?? route.team}
+            </NavLink>
+            <span className="separator">›</span>
+            <NavLink to={pagePath(`/team/${encodeURIComponent(route.team)}/cycles`)}>
+              Cycles
+            </NavLink>
+            <span className="separator">›</span>
+            <Orbit className="icon cycle-crumb-icon" aria-hidden="true" />
+          </>
+        ) : (
+          <>
+            {activeProject ? (
+              <EmojiPicker
+                value={activeProject.emoji}
+                label={`Change emoji for project ${activeProject.name}`}
+                onChange={async (emoji) => {
+                  const updated = await api<Project>(
+                    apiPath(`/projects/by-id/${activeProject.id}`),
+                    "PATCH",
+                    { emoji },
+                  );
+                  project.update(() => updated);
+                }}
+              />
+            ) : activeTeam ? (
+              <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />
+            ) : null}
+          </>
+        )}
         <span>{heading}</span>
       </PageHeader>
       {activeProject && !scopeError && (
@@ -283,6 +303,7 @@ export default function IssuesPage({
           membershipEnabled={teams.some((item) => item.membership_enabled)}
           filter={filter}
           setFilter={changeStatusFilter}
+          statusLocked={triage}
           team={teamFilter}
           teams={
             route.kind === "project" && activeProject
@@ -316,55 +337,6 @@ export default function IssuesPage({
         />
       )}
 
-      {cycle.data && !scopeError && (
-        <div className="cycle-overview">
-          <NavLink to={pagePath(`/team/${encodeURIComponent(cycle.data.team)}/cycles`)}>
-            All cycles
-          </NavLink>
-          <p>
-            {cycleDates(cycle.data)} · {cycle.data.timezone}
-          </p>
-          <p>
-            {cycle.data.state} · {cycle.data.done} / {cycle.data.total} done · {cycle.data.canceled}{" "}
-            canceled · {cycle.data.rolled_over} carried over
-          </p>
-          {cycle.data.description && <p>{cycle.data.description}</p>}
-          {cycle.data.state === "completed" && (
-            <p>
-              Counts are a completion snapshot. The issues below reflect their current cycle
-              assignment and status.
-            </p>
-          )}
-          <button className="button" onClick={() => setEditingCycle(true)}>
-            Edit cycle
-          </button>
-        </div>
-      )}
-      {capabilities.cycles && route.kind !== "cycle" && team && (
-        <label className="cycle-filter">
-          Cycle{" "}
-          <CycleSelect
-            key={team}
-            team={team}
-            value={cycleFilter}
-            filter
-            onChange={(id) => {
-              setCycleFilter(id);
-              setSelected([]);
-            }}
-          />
-        </label>
-      )}
-      {editingCycle && cycle.data && (
-        <CycleEditor
-          cycle={cycle.data}
-          onClose={() => setEditingCycle(false)}
-          onSaved={(updated) => {
-            cycle.update(() => updated);
-            setEditingCycle(false);
-          }}
-        />
-      )}
       {showOverview && activeProject && (
         <ProjectOverview
           project={activeProject}

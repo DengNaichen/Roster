@@ -176,7 +176,10 @@ function WorkspaceContent() {
                 />
                 <NavLink to={pagePath("/")}>Back to all issues</NavLink>
               </div>
-            ) : route.kind === "issues" || route.kind === "project" || route.kind === "cycle" ? (
+            ) : route.kind === "issues" ||
+              route.kind === "triage" ||
+              route.kind === "project" ||
+              route.kind === "cycle" ? (
               <IssuesPage
                 route={route}
                 teams={teams.data.teams}

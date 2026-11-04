@@ -287,19 +287,55 @@ Deno.test({
       assert(page.cycles.every((c) => c.completed_at));
       assert((await s.getIssue(owner, w.slug, planned.identifier)).cycle_id === null);
       await rejects(
-        () => s.configureCycles(owner, w.slug, 'AA', { ...cfg, start_date: '2026-03-24' }),
+        () => s.configureCycles(owner, w.slug, 'AA', { ...cfg, start_date: '2026-03-23' }),
         'conflict',
       );
       page = await s.configureCycles(owner, w.slug, 'AA', {
         ...cfg,
         timezone: 'UTC',
-        start_date: '2026-03-25',
+        start_date: '2026-03-30',
       });
       assert(
         page.cycles.some((c) => c.timezone === 'America/Los_Angeles') &&
           page.cycles.some((c) => c.timezone === 'UTC'),
         'Schedule changes must preserve historical timezones',
       );
+      // A team without a configuration row starts on the default weekly schedule (this Monday, UTC).
+      clock = new Date('2026-04-01T12:00:00Z');
+      const utc = { ...cfg, timezone: 'UTC' };
+      await s.createTeam(owner, w.slug, { key: 'CC', name: 'Default' });
+      const auto = await s.listCycles(owner, w.slug, 'CC');
+      assert(
+        auto.settings.enabled && auto.settings.start_date === '2026-03-30' &&
+          auto.settings.duration_weeks === 1 && auto.settings.timezone === 'UTC',
+        'New teams default to weekly cycles from this Monday',
+      );
+      assert(auto.cycles.length === 3, 'The current cycle and two upcoming ones are generated');
+      assert(
+        auto.cycles.find((c) => c.state === 'current')?.starts_at === '2026-03-30T00:00:00.000Z',
+      );
+      // An explicit opt-out is kept and never re-enabled by reading.
+      await s.configureCycles(owner, w.slug, 'CC', {
+        ...utc,
+        start_date: '2026-03-30',
+        enabled: false,
+      });
+      assert(!(await s.listCycles(owner, w.slug, 'CC')).settings.enabled);
+      // Schedules begin on a Monday, and this week's Monday is allowed mid-week.
+      await s.createTeam(owner, w.slug, { key: 'DD', name: 'Midweek' });
+      await rejects(
+        () => s.configureCycles(owner, w.slug, 'DD', { ...utc, start_date: '2026-04-01' }),
+        'invalid_input',
+      );
+      await rejects(
+        () => s.configureCycles(owner, w.slug, 'DD', { ...utc, start_date: '2026-03-23' }),
+        'invalid_input',
+      );
+      const midweek = await s.configureCycles(owner, w.slug, 'DD', {
+        ...utc,
+        start_date: '2026-03-30',
+      });
+      assert(midweek.cycles.some((c) => c.state === 'current'));
     } finally {
       await runtime.pool.end();
       if (workspaceId) await cleanupWorkspace(admin, workspaceId);

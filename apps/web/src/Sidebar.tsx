@@ -3,6 +3,7 @@ import {
   Orbit,
   DraftingCompass,
   Box,
+  Inbox,
   ChevronDown,
   ChevronRight,
   ListTodo,
@@ -10,11 +11,12 @@ import {
   Plus,
   Telescope,
 } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
 import { Session } from "./Session";
 import { WorkspaceMenu } from "./WorkspaceMenu";
-import { NavLink, pagePath, Team, WorkspaceRoute } from "./shared";
+import { apiPath, NavLink, pagePath, Team, triageChanged, WorkspaceRoute } from "./shared";
+import { useResource } from "./useResource";
 
 export function Sidebar({
   route,
@@ -53,17 +55,6 @@ export function Sidebar({
         aria-label="Workspace navigation"
       >
         <div className="sidebar-label">Workspace</div>
-        <NavLink className={`nav-item ${active("issues") ? "active" : ""}`} to={pagePath("/")}>
-          <ListTodo className="icon" />
-          <span className="nav-label">All issues</span>
-        </NavLink>
-        <NavLink
-          className={`nav-item ${route.kind === "specs" || route.kind === "spec" ? "active" : ""}`}
-          to={pagePath("/specs")}
-        >
-          <DraftingCompass className="icon" />
-          <span className="nav-label">Specs</span>
-        </NavLink>
         <NavLink
           unavailable={!capabilities.projects}
           className={`nav-item ${active("projects") ? "active" : ""}`}
@@ -102,7 +93,7 @@ export function Sidebar({
               ("team" in route && route.team === item.key),
           )
           .map((item) => (
-            <TeamNavigation key={item.key} team={item} route={route} />
+            <TeamNavigation key={item.key} team={item} route={route} visit={visit} />
           ))}
       </nav>
       <Session />
@@ -110,11 +101,42 @@ export function Sidebar({
   );
 }
 
-function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) {
+// Issues waiting for a decision; refreshed on navigation and when issues move in or out.
+function useTriageCount(team: string, visit: number) {
+  const resource = useResource<{ issues: unknown[] }>(
+    apiPath(`/issues?team=${encodeURIComponent(team)}&status=triage&limit=-1`),
+    { issues: [] },
+  );
+  const { reload } = resource;
+  const seen = useRef(visit);
+  useEffect(() => {
+    if (seen.current === visit) return;
+    seen.current = visit;
+    void reload();
+  }, [visit, reload]);
+  useEffect(() => {
+    const refresh = () => void reload();
+    window.addEventListener(triageChanged, refresh);
+    return () => window.removeEventListener(triageChanged, refresh);
+  }, [reload]);
+  return resource.error ? 0 : resource.data.issues.length;
+}
+
+function TeamNavigation({
+  team,
+  route,
+  visit,
+}: {
+  team: Team;
+  route: WorkspaceRoute;
+  visit: number;
+}) {
+  const triageCount = useTriageCount(team.key, visit);
   const capabilities = useCapabilities();
   const [expanded, setExpanded] = useState(true);
   const destinationsId = useId();
-  const active = (kind: "issues" | "projects") => route.kind === kind && route.team === team.key;
+  const active = (kind: "issues" | "triage" | "projects") =>
+    route.kind === kind && route.team === team.key;
   return (
     <section className="team-navigation" aria-label={`${team.name} navigation`}>
       <button
@@ -135,6 +157,14 @@ function TeamNavigation({ team, route }: { team: Team; route: WorkspaceRoute }) 
         )}
       </button>
       <div id={destinationsId} className="team-destinations" hidden={!expanded}>
+        <NavLink
+          className={`nav-item team-destination ${active("triage") ? "active" : ""}`}
+          to={pagePath(`/team/${encodeURIComponent(team.key)}/triage`)}
+        >
+          <Inbox className="icon" />
+          <span className="nav-label">Triage</span>
+          {triageCount > 0 && <small className="nav-count">{triageCount}</small>}
+        </NavLink>
         <NavLink
           className={`nav-item team-destination ${active("issues") ? "active" : ""}`}
           to={pagePath(`/team/${encodeURIComponent(team.key)}/issues`)}
