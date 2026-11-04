@@ -178,6 +178,7 @@ export function IssueViews({
             <button
               type="button"
               className="group-header"
+              data-status={column.status}
               aria-expanded={!isCollapsed(column.status)}
               aria-controls={`rows-${column.status}`}
               onClick={(event) => {
