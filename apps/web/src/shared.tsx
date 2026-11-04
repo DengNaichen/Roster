@@ -23,6 +23,9 @@ export const columns = [
   { status: "canceled", label: "Canceled", hint: "No longer planned" },
 ] as const;
 
+/** Fired after issues move in or out of Triage so the sidebar count can refresh. */
+export const triageChanged = "triage-changed";
+
 // Lists lead with the work closest to done and end with the closed groups.
 // Pickers, filters and boards keep the workflow order of `columns`.
 const listOrder: Status[] = [
@@ -187,6 +190,7 @@ export type WorkspaceRoute =
   | { kind: "initiatives" }
   | { kind: "initiative"; id: number }
   | { kind: "issues"; team: string }
+  | { kind: "triage"; team: string }
   | { kind: "projects"; team: string }
   | { kind: "project"; id: number }
   | { kind: "issue"; identifier: string }
@@ -207,11 +211,11 @@ export function workspaceRoute(path: string): WorkspaceRoute {
     return { kind: "initiative", id: Number(initiative[1]) };
   if (route === "/settings") return { kind: "settings" };
   if (route === "/labels") return { kind: "labels" };
-  const team = route.match(/^\/team\/([^/]+)\/(issues|projects|cycles|specs)$/);
+  const team = route.match(/^\/team\/([^/]+)\/(issues|triage|projects|cycles|specs)$/);
   if (team) {
     try {
       return {
-        kind: team[2] as "issues" | "projects" | "cycles" | "specs",
+        kind: team[2] as "issues" | "triage" | "projects" | "cycles" | "specs",
         team: decodeURIComponent(team[1]),
       };
     } catch {
