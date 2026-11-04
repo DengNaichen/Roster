@@ -181,3 +181,18 @@
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--priority-urgent) 6%, var(--surface-card));
 }
+
+.design-items {
+  list-style: decimal outside;
+  padding-inline-start: 2.25ch;
+}
+.design-items li {
+  padding-inline-start: var(--space-4);
+}
+.design-items li + li {
+  margin-top: var(--space-8);
+}
+.design-items li::marker {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

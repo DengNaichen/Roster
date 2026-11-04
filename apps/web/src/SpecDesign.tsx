@@ -230,6 +230,22 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
 }
 
 const labels = { context: "Context", goals: "Goals", nonGoals: "Non-Goals" };
+function DesignItems({ text }: { text: string }) {
+  const items = text
+    .trim()
+    .split(/\r?\n(?:[^\S\r\n]*\r?\n)+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (items.length < 2) return <p className="design-prose">{text}</p>;
+  return (
+    <ol className="design-prose design-items">
+      {items.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ol>
+  );
+}
+
 function DesignDocument({ content: c }: { content: DesignContent }) {
   const diagrams = c.decisions.flatMap((decision, index) =>
     diagramFields
@@ -258,7 +274,7 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
                 c[k] && (
                   <div key={k} className={k === "goals" ? "design-in-scope" : undefined}>
                     <h3 className="spec-subheading">{labels[k]}</h3>
-                    <p className="design-prose">{c[k]}</p>
+                    <DesignItems text={c[k]} />
                   </div>
                 ),
             )}
@@ -282,7 +298,7 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
       {c.risks && (
         <section className="spec-section design-risks">
           <h2>Risks / Trade-offs</h2>
-          <p className="design-prose">{c.risks}</p>
+          <DesignItems text={c.risks} />
         </section>
       )}
       {c.notes && (
