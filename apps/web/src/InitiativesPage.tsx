@@ -1,4 +1,4 @@
-import { Target } from "lucide-react";
+import { Telescope } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PageHeader } from "./PageHeader";
 import { ProjectDialog } from "./ProjectManagement";
@@ -61,7 +61,7 @@ function InitiativeDirectory() {
         <p className="empty">Loading initiatives…</p>
       ) : visible.length === 0 ? (
         <div className="project-empty">
-          <Target className="icon" aria-hidden="true" />
+          <Telescope className="icon" aria-hidden="true" />
           <p>No {archived ? "archived" : "active"} initiatives</p>
           <small>
             {archived
@@ -83,7 +83,7 @@ function InitiativeDirectory() {
                 to={pagePath(`/initiative/${item.id}`)}
               >
                 <span className="project-icon">
-                  <Target className="icon" aria-hidden="true" />
+                  <Telescope className="icon" aria-hidden="true" />
                 </span>
                 <span className="project-text">
                   <span className="project-title" title={item.name}>
