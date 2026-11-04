@@ -143,6 +143,8 @@
   --list-control-size: var(--space-24);
   --opacity-disabled: 0.5;
   --duration-fast: 0.12s;
+  --duration-collapse: 0.2s;
+  --ease-collapse: cubic-bezier(0.4, 0, 0.2, 1);
   /* Component dimensions are independent from the spacing scale. */
   --badge-line-height: 18px;
   --filter-height: 26px;
