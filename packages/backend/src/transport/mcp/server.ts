@@ -141,6 +141,11 @@ const resultSchemas: Record<string, z.ZodType> = {
   }),
   list_specs: z.array(specSummaryOutput),
   get_spec: specOutput,
+  get_spec_design: z.object({
+    identifier: specIdentifierOutput,
+    design: specs.storedDesignSchema.nullable(),
+  }),
+  set_spec_design: z.object({ identifier: specIdentifierOutput, design: specs.storedDesignSchema }),
   create_spec: specOutput,
   update_spec: specOutput,
   list_spec_revisions: z.array(specRevisionOutput),
@@ -570,6 +575,20 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     specs.listSpecsSchema.shape,
     true,
     (i) => service.listSpecs(ctx, workspace, i),
+  );
+  tool(
+    'get_spec_design',
+    'Read the design attached to a visible spec. A null design means none has been written.',
+    specs.getSpecSchema.shape,
+    true,
+    (i) => service.getSpecDesign(ctx, workspace, i.identifier),
+  );
+  tool(
+    'set_spec_design',
+    'Create or replace the full design. Use base_revision 0 to create or the current design revision to update. spec_revision identifies the source spec revision. Separate scope and risk items with blank lines. Diagram sources are optional Mermaid sequenceDiagram and stateDiagram-v2.',
+    specs.setSpecDesignSchema.shape,
+    false,
+    (i) => service.setSpecDesign(ctx, workspace, i),
   );
   tool(
     'get_spec',

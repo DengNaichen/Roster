@@ -2,6 +2,7 @@ import { createUnitOfWork } from '../../packages/backend/src/platform/database/s
 // Local preview only: deliberately not imported by any deployed function.
 import { createDatabase } from '../../packages/backend/src/platform/database/client.ts';
 import { createService } from '../../packages/backend/src/service.ts';
+import { createMcpFetch } from '../../packages/backend/src/transport/mcp/server.ts';
 import { createHttpApp } from '../../packages/backend/src/transport/http/app.ts';
 import type { IssueStatus, RequestContext } from '../../packages/contracts/mod.ts';
 import { advanceAllCycles } from '../../packages/backend/src/modules/cycles/index.ts';
@@ -96,6 +97,14 @@ if (!(await service.listWorkspaces(ctx)).some((w) => w.slug === slug)) {
   });
 }
 const app = createHttpApp({ service, verify: async () => ctx, allowedOrigins: origins });
+// The loopback preview identity is for local clients only. Browser origins cannot call MCP.
+const localMcp = createMcpFetch({
+  service,
+  verify: async () => ctx,
+  allowedOrigins: [],
+  publicUrl: `http://127.0.0.1:${port}`,
+  authorizationServer: `http://127.0.0.1:${port}`,
+});
 const server = Deno.serve({ hostname: '127.0.0.1', port }, (request) => {
   const url = new URL(request.url);
   const origin = request.headers.get('origin');
@@ -105,6 +114,12 @@ const server = Deno.serve({ hostname: '127.0.0.1', port }, (request) => {
   if (origin && !origins.includes(origin)) return new Response('Origin denied', { status: 403 });
   if (request.headers.get('sec-fetch-site') === 'cross-site') {
     return new Response('Origin denied', { status: 403 });
+  }
+  if (url.pathname === `/w/${slug}/mcp`) {
+    if (origin || request.headers.has('sec-fetch-site')) {
+      return new Response('Local MCP clients only', { status: 403 });
+    }
+    return localMcp(request);
   }
   return app.fetch(request);
 });

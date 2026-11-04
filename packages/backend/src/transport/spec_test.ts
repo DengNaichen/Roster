@@ -172,6 +172,29 @@ export async function exerciseSpecTransports(
   assert(mcpList.some((spec) => spec.identifier === mcpCreated.identifier));
   const mcpCurrent = await call<Spec>('get_spec', { identifier: mcpCreated.identifier });
   assert(mcpCurrent.content.title === mcpContent.title);
+  const designRef = { identifier: mcpCreated.identifier };
+  const designInput = {
+    ...designRef,
+    base_revision: 0,
+    spec_revision: 1,
+    content: { decisions: [{ title: 'Keep links independent' }] },
+  };
+  type DesignResponse = {
+    design: { revision: number; content: { decisions: { title: string }[] } } | null;
+  };
+  assert((await call<DesignResponse>('get_spec_design', designRef)).design === null);
+  assert((await call<DesignResponse>('set_spec_design', designInput)).design?.revision === 1);
+  await call('set_spec_design', designInput, 'conflict');
+  const update = { ...designInput, base_revision: 1 };
+  const winners = await Promise.allSettled([
+    call<DesignResponse>('set_spec_design', update),
+    call<DesignResponse>('set_spec_design', update),
+  ]);
+  assert(winners.filter((r) => r.status === 'fulfilled').length === 1);
+  assert((await call<DesignResponse>('get_spec_design', designRef)).design?.revision === 2);
+  const shared = await rest(`/specs/${mcpCreated.identifier}/design`) as DesignResponse;
+  assert(shared.design?.content.decisions[0].title === 'Keep links independent');
+  await rest(`/specs/${mcpCreated.identifier}/design`, 'PUT', designInput, 404);
   const mcpUpdated = await call<Spec>('update_spec', {
     identifier: mcpCreated.identifier,
     base_revision: 1,

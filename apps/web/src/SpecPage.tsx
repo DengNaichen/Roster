@@ -1,6 +1,8 @@
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import type { Spec, SpecRevision } from "../../../packages/contracts/spec";
+import { SpecDesign } from "./SpecDesign";
+import { useSession } from "./integration/auth";
 import { PageHeader } from "./PageHeader";
 import { apiPath, NavLink, pagePath, RequestError, type IssueSummary } from "./shared";
 import { useResource } from "./useResource";
@@ -13,9 +15,18 @@ import "./spec-issues.css";
 export default function SpecPage({ id }: { id: string }) {
   const resource = useResource<Spec | null>(apiPath(`/specs/${encodeURIComponent(id)}`), null);
   const [editing, setEditing] = useState(false);
-  const [tab, setTab] = useState(() =>
-    new URLSearchParams(window.location.search).get("section") === "issues" ? "issues" : "overview",
+  const section = new URLSearchParams(window.location.search).get("section");
+  const [tab, selectTab] = useState<string>(
+    section === "design" || section === "issues" ? section : "overview",
   );
+  const { identity } = useSession();
+  function setTab(value: string) {
+    const url = new URL(window.location.href);
+    if (value === "overview") url.searchParams.delete("section");
+    else url.searchParams.set("section", value);
+    window.history.replaceState(window.history.state, "", url);
+    selectTab(value);
+  }
   const linkedIssues = useResource<{ issues: IssueSummary[] }>(
     apiPath(`/specs/${encodeURIComponent(id)}/issues?limit=-1`),
     { issues: [] },
@@ -26,6 +37,7 @@ export default function SpecPage({ id }: { id: string }) {
     <div className="segmented" role="tablist" aria-label="Spec sections">
       {[
         ["overview", "Overview"],
+        ["design", "Design"],
         ["issues", `Issues · ${issueCount}`],
       ].map(([value, label]) => (
         <button
@@ -46,7 +58,8 @@ export default function SpecPage({ id }: { id: string }) {
       <PageHeader
         className="spec-page-header"
         actions={
-          spec && (
+          spec &&
+          tab !== "design" && (
             <div className="spec-action-row">
               <button className="button" onClick={() => setEditing(true)}>
                 Edit spec
@@ -83,6 +96,12 @@ export default function SpecPage({ id }: { id: string }) {
             onLinksChanged={async () => {
               await Promise.all([linkedIssues.reload(), resource.reload()]);
             }}
+          />
+        ) : tab === "design" ? (
+          <SpecDesign
+            key={apiPath(id) + identity?.subject}
+            spec={spec}
+            storageKey={`roster-design:${identity?.subject}:${apiPath(id)}`}
           />
         ) : (
           <SpecOverview key={`overview-${id}`} spec={spec} />

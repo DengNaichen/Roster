@@ -15,6 +15,14 @@ VITE_LOCAL_PREVIEW=true node scripts/toolchain.mjs --filter @roster/web dev --po
 
 访问 `http://127.0.0.1:5178/roster`。修改保存在该本地数据库，重启不覆盖已有工作区。预览只有一个固定用户，不能用于验证多用户登录或 OAuth；生产构建即使设置 `VITE_LOCAL_PREVIEW=true` 也不会启用免登录。
 
+## Spec Design
+
+Design 页签读取 `GET /api/w/:workspace/specs/:identifier/design`。共享文档使用 Spec 的工作区与团队权限。尚无共享版本时，浏览器可以只读展示此前保存在本机的草稿。
+
+Agent 通过工作区 MCP 调用 `get_spec_design`（参数为 `identifier`），返回的 `design` 为空表示尚未创建。使用 `set_spec_design` 提交完整正文。首次写入传 `base_revision: 0`，后续传读取到的 Design 版本号；遇到冲突时重新读取并整合修改。`spec_revision` 指向这份设计所依据的 Spec 修订。只有 Design 的版本号会随写入递增。
+
+本机免登录预览支持在 API 端口的 `/w/roster/mcp` 接入本地 MCP 客户端，使用预览固定身份，拒绝带浏览器 Origin 或 Fetch Metadata 的请求。部署环境沿用现有 MCP 授权流程。
+
 ## 数据访问
 
 ### 原前端兼容

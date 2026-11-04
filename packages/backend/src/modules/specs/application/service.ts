@@ -6,11 +6,13 @@ import {
   getSpecRevisionSchema,
   listIssueSpecsSchema,
   listSpecsSchema,
+  setSpecDesignSchema,
   type Spec,
   specContentSchema,
   type SpecRevision,
   type SpecRevisionSummary,
   specStoredStatusSchema,
+  storedDesignSchema,
   updateSpecSchema,
 } from '../../../../../contracts/spec.ts';
 import type { Row } from '../../../application/records.ts';
@@ -145,6 +147,37 @@ export function createSpecService(db: UnitOfWork, options: { now?: () => Date } 
         teamId: t ? (t.id) : undefined,
       });
       return result.map(specSummary);
+    },
+    async getSpecDesign(ctx, slug, identifier) {
+      const w = await workspace(db, ctx, slug);
+      const sp = await readSpec(db, ctx, w, identifier);
+      const [row] = await db.specs.getDesign(sp.id);
+      return { identifier, design: row ? storedDesignSchema.parse(row) : null };
+    },
+    async setSpecDesign(ctx, slug, input) {
+      const value = parse(setSpecDesignSchema, input);
+      const content = JSON.stringify(value.content);
+      if (new TextEncoder().encode(content).length > 262144) {
+        fail('invalid_input', 'Design content is larger than 256 KiB');
+      }
+      return db.transaction(async (tx) => {
+        const w = await workspace(tx, ctx, slug, true);
+        const sp = await readSpec(tx, ctx, w, value.identifier);
+        if (value.spec_revision > Number(sp.current_revision)) {
+          fail('invalid_input', 'Unknown spec revision');
+        }
+        await saveIdentity(tx, ctx);
+        const [row] = await tx.specs.saveDesign({
+          specId: sp.id,
+          base: value.base_revision,
+          specRevision: value.spec_revision,
+          content,
+          subject: ctx.identity.subject,
+          now: clock(),
+        });
+        if (!row) fail('conflict', 'Design changed since base_revision; read it again');
+        return { identifier: value.identifier, design: storedDesignSchema.parse(row) };
+      });
     },
     async getSpec(ctx, slug, identifier) {
       const w = await workspace(db, ctx, slug);

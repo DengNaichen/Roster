@@ -454,3 +454,35 @@ it("loads real scoped links beyond 50 rows and persists link/unlink through remo
   expect(await screen.findByText("Existing candidate")).toBeTruthy();
   expect(screen.queryByText("Linked issue 1")).toBeNull();
 });
+it("reads the shared design without exposing edit controls", async () => {
+  history.replaceState(null, "", "/demo/spec/SPEC-42?section=design");
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (path: string) =>
+      json(
+        path.endsWith("/design")
+          ? {
+              identifier: spec.identifier,
+              design: {
+                revision: 2,
+                spec_revision: 1,
+                content: {
+                  context: "Verify handoff",
+                  goals: "",
+                  nonGoals: "",
+                  risks: "",
+                  decisions: [],
+                },
+              },
+            }
+          : path.includes("/issues?")
+            ? { issues: [] }
+            : spec,
+      ),
+    ),
+  );
+  render(<SpecPage id={spec.identifier} />);
+  expect(await screen.findByText("Verify handoff")).toBeTruthy();
+  expect(screen.getByText("Design r2 · Based on spec r1")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /edit design|save design|new design/i })).toBeNull();
+});
