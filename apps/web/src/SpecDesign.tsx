@@ -192,7 +192,10 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
                     />
                   </label>
                 )}
-                <details className="design-extras">
+                <details
+                  className="design-extras"
+                  open={draft.decisions.some((d) => d.sequence.trim() || d.state.trim())}
+                >
                   <summary>Optional diagrams</summary>
                   {draft.decisions.map((d, i) => (
                     <fieldset className="spec-story design-fields" key={i}>
@@ -289,16 +292,16 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
         <section className="spec-section">
           <h2>Diagrams</h2>
           {diagrams.map(({ id, title, label, source }) => (
-            <details className="design-extras" key={id}>
-              <summary>
+            <figure className="design-extras" key={id}>
+              <figcaption className="spec-subheading">
                 {label} · {title}
-              </summary>
-              <figure className="design-figure">
+              </figcaption>
+              <div className="design-figure">
                 <Suspense fallback="Loading diagram…">
                   <Diagram key={source} source={source} />
                 </Suspense>
-              </figure>
-            </details>
+              </div>
+            </figure>
           ))}
         </section>
       )}
