@@ -1,4 +1,5 @@
-import { CalendarRange, Orbit } from "lucide-react";
+import { ReactNode } from "react";
+import { Orbit } from "lucide-react";
 import { PageHeader } from "./PageHeader";
 import { apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 import { useResource } from "./useResource";
@@ -33,31 +34,46 @@ export default function CyclesPage({ team, teams }: { team: string; teams: Team[
         ) : (
           <>
             {!resource.data.settings.enabled && (
-              <div className="cycle-empty">
-                <h2>Build a steady rhythm</h2>
-                <p>
-                  Cycles plan work in repeating periods. Completed history stays available here.
-                </p>
+              <CycleEmpty
+                title="Build a steady rhythm"
+                hint="Cycles plan work in repeating periods. Completed history stays available here."
+              >
                 {canManage && (
                   <NavLink className="button primary" to={pagePath("/settings")}>
                     Set up cycles in Settings
                   </NavLink>
                 )}
-              </div>
+              </CycleEmpty>
             )}
             {resource.data.settings.enabled && cycles.length === 0 && (
-              <div className="project-empty">
-                <CalendarRange className="icon" aria-hidden="true" />
-                <p>No cycles scheduled</p>
-                <small>
-                  Plan a focused set of work. Unfinished committed issues roll into the next cycle.
-                </small>
-              </div>
+              <CycleEmpty
+                title="No cycles scheduled"
+                hint="Plan a focused set of work. Unfinished committed issues roll into the next cycle."
+              />
             )}
             {cycles.length > 0 && <CycleTimeline cycles={cycles} />}
           </>
         )}
       </div>
     </>
+  );
+}
+
+function CycleEmpty({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="cycle-empty">
+      <Orbit className="icon" aria-hidden="true" />
+      <h2>{title}</h2>
+      <p>{hint}</p>
+      {children}
+    </div>
   );
 }
