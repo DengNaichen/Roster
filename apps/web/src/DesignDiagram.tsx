@@ -11,6 +11,24 @@ function isDark() {
   return window.matchMedia(preference).matches;
 }
 
+// Mermaid draws each sequence participant twice. Match both boxes by name.
+function tintNodes(svg: string, colors: string[], surface: string) {
+  const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+  const participants = new Map<string, string>();
+  const nodes = document.querySelectorAll<SVGElement>(
+    "rect.actor[name], g.statediagram-state > rect.label-container",
+  );
+  for (const node of nodes) {
+    const id = node.getAttribute("name") ?? node.parentElement?.id;
+    if (!id) continue;
+    const color = participants.get(id) ?? colors[participants.size % colors.length];
+    participants.set(id, color);
+    if (!node.style.fill) node.style.fill = `color-mix(in srgb, ${color} 17%, ${surface})`;
+    if (!node.style.stroke) node.style.stroke = color;
+  }
+  return new XMLSerializer().serializeToString(document.documentElement);
+}
+
 export default function DesignDiagram({ source }: { source: string }) {
   const dark = useSyncExternalStore(subscribeTheme, isDark);
   const [result, setResult] = useState({ image: "", error: "" });
@@ -43,7 +61,7 @@ export default function DesignDiagram({ source }: { source: string }) {
             actorTextColor: text,
             actorBorder: line,
             actorLineColor: line,
-            signalColor: line,
+            signalColor: token("--link"),
             signalTextColor: text,
             labelBoxBkgColor: node,
             labelBoxBorderColor: line,
@@ -52,7 +70,7 @@ export default function DesignDiagram({ source }: { source: string }) {
             edgeLabelBackground: surface,
             stateBkg: node,
             stateBorder: line,
-            transitionColor: line,
+            transitionColor: token("--link"),
             transitionLabelColor: text,
             stateLabelColor: text,
           },
@@ -65,7 +83,15 @@ export default function DesignDiagram({ source }: { source: string }) {
         const { svg } = await mermaid.render("design-" + crypto.randomUUID(), source);
         if (active)
           setResult({
-            image: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg),
+            image:
+              "data:image/svg+xml;charset=utf-8," +
+              encodeURIComponent(
+                tintNodes(
+                  svg,
+                  [token("--accent"), token("--success"), token("--pr-merged")],
+                  surface,
+                ),
+              ),
             error: "",
           });
       } catch (error) {
