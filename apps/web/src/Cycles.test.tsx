@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { CycleSelect, CycleSettingsDialog, emptyCycles } from "./Cycles";
+import { CycleSelect, emptyCycles } from "./Cycles";
+import { CycleSettingsSection, mondayOf } from "./CycleSettings";
+import CyclesPage from "./CyclesPage";
 import { deferred, json } from "./test/fixtures";
 
 beforeEach(() => {
@@ -41,28 +43,74 @@ it("retries failed cycle reads and keeps the selected value", async () => {
   fireEvent.click(await screen.findByRole("option", { name: "No cycle" }));
   expect(changed).toHaveBeenCalledWith(0);
 });
-it("keeps cycle configuration drafts after a failed save", async () => {
+it("snaps any chosen day to its Monday", () => {
+  expect(mondayOf("2026-11-04")).toBe("2026-11-02");
+  expect(mondayOf("2026-11-02")).toBe("2026-11-02");
+  expect(mondayOf("2026-11-08")).toBe("2026-11-02");
+});
+it("defaults new team cycles to Mondays and one week, and keeps drafts after a failed save", async () => {
   const save = deferred<Response>();
   vi.stubGlobal(
     "fetch",
-    vi.fn(() => save.promise),
+    vi.fn((_url: string, init?: RequestInit) =>
+      init?.method === "PUT" ? save.promise : Promise.resolve(json(emptyCycles)),
+    ),
   );
-  render(
-    <CycleSettingsDialog
-      team="AL"
-      settings={emptyCycles.settings}
-      onClose={vi.fn()}
-      onSaved={vi.fn()}
-    />,
-  );
+  render(<CycleSettingsSection team="AL" canManage />);
+  const start = (await screen.findByLabelText("First Monday")) as HTMLInputElement;
+  expect(new Date(`${start.value}T00:00:00Z`).getUTCDay()).toBe(1);
+  expect((screen.getByLabelText("Weeks per cycle") as HTMLInputElement).value).toBe("1");
+  fireEvent.change(start, { target: { value: "2026-11-04" } });
+  expect(start.value).toBe("2026-11-02");
   fireEvent.change(screen.getByLabelText("Weeks per cycle"), { target: { value: "3" } });
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await act(async () => save.resolve(json({ error: "Offline" }, 500)));
   await screen.findByText("Offline");
   expect((screen.getByLabelText("Weeks per cycle") as HTMLInputElement).value).toBe("3");
-  await waitFor(() =>
-    expect(
-      (screen.getByRole("button", { name: "Save changes" }) as HTMLButtonElement).disabled,
-    ).toBe(false),
+});
+it("shows cycle settings read-only without manage access", async () => {
+  vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(json(emptyCycles))));
+  render(<CycleSettingsSection team="AL" canManage={false} />);
+  expect(((await screen.findByLabelText("First Monday")) as HTMLInputElement).disabled).toBe(true);
+  expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
+});
+it("lists cycles newest first and expands only the current one", async () => {
+  const day = 86_400_000;
+  const cycle = (number: number, state: string, start: number, total: number, done: number) => ({
+    id: number,
+    team: "AL",
+    number,
+    name: "",
+    description: "",
+    timezone: "UTC",
+    starts_at: new Date(Date.now() + start * day).toISOString(),
+    ends_at: new Date(Date.now() + (start + 14) * day).toISOString(),
+    completed_at: state === "completed" ? new Date().toISOString() : null,
+    state,
+    total,
+    done,
+    canceled: 0,
+    rolled_over: total - done,
+  });
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() =>
+      Promise.resolve(
+        json({
+          settings: { ...emptyCycles.settings, enabled: true },
+          cycles: [
+            cycle(1, "completed", -20, 10, 5),
+            cycle(2, "current", -3, 8, 2),
+            cycle(3, "upcoming", 11, 0, 0),
+          ],
+        }),
+      ),
+    ),
   );
+  render(<CyclesPage team="AL" teams={[]} />);
+  const names = (await screen.findAllByRole("heading", { level: 2 })).map((h) => h.textContent);
+  expect(names).toEqual(["Cycle 3", "Cycle 2", "Cycle 1"]);
+  expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+  expect(screen.getByText("50% success")).toBeTruthy();
+  expect(screen.getByText("5 carried over")).toBeTruthy();
 });

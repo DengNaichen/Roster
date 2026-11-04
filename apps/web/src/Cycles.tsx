@@ -33,7 +33,7 @@ export const emptyCycles: CyclePage = {
     enabled: false,
     timezone: "UTC",
     start_date: "",
-    duration_weeks: 2,
+    duration_weeks: 1,
     upcoming_count: 2,
   },
   cycles: [],
@@ -50,6 +50,19 @@ export function cycleDates(cycle: Cycle) {
       year: "numeric",
     });
   return `${format(cycle.starts_at)} – ${format(new Date(new Date(cycle.ends_at).getTime() - 1).toISOString())}`;
+}
+
+export const cycleStart = (cycle: Cycle) =>
+  new Date(cycle.starts_at).toLocaleDateString(undefined, {
+    timeZone: cycle.timezone,
+    month: "short",
+    day: "numeric",
+  });
+export const percent = (part: number, total: number) =>
+  total > 0 ? Math.round((part / total) * 100) : 0;
+export function daysLeft(cycle: Cycle, now = new Date()) {
+  const remaining = new Date(cycle.ends_at).getTime() - now.getTime();
+  return Math.max(0, Math.ceil(remaining / 86_400_000));
 }
 
 export function CycleSelect({
@@ -100,139 +113,6 @@ export function CycleSelect({
         </>
       )}
     </span>
-  );
-}
-
-export function CycleSettingsDialog({
-  team,
-  settings,
-  onClose,
-  onSaved,
-}: {
-  team: string;
-  settings: CycleSettings;
-  onClose: () => void;
-  onSaved: (page: CyclePage) => void;
-}) {
-  const timezone = settings.start_date
-    ? settings.timezone
-    : Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const today = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  const [draft, setDraft] = useState({
-    ...settings,
-    timezone,
-    start_date: settings.enabled ? settings.start_date : today,
-    enabled: settings.enabled || !settings.start_date,
-  });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const requests = useRequestScope(team);
-  async function save(e: FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-    await requests.write(
-      team,
-      () => api<CyclePage>(apiPath(`/teams/${encodeURIComponent(team)}/cycles`), "PUT", draft),
-      onSaved,
-      (cause) => {
-        setError(cause.message);
-        setSaving(false);
-      },
-    );
-  }
-  return (
-    <ModalDialog
-      className="issue-dialog"
-      aria-labelledby="cycle-settings-title"
-      restoreFocus
-      onClose={() => {
-        if (!saving) onClose();
-      }}
-    >
-      <form onSubmit={save}>
-        <header>
-          <h2 id="cycle-settings-title">Cycle settings</h2>
-        </header>
-        <label className="cycle-toggle">
-          <input
-            type="checkbox"
-            checked={draft.enabled}
-            disabled={saving}
-            onChange={(e) => setDraft({ ...draft, enabled: e.target.checked })}
-          />{" "}
-          Enable cycles
-        </label>
-        <label>
-          Timezone
-          <input
-            value={draft.timezone}
-            disabled={saving || settings.enabled}
-            required
-            onChange={(e) => setDraft({ ...draft, timezone: e.target.value })}
-            placeholder="Asia/Shanghai"
-          />
-        </label>
-        <label>
-          First day
-          <input
-            type="date"
-            value={draft.start_date}
-            disabled={saving || settings.enabled}
-            required
-            onChange={(e) => setDraft({ ...draft, start_date: e.target.value })}
-          />
-        </label>
-        <label>
-          Weeks per cycle
-          <input
-            type="number"
-            min={1}
-            max={8}
-            value={draft.duration_weeks}
-            disabled={saving || settings.enabled}
-            required
-            onChange={(e) => setDraft({ ...draft, duration_weeks: Number(e.target.value) })}
-          />
-        </label>
-        <label>
-          Upcoming cycles
-          <input
-            type="number"
-            min={1}
-            max={15}
-            value={draft.upcoming_count}
-            disabled={saving}
-            required
-            onChange={(e) => setDraft({ ...draft, upcoming_count: Number(e.target.value) })}
-          />
-        </label>
-        <p className="dialog-hint">
-          Cycles start at midnight in the team timezone. Disable cycles before changing the
-          schedule. Reducing upcoming cycles keeps existing plans.
-        </p>
-        {settings.enabled && !draft.enabled && (
-          <p className="dialog-hint">
-            Saving will close the current cycle and remove upcoming cycles and their assignments.
-            Completed history is preserved.
-          </p>
-        )}
-        {error && <RequestError message={error} />}
-        <footer>
-          <button type="button" className="button" disabled={saving} onClick={onClose}>
-            Cancel
-          </button>
-          <button className="button primary" disabled={saving}>
-            {saving ? "Saving…" : "Save changes"}
-          </button>
-        </footer>
-      </form>
-    </ModalDialog>
   );
 }
 

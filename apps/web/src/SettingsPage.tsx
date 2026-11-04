@@ -4,6 +4,7 @@ import { PageHeader } from "./PageHeader";
 import { EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
 import { MembersSettings } from "./WorkspaceAccess";
+import { CycleSettingsSection } from "./CycleSettings";
 import { api, apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 
 type TeamDirectory = { teams: Team[] };
@@ -216,6 +217,10 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
           </button>
         </footer>
       </form>
+      <CycleSettingsSection
+        team={team.key}
+        canManage={!team.membership_enabled || team.can_manage}
+      />
       {team.membership_enabled && (
         <TeamAccess team={team} onChanged={() => window.location.reload()} />
       )}
