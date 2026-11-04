@@ -4,6 +4,7 @@
   --bg: #f5f6f8;
   --panel: #ffffff;
   --raised: #f0f1f4;
+  --menu-bg: #ffffff;
   --hover: rgba(0, 0, 0, 0.035);
   --selected: rgba(0, 0, 0, 0.065);
   --border: rgba(0, 0, 0, 0.1);
@@ -59,12 +60,12 @@
   --priority-urgent: #a75b14;
   --agent-mark-bg: #ffffff;
   --agent-mark-color: #111112;
-  --shadow-priority-menu: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --shadow-menu: 0 8px 32px rgba(0, 0, 0, 0.18);
   --emoji-picker-width: 450px;
   --emoji-picker-height: 450px;
   --emoji-cell-height: 30px;
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  --priority-menu-width: 200px;
+  --menu-width: 200px;
   --priority-muted-opacity: 0.25;
 
   /* Shared scales retain the existing compact density. */
@@ -136,6 +137,9 @@
   --radius-pill: 999px;
   --radius-circle: 50%;
   --border-width: 1px;
+  /* One physical pixel on high-density screens, rounded up to 1px elsewhere. */
+  --border-hairline: 0.5px;
+  --radius-control: 10px;
   --focus-width: 2px;
   --icon-size: var(--space-16);
   --icon-stroke: 1.5;
@@ -212,6 +216,7 @@
     --bg: #08090a;
     --panel: #111112;
     --raised: #1b1b1d;
+    --menu-bg: #232326;
     --hover: rgba(255, 255, 255, 0.035);
     --selected: rgba(255, 255, 255, 0.06);
     --border: rgba(255, 255, 255, 0.07);
@@ -264,7 +269,7 @@
     --type-improvement: #f2994a;
     --type-chore: #f2c1bd;
     --priority-urgent: #f2994a;
-    --shadow-priority-menu: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-menu: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -1230,40 +1235,45 @@ button:focus-visible {
   height: var(--list-control-size);
   padding: 0;
 }
-.priority-menu {
+.select-menu {
   z-index: 20;
-  width: var(--priority-menu-width);
+  width: var(--menu-width);
   max-height: var(--radix-select-content-available-height);
   overflow: auto;
   padding: var(--space-4);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius-lg);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-panel);
   color: var(--text-2);
-  background: var(--raised);
-  box-shadow: var(--shadow-priority-menu);
+  background: var(--menu-bg);
+  box-shadow: var(--shadow-menu);
 }
-.priority-option {
+.select-option {
   display: flex;
   align-items: center;
   gap: var(--space-8);
   height: var(--space-32);
   padding: 0 var(--space-8);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-13);
   cursor: default;
   user-select: none;
   outline: none;
 }
-.priority-option[data-highlighted] {
+.select-option[data-highlighted] {
   color: var(--text);
-  background: var(--selected);
+  background: var(--hover);
 }
-.priority-check {
+.select-option[data-disabled] {
+  opacity: var(--opacity-disabled);
+}
+.select-check {
   display: flex;
   align-items: center;
   width: var(--icon-size);
+  margin-left: auto;
+  color: var(--text-2);
 }
-/* One dropdown trigger for every choice list; the menu reuses .priority-menu. */
+/* One dropdown trigger for every choice list; the menu reuses .select-menu. */
 .dropdown {
   box-sizing: border-box;
   display: inline-flex;
@@ -1274,8 +1284,8 @@ button:focus-visible {
   max-width: 100%;
   height: var(--space-28);
   padding: 0 var(--space-8) 0 var(--space-10);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-2);
   font-size: var(--font-size-13);
@@ -1285,6 +1295,7 @@ button:focus-visible {
 .dropdown:hover,
 .dropdown[data-state="open"] {
   background: var(--hover);
+  border-color: var(--border-strong);
   color: var(--text);
 }
 .dropdown:focus-visible {
@@ -1316,14 +1327,23 @@ button:focus-visible {
 }
 .dropdown-ghost {
   border-color: transparent;
-  padding-left: var(--space-6);
+  border-radius: var(--radius);
+  /* The transparent border keeps the height; shave it off the padding. */
+  padding: 0 calc(var(--space-8) - var(--border-hairline));
+}
+.dropdown-ghost:hover,
+.dropdown-ghost[data-state="open"] {
+  border-color: transparent;
+}
+.dropdown-ghost .dropdown-chevron {
+  display: none;
 }
 .dropdown-menu {
   width: auto;
   min-width: var(--radix-select-trigger-width);
   max-width: min(360px, calc(100vw - var(--space-16)));
 }
-.dropdown-menu .priority-option {
+.dropdown-menu .select-option {
   white-space: nowrap;
 }
 input.dropdown-required {
@@ -1407,7 +1427,7 @@ input.dropdown-required {
   background: var(--dialog-bg);
   border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-priority-menu);
+  box-shadow: var(--shadow-menu);
 }
 .emoji-picker-heading {
   flex: none;

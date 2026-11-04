@@ -1,6 +1,6 @@
 import { Dropdown } from "./Dropdown";
 import { ReactNode, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { api, apiPath, Label, LabelBadge, LabelGroup, ModalDialog, RequestError } from "./shared";
 
 import { Catalog, emptyLabelFilter, LabelFilterValue } from "./useLabels";
@@ -237,13 +237,16 @@ export function LabelFilter({
     <>
       <button
         type="button"
-        className="button"
+        className="dropdown dropdown-block"
         onClick={() => {
           setDraft(value);
           setOpen(true);
         }}
       >
-        Labels{value.mode === "unlabeled" ? ": none" : count ? `: ${count}` : ""}
+        <span className="dropdown-label">
+          {value.mode === "unlabeled" ? "No labels" : count ? `${count} selected` : "All labels"}
+        </span>
+        <ChevronDown className="dropdown-chevron" aria-hidden="true" />
       </button>
       {open && (
         <LabelDialog title="Filter by labels" onClose={() => setOpen(false)}>

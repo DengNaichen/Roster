@@ -250,7 +250,7 @@
   flex: 1;
 }
 .detail-properties .detail-cycle-value {
-  margin-left: calc(-1 * var(--space-6));
+  margin-left: calc(-1 * var(--space-8));
 }
 .detail-cycle-value .dropdown {
   width: 100%;
