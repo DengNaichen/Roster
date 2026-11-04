@@ -462,8 +462,11 @@ it("reopens a browser-local design from the section URL without modifying the sp
   const view = render(<SpecPage id={spec.identifier} />);
   fireEvent.click(await screen.findByRole("tab", { name: "Design" }));
   fireEvent.click(screen.getByRole("button", { name: "New design" }));
-  fireEvent.change(screen.getByRole("textbox", { name: "Design principles" }), {
-    target: { value: "Verify handoff\nKeep records independent" },
+  fireEvent.change(screen.getByRole("textbox", { name: "Decision title" }), {
+    target: { value: "Verify handoff" },
+  });
+  fireEvent.change(screen.getByRole("textbox", { name: "Reason and alternatives" }), {
+    target: { value: "Keep records independent" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Save design" }));
   view.unmount();

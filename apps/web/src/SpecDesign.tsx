@@ -1,7 +1,16 @@
 import { lazy, Suspense, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
-import { emptyDesign, exampleDesign, readDesign, type DesignContent } from "./designContent";
+import { localPreview } from "./integration/preview";
+import { workspaceSlug } from "./shared";
+import {
+  blankDecision,
+  type Decision,
+  emptyDesign,
+  exampleDesign,
+  readDesign,
+  type DesignContent,
+} from "./designContent";
 import "./spec-design.css";
 
 const Diagram = lazy(() => import("./DesignDiagram"));
@@ -22,6 +31,11 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
     }
   });
   const [design, setDesign] = useState(loaded.design);
+  const seed =
+    localPreview && workspaceSlug() === "roster" && spec.identifier === "SPEC-1"
+      ? exampleDesign
+      : null;
+  const current = design?.content ?? seed;
   const [draft, setDraft] = useState(emptyDesign);
   const [editing, setEditing] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -34,6 +48,12 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
     setBase(design?.revision ?? spec.active_revision?.number ?? spec.revision);
     setPreview(false);
     setEditing(true);
+  }
+  function updateDecision(index: number, change: Partial<Decision>) {
+    setDraft({
+      ...draft,
+      decisions: draft.decisions.map((d, i) => (i === index ? { ...d, ...change } : d)),
+    });
   }
   function save() {
     try {
@@ -58,19 +78,18 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
           <h1>{spec.content.title}</h1>
           <div className="design-tools">
             <span>
-              {design ? `Based on spec r${design.revision}` : "Example · Spec–issue links"}
+              {design
+                ? `Based on spec r${design.revision}`
+                : seed
+                  ? "OpenSpec · Demo design"
+                  : "OpenSpec"}
             </span>
             <span>Local to this browser</span>
             {!editing && !loaded.error && (
               <>
-                <button className="button" onClick={() => edit(design?.content ?? emptyDesign)}>
-                  {design ? "Edit design" : "New design"}
+                <button className="button" onClick={() => edit(current ?? emptyDesign)}>
+                  {current ? "Edit design" : "New design"}
                 </button>
-                {!design && (
-                  <button className="button" onClick={() => edit(exampleDesign)}>
-                    Use example
-                  </button>
-                )}
               </>
             )}
           </div>
@@ -96,19 +115,86 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
               <button className="button" onClick={() => setEditing(false)}>
                 Cancel
               </button>
-              <button className="button" disabled={!draft.approach.trim()} onClick={save}>
+              <button
+                className="button"
+                disabled={!draft.decisions.every((d) => d.title.trim())}
+                onClick={save}
+              >
                 Save design
               </button>
             </div>
             {!preview && (
               <div className="design-fields">
+                {(["context", "goals", "nonGoals"] as const).map((key) => (
+                  <label key={key}>
+                    {labels[key]}
+                    <textarea
+                      value={draft[key]}
+                      onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                    />
+                  </label>
+                ))}
+                <h2>Decisions</h2>
+                {draft.decisions.map((d, i) => (
+                  <fieldset className="spec-story design-fields" key={i}>
+                    <legend>Decision {i + 1}</legend>
+                    <label>
+                      Decision title
+                      <input
+                        value={d.title}
+                        onChange={(e) => updateDecision(i, { title: e.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Reason and alternatives
+                      <textarea
+                        value={d.reason}
+                        onChange={(e) => updateDecision(i, { reason: e.target.value })}
+                      />
+                    </label>
+                    <details className="design-extras">
+                      <summary>Optional diagrams</summary>
+                      <div className="design-fields">
+                        {diagramFields.map(({ key, label, placeholder }) => (
+                          <label key={key}>
+                            {label}
+                            <textarea
+                              value={d[key]}
+                              placeholder={placeholder}
+                              onChange={(e) => updateDecision(i, { [key]: e.target.value })}
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </details>
+                    {draft.decisions.length > 1 && (
+                      <button
+                        className="button"
+                        onClick={() =>
+                          setDraft({
+                            ...draft,
+                            decisions: draft.decisions.filter((_, j) => i !== j),
+                          })
+                        }
+                      >
+                        Remove decision
+                      </button>
+                    )}
+                  </fieldset>
+                ))}
+                <button
+                  className="button"
+                  onClick={() =>
+                    setDraft({ ...draft, decisions: [...draft.decisions, blankDecision] })
+                  }
+                >
+                  Add decision
+                </button>
                 <label>
-                  Design principles
+                  Risks / Trade-offs
                   <textarea
-                    placeholder="Write one implementation rule per line."
-                    required
-                    value={draft.approach}
-                    onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
+                    value={draft.risks}
+                    onChange={(e) => setDraft({ ...draft, risks: e.target.value })}
                   />
                 </label>
                 {draft.notes !== undefined && (
@@ -120,67 +206,80 @@ export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: strin
                     />
                   </label>
                 )}
-                <details className="design-extras">
-                  <summary>Optional diagrams</summary>
-                  <div className="design-fields">
-                    {diagramFields.map(({ key, label, placeholder }) => (
-                      <label key={key}>
-                        {label}
-                        <textarea
-                          className="diagram-source"
-                          value={draft[key]}
-                          placeholder={placeholder}
-                          spellCheck={false}
-                          onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </details>
               </div>
             )}
           </div>
         )}
-        {!loaded.error && (!editing || preview) && (
-          <DesignDocument content={editing ? draft : (design?.content ?? exampleDesign)} />
+        {!loaded.error && (!editing || preview) && (editing || current) && (
+          <DesignDocument content={editing ? draft : (current ?? emptyDesign)} />
         )}
       </article>
     </div>
   );
 }
 
-function DesignDocument({ content }: { content: DesignContent }) {
+const labels = { context: "Context", goals: "Goals", nonGoals: "Non-Goals" };
+function DesignDocument({ content: c }: { content: DesignContent }) {
   return (
     <>
+      {c.context && (
+        <section className="spec-section">
+          <h2>Context</h2>
+          <p className="design-prose">{c.context}</p>
+        </section>
+      )}
+      {(c.goals || c.nonGoals) && (
+        <section className="spec-section">
+          <h2>Goals / Non-Goals</h2>
+          {(["goals", "nonGoals"] as const).map(
+            (k) =>
+              c[k] && (
+                <div key={k}>
+                  <h3 className="spec-subheading">{labels[k]}</h3>
+                  <p className="design-prose">{c[k]}</p>
+                </div>
+              ),
+          )}
+        </section>
+      )}
       <section className="spec-section">
-        <h2>Design principles</h2>
-        <ol className="design-principles">
-          {content.approach
-            .split(/\r?\n/)
-            .filter((line) => line.trim())
-            .map((line, i) => (
-              <li key={i}>{line}</li>
-            ))}
-        </ol>
+        <h2>Decisions</h2>
+        <div className="spec-stories">
+          {c.decisions.map((d, i) => (
+            <article className="spec-story" key={i}>
+              <header>
+                <span className="spec-id">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{d.title}</h3>
+              </header>
+              <p className="design-prose">{d.reason}</p>
+              {diagramFields
+                .filter(({ key }) => d[key].trim())
+                .map(({ key, label }) => (
+                  <details className="design-extras" key={key}>
+                    <summary>{label}</summary>
+                    <figure className="design-figure">
+                      <Suspense fallback="Loading diagram…">
+                        <Diagram source={d[key]} key={d[key]} />
+                      </Suspense>
+                    </figure>
+                  </details>
+                ))}
+            </article>
+          ))}
+        </div>
       </section>
-      {content.notes && (
+      {c.risks && (
+        <section className="spec-section">
+          <h2>Risks / Trade-offs</h2>
+          <p className="design-prose">{c.risks}</p>
+        </section>
+      )}
+      {c.notes && (
         <details className="design-extras">
           <summary>Supporting notes</summary>
-          <p className="design-prose">{content.notes}</p>
+          <p className="design-prose">{c.notes}</p>
         </details>
       )}
-      {diagramFields
-        .filter(({ key }) => content[key].trim())
-        .map(({ key, label }) => (
-          <section className="spec-section" key={key}>
-            <h2>{label}</h2>
-            <figure className="design-figure">
-              <Suspense fallback="Loading diagram…">
-                <Diagram key={content[key]} source={content[key]} />
-              </Suspense>
-            </figure>
-          </section>
-        ))}
     </>
   );
 }
