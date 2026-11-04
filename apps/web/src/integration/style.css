@@ -34,70 +34,71 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: radial-gradient(ellipse at 50% 22%, var(--drop-bg), transparent 62%), var(--bg);
-  color: var(--text);
+  padding: 32px 20px;
+  background: linear-gradient(180deg, #111213, #0b0b0c 52%);
+  color: #ededee;
+  text-align: center;
+  color-scheme: dark;
 }
 .roster-login-card {
-  width: min(100%, 396px);
-  padding: clamp(24px, 5vw, 40px);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--panel);
-  box-shadow: 0 10px 40px rgba(34, 40, 73, 0.06);
+  width: min(100%, 288px);
 }
-.roster-login-brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-weight: 650;
-}
-.roster-login-brand span {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-weight: 750;
+.roster-login-mark {
+  display: block;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto;
+  color: #e4e4e6;
 }
 .roster-login h1 {
-  margin: 34px 0 8px;
-  font-size: 29px;
-  letter-spacing: -0.04em;
-  line-height: 1.2;
-}
-.roster-login p {
-  margin: 0 0 24px;
-  color: var(--muted);
-  line-height: 1.55;
+  margin: 32px 0 24px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.025em;
 }
 .roster-login button {
   display: block;
   width: 100%;
   min-height: 44px;
-  margin-top: 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--panel);
-  color: var(--text);
+  border-radius: 999px;
+  border: 1px solid #262628;
+  color: #f8f8fa;
+  background: #1e1e20;
   font: inherit;
-  font-weight: 550;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
+.roster-login button + button {
+  margin-top: 16px;
+}
 .roster-login button:hover {
-  background: var(--raised);
+  background: #2a2a2d;
+}
+.roster-login button.roster-login-primary {
+  background: #5863bb;
+  border-color: #6570c8;
+}
+.roster-login button.roster-login-primary:hover {
+  background: #616cc3;
 }
 .roster-login button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid #b7bcff;
+  outline-offset: 4px;
 }
 .roster-login button:disabled {
   opacity: 0.65;
   cursor: wait;
 }
+.roster-login-note,
 .roster-login p[role="alert"] {
-  color: var(--error-text);
-  margin: 16px 0 0;
+  margin: 30px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: #a3a3ab;
+}
+.roster-login p[role="alert"] {
+  margin-top: 16px;
+  color: #ffb4ab;
 }
