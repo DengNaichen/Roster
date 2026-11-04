@@ -2,6 +2,11 @@
   padding: var(--space-8) var(--space-12) var(--space-24);
   overflow: auto;
 }
+/* Orbit is centred in its box, but 13px text sits lower, so nudge it down to match. */
+.cycle-crumb-icon {
+  position: relative;
+  top: 1.5px;
+}
 .cycle-timeline {
   margin: 0;
   padding: 0;

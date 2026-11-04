@@ -1,8 +1,14 @@
-import { CircleCheck, CircleDashed, CirclePlay } from "lucide-react";
 import { NavLink, pagePath } from "./shared";
-import { Cycle, cycleDates, cycleName, cyclePath, cycleStart, daysLeft, percent } from "./Cycles";
-
-const stateIcon = { upcoming: CircleDashed, current: CirclePlay, completed: CircleCheck };
+import {
+  Cycle,
+  cycleDates,
+  cycleName,
+  cyclePath,
+  cycleStart,
+  cycleStateIcon,
+  daysLeft,
+  percent,
+} from "./Cycles";
 
 export function CycleTimeline({ cycles }: { cycles: Cycle[] }) {
   const ordered = [...cycles].sort((a, b) => b.number - a.number);
@@ -16,7 +22,7 @@ export function CycleTimeline({ cycles }: { cycles: Cycle[] }) {
 }
 
 function CycleRow({ cycle }: { cycle: Cycle }) {
-  const Icon = stateIcon[cycle.state];
+  const Icon = cycleStateIcon[cycle.state];
   return (
     <li className={`cycle-row ${cycle.state}`}>
       <time className="cycle-rail" dateTime={cycle.starts_at}>

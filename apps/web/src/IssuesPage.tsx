@@ -1,6 +1,7 @@
 import { useCapabilities } from "./Capabilities";
 import { Cycle, CyclePage, CycleSelect, cycleName, emptyCycles } from "./Cycles";
 import "./cycles.css";
+import { Orbit } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NewIssueDialog } from "./Dialogs";
 import { EmojiPicker, EntityEmoji } from "./EmojiPicker";
@@ -225,22 +226,39 @@ export default function IssuesPage({
             <span className="separator">›</span>
           </>
         )}
-        {activeProject ? (
-          <EmojiPicker
-            value={activeProject.emoji}
-            label={`Change emoji for project ${activeProject.name}`}
-            onChange={async (emoji) => {
-              const updated = await api<Project>(
-                apiPath(`/projects/by-id/${activeProject.id}`),
-                "PATCH",
-                { emoji },
-              );
-              project.update(() => updated);
-            }}
-          />
-        ) : activeTeam ? (
-          <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />
-        ) : null}
+        {route.kind === "cycle" ? (
+          <>
+            {activeTeam && <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />}
+            <NavLink to={pagePath(`/team/${encodeURIComponent(route.team)}/issues`)}>
+              {activeTeam?.name ?? route.team}
+            </NavLink>
+            <span className="separator">›</span>
+            <NavLink to={pagePath(`/team/${encodeURIComponent(route.team)}/cycles`)}>
+              Cycles
+            </NavLink>
+            <span className="separator">›</span>
+            <Orbit className="icon cycle-crumb-icon" aria-hidden="true" />
+          </>
+        ) : (
+          <>
+            {activeProject ? (
+              <EmojiPicker
+                value={activeProject.emoji}
+                label={`Change emoji for project ${activeProject.name}`}
+                onChange={async (emoji) => {
+                  const updated = await api<Project>(
+                    apiPath(`/projects/by-id/${activeProject.id}`),
+                    "PATCH",
+                    { emoji },
+                  );
+                  project.update(() => updated);
+                }}
+              />
+            ) : activeTeam ? (
+              <EntityEmoji emoji={activeTeam.emoji} teamKey={activeTeam.key} />
+            ) : null}
+          </>
+        )}
         <span>{heading}</span>
       </PageHeader>
       {activeProject && !scopeError && (

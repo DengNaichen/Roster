@@ -1,4 +1,4 @@
-import { CalendarRange } from "lucide-react";
+import { CalendarRange, Orbit } from "lucide-react";
 import { PageHeader } from "./PageHeader";
 import { apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 import { useResource } from "./useResource";
@@ -17,7 +17,7 @@ export default function CyclesPage({ team, teams }: { team: string; teams: Team[
   return (
     <>
       <PageHeader>
-        <CalendarRange className="icon" />
+        <Orbit className="icon cycle-crumb-icon" aria-hidden="true" />
         <span>{activeTeam?.name ?? team} / Cycles</span>
       </PageHeader>
       <div className="cycle-content">

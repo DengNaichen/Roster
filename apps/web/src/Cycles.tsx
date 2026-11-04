@@ -1,3 +1,4 @@
+import { CircleCheck, CircleDashed, CirclePlay } from "lucide-react";
 import { Dropdown } from "./Dropdown";
 import { apiPath, RequestError } from "./shared";
 import { useResource } from "./useResource";
@@ -35,6 +36,11 @@ export const emptyCycles: CyclePage = {
     upcoming_count: 2,
   },
   cycles: [],
+};
+export const cycleStateIcon = {
+  upcoming: CircleDashed,
+  current: CirclePlay,
+  completed: CircleCheck,
 };
 export const cycleName = (cycle: Cycle) => cycle.name || `Cycle ${cycle.number}`;
 export const cyclePath = (cycle: Cycle) =>
