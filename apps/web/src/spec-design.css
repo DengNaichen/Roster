@@ -1,0 +1,48 @@
+.design-content {
+  max-width: 960px;
+}
+.design-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  color: var(--muted);
+  font-size: var(--font-size-12);
+}
+.design-tools button:first-of-type {
+  margin-inline-start: auto;
+}
+.design-body,
+.design-editor {
+  margin-top: var(--space-24);
+  border-top: var(--border-width) solid var(--border);
+  padding-top: var(--space-16);
+}
+.design-body pre:has(.design-diagram) {
+  background: var(--surface-card);
+  padding: var(--space-16);
+  text-align: center;
+}
+.design-diagram {
+  max-width: 100%;
+  max-height: 380px;
+  vertical-align: middle;
+  background: white;
+  border-radius: var(--radius);
+}
+.design-error {
+  white-space: pre-wrap;
+}
+.design-editor > label {
+  display: grid;
+  margin-top: var(--space-16);
+  gap: var(--space-8);
+}
+.design-editor textarea {
+  width: 100%;
+  min-height: 48vh;
+  resize: vertical;
+  font: inherit;
+  font-family: var(--mono);
+  padding: var(--space-12);
+}

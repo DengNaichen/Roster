@@ -454,3 +454,23 @@ it("loads real scoped links beyond 50 rows and persists link/unlink through remo
   expect(await screen.findByText("Existing candidate")).toBeTruthy();
   expect(screen.queryByText("Linked issue 1")).toBeNull();
 });
+it("reopens a browser-local design from the section URL without modifying the spec", async () => {
+  const read = vi.fn(async (path: string) =>
+    json(path.includes("/issues?") ? { issues: [] } : spec),
+  );
+  vi.stubGlobal("fetch", read);
+  const view = render(<SpecPage id={spec.identifier} />);
+  fireEvent.click(await screen.findByRole("tab", { name: "Design" }));
+  fireEvent.click(screen.getByRole("button", { name: "New design" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Design in Markdown" }), {
+    target: { value: "## Verify handoff" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Save design" }));
+  view.unmount();
+  expect(location.search).toBe("?section=design");
+  render(<SpecPage id={spec.identifier} />);
+  expect(await screen.findByRole("heading", { name: "Verify handoff" })).toBeTruthy();
+  expect(screen.getByText("Based on spec r1")).toBeTruthy();
+  for (const call of read.mock.calls as unknown as [string, RequestInit][])
+    expect(call[1]?.method ?? "GET").toBe("GET");
+});

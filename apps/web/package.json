@@ -18,6 +18,7 @@
     "@supabase/supabase-js": "^2.57.0",
     "@tanstack/react-virtual": "^3.14.15",
     "lucide-react": "^1.48.0",
+    "mermaid": "^11.17.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
