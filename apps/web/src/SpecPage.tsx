@@ -37,7 +37,7 @@ export default function SpecPage({ id }: { id: string }) {
     <div className="segmented" role="tablist" aria-label="Spec sections">
       {[
         ["overview", "Overview"],
-        ["design", "Plan"],
+        ["design", "Design"],
         ["issues", `Issues · ${issueCount}`],
       ].map(([value, label]) => (
         <button
@@ -101,7 +101,6 @@ export default function SpecPage({ id }: { id: string }) {
           <SpecDesign
             key={apiPath(id) + identity?.subject}
             spec={spec}
-            openIssues={() => setTab("issues")}
             storageKey={`roster-design:${identity?.subject}:${apiPath(id)}`}
           />
         ) : (

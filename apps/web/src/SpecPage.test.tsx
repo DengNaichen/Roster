@@ -460,15 +460,12 @@ it("reopens a browser-local design from the section URL without modifying the sp
   );
   vi.stubGlobal("fetch", read);
   const view = render(<SpecPage id={spec.identifier} />);
-  fireEvent.click(await screen.findByRole("tab", { name: "Plan" }));
-  fireEvent.click(screen.getByRole("button", { name: "New plan" }));
-  fireEvent.change(screen.getByRole("textbox", { name: "Summary" }), {
-    target: { value: "Verify handoff" },
+  fireEvent.click(await screen.findByRole("tab", { name: "Design" }));
+  fireEvent.click(screen.getByRole("button", { name: "New design" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Design principles" }), {
+    target: { value: "Verify handoff\nKeep records independent" },
   });
-  fireEvent.change(screen.getByRole("textbox", { name: "Decision" }), {
-    target: { value: "Keep records independent" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Save plan" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save design" }));
   view.unmount();
   expect(location.search).toBe("?section=design");
   render(<SpecPage id={spec.identifier} />);

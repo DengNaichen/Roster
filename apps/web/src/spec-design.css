@@ -68,28 +68,17 @@
 .design-fields .button {
   justify-self: start;
 }
-.plan-sections {
-  margin-block: var(--space-24);
-  border-top: var(--border-width) solid var(--border);
+.design-principles {
+  padding-inline-start: var(--space-24);
+  line-height: 1.6;
 }
-.plan-section {
-  border-bottom: var(--border-width) solid var(--border);
-  padding-block: var(--space-12);
+.design-principles li {
+  padding: var(--space-4);
 }
-.plan-section summary {
+.design-extras {
+  margin-block: var(--space-16);
+}
+.design-extras summary {
+  color: var(--text-2);
   cursor: pointer;
-  font-weight: var(--weight-medium);
-}
-.plan-section summary small {
-  margin-inline-start: var(--space-12);
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: var(--font-size-12);
-}
-.plan-section dt {
-  color: var(--muted);
-  font-size: var(--font-size-12);
-}
-.plan-section dd {
-  margin: var(--space-4) 0 var(--space-12);
 }

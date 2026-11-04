@@ -1,7 +1,7 @@
 import { planSections, type PlanNotes } from "./planSections";
 export type Scenario = { given: string; when: string; then: string };
 export type DesignContent = {
-  plan?: PlanNotes;
+  notes?: string;
   approach: string;
   sequence: string;
   state: string;
@@ -11,29 +11,12 @@ export type Design = { content: DesignContent; revision: number };
 export const blankScenario = { given: "", when: "", then: "" };
 export const emptyDesign: DesignContent = { approach: "", sequence: "", state: "", scenarios: [] };
 export const exampleDesign: DesignContent = {
-  approach:
-    "Keep specifications and issues independent. Store their relationship separately so either record can evolve on its own.",
-  plan: {
-    stack: "TypeScript web client and service, with PostgreSQL for persistent links.",
-    storage:
-      "Store a unique pair of spec and issue IDs. Exercise permissions, duplicate links and unlinking in integration tests.",
-    constraints: "Both records must belong to the same workspace and remain visible to the caller.",
-    initialCheck:
-      "Example review criterion: enforce workspace and team visibility at both ends of the relationship.",
-    exceptions: "No exception proposed.",
-    structure:
-      "packages/backend for link operations, packages/contracts for shared inputs, apps/web for both directions of navigation.",
-    decision: "Use a many-to-many association.",
-    rationale: "One implementation task can support several specifications.",
-    alternatives: "A single spec ID on the issue would prevent reuse across specs.",
-    model: "Spec and Issue each have an independent lifecycle. A unique link identifies one pair.",
-    contracts:
-      "Link and unlink by identifier. Check both records before writing. Repeating a link keeps a single association.",
-    quickstart:
-      "Open a visible spec, link an existing issue, refresh both detail pages, then unlink. Verify both records still exist.",
-    finalCheck:
-      "Review the read and write paths with a private-team issue before handing off implementation.",
-  },
+  approach: [
+    "Keep the spec and the issue independent. Removing a link must preserve both records.",
+    "Check access to both records before exposing or changing their relationship.",
+    "Keep one link per spec–issue pair, even when two callers link the pair concurrently.",
+    "Apply the same visibility and uniqueness rules to actions from the web and MCP.",
+  ].join("\n"),
   sequence: `sequenceDiagram
   actor User
   participant Roster
@@ -51,13 +34,7 @@ export const exampleDesign: DesignContent = {
   Unlinked --> Linked: Link visible pair
   Linked --> Linked: Repeat link
   Linked --> Unlinked: Unlink`,
-  scenarios: [
-    {
-      given: "A spec and issue are linked.",
-      when: "A member unlinks the issue.",
-      then: "Both records remain available and the association disappears.",
-    },
-  ],
+  scenarios: [],
 };
 
 // Import the original four-section template. Preserve arbitrary Markdown verbatim
@@ -79,8 +56,7 @@ export function readDesign(key: string): Design | null {
   const value = JSON.parse(localStorage.getItem(key) ?? "null");
   if (value === null) return null;
   if (!Number.isInteger(value.revision)) throw new Error("Invalid design revision");
-  if (typeof value.body === "string")
-    return { revision: value.revision, content: fromMarkdown(value.body) };
+  if (typeof value.body === "string") value.content = fromMarkdown(value.body);
   const c = value.content;
   if (
     !c ||
@@ -100,5 +76,36 @@ export function readDesign(key: string): Design | null {
     )
   )
     throw new Error("Invalid design content");
+  if (c.notes !== undefined && typeof c.notes !== "string") throw new Error("Invalid design notes");
+  if (c.plan || c.scenarios.length) {
+    const notes = [c.notes];
+    const plan: PlanNotes = c.plan ?? {};
+    for (const section of planSections)
+      for (const [key, label] of section.fields) {
+        if (plan[key]) notes.push(label + "\n" + plan[key]);
+      }
+    for (const scenario of c.scenarios as Scenario[]) {
+      notes.push(
+        [
+          ["Given", scenario.given],
+          ["When", scenario.when],
+          ["Then", scenario.then],
+        ]
+          .filter(([, v]) => v)
+          .map(([k, v]) => k + " " + v)
+          .join("\n"),
+      );
+    }
+    return {
+      revision: value.revision,
+      content: {
+        approach: c.approach,
+        sequence: c.sequence,
+        state: c.state,
+        scenarios: [],
+        notes: notes.filter(Boolean).join("\n\n"),
+      },
+    };
+  }
   return value;
 }

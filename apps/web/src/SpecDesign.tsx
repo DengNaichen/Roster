@@ -1,14 +1,7 @@
 import { lazy, Suspense, useState } from "react";
-import { planSections, type PlanNotes } from "./planSections";
 import { Dropdown } from "./Dropdown";
 import type { Spec } from "../../../packages/contracts/spec";
-import {
-  blankScenario,
-  emptyDesign,
-  exampleDesign,
-  readDesign,
-  type DesignContent,
-} from "./designContent";
+import { emptyDesign, exampleDesign, readDesign, type DesignContent } from "./designContent";
 import "./spec-design.css";
 
 const Diagram = lazy(() => import("./DesignDiagram"));
@@ -16,17 +9,8 @@ const diagramFields = [
   { key: "sequence", label: "Sequence diagram", placeholder: "sequenceDiagram" },
   { key: "state", label: "State diagram", placeholder: "stateDiagram-v2" },
 ] as const;
-const parts = ["given", "when", "then"] as const;
 
-export function SpecDesign({
-  spec,
-  storageKey,
-  openIssues,
-}: {
-  spec: Spec;
-  storageKey: string;
-  openIssues: () => void;
-}) {
+export function SpecDesign({ spec, storageKey }: { spec: Spec; storageKey: string }) {
   const [loaded] = useState(() => {
     try {
       return { design: readDesign(storageKey), error: "" };
@@ -70,7 +54,7 @@ export function SpecDesign({
     <div className="spec-scroll">
       <article className="spec-content design-content">
         <header className="spec-heading">
-          <p className="spec-kicker">Spec Kit · Implementation plan · {spec.identifier}</p>
+          <p className="spec-kicker">Design · {spec.identifier}</p>
           <h1>{spec.content.title}</h1>
           <div className="design-tools">
             <span>
@@ -80,7 +64,7 @@ export function SpecDesign({
             {!editing && !loaded.error && (
               <>
                 <button className="button" onClick={() => edit(design?.content ?? emptyDesign)}>
-                  {design ? "Edit plan" : "New plan"}
+                  {design ? "Edit design" : "New design"}
                 </button>
                 {!design && (
                   <button className="button" onClick={() => edit(exampleDesign)}>
@@ -113,95 +97,52 @@ export function SpecDesign({
                 Cancel
               </button>
               <button className="button" disabled={!draft.approach.trim()} onClick={save}>
-                Save plan
+                Save design
               </button>
             </div>
             {!preview && (
               <div className="design-fields">
                 <label>
-                  Summary
+                  Design principles
                   <textarea
+                    placeholder="Write one implementation rule per line."
                     required
                     value={draft.approach}
                     onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
                   />
                 </label>
-                <PlanSections
-                  notes={draft.plan}
-                  onChange={(plan) => setDraft({ ...draft, plan })}
-                />
-                {diagramFields.map(({ key, label, placeholder }) => (
-                  <label key={key}>
-                    {label}
+                {draft.notes !== undefined && (
+                  <label>
+                    Supporting notes
                     <textarea
-                      className="diagram-source"
-                      value={draft[key]}
-                      placeholder={placeholder}
-                      spellCheck={false}
-                      onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                      value={draft.notes}
+                      onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
                     />
                   </label>
-                ))}
-                <section className="spec-section">
-                  <h2>Verification scenarios</h2>
-                  {draft.scenarios.map((scenario, i) => (
-                    <fieldset className="spec-story design-fields" key={i}>
-                      <legend>Scenario {i + 1}</legend>
-                      {parts.map((part) => (
-                        <label key={part}>
-                          {part}
-                          <textarea
-                            value={scenario[part]}
-                            onChange={(e) =>
-                              setDraft({
-                                ...draft,
-                                scenarios: draft.scenarios.map((s, j) =>
-                                  i === j ? { ...s, [part]: e.target.value } : s,
-                                ),
-                              })
-                            }
-                          />
-                        </label>
-                      ))}
-                      <button
-                        className="button"
-                        onClick={() =>
-                          setDraft({
-                            ...draft,
-                            scenarios: draft.scenarios.filter((_, j) => j !== i),
-                          })
-                        }
-                      >
-                        Remove scenario
-                      </button>
-                    </fieldset>
-                  ))}
-                  <button
-                    className="button"
-                    onClick={() =>
-                      setDraft({ ...draft, scenarios: [...draft.scenarios, { ...blankScenario }] })
-                    }
-                  >
-                    Add scenario
-                  </button>
-                </section>
+                )}
+                <details className="design-extras">
+                  <summary>Optional diagrams</summary>
+                  <div className="design-fields">
+                    {diagramFields.map(({ key, label, placeholder }) => (
+                      <label key={key}>
+                        {label}
+                        <textarea
+                          className="diagram-source"
+                          value={draft[key]}
+                          placeholder={placeholder}
+                          spellCheck={false}
+                          onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </details>
               </div>
             )}
           </div>
         )}
         {!loaded.error && (!editing || preview) && (
           <DesignDocument content={editing ? draft : (design?.content ?? exampleDesign)} />
-        )}
-        {!editing && !loaded.error && (
-          <section className="spec-section">
-            <h2>Task handoff</h2>
-            <p>
-              Review the plan and its validation scenarios, then break the work into linked issues.
-            </p>
-            <button className="button" onClick={openIssues}>
-              Open linked issues
-            </button>
-          </section>
         )}
       </article>
     </div>
@@ -212,89 +153,34 @@ function DesignDocument({ content }: { content: DesignContent }) {
   return (
     <>
       <section className="spec-section">
-        <h2>Summary</h2>
-        <p className="design-prose">{content.approach || "No approach yet."}</p>
+        <h2>Design principles</h2>
+        <ol className="design-principles">
+          {content.approach
+            .split(/\r?\n/)
+            .filter((line) => line.trim())
+            .map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+        </ol>
       </section>
-      <PlanSections notes={content.plan} />
-      {diagramFields.map(({ key, label }) => (
-        <section className="spec-section" key={key}>
-          <h2>{label}</h2>
-          {content[key].trim() ? (
+      {content.notes && (
+        <details className="design-extras">
+          <summary>Supporting notes</summary>
+          <p className="design-prose">{content.notes}</p>
+        </details>
+      )}
+      {diagramFields
+        .filter(({ key }) => content[key].trim())
+        .map(({ key, label }) => (
+          <section className="spec-section" key={key}>
+            <h2>{label}</h2>
             <figure className="design-figure">
               <Suspense fallback="Loading diagram…">
                 <Diagram key={content[key]} source={content[key]} />
               </Suspense>
             </figure>
-          ) : (
-            <p>No diagram yet.</p>
-          )}
-        </section>
-      ))}
-      <section className="spec-section">
-        <h2>Verification scenarios</h2>
-        {content.scenarios.length ? (
-          <ol className="spec-scenarios">
-            {content.scenarios.map((s, i) => (
-              <li key={i}>
-                {parts.map(
-                  (part) =>
-                    s[part] && (
-                      <span className="design-prose" key={part}>
-                        <b>{part[0].toUpperCase() + part.slice(1)}</b> {s[part]}
-                      </span>
-                    ),
-                )}
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p>No scenarios yet.</p>
-        )}
-      </section>
+          </section>
+        ))}
     </>
-  );
-}
-
-function PlanSections({
-  notes = {},
-  onChange,
-}: {
-  notes?: PlanNotes;
-  onChange?: (notes: PlanNotes) => void;
-}) {
-  return (
-    <div className="plan-sections">
-      {planSections.map(({ title, artifact, fields }) => (
-        <details className="plan-section" key={title} open={onChange ? true : undefined}>
-          <summary>
-            {title}
-            <small>{artifact}</small>
-          </summary>
-          {onChange ? (
-            <div className="design-fields">
-              {fields.map(([key, label, hint]) => (
-                <label key={key}>
-                  {label}
-                  <textarea
-                    value={notes[key] ?? ""}
-                    placeholder={hint}
-                    onChange={(e) => onChange({ ...notes, [key]: e.target.value })}
-                  />
-                </label>
-              ))}
-            </div>
-          ) : (
-            <dl>
-              {fields.map(([key, label]) => (
-                <div key={key}>
-                  <dt>{label}</dt>
-                  <dd className="design-prose">{notes[key] || "Not recorded"}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </details>
-      ))}
-    </div>
   );
 }
