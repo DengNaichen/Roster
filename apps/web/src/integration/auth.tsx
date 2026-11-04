@@ -32,83 +32,73 @@ const SessionContext = createContext<State>({
 export const useSession = () => useContext(SessionContext);
 function safeReturn() {
   const target = new URLSearchParams(window.location.search).get("return_to") ?? "/";
-  return target.startsWith("/") && !target.startsWith("//") && !target.includes("\\")
-    ? target
-    : "/";
+  if (!target.startsWith("/") || target.startsWith("//") || /[\\\s]/u.test(target)) return "/";
+  const url = new URL(target, window.location.origin);
+  if (url.pathname.startsWith("//") || ["/auth/login", "/auth/callback"].includes(url.pathname))
+    return "/";
+  return url.origin === window.location.origin ? url.pathname + url.search + url.hash : "/";
 }
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error ?? ""));
-function Login({ error: initial, onSignedIn }: { error?: unknown; onSignedIn?: () => void }) {
+function Login({ error: initial }: { error?: unknown }) {
   const [error, setError] = useState<unknown>(initial);
-  const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<"google" | "github" | null>(null);
+  async function signIn(provider: "google" | "github") {
+    if (!supabase) {
+      setError("Sign-in is not configured for this preview.");
+      return;
+    }
+    setPending(provider);
+    setError(undefined);
+    try {
+      const { pathname, search, hash, origin } = window.location;
+      const callback = new URL("/auth/callback", origin);
+      callback.searchParams.set(
+        "return_to",
+        ["/auth/login", "/auth/callback"].includes(pathname)
+          ? safeReturn()
+          : pathname + search + hash,
+      );
+      const result = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: callback.href },
+      });
+      if (result.error) throw result.error;
+    } catch (e) {
+      setError(e);
+      setPending(null);
+    }
+  }
   return (
-    <main className="integration-auth">
-      <h1>Sign in to Roster</h1>
-      {!configured ? (
-        <p>Configure VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY and VITE_API_BASE_URL to sign in.</p>
-      ) : (
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setBusy(true);
-            setError(undefined);
-            const data = new FormData(event.currentTarget);
-            try {
-              const { error } = await supabase!.auth.signInWithPassword({
-                email: String(data.get("email")),
-                password: String(data.get("password")),
-              });
-              if (error) throw error;
-              onSignedIn?.();
-            } catch (e) {
-              setError(e);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          <label>
-            Email
-            <input name="email" type="email" required autoComplete="email" />
-          </label>
-          <label>
-            Password
-            <input name="password" type="password" autoComplete="current-password" />
-          </label>
-          <button disabled={busy}>Sign in</button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={async (event) => {
-              const form = event.currentTarget.form!;
-              const email = String(new FormData(form).get("email") ?? "");
-              if (!email) {
-                setError(new Error("Enter your email first."));
-                return;
-              }
-              setBusy(true);
-              try {
-                const { error } = await supabase!.auth.signInWithOtp({
-                  email,
-                  options: { emailRedirectTo: window.location.href },
-                });
-                if (error) throw error;
-                setNotice("Check your email for a sign-in link.");
-              } catch (e) {
-                setError(e);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Email me a sign-in link
-          </button>
-        </form>
-      )}
-      {Boolean(error) && <p role="alert">{message(error)}</p>}
-      <p role="status">{notice}</p>
+    <main className="roster-login">
+      <section aria-labelledby="login-title" className="roster-login-card">
+        <div className="roster-login-brand">
+          <span aria-hidden="true">R</span>Roster
+        </div>
+        <h1 id="login-title">Sign in to Roster</h1>
+        <p>Choose an account to create or access your workspace.</p>
+        {(["google", "github"] as const).map((provider) => {
+          const name = provider === "google" ? "Google" : "GitHub";
+          return (
+            <button
+              key={provider}
+              type="button"
+              disabled={pending !== null}
+              onClick={() => void signIn(provider)}
+            >
+              {pending === provider ? `Connecting to ${name}…` : `Continue with ${name}`}
+            </button>
+          );
+        })}
+        {Boolean(error) && <p role="alert">{message(error)}</p>}
+      </section>
     </main>
   );
+}
+function ReturnAfterLogin() {
+  useEffect(() => {
+    window.location.replace(safeReturn());
+  }, []);
+  return <main className="integration-auth">Opening workspace…</main>;
 }
 function Consent() {
   const id = new URLSearchParams(window.location.search).get("authorization_id");
@@ -292,11 +282,6 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     content = (
       <Login
         error={error || new URLSearchParams(window.location.search).get("error_description")}
-        onSignedIn={
-          path === "/auth/login" || path === "/auth/callback"
-            ? () => window.location.assign(safeReturn())
-            : undefined
-        }
       />
     );
   } else if (path === "/auth/login" && localPreview) {
@@ -306,23 +291,8 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
         <a href={safeReturn()}>Enter preview</a>
       </main>
     );
-  } else if (path === "/auth/login") {
-    content = (
-      <Login
-        error={error}
-        onSignedIn={() => {
-          const target = new URLSearchParams(window.location.search).get("return_to") ?? "/";
-          window.location.assign(
-            target.startsWith("/") && !target.startsWith("//") && !target.includes("\\")
-              ? target
-              : "/",
-          );
-        }}
-      />
-    );
-  } else if (path === "/auth/callback") {
-    window.history.replaceState({}, "", safeReturn());
-    content = appContent;
+  } else if (path === "/auth/login" || path === "/auth/callback") {
+    content = <ReturnAfterLogin />;
   } else if (path === "/oauth/consent") content = <Consent />;
   else if (path === "/join") {
     window.history.replaceState({}, "", `/auth/join${window.location.search}`);

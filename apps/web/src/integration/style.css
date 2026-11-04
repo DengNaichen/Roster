@@ -29,3 +29,75 @@
 .integration-auth [role="alert"] {
   color: #ffb4ab;
 }
+
+.roster-login {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 22%, var(--drop-bg), transparent 62%), var(--bg);
+  color: var(--text);
+}
+.roster-login-card {
+  width: min(100%, 396px);
+  padding: clamp(24px, 5vw, 40px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 10px 40px rgba(34, 40, 73, 0.06);
+}
+.roster-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 650;
+}
+.roster-login-brand span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 750;
+}
+.roster-login h1 {
+  margin: 34px 0 8px;
+  font-size: 29px;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.roster-login p {
+  margin: 0 0 24px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.roster-login button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-weight: 550;
+  cursor: pointer;
+}
+.roster-login button:hover {
+  background: var(--raised);
+}
+.roster-login button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.roster-login button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.roster-login p[role="alert"] {
+  color: var(--error-text);
+  margin: 16px 0 0;
+}
