@@ -175,3 +175,9 @@
 .design-plate .design-figure {
   border: 0;
 }
+
+.design-risks {
+  padding: var(--space-16);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--priority-urgent) 6%, var(--surface-card));
+}

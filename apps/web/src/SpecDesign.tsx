@@ -280,7 +280,7 @@ function DesignDocument({ content: c }: { content: DesignContent }) {
         </div>
       </section>
       {c.risks && (
-        <section className="spec-section">
+        <section className="spec-section design-risks">
           <h2>Risks / Trade-offs</h2>
           <p className="design-prose">{c.risks}</p>
         </section>
