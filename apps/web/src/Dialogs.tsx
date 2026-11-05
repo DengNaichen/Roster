@@ -125,7 +125,7 @@ export function NewIssueDialog({
             rows={5}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="Add a description… (Markdown)"
+            placeholder="Add a description… (HTML or Markdown)"
             disabled={saving}
           />
         </label>

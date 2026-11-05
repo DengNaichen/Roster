@@ -7,6 +7,7 @@ import { codingAgentName, personName } from "./shared";
 import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
+import { IssueDocument } from "./IssueDocument";
 import { WorkLogEntry, WorkLogList, ActivityTabs } from "./WorkLogs";
 import {
   RequestError,
@@ -346,7 +347,7 @@ export function IssueDetail({
           )}
         </section>
         <article className="detail-main">
-          <MarkdownText text={issue.description} />
+          <IssueDocument text={issue.description} />
           {issue.decisions.length > 0 && (
             <section className="detail-section decision-section" aria-label="Decisions">
               <h2>
@@ -692,7 +693,7 @@ function IssueEditor({
             rows={5}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="Add a description… (Markdown)"
+            placeholder="Add a description… (HTML or Markdown)"
             disabled={saving}
           />
         </label>

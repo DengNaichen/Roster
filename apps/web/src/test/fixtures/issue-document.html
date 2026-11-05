@@ -1,0 +1,61 @@
+<article>
+  <p class="issue-doc-lead">让用户在 Spec 的任务列表中直接识别依赖和阻塞关系。无需切换视图，也能知道一个任务正在等待谁，以及它会影响哪些后续工作。</p>
+  <section>
+    <h2>01 · 交付目标</h2>
+    <p>用户打开任务列表时，首先阅读任务标题和状态。当任务存在依赖时，再通过一枚紧凑的图标查看关系，而不是在每一行增加一段说明。</p>
+    <p><strong>完成后的变化：</strong>选中依赖提示即可看到直接前置与后续任务，包含它们的状态和负责人，并能跳转到任务详情。</p>
+  </section>
+  <section>
+    <h2>02 · 工作范围</h2>
+    <div class="issue-doc-columns">
+      <div class="issue-doc-panel issue-doc-scope">
+        <h3>本次包含</h3>
+        <ol>
+          <li>在 Spec 的 Issue 列表行内展示依赖图标与数量。</li>
+          <li>区分“被阻塞”和“阻塞后续任务”，用红色提示尚未解除的阻塞。</li>
+          <li>点击后展开直接关系，展示状态、负责人和详情入口。</li>
+        </ol>
+      </div>
+      <div class="issue-doc-panel">
+        <h3>本次不包含</h3>
+        <ol>
+          <li>不引入独立的 DAG 视图。</li>
+          <li>不自动修改任务优先级或执行顺序。</li>
+          <li>不在列表中编辑依赖，也不展开完整的上下游链路。</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>03 · 展示与交互</h2>
+    <table>
+      <thead><tr><th>任务情况</th><th>列表中的提示</th><th>点击后的内容</th></tr></thead>
+      <tbody>
+        <tr><td>存在未完成的前置任务</td><td>红色“被阻塞”图标与数量</td><td>前置任务及其当前状态、负责人</td></tr>
+        <tr><td>正在阻塞后续任务</td><td>红色“阻塞后续”图标与数量</td><td>当前 Spec 内的直接后续任务</td></tr>
+        <tr><td>前置任务均已完成</td><td>灰色依赖图标</td><td>保留关系，便于回溯实施顺序</td></tr>
+        <tr><td>没有依赖关系</td><td>不显示额外标记</td><td>保持现有列表行为</td></tr>
+      </tbody>
+    </table>
+    <p>悬停图标时显示简短说明，例如“被 RO-54 阻塞”。点击图标打开浮层；点击任务进入详情；按 Esc 或点击浮层外部关闭。</p>
+  </section>
+  <section>
+    <h2>04 · 实施约束</h2>
+    <ol>
+      <li><strong>沿用列表组件。</strong>保留现有状态分组、筛选、排序和选择行为，不改变任务的排列顺序。</li>
+      <li><strong>复用共享查询。</strong>通过 <code>GET /specs/:identifier/dependencies</code> 获取关系，REST 与 MCP 使用同一份可见性规则。</li>
+      <li><strong>及时刷新。</strong>任务状态变更后，更新相关依赖提示；关系加载失败时，任务列表仍然可用。</li>
+    </ol>
+    <aside class="issue-doc-note"><h3>需要注意的边界</h3><p>没有可见阻塞，不等于所有执行条件都已满足。隐藏任务不能通过名称、数量或间接路径泄露；后续任务仅统计当前 Spec 范围。</p></aside>
+  </section>
+  <section>
+    <h2>05 · 验收条件</h2>
+    <ol class="issue-doc-criteria">
+      <li><strong>可以识别阻塞。</strong>给任务关联一个未完成的前置任务后，列表出现红色图标，悬停说明与实际关系一致。</li>
+      <li><strong>可以查看直接关系。</strong>浮层正确列出前置和后续任务，点击编号或标题能打开对应详情。</li>
+      <li><strong>完成前置后及时更新。</strong>将前置任务标记为 Done 后，相关任务不再显示该项为未完成阻塞。</li>
+      <li><strong>列表行为不受影响。</strong>筛选、排序、状态分组、批量选择及长列表滚动保持可用。</li>
+      <li><strong>深浅主题一致可读。</strong>图标、正文与浮层继承主题颜色，窄窗口下不挤压出页面边界。</li>
+    </ol>
+  </section>
+</article>
