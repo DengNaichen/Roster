@@ -2,12 +2,6 @@
 
 面向人和 Agent 的任务工作区。React 页面与 MCP 共用 TypeScript 业务层，Supabase 提供 Postgres、Auth 和 Edge Functions，Vercel 托管前端。
 
-这是 InfTask 的独立 TypeScript 迁移版本。旧 InfTask 保持独立运行；这里不连接旧库，也不自动迁移正式数据。
-
-任务管理界面直接迁自 InfTask `0f7740bfbc29ba2755a778bba8a0f04074ea1224` 的 `web/src`：保留原页面与样式结构、列表/看板、Markdown 详情、新建/编辑弹窗、路由及保存队列。通过认证、REST 兼容和能力声明适配新后端，并保留后续项目样式调整，不另做一套简化 UI。全部业务能力已接通，能力声明全部启用。
-
-独立 Spec 界面沿用 InfTask AL-80 工作树中的原型布局与样式，接入真实读取、编辑、修订历史、比较及冲突恢复。迁移范围以当前可运行功能为准。
-
 ## 当前范围
 
 - Workspace 创建与切换、Admin/Member、停用与恢复、可重置的邀请链接。
