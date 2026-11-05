@@ -1,3 +1,4 @@
+import type { IssueDocument } from './issue-document.ts';
 import type { Label } from './catalog.ts';
 
 import type { ActivityIssueDetails } from './activity.ts';
@@ -53,7 +54,7 @@ export type Issue = {
   identifier: string;
   team: string;
   title: string;
-  description: string;
+  document: IssueDocument;
   status: IssueStatus;
   type: IssueType | null;
   priority: number;
@@ -79,7 +80,7 @@ export type IssueDetail = Issue & { audit: AuditEvent[]; children: Issue[] } & A
 export type CreateIssueInput = {
   team: string;
   title: string;
-  description?: string;
+  document?: IssueDocument;
   status?: IssueStatus;
   type?: IssueType | null;
   priority?: number;
@@ -155,3 +156,4 @@ export * from './catalog.ts';
 export * from './cycles.ts';
 
 export * from './spec.ts';
+export * from './issue-document.ts';
