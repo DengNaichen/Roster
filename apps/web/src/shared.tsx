@@ -271,12 +271,14 @@ export function NavLink({
   className,
   children,
   unavailable,
+  title,
   "aria-label": ariaLabel,
 }: {
   to: string;
   className?: string;
   children: ReactNode;
   unavailable?: boolean;
+  title?: string;
   "aria-label"?: string;
 }) {
   function open(event: MouseEvent) {
@@ -291,7 +293,7 @@ export function NavLink({
       onClick={open}
       aria-label={ariaLabel}
       aria-disabled={unavailable || undefined}
-      title={unavailable ? "This feature has not been migrated to Roster yet" : undefined}
+      title={unavailable ? "This feature has not been migrated to Roster yet" : title}
       style={unavailable ? { opacity: 0.5 } : undefined}
     >
       {children}
@@ -465,54 +467,85 @@ export function StatusSelect({
   );
 }
 
-export function AssigneeBadge({ person }: { person: Identity | null }) {
+export function AssigneeBadge({
+  person,
+  avatar = false,
+}: {
+  person: Identity | null;
+  avatar?: boolean;
+}) {
+  const name = person ? personName(person) : "Unassigned";
   return (
     <span
       className="assignee-badge"
-      title={person ? `Assignee: ${personName(person)}` : "Unassigned"}
+      title={person ? `Assignee: ${name}` : name}
+      role={avatar ? "img" : undefined}
+      aria-label={avatar ? `Assignee: ${name}` : undefined}
     >
-      <UserRound className="icon" />
-      <span>{person ? personName(person) : "Unassigned"}</span>
+      {avatar ? (
+        <span className="assignee-avatar" aria-hidden="true">
+          {person ? Array.from(name)[0].toUpperCase() : <UserRound className="icon" />}
+        </span>
+      ) : (
+        <UserRound className="icon" />
+      )}
+      <span className="assignee-name">{name}</span>
     </span>
   );
 }
 
-export function IssueMeta({ issue }: { issue: IssueSummary }) {
+export function IssueMeta({
+  issue,
+  layout = "inline",
+}: {
+  issue: IssueSummary;
+  layout?: "inline" | "row";
+}) {
   return (
     <span className="issue-meta">
-      <AssigneeBadge person={issue.assignee} />
-      {issue.labels.slice(0, 2).map((label) => (
-        <LabelBadge key={label.id} label={label} />
-      ))}
-      {issue.labels.length > 2 && (
-        <span
-          className="label-overflow"
-          title={issue.labels
-            .slice(2)
-            .map((l) => l.name)
-            .join(", ")}
-        >
-          +{issue.labels.length - 2}
-        </span>
-      )}
-      {issue.type && (
-        <span className="type-label" data-type={issue.type} title={issue.type}>
-          <span className="label-dot" />
-          {issue.type}
-        </span>
-      )}
-      {issue.project && (
-        <span className="project-label" title={issue.project}>
-          {issue.project_emoji ? (
-            <span className="project-emoji" aria-hidden="true">
-              {issue.project_emoji}
+      <AssigneeBadge person={issue.assignee} avatar={layout === "row"} />
+      <span className="issue-meta-secondary">
+        {issue.labels.slice(0, 2).map((label) => (
+          <span className="issue-meta-item" key={label.id}>
+            <LabelBadge label={label} />
+          </span>
+        ))}
+        {issue.labels.length > 2 && (
+          <span className="issue-meta-item">
+            <span
+              className="label-overflow"
+              title={issue.labels
+                .slice(2)
+                .map((l) => l.name)
+                .join(", ")}
+            >
+              +{issue.labels.length - 2}
             </span>
-          ) : (
-            <Box className="icon" />
-          )}
-          <span>{issue.project}</span>
-        </span>
-      )}
+          </span>
+        )}
+        {issue.type && (
+          <span className="issue-meta-item">
+            <span className="type-label" data-type={issue.type} title={issue.type}>
+              <span className="label-dot" />
+              <span className="type-label-name">{issue.type}</span>
+            </span>
+          </span>
+        )}
+        {issue.project && (
+          <span className="issue-meta-item">
+            <span className="project-label" title={issue.project}>
+              {issue.project_emoji ? (
+                <span className="project-emoji" aria-hidden="true">
+                  {issue.project_emoji}
+                </span>
+              ) : (
+                <Box className="icon" />
+              )}
+              <span>{issue.project}</span>
+            </span>
+          </span>
+        )}
+      </span>
     </span>
   );
 }
