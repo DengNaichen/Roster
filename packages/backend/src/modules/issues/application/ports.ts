@@ -2,6 +2,7 @@ import type {
   CreateIssueInput,
   Issue,
   IssueDetail,
+  IssueDocument,
   IssuePage,
   ListIssuesInput,
   RequestContext,
@@ -64,12 +65,16 @@ export interface IssueSession {
     refs: IssueReferences,
   ): Promise<StoredIssue>;
   update(current: IssueSnapshot, input: UpdateIssueInput, refs: IssueReferences): Promise<void>;
+  /** Locks the issue row until the transaction ends. */
+  lockDocument(issue: IssueSnapshot): Promise<IssueDocument>;
+  writeDocument(issue: IssueSnapshot, document: IssueDocument): Promise<void>;
   audit(
     ctx: RequestContext,
     w: WorkspaceScope,
     kind: string,
-    before: IssueSnapshot | null,
-    after: StoredIssue,
+    issueId: string,
+    before: unknown,
+    after: unknown,
   ): Promise<void>;
   output(ctx: RequestContext, w: WorkspaceScope, issue: IssueSnapshot): Promise<Issue>;
 }

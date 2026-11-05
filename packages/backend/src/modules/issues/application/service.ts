@@ -1,9 +1,13 @@
 import type { Service } from '../../../application/mod.ts';
 
 import { text } from '../../../platform/errors/validation.ts';
+import { setCriterionDone } from '../domain/document.ts';
 import { validateIssue } from '../domain/rules.ts';
 import type { IssueDependencies } from './ports.ts';
-export type IssueService = Pick<Service, 'listIssues' | 'getIssue' | 'createIssue' | 'updateIssue'>;
+export type IssueService = Pick<
+  Service,
+  'listIssues' | 'getIssue' | 'createIssue' | 'updateIssue' | 'checkIssueCriterion'
+>;
 
 export function createIssueService(
   deps: IssueDependencies,
@@ -25,7 +29,7 @@ export function createIssueService(
         const parent = await session.parent(ctx, w, input.parent, null);
         const number = await session.nextNumber(t);
         const r = await session.insert(w, t, number, input, { assignee, project, cycle, parent });
-        await session.audit(ctx, w, 'issue.created', null, r);
+        await session.audit(ctx, w, 'issue.created', r.id, null, r);
         return session.output(ctx, w, await session.read(ctx, w, r.identifier));
       });
     },
@@ -43,8 +47,27 @@ export function createIssueService(
           : await session.assignee(w, t, input.assignee);
         await session.update(r, input, { assignee, project, cycle, parent });
         const after = await session.read(ctx, w, identifier);
-        await session.audit(ctx, w, 'issue.updated', r, after);
+        await session.audit(ctx, w, 'issue.updated', r.id, r, after);
         return session.output(ctx, w, after);
+      });
+    },
+    checkIssueCriterion(ctx, slug, identifier, { criterion, done }) {
+      return deps.transaction(async (session) => {
+        const w = await session.workspace(ctx, slug);
+        const r = await session.read(ctx, w, identifier);
+        await session.team(ctx, w, r.team);
+        const change = setCriterionDone(await session.lockDocument(r), criterion, done);
+        if (change.before === done) return session.output(ctx, w, r);
+        await session.writeDocument(r, change.document);
+        await session.audit(
+          ctx,
+          w,
+          'issue.criterion_updated',
+          r.id,
+          { criterion, done: change.before },
+          { criterion, done },
+        );
+        return session.output(ctx, w, await session.read(ctx, w, identifier));
       });
     },
   };

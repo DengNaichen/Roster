@@ -7,6 +7,7 @@ import * as cycles from '../../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
+  checkIssueCriterionSchema,
   createTeamSchema,
   createWorkspaceSchema,
   joinTeamSchema,
@@ -329,6 +330,23 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
             c.req.param('workspace'),
             c.req.param('identifier'),
             await body(c, updateIssueSchema.pick({ status: true }).required()),
+          ),
+        ),
+      ),
+  );
+  app.patch(
+    '/api/w/:workspace/issues/:identifier/criteria/:criterion',
+    async (c) =>
+      c.json(
+        restIssue(
+          await s.checkIssueCriterion(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('identifier'),
+            checkIssueCriterionSchema.parse({
+              ...await body(c, checkIssueCriterionSchema.omit({ criterion: true })),
+              criterion: c.req.param('criterion'),
+            }),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import type { RequestContext } from '../../../contracts/mod.ts';
+import { checkIssueCriterionSchema } from '../../../contracts/issue-document.ts';
 import * as schemas from '../../../contracts/schemas.ts';
 import { identity } from '../modules/access/index.ts';
 import { describeIssues, fail } from '../platform/errors/validation.ts';
@@ -27,6 +28,7 @@ export function guardService(service: Service): Service {
     listIssues: schemas.listIssuesSchema,
     createIssue: schemas.createIssueSchema,
     updateIssue: schemas.updateIssueSchema,
+    checkIssueCriterion: checkIssueCriterionSchema,
   };
   const inputIndex: Record<string, number> = {
     createWorkspace: 1,
@@ -35,6 +37,7 @@ export function guardService(service: Service): Service {
     changeTeamMember: 3,
     joinTeam: 3,
     updateIssue: 3,
+    checkIssueCriterion: 3,
   };
   return new Proxy(service, {
     get(target, key: keyof Service) {

@@ -266,6 +266,7 @@ Deno.test('All original MCP tools are genuinely registered with input and output
       'set_spec_design',
       'link_spec_issue',
       'unlink_spec_issue',
+      'check_issue_criterion',
     ]
   ) {
     const tool = tools.find((t) => t.name === name);

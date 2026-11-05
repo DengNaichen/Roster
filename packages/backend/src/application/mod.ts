@@ -1,5 +1,6 @@
 import type {
   ChangeTeamMemberInput,
+  CheckIssueCriterionInput,
   CreateIssueInput,
   CreateTeamInput,
   Identity,
@@ -94,5 +95,11 @@ export interface Service extends CatalogService, CycleService, ActivityService, 
     slug: string,
     identifier: string,
     input: UpdateIssueInput,
+  ): Promise<Issue>;
+  checkIssueCriterion(
+    ctx: RequestContext,
+    slug: string,
+    identifier: string,
+    input: CheckIssueCriterionInput,
   ): Promise<Issue>;
 }

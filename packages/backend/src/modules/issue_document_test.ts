@@ -49,7 +49,8 @@ const full: IssueDocument = {
 };
 const url = Deno.env.get('ROSTER_TEST_DATABASE_URL');
 Deno.test({
-  name: 'Issue documents over REST and MCP: validation paths, whole replace, search',
+  name:
+    'Issue documents over REST and MCP: validation paths, whole replace, criterion checks, search',
   ignore: !url,
   sanitizeOps: false,
   sanitizeResources: false,
@@ -274,6 +275,102 @@ Deno.test({
           sections: [],
           criteria: [],
         }),
+      );
+
+      const criteria = `/issues/${created.identifier}/criteria`;
+      const checked = await rest<Issue>('member', `${criteria}/AC-1`, 'PATCH', { done: true });
+      assert(checked.document.criteria.find((c) => c.id === 'AC-1')?.done === true);
+      assert(checked.updated_at > created.updated_at, 'Checking bumps updated_at');
+      assert(
+        isDeepStrictEqual(checked.document.sections, full.sections) &&
+          checked.document.criteria.length === 3,
+        'Only the criterion changes',
+      );
+      const text = await admin.query('select document_text from roster.issues where id=$1', [
+        created.id,
+      ]);
+      assert(
+        text.rows[0].document_text.includes('[x] Blocked rows are marked.'),
+        text.rows[0].document_text,
+      );
+      const repeat = await rest<Issue>('member', `${criteria}/AC-1`, 'PATCH', { done: true });
+      assert(repeat.updated_at === checked.updated_at, 'Repeating a check is a no-op');
+      const history = (await rest<IssueDetail>('owner', `/issues/${created.identifier}`)).audit
+        .filter((e) => e.kind === 'issue.criterion_updated');
+      assert(history.length === 1, JSON.stringify(history));
+      assert(
+        isDeepStrictEqual(history[0].before, { criterion: 'AC-1', done: false }) &&
+          isDeepStrictEqual(history[0].after, { criterion: 'AC-1', done: true }) &&
+          history[0].actor_subject === member.identity.subject,
+        JSON.stringify(history[0]),
+      );
+      const unknown = await rest<{ error: { code: string; message: string } }>(
+        'owner',
+        `${criteria}/AC-9`,
+        'PATCH',
+        { done: true },
+        404,
+      );
+      assert(
+        unknown.error.message === 'Acceptance criterion AC-9 not found',
+        unknown.error.message,
+      );
+      await rest('owner', `${criteria}/criterion-1`, 'PATCH', { done: true }, 400);
+      await rest('owner', `${criteria}/AC-1`, 'PATCH', { done: 'yes' }, 400);
+      await rest('owner', `${criteria}/AC-1`, 'PATCH', { done: true, criterion: 'AC-2' }, 400);
+      await rest('outsider', `${criteria}/AC-2`, 'PATCH', { done: true }, 403);
+      const secret = await service.createIssue(owner, w.slug, {
+        team: 'SEC',
+        title: 'Private',
+        document: full,
+      });
+      await rest(
+        'member',
+        `/issues/${secret.identifier}/criteria/AC-1`,
+        'PATCH',
+        { done: true },
+        404,
+      );
+      const denied = await call('member', 'check_issue_criterion', {
+        identifier: secret.identifier,
+        criterion: 'AC-1',
+        done: true,
+      });
+      assert(denied.isError && denied.content[0].text.includes('"code":"not_found"'));
+      assert(
+        (await service.getIssue(owner, w.slug, secret.identifier)).document.criteria[0].done ===
+          false,
+        'Denied checks leave the document unchanged',
+      );
+
+      await Promise.all([
+        rest('owner', `${criteria}/AC-2`, 'PATCH', { done: true }),
+        mcpOk('member', 'check_issue_criterion', {
+          identifier: created.identifier,
+          criterion: 'AC-3',
+          done: false,
+        }),
+        rest('member', `${criteria}/AC-1`, 'PATCH', { done: false }),
+      ]);
+      const after = await mcpOk('owner', 'get_issue', { identifier: created.identifier });
+      assert(
+        isDeepStrictEqual(after.document.criteria.map((c) => [c.id, c.done]), [
+          ['AC-1', false],
+          ['AC-2', true],
+          ['AC-3', false],
+        ]),
+        'Concurrent checks of different criteria all persist: ' +
+          JSON.stringify(after.document.criteria),
+      );
+      const unknownMcp = await call('owner', 'check_issue_criterion', {
+        identifier: created.identifier,
+        criterion: 'AC-7',
+        done: true,
+      });
+      assert(
+        unknownMcp.isError &&
+          unknownMcp.content[0].text.includes('Acceptance criterion AC-7 not found'),
+        unknownMcp.content[0].text,
       );
 
       const search = async (query: string) =>

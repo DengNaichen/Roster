@@ -6,6 +6,7 @@ import * as cycles from '../../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
+  checkIssueCriterionSchema,
   createIssueSchema,
   createTeamSchema,
   createWorkspaceSchema,
@@ -179,6 +180,7 @@ const resultSchemas: Record<string, z.ZodType> = {
   }),
   create_issue: issueOutput,
   update_issue: issueOutput,
+  check_issue_criterion: issueOutput,
 };
 export function createMcpServer(service: Service, ctx: RequestContext, workspace: string) {
   const server = new McpServer({ name: 'roster', version: '0.1.0' });
@@ -346,11 +348,20 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     'update_issue',
     'Update a visible issue; omitted properties remain unchanged. `document` replaces the whole ' +
       'body: read it with get_issue, edit it, and send it back complete. Keep existing criterion ' +
-      'IDs and give new criteria the next unused number.',
+      'IDs and give new criteria the next unused number. To tick one criterion after verifying ' +
+      'it, call check_issue_criterion instead of rewriting the document.',
     { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
     false,
     ({ identifier, ...i }) =>
       service.updateIssue(ctx, workspace, identifier, restUpdateIssueSchema.parse(i)),
+  );
+  tool(
+    'check_issue_criterion',
+    'Set done on one acceptance criterion by ID without rewriting the document. Mark it done ' +
+      'only after verifying the outcome, and record the evidence with add_work_log.',
+    { identifier: z.string(), ...checkIssueCriterionSchema.shape },
+    false,
+    ({ identifier, ...i }) => service.checkIssueCriterion(ctx, workspace, identifier, i),
   );
   tool(
     'list_assignees',

@@ -81,8 +81,18 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
               },assignee_subject=${refs.assignee},project_id=${refs.project},cycle_id=${refs.cycle},parent_id=${refs.parent},updated_at=clock_timestamp() where id=${r.id}`,
             );
           },
-          audit: (ctx, w, kind, before, after) =>
-            audit(session, ctx, w, kind, before, after, after.id),
+          lockDocument: async (r) =>
+            (await one(tx, sql`select document from roster.issues where id=${r.id} for update`))
+              .document as IssueDocument,
+          writeDocument: async (r, document) => {
+            await tx.execute(
+              sql`update roster.issues set (document,document_text)=(${
+                documentColumns(document)
+              }),updated_at=clock_timestamp() where id=${r.id}`,
+            );
+          },
+          audit: (ctx, w, kind, issueId, before, after) =>
+            audit(session, ctx, w, kind, before, after, issueId),
           output: async (ctx, w, r) => (await hydrateCoreIssues(tx, ctx, w, [r]))[0],
         });
       }),
