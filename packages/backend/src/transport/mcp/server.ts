@@ -141,6 +141,7 @@ const resultSchemas: Record<string, z.ZodType> = {
   }),
   list_specs: z.array(specSummaryOutput),
   get_spec: specOutput,
+  get_spec_dependencies: specs.specDependenciesSchema,
   get_spec_design: z.object({
     identifier: specIdentifierOutput,
     design: specs.storedDesignSchema.nullable(),
@@ -575,6 +576,13 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     specs.listSpecsSchema.shape,
     true,
     (i) => service.listSpecs(ctx, workspace, i),
+  );
+  tool(
+    'get_spec_dependencies',
+    'Read visible linked issues and their recursive prerequisites. Edges point from prerequisite to dependent. External nodes are not directly linked to this spec. Invisible issues and paths through them are omitted.',
+    specs.getSpecSchema.shape,
+    true,
+    (i) => service.getSpecDependencies(ctx, workspace, i.identifier),
   );
   tool(
     'get_spec_design',

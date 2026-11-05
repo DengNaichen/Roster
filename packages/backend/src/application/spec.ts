@@ -8,6 +8,7 @@ import type {
   listSpecsSchema,
   setSpecDesignSchema,
   Spec,
+  SpecDependencies,
   SpecIssueChange,
   SpecRevision,
   SpecRevisionSummary,
@@ -16,6 +17,11 @@ import type {
   updateSpecSchema,
 } from '../../../contracts/spec.ts';
 export interface SpecService {
+  getSpecDependencies(
+    ctx: RequestContext,
+    slug: string,
+    identifier: string,
+  ): Promise<SpecDependencies>;
   getSpecDesign(
     ctx: RequestContext,
     slug: string,

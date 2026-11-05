@@ -261,6 +261,7 @@ Deno.test('All original MCP tools are genuinely registered with input and output
       ...originalMcpTools,
       'list_spec_issues',
       'list_issue_specs',
+      'get_spec_dependencies',
       'get_spec_design',
       'set_spec_design',
       'link_spec_issue',

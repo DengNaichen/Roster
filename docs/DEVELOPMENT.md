@@ -23,6 +23,14 @@ Agent 通过工作区 MCP 调用 `get_spec_design`（参数为 `identifier`）�
 
 本机免登录预览支持在 API 端口的 `/w/roster/mcp` 接入本地 MCP 客户端，使用预览固定身份，拒绝带浏览器 Origin 或 Fetch Metadata 的请求。部署环境沿用现有 MCP 授权流程。
 
+## Spec 依赖图
+
+`GET /api/w/:workspace/specs/:identifier/dependencies` 与 MCP `get_spec_dependencies`（参数 `identifier`）返回相同的 `nodes`、`edges`。节点以 Issue UUID 标识，包含票号、标题、状态、负责人和 `external` 标记。边从前置任务的 `from` 指向后续任务的 `to`。
+
+读取结果包含直接关联任务与它们的递归前置任务。`external` 表示该节点未直接关联当前 Spec。Spec 和每个节点都按调用者权限检查，隐藏节点以及经过隐藏节点的路径被省略。图展示的是可见关系，无法据此断言任务已经满足所有执行条件。
+
+前端按当前任务范围和过滤条件选择关联节点，并保留必要的可见前置节点。点击节点可以打开真实 Issue 详情。
+
 ## 数据访问
 
 ### 原前端兼容

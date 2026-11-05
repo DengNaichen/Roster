@@ -3,103 +3,59 @@ import { Dropdown } from "./Dropdown";
 import { useState } from "react";
 import {
   columns,
-  issueScopes,
+  apiPath,
+  RequestError,
+  NavLink,
+  pagePath,
   AssigneeBadge,
   StatusIcon,
-  type IssueScope,
-  type Status,
 } from "./shared";
 import "./spec-dependencies.css";
+import type { SpecDependencies as SpecGraph } from "../../../packages/contracts/spec";
+import { useResource } from "./useResource";
+import { dependencyLayout } from "./dependencyLayout";
 
-type Node = {
-  id: string;
-  title: string;
-  status: Status;
-  x: number;
-  y: number;
-  owner: string;
-  description: string;
-};
-const lanes = [
-  ["确定关联语义", "建立关联表", "实现关联写入", "接入网页操作", "验证并发请求", "验收关联行为"],
-  [
-    "确认可见性规则",
-    "实现权限查询",
-    "校验关联两端",
-    "接入私有团队过滤",
-    "验证权限变化",
-    "验收访问边界",
-  ],
-  [
-    "定义接口契约",
-    "实现双向查询",
-    "注册 MCP 工具",
-    "接入 Agent 调用",
-    "验证重试行为",
-    "验收 MCP 集成",
-  ],
-  [
-    "定义进度口径",
-    "实现计数查询",
-    "增加查询索引",
-    "接入进度展示",
-    "验证分页与计数",
-    "验收进度统计",
-  ],
-  ["整理历史数据", "制定数据迁移", "编写迁移脚本", "准备灰度数据", "验证回退路径", "发布前检查"],
-];
-const nodeId = (lane: number, stage: number) =>
-  "D-" + String(lane * 6 + stage + 1).padStart(2, "0");
-const nodes: Node[] = lanes.flatMap((titles, lane) =>
-  titles.map((title, stage) => ({
-    id: nodeId(lane, stage),
-    title,
-    status: (stage === 0
-      ? "done"
-      : stage === 1
-        ? lane === 1
-          ? "backlog"
-          : "in_progress"
-        : "todo") as Status,
-    x: 28 + stage * 292,
-    y: 36 + lane * 156,
-    owner: ["Chen", "Lin", "Agent"][lane % 3],
-    description: `“${title}”属于示例实施路线 ${lane + 1}，用于观察多任务的先后关系。完成后可推进右侧后续工作。`,
-  })),
-);
-const edges: string[][] = lanes.flatMap((_, lane) =>
-  Array.from({ length: 5 }, (_, stage) => [nodeId(lane, stage), nodeId(lane, stage + 1)]),
-);
-edges.push(
-  [nodeId(0, 1), nodeId(2, 2)],
-  [nodeId(1, 2), nodeId(0, 3)],
-  [nodeId(3, 4), nodeId(4, 5)],
-  [nodeId(2, 4), nodeId(4, 5)],
-);
-const width = 1756,
-  height = 820;
-export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
+export function SpecDependencies({ id, visible }: { id: string; visible: string[] }) {
+  const resource = useResource<SpecGraph | null>(
+    apiPath(`/specs/${encodeURIComponent(id)}/dependencies`),
+    null,
+  );
   const [zoom, setZoom] = useState("0.75");
   const scale = Number(zoom);
-  const [selected, setSelected] = useState("D-02");
-  const statuses = issueScopes.find((s) => s.value === scope)?.statuses;
+  const [selected, setSelected] = useState("");
+  let layout: ReturnType<typeof dependencyLayout>;
+  try {
+    layout = dependencyLayout(resource.data ?? { nodes: [], edges: [] }, new Set(visible));
+  } catch {
+    return <RequestError message="Unable to lay out dependencies. The graph contains a cycle." />;
+  }
+  const { nodes, edges: relations, width, height } = layout;
+  const edges = relations.map((e) => [e.from, e.to]);
   const focused = new Set(
-    nodes.filter((n) => !statuses || statuses.includes(n.status)).map((n) => n.id),
+    nodes.filter((n) => !n.external && visible.includes(n.identifier)).map((n) => n.id),
   );
-  const shown = new Set(focused);
-  // Keep every prerequisite needed to explain the selected scope.
-  for (let i = 0; i < nodes.length; i++)
-    for (const [from, to] of edges) if (shown.has(to)) shown.add(from);
+  const shown = new Set(nodes.map((n) => n.id));
   const current = nodes.find((n) => n.id === selected && shown.has(n.id));
   const blockers = (id: string) =>
     edges
       .filter(([, to]) => to === id)
       .map(([from]) => nodes.find((n) => n.id === from)!)
       .filter((n) => n.status !== "done");
+  if (resource.error)
+    return (
+      <div className="scope-message">
+        <RequestError message={resource.error} />
+        <button className="button" onClick={() => void resource.reload()}>
+          Retry dependencies
+        </button>
+      </div>
+    );
+  if (!resource.data) return <p className="empty">Loading dependencies…</p>;
+  if (!nodes.length) return <p className="empty">No linked issues match these filters.</p>;
   return (
     <div className="dependency-demo">
       <div className="dependency-caption">
-        <span>依赖图 · 30 个示例任务 · {shown.size} 个可见</span>
+        <span>依赖图 · {shown.size} 个可见任务</span>
         <Dropdown
           aria-label="Graph zoom"
           value={zoom}
@@ -110,7 +66,7 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
             { value: "1", label: "100%" },
           ]}
         />
-        <span>箭头指向后续任务 · 淡色为范围外的前置任务</span>
+        <span>箭头指向后续任务 · 淡色为范围外的前置任务 · 仅展示有权查看的关系</span>
       </div>
       <div className="dependency-scroll">
         <div style={{ width: width * scale, height: height * scale }}>
@@ -153,7 +109,10 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
                   onClick={() => setSelected(n.id)}
                   aria-pressed={selected === n.id}
                 >
-                  <span className="card-identifier">{n.id}</span>
+                  <span className="card-identifier">
+                    {n.identifier}
+                    {n.external ? " · 外部依赖" : ""}
+                  </span>
                   <span className="card-heading">
                     <span title={columns.find((c) => c.status === n.status)?.label}>
                       <StatusIcon status={n.status} />
@@ -161,13 +120,13 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
                     <span className="card-title">{n.title}</span>
                   </span>
                   <span className="dependency-node-meta">
-                    <AssigneeBadge person={{ subject: n.owner, name: n.owner, email: "" }} />
+                    <AssigneeBadge person={n.assignee} />
                     <span>
                       {n.status === "done"
                         ? "已完成"
                         : blockers(n.id).length
                           ? `等待 ${blockers(n.id).length} 项`
-                          : "前置已就绪"}
+                          : "无可见阻塞"}
                     </span>
                   </span>
                 </button>
@@ -178,17 +137,17 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
       {current && (
         <section className="dependency-selection">
           <div>
-            <span className="spec-id">{current.id}</span>
+            <span className="spec-id">{current.identifier}</span>
             <h3>{current.title}</h3>
           </div>
-          <p>{current.description}</p>
+          <NavLink to={pagePath(`/issue/${current.identifier}`)}>打开任务详情</NavLink>
           <p className="dependency-caption">
             {blockers(current.id).length
               ? "尚未完成的前置任务 · " +
                 blockers(current.id)
-                  .map((n) => n.id + " " + n.title)
+                  .map((n) => n.identifier + " " + n.title)
                   .join("、")
-              : "所有前置任务已完成"}
+              : "没有尚未完成的可见前置任务"}
           </p>
         </section>
       )}

@@ -182,3 +182,25 @@ export const changeSpecIssuesSchema = z.strictObject({
 export const specIssueSchema = z.strictObject({ identifier, issue: issueIdentifier });
 export const listIssueSpecsSchema = z.strictObject({ issue: issueIdentifier });
 export type SpecIssueChange = { identifier: string; issues: string[]; linked: boolean };
+
+export const specDependenciesSchema = z.object({
+  nodes: z.array(z.object({
+    id: z.string().uuid(),
+    identifier: z.string(),
+    title: z.string(),
+    status: z.enum([
+      'triage',
+      'backlog',
+      'todo',
+      'agent_ready',
+      'in_progress',
+      'in_review',
+      'done',
+      'canceled',
+    ]),
+    external: z.boolean(),
+    assignee: z.object({ subject: z.string(), name: z.string(), email: z.string() }).nullable(),
+  })),
+  edges: z.array(z.object({ from: z.string().uuid(), to: z.string().uuid() })),
+});
+export type SpecDependencies = z.output<typeof specDependenciesSchema>;

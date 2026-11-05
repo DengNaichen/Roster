@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { SpecDependencyDemo } from "./SpecDependencyDemo";
+import { SpecDependencies } from "./SpecDependencies";
 import { NewIssueDialog } from "./Dialogs";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, type ViewMode } from "./IssueViews";
@@ -220,7 +220,7 @@ export default function SpecIssues({
         </p>
       )}
       {dependencies ? (
-        <SpecDependencyDemo scope={scope} />
+        <SpecDependencies id={id} visible={visible.map((issue) => issue.identifier)} />
       ) : (
         <IssueViews
           view={view}
