@@ -42,11 +42,16 @@
   display: flex;
   gap: var(--space-8);
   padding: var(--space-8);
-  border-radius: var(--radius);
-  color: var(--text);
+  min-height: var(--space-32);
+  border-radius: var(--radius-lg);
+  color: var(--text-2);
 }
 .dependency-related-issue:hover {
+  color: var(--text);
   background: var(--hover);
+}
+.dependency-related-issue:focus-visible {
+  outline-offset: calc(-1 * var(--focus-width));
 }
 .dependency-related-content {
   min-width: 0;

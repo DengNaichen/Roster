@@ -149,18 +149,6 @@
 .workspace-trigger .icon {
   flex: none;
 }
-.toolbar-popover:not(.filter-popover, .display-popover) {
-  z-index: 20;
-  max-width: calc(100vw - var(--space-16));
-  max-height: var(--radix-popover-content-available-height);
-  overflow: auto;
-  padding: var(--space-4);
-  color: var(--text-2);
-  background: var(--raised);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-menu);
-}
 .workspace-menu,
 .account-menu {
   width: var(--sidebar-width);
@@ -513,7 +501,7 @@
   color: var(--text);
   background: var(--button-hover);
 }
-:is(.filter-popover, .display-popover) .toolbar-popover-heading {
+:is(.filter-popover, .display-popover, .issue-dependency-popover) .toolbar-popover-heading {
   font-size: var(--font-size-13);
   font-weight: var(--weight-regular);
 }
