@@ -1,15 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { isDarkAppearance, resolveColorTokens, subscribeAppearance } from "./appearance";
 
 const renderer = import("mermaid");
-const preference = "(prefers-color-scheme: dark)";
-function subscribeTheme(update: () => void) {
-  const media = window.matchMedia(preference);
-  media.addEventListener("change", update);
-  return () => media.removeEventListener("change", update);
-}
-function isDark() {
-  return window.matchMedia(preference).matches;
-}
 
 // Mermaid draws each sequence participant twice. Match both boxes by name.
 function tintNodes(svg: string, colors: string[], surface: string) {
@@ -30,7 +22,7 @@ function tintNodes(svg: string, colors: string[], surface: string) {
 }
 
 export default function DesignDiagram({ source }: { source: string }) {
-  const dark = useSyncExternalStore(subscribeTheme, isDark);
+  const dark = useSyncExternalStore(subscribeAppearance, isDarkAppearance);
   const [result, setResult] = useState({ image: "", error: "" });
   useEffect(() => {
     let active = true;
@@ -38,8 +30,18 @@ export default function DesignDiagram({ source }: { source: string }) {
       try {
         const { default: mermaid } = await renderer;
         if (!active) return;
-        const css = getComputedStyle(document.documentElement);
-        const token = (name: string) => css.getPropertyValue(name).trim();
+        const names = [
+          "--text",
+          "--surface-card",
+          "--raised",
+          "--text-3",
+          "--link",
+          "--accent",
+          "--success",
+          "--pr-merged",
+        ];
+        const resolved = resolveColorTokens(names);
+        const token = (name: string) => resolved[names.indexOf(name)];
         const text = token("--text"),
           surface = token("--surface-card"),
           node = token("--raised"),

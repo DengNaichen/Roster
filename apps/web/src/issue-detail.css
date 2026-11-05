@@ -9,11 +9,15 @@
   grid-template-columns: minmax(0, 1fr) var(--detail-properties-width);
   grid-template-rows: auto 1fr;
   align-items: start;
-  column-gap: var(--space-48);
+  column-gap: var(--r-layout-column-gap);
   row-gap: var(--space-24);
-  max-width: calc(var(--content-max-width) + var(--detail-properties-width) + var(--space-48));
+  max-width: calc(
+    var(--content-max-width) +
+    var(--detail-properties-width) +
+    var(--r-layout-column-gap)
+  );
   margin: 0 auto;
-  padding: var(--space-40) var(--space-32) var(--space-64);
+  padding: var(--r-space-32) var(--r-layout-gutter) var(--r-space-64);
 }
 .detail-heading {
   grid-column: 1;
@@ -22,8 +26,7 @@
 .detail-heading h1 {
   margin: 0;
   color: var(--text);
-  font-size: var(--font-size-24);
-  font-weight: var(--weight-heading);
+  font: var(--r-type-heading-lg);
   font-variation-settings: "opsz" var(--font-optical-heading);
   letter-spacing: var(--tracking-title);
   line-height: var(--line-title);
@@ -323,7 +326,7 @@
   background: var(--hover);
 }
 .issue-composer .composer-property:has(.dropdown:disabled) {
-  opacity: var(--opacity-disabled);
+  color: var(--r-color-text-disabled);
 }
 .issue-composer .composer-priority {
   padding-right: 0;
@@ -340,7 +343,7 @@
   border-top: var(--border-width) solid var(--border);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1279px) {
   .detail-content {
     grid-template-columns: minmax(0, 1fr);
     max-width: var(--content-max-width);

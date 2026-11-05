@@ -1,0 +1,365 @@
+/*
+ * Roster design tokens v1 — application baseline, 2026-11-05.
+ *
+ * PRODUCT CONTRACT
+ * - Dense work surfaces: navigation, lists, boards, timelines, properties.
+ * - Reading surfaces: issue/spec documents, decisions, comments, work logs.
+ * - Editing surfaces: forms, settings, authentication, dialogs.
+ * These share visual meaning; they do not share one font size or row height.
+ *
+ * OWNERSHIP
+ * --r-ref-*       private palette; edit only when changing the system.
+ * --r-space-*     shared spacing scale; choose by proximity and grouping.
+ * --r-color-*     public UI colors, including interaction and feedback roles.
+ * --r-type-*      complete font roles (weight, size, line height, family).
+ * --r-size-*      interaction dimensions, independent of the spacing scale.
+ * --r-layout-*    reusable layout constraints, not arbitrary column widths.
+ * --r-status-* / --r-pr-* / --r-priority-* / --r-type-color-* / --r-chart-*
+ *                 domain/data mappings, separate from UI feedback and branding.
+ *
+ * THEMING & DENSITY
+ * Uses CSS light-dark(), supported by current evergreen browsers.
+ * On document.documentElement: data-roster-theme="light" | "dark".
+ * Remove the attribute to follow the system. Density: "compact" (default)
+ * or "comfortable". Theme/density scopes are document-wide in this v1.
+ * Coarse pointers enlarge interaction targets independently of text size.
+ * Explicit colors on special surfaces must use their matching foreground.
+ *
+ * USE
+ * .list-row { min-block-size: var(--r-size-row); font: var(--r-type-ui); }
+ * .document { font: var(--r-type-prose); max-inline-size: var(--r-layout-reading); }
+ * .dialog { padding: var(--r-inset-dialog); border-radius: var(--r-radius-dialog); }
+ * Theme changes may require rerendering canvases, diagrams, and third-party UI.
+ *
+ * BOUNDARIES
+ * - Rem values assume the browser default 16px; never force html to 13px.
+ * - Heights are minimums unless the layout truly needs fixed aligned tracks.
+ * - Text may wrap/grow at zoom; density never shrinks prose or font roles.
+ * - 1px borders, icon strokes, optical offsets, and data-driven positions are
+ *   not spacing tokens. A documented local adjustment need not become global.
+ * - Custom label colors are user data. Keep label text on a readable neutral
+ *   foreground; a colored dot/stripe can carry identity alongside its name.
+ * - Component aliases belong to the component unless a real shared override
+ *   is needed. Do not create copies for Issues, Specs, Projects, and Settings.
+ * - New public tokens need a semantic purpose and representative usages;
+ *   new raw values need a reason the existing scale cannot serve that purpose.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Private reference palette: only the stops used by v1 are defined. */
+  --r-ref-neutral-0: #ffffff;
+  --r-ref-neutral-50: #f6f7f9;
+  --r-ref-neutral-100: #eef0f3;
+  --r-ref-neutral-200: #d8dce3;
+  --r-ref-neutral-300: #b7beca;
+  --r-ref-neutral-400: #919bab;
+  --r-ref-neutral-500: #626d80;
+  --r-ref-neutral-600: #4c5668;
+  --r-ref-neutral-700: #364152;
+  --r-ref-neutral-800: #272d38;
+  --r-ref-neutral-850: #1f242d;
+  --r-ref-neutral-900: #181c23;
+  --r-ref-neutral-950: #111418;
+  --r-ref-indigo-50: #eef0ff;
+  --r-ref-indigo-100: #e2e6ff;
+  --r-ref-indigo-200: #a8b2ff;
+  --r-ref-indigo-300: #a0aafb;
+  --r-ref-indigo-400: #8995f5;
+  --r-ref-indigo-500: #7584e6;
+  --r-ref-indigo-600: #5661c4;
+  --r-ref-indigo-700: #4955b4;
+  --r-ref-indigo-800: #3d489e;
+  --r-ref-indigo-900: #343959;
+  --r-ref-indigo-950: #292d4b;
+  --r-ref-green-light: #267844;
+  --r-ref-green-dark: #7acb96;
+  --r-ref-amber-light: #8a5b12;
+  --r-ref-amber-dark: #e7b85d;
+  --r-ref-red-light: #b2374b;
+  --r-ref-red-dark: #f29ba7;
+  --r-ref-blue-light: #2e62a5;
+  --r-ref-blue-dark: #91b9ed;
+  --r-ref-purple-light: #7955a0;
+  --r-ref-purple-dark: #c0a6e8;
+  --r-ref-orange-light: #a04c1d;
+  --r-ref-orange-dark: #f2ad78;
+  --r-ref-teal-light: #207783;
+  --r-ref-teal-dark: #7bcbd2;
+
+  /* Space: 4px is the working rhythm; 2px serves micro separation. */
+  --r-space-0: 0;
+  --r-space-2: 0.125rem;
+  --r-space-4: 0.25rem;
+  --r-space-8: 0.5rem;
+  --r-space-12: 0.75rem;
+  --r-space-16: 1rem;
+  --r-space-24: 1.5rem;
+  --r-space-32: 2rem;
+  --r-space-48: 3rem;
+  --r-space-64: 4rem;
+  --r-gap-label: var(--r-space-4);
+  --r-gap-related: var(--r-space-8);
+  --r-gap-fields: var(--r-space-16);
+  --r-gap-groups: var(--r-space-24);
+  --r-gap-sections: var(--r-space-32);
+  --r-inset-dense: var(--r-space-8);
+  --r-inset-control: var(--r-space-12);
+  --r-inset-panel: var(--r-space-16);
+  --r-inset-dialog: var(--r-space-24);
+
+  /* Typography: UI, reading, headings, and code have distinct roles. */
+  --r-font-ui:
+    "Inter Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --r-font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --r-font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --r-weight-regular: 400;
+  --r-weight-medium: 500;
+  --r-weight-semibold: 600;
+  --r-type-caption: var(--r-weight-regular) 0.75rem / 1rem var(--r-font-ui);
+  --r-type-label: var(--r-weight-medium) 0.75rem / 1rem var(--r-font-ui);
+  --r-type-ui: var(--r-weight-regular) 0.8125rem / 1.25rem var(--r-font-ui);
+  --r-type-ui-strong: var(--r-weight-medium) 0.8125rem / 1.25rem var(--r-font-ui);
+  --r-type-body: var(--r-weight-regular) 0.875rem / 1.375rem var(--r-font-ui);
+  --r-type-field: var(--r-type-body);
+  --r-type-prose: var(--r-weight-regular) 0.9375rem / 1.625rem var(--r-font-ui);
+  --r-type-heading-sm: var(--r-weight-semibold) 1rem / 1.5rem var(--r-font-ui);
+  --r-type-heading-md: var(--r-weight-semibold) 1.25rem / 1.75rem var(--r-font-ui);
+  --r-type-heading-lg: var(--r-weight-semibold) 1.5rem / 2rem var(--r-font-ui);
+  --r-type-code: var(--r-weight-regular) 0.8125rem / 1.25rem var(--r-font-mono);
+  --r-tracking-heading: -0.02em;
+  /* Numeric tables use font-variant-numeric: tabular-nums; prose does not. */
+
+  /* Surfaces are roles, not DOM depth; nested cards do not keep getting lighter. */
+  --r-color-bg-canvas: light-dark(var(--r-ref-neutral-50), var(--r-ref-neutral-950));
+  --r-color-bg-surface: light-dark(var(--r-ref-neutral-0), var(--r-ref-neutral-900));
+  --r-color-bg-subtle: light-dark(var(--r-ref-neutral-100), var(--r-ref-neutral-850));
+  --r-color-bg-overlay: light-dark(var(--r-ref-neutral-0), var(--r-ref-neutral-800));
+  --r-color-text-primary: light-dark(var(--r-ref-neutral-900), var(--r-ref-neutral-100));
+  --r-color-text-secondary: light-dark(var(--r-ref-neutral-600), var(--r-ref-neutral-300));
+  --r-color-text-muted: light-dark(var(--r-ref-neutral-500), var(--r-ref-neutral-400));
+  --r-color-text-disabled: light-dark(var(--r-ref-neutral-400), var(--r-ref-neutral-500));
+  --r-color-icon: var(--r-color-text-secondary);
+  --r-color-icon-muted: var(--r-color-text-muted);
+  /* Divider is decorative. Control is for necessary field/control boundaries. */
+  --r-color-border-divider: light-dark(var(--r-ref-neutral-200), var(--r-ref-neutral-800));
+  --r-color-border-control: light-dark(var(--r-ref-neutral-500), var(--r-ref-neutral-400));
+  --r-color-border-hover: light-dark(var(--r-ref-neutral-600), var(--r-ref-neutral-300));
+  --r-color-focus-ring: light-dark(var(--r-ref-indigo-600), var(--r-ref-indigo-200));
+  --r-color-link: light-dark(var(--r-ref-indigo-700), var(--r-ref-indigo-200));
+  --r-color-link-hover: light-dark(var(--r-ref-indigo-800), var(--r-ref-indigo-300));
+
+  /* Neutral, selection, and action states are separate contracts. */
+  --r-color-bg-hover: light-dark(var(--r-ref-neutral-100), var(--r-ref-neutral-850));
+  --r-color-bg-pressed: light-dark(var(--r-ref-neutral-200), var(--r-ref-neutral-800));
+  --r-color-bg-nav-current: var(--r-color-bg-pressed);
+  --r-color-text-nav-current: var(--r-color-text-primary);
+  --r-color-bg-selected: light-dark(var(--r-ref-indigo-50), var(--r-ref-indigo-950));
+  --r-color-bg-selected-hover: light-dark(var(--r-ref-indigo-100), var(--r-ref-indigo-900));
+  --r-color-text-selected: light-dark(var(--r-ref-indigo-700), var(--r-ref-indigo-200));
+  --r-color-border-selected: var(--r-color-focus-ring);
+  --r-color-bg-disabled: light-dark(var(--r-ref-neutral-100), var(--r-ref-neutral-850));
+  --r-color-bg-action: light-dark(var(--r-ref-indigo-600), var(--r-ref-indigo-400));
+  --r-color-bg-action-hover: light-dark(var(--r-ref-indigo-700), var(--r-ref-indigo-300));
+  --r-color-bg-action-pressed: light-dark(var(--r-ref-indigo-800), var(--r-ref-indigo-500));
+  --r-color-text-on-action: light-dark(var(--r-ref-neutral-0), var(--r-ref-neutral-950));
+  /* Dark action buttons deliberately use a dark foreground; do not force white. */
+  --r-color-bg-danger-action: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-color-bg-danger-action-hover: light-dark(#982c3e, #f6b3bc);
+  --r-color-bg-danger-action-pressed: light-dark(#802435, #e78997);
+  --r-color-text-on-danger-action: light-dark(var(--r-ref-neutral-0), var(--r-ref-neutral-950));
+
+  /* Feedback pairs: always use foreground with its matching background. */
+  --r-color-success-fg: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));
+  --r-color-success-bg: light-dark(#edf7f0, #1c3025);
+  --r-color-warning-fg: light-dark(var(--r-ref-amber-light), var(--r-ref-amber-dark));
+  --r-color-warning-bg: light-dark(#fff6e5, #352b19);
+  --r-color-danger-fg: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-color-danger-bg: light-dark(#fff0f2, #3b2028);
+  --r-color-info-fg: light-dark(var(--r-ref-blue-light), var(--r-ref-blue-dark));
+  --r-color-info-bg: light-dark(#edf4fd, #172941);
+  --r-color-code-bg: var(--r-color-bg-subtle);
+  --r-color-code-fg: var(--r-color-text-primary);
+  --r-color-scrim: light-dark(rgb(17 20 24 / 36%), rgb(0 0 0 / 64%));
+
+  /* Desktop compact defaults. Field = form input; control = toolbar/button. */
+  --r-size-control: 1.75rem; /* 28px */
+  --r-size-field: 2.25rem; /* 36px */
+  --r-size-row: 2.25rem; /* 36px */
+  --r-size-nav-row: 1.75rem; /* 28px */
+  --r-size-menu-row: 2rem; /* 32px */
+  --r-size-hit-min: 1.5rem; /* 24px; interactive icon hit area, not glyph size */
+  --r-size-icon-sm: 0.875rem; /* 14px; metadata only */
+  --r-size-icon: 1rem; /* 16px; default */
+  --r-size-icon-lg: 1.25rem; /* 20px; large control */
+  --r-icon-stroke: 1.5;
+  --r-size-avatar-sm: 1rem;
+  --r-size-avatar: 1.5rem;
+  --r-size-avatar-lg: 2rem;
+  --r-size-badge: 1.25rem; /* visual, noninteractive badge; controls use hit minimum */
+
+  /* Max widths, not mandatory widths. Lists/boards/timelines may fill available space. */
+  --r-layout-sidebar: 15rem; /* 240px */
+  --r-layout-properties: 17.5rem; /* 280px */
+  --r-layout-reading: 45rem; /* 720px */
+  --r-layout-form: 30rem; /* 480px */
+  --r-layout-content: 70rem; /* 1120px; summaries/settings, not all screens */
+  --r-layout-dialog-sm: 25rem; /* 400px; confirmation */
+  --r-layout-dialog-md: 35rem; /* 560px; typical editing */
+  --r-layout-dialog-lg: 50rem; /* 800px; document/complex editing */
+  --r-layout-menu-min: 12.5rem; /* 200px */
+  --r-layout-menu-max: 20rem; /* 320px; wrap or scroll when needed */
+  --r-layout-gutter: var(--r-space-24);
+  --r-layout-column-gap: var(--r-space-32);
+  /* Breakpoints are CSS conditions, not var()-usable CSS media-query tokens:
+   * 40rem / 640px: narrow viewport; 16px gutters, full-width forms/dialogs.
+   * 64rem / 1024px: persistent sidebar can fit; below it use a drawer.
+   * 80rem / 1280px: detail property column can sit beside the reading column.
+   * Stack detail properties above content when space is insufficient.
+   * Data grids may scroll locally; prose and the whole page must reflow.
+   */
+
+  /* Shape and depth: quiet workbench chrome; shadows reserved for raised layers. */
+  --r-radius-small: 0.25rem; /* 4px; code, tiny indicators */
+  --r-radius-control: 0.375rem; /* 6px; fields, buttons, menu items */
+  --r-radius-panel: 0.5rem; /* 8px; cards, menus */
+  --r-radius-dialog: 0.75rem; /* 12px */
+  --r-radius-pill: 9999px;
+  --r-radius-circle: 50%;
+  --r-border-width: 1px;
+  --r-focus-width: 2px;
+  --r-focus-offset: 2px;
+  --r-shadow-flat: none;
+  --r-shadow-overlay: 0 4px 16px light-dark(rgb(17 20 24 / 14%), rgb(0 0 0 / 36%));
+  --r-shadow-dialog: 0 16px 48px light-dark(rgb(17 20 24 / 22%), rgb(0 0 0 / 56%));
+  --r-layer-base: 0;
+  --r-layer-sticky: 10;
+  --r-layer-scrim: 100;
+  --r-layer-modal: 200;
+  --r-layer-popover: 300;
+  --r-layer-tooltip: 400;
+  --r-layer-notification: 500;
+  /* Layer numbers apply only in the same stacking context. Native top-layer
+   * dialogs/popovers have their own order. Modal-owned popovers must be mounted
+   * in/owned by that modal; close unrelated popovers when opening a modal.
+   */
+  --r-duration-feedback: 120ms;
+  --r-duration-disclosure: 180ms;
+  --r-duration-overlay: 240ms;
+  --r-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Focus, validation messages, and data arrival do not require animation.
+   * Never make functional completion depend exclusively on transitionend.
+   */
+
+  /* Business identities do not alias feedback-success or action-background.
+   * Keep existing workflow hue associations where possible. Shape/name must
+   * accompany color; triage and urgency must not be understood by color alone.
+   */
+  --r-status-triage: light-dark(var(--r-ref-orange-light), var(--r-ref-orange-dark));
+  --r-status-backlog: var(--r-color-text-muted);
+  --r-status-todo: var(--r-color-text-secondary);
+  --r-status-agent-ready: light-dark(var(--r-ref-purple-light), var(--r-ref-purple-dark));
+  --r-status-in-progress: light-dark(var(--r-ref-amber-light), var(--r-ref-amber-dark));
+  --r-status-in-review: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));
+  --r-status-done: light-dark(var(--r-ref-indigo-600), var(--r-ref-indigo-200));
+  --r-status-canceled: var(--r-color-text-muted);
+  --r-pr-open: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));
+  --r-pr-merged: light-dark(var(--r-ref-purple-light), var(--r-ref-purple-dark));
+  --r-pr-closed: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-priority-urgent: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-priority-high: light-dark(var(--r-ref-orange-light), var(--r-ref-orange-dark));
+  --r-priority-normal: var(--r-color-text-secondary);
+  --r-priority-low: var(--r-color-text-muted);
+  --r-priority-none: var(--r-color-text-muted);
+  --r-type-color-spec: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-type-color-feature: light-dark(var(--r-ref-purple-light), var(--r-ref-purple-dark));
+  --r-type-color-bug: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-type-color-improvement: light-dark(var(--r-ref-orange-light), var(--r-ref-orange-dark));
+  --r-type-color-chore: var(--r-color-text-muted);
+
+  /* Data colors: use only for meaningful categories; persist entity-to-color
+   * assignments across filter/sort changes. Do not recycle warning/error colors
+   * to express unrelated dates or quantities. Custom palettes remain local.
+   */
+  --r-chart-series-1: light-dark(var(--r-ref-blue-light), var(--r-ref-blue-dark));
+  --r-chart-series-2: light-dark(var(--r-ref-purple-light), var(--r-ref-purple-dark));
+  --r-chart-series-3: light-dark(var(--r-ref-teal-light), var(--r-ref-teal-dark));
+  --r-chart-series-4: light-dark(var(--r-ref-orange-light), var(--r-ref-orange-dark));
+  --r-chart-series-5: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));
+  --r-chart-series-6: light-dark(var(--r-ref-red-light), var(--r-ref-red-dark));
+  --r-chart-grid: var(--r-color-border-divider);
+  --r-chart-label: var(--r-color-text-muted);
+  --r-chart-today: light-dark(var(--r-ref-indigo-600), var(--r-ref-indigo-200));
+}
+
+:root[data-roster-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-roster-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-roster-density="comfortable"] {
+  --r-size-control: 2rem; /* 32px */
+  --r-size-field: 2.5rem; /* 40px */
+  --r-size-row: 2.75rem; /* 44px */
+  --r-size-nav-row: 2rem; /* 32px */
+  --r-size-menu-row: 2.25rem; /* 36px */
+}
+
+@media (pointer: coarse) {
+  :root,
+  :root[data-roster-density="comfortable"] {
+    --r-size-control: 2.75rem; /* 44px */
+    --r-size-field: 2.75rem;
+    --r-size-row: 3.25rem; /* 52px */
+    --r-size-nav-row: 2.75rem;
+    --r-size-menu-row: 2.75rem;
+    --r-size-hit-min: 2.75rem;
+    /* Form inputs should use at least 16px text on touch devices. */
+    --r-type-field: var(--r-weight-regular) 1rem / 1.5rem var(--r-font-ui);
+  }
+}
+
+@media (max-width: 40rem) {
+  :root {
+    --r-layout-gutter: var(--r-space-16);
+  }
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --r-layout-gutter: var(--r-space-32);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --r-duration-feedback: 0ms;
+    --r-duration-disclosure: 0ms;
+    --r-duration-overlay: 0ms;
+  }
+}
+
+/* IMPLEMENTATION ACCEPTANCE
+ * 1. Normal UI text >= 4.5:1 on its actual surface. Necessary non-text control
+ *    boundaries and focus/selection indicators >= 3:1 on adjacent colors.
+ *    Decorative dividers and inactive controls have different requirements.
+ * 2. Selected rows keep primary text; use text-selected for active labels.
+ *    Use a checkmark/edge/icon as well as a soft selection background.
+ * 3. A visible focus ring remains distinct from selection and hover.
+ * 4. Disabled uses explicit fg/bg colors, not opacity on the whole subtree.
+ * 5. Every shared component covers hover, pressed, focus-visible, disabled,
+ *    selected, loading, empty, and error wherever that state applies.
+ * 6. Test real English/Chinese content, long names, 200% zoom, keyboard use,
+ *    both themes, touch targets, and reduced motion across representative pages.
+ * 7. Color-pair checks alone do not certify application accessibility.
+ * 8. Migration is semantic: --text-3/--muted/--faint are not safely replaceable
+ *    by one blind search-and-replace. Inventory each usage by its purpose.
+ * 9. Adopt shared controls/navigation first, then lists/settings, then reading
+ *    surfaces, then special data views. Keep one temporary legacy adapter and
+ *    retire it as callers migrate; new code must use the v1 roles directly.
+ */

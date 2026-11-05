@@ -375,9 +375,8 @@ function VirtualIssueRows({
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [margin, setMargin] = useState(0);
-  const [rowHeight, setRowHeight] = useState(() =>
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--row-height")),
-  );
+  // Initial estimate only; measure rendered pixels rather than parsing a rem token.
+  const [rowHeight, setRowHeight] = useState(36);
   const [focused, setFocused] = useState<string | null>(null);
   const focusedIndex = issues.findIndex((issue) => issue.identifier === focused);
   const getItemKey = useCallback((index: number) => issues[index].identifier, [issues]);
@@ -422,15 +421,21 @@ function VirtualIssueRows({
       setMargin(
         rows.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop,
       );
-      setRowHeight(parseFloat(getComputedStyle(rows).getPropertyValue("--row-height")));
+      const height = rows.querySelector(".list-row")?.getBoundingClientRect().height;
+      if (height && height > 0) setRowHeight(height);
     };
     update();
     // Preceding groups can resize without changing the viewport's dimensions.
     const observer = new ResizeObserver(update);
     observer.observe(list);
     for (const group of list.children) observer.observe(group);
+    const firstRow = rows.querySelector(".list-row");
+    if (firstRow) observer.observe(firstRow);
     return () => observer.disconnect();
   }, [scroll]);
+  useLayoutEffect(() => {
+    virtual.measure();
+  }, [rowHeight, virtual]);
   useLayoutEffect(() => {
     const rows = container.current!;
     let width = rows.clientWidth;

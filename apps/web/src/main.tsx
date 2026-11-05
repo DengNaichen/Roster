@@ -8,6 +8,9 @@ import "./app.css";
 import "./issue-views.css";
 import "./issue-detail.css";
 import "./navigation.css";
+import { applyAppearance, readAppearance } from "./appearance";
+
+applyAppearance(readAppearance());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

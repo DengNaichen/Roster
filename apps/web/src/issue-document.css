@@ -1,7 +1,6 @@
 .issue-document {
   color: var(--text-2);
-  font-size: var(--font-size-14);
-  line-height: 1.8;
+  font: var(--r-type-prose);
   overflow-wrap: anywhere;
 }
 .issue-document :is(h1, h2, h3, h4) {
@@ -10,7 +9,7 @@
   line-height: 1.5;
 }
 .issue-document :is(h1, h2) {
-  font-size: var(--font-size-16);
+  font: var(--r-type-heading-sm);
   margin: var(--space-32) 0 var(--space-12);
 }
 .issue-document h3 {
@@ -22,8 +21,7 @@
 }
 .issue-document .issue-doc-lead {
   color: var(--text-2);
-  font-size: var(--font-size-15);
-  line-height: 1.85;
+  font: var(--r-type-prose);
   margin-bottom: var(--space-24);
 }
 .issue-document section + section {
@@ -48,7 +46,7 @@
   font-weight: var(--weight-medium);
 }
 .issue-document a {
-  color: var(--accent);
+  color: var(--r-color-link);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -66,7 +64,7 @@
   margin-bottom: 0;
 }
 .issue-document .issue-doc-scope {
-  background: color-mix(in srgb, var(--success) 6%, var(--surface-card));
+  background: var(--r-color-success-bg);
 }
 .issue-document .issue-doc-scope h3 {
   color: var(--success);
@@ -74,7 +72,7 @@
 .issue-document .issue-doc-note {
   padding: var(--space-16);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--status-in-progress) 7%, var(--surface-card));
+  background: var(--r-color-warning-bg);
 }
 .issue-document .issue-doc-note > :last-child {
   margin-bottom: 0;

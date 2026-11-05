@@ -2,7 +2,7 @@
   --timeline-min-width: 1050px;
   --timeline-name-width: 200px;
   --timeline-dates-width: 220px;
-  --timeline-row-height: 44px;
+  --timeline-row-height: var(--r-size-row);
   --timeline-bar-height: 20px;
 }
 .project-timeline {
@@ -96,7 +96,7 @@
   top: 0;
   bottom: 0;
   width: var(--border-width);
-  background: var(--error-text);
+  background: var(--r-chart-today);
 }
 .timeline-dates {
   font-size: var(--font-size-12);

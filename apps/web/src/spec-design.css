@@ -58,8 +58,7 @@
 }
 .design-content .design-prose {
   color: var(--text-2);
-  font-size: var(--font-size-14);
-  line-height: 1.8;
+  font: var(--r-type-prose);
   margin: 0;
 }
 .design-goals {
