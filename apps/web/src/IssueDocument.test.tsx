@@ -1,79 +1,62 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { IssueDocument, sanitizeIssueHtml, setCriterion } from "./IssueDocument";
-import sample from "./test/fixtures/issue-document.html?raw";
+import { IssueDocument } from "./IssueDocument";
+import { sampleDocument } from "./test/fixtures/issueDocument";
 
-it("renders a full HTML issue as semantic sections, numbered criteria and a table", () => {
-  const { container } = render(<IssueDocument text={sample} />);
-  expect(screen.getByRole("heading", { name: "05 · 验收条件" })).toBeTruthy();
-  expect(screen.getByRole("table")).toBeTruthy();
-  expect(container.querySelectorAll(".issue-doc-criteria > li")).toHaveLength(5);
-  expect(container.querySelector(".issue-doc-scope")).toBeTruthy();
-});
-it("removes executable HTML, unsafe links and classes that could affect the application", () => {
-  const html = sanitizeIssueHtml(
-    '<article><script>alert(1)</script><style>body{display:none}</style><iframe src="https://example.com"></iframe><svg onload="alert(1)"></svg><form><input name="location"></form><p onclick="alert(1)" style="position:fixed" class="detail issue-doc-lead" id="root">Readable</p><a href="javascript:alert(1)">Unsafe</a><a href="https://example.com">Safe</a></article>',
-  );
-  const { container } = render(<div dangerouslySetInnerHTML={{ __html: html }} />);
+it("renders a structured issue as numbered sections ending with acceptance criteria", () => {
+  const { container } = render(<IssueDocument document={sampleDocument} />);
+  expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([
+    "01 · 交付目标",
+    "02 · 工作范围",
+    "03 · 展示与交互",
+    "04 · 实施约束",
+    "05 · Acceptance criteria 1/2",
+  ]);
+  expect(container.querySelector(".issue-doc-lead")?.textContent).toBe(sampleDocument.lead);
   expect(
-    container.querySelector("script,style,iframe,svg,form,input,[onclick],[style],[id]"),
+    screen.getByRole("heading", { name: "本次包含" }).closest(".issue-doc-scope"),
+  ).toBeTruthy();
+  expect(
+    screen.getByRole("heading", { name: "本次不包含" }).closest(".issue-doc-scope"),
   ).toBeNull();
-  expect(screen.getByText("Readable").className).toBe("issue-doc-lead");
-  expect(screen.getByText("Unsafe").getAttribute("href")).toBeNull();
-  expect(screen.getByRole("link", { name: "Safe" }).getAttribute("href")).toBe(
-    "https://example.com",
+  expect(screen.getAllByRole("columnheader").map((th) => th.textContent)).toEqual([
+    "任务情况",
+    "列表中的提示",
+  ]);
+  expect(screen.getByRole("complementary").textContent).toContain("隐藏任务不能通过数量泄露");
+  expect(screen.getByText("GET /specs/:identifier/dependencies").tagName).toBe("CODE");
+});
+it("shows authored text literally, never as markup", () => {
+  render(
+    <IssueDocument
+      document={{
+        lead: '<img src=x onerror="alert(1)"> **not bold**',
+        sections: [],
+        criteria: [],
+      }}
+    />,
   );
+  expect(document.querySelector("img")).toBeNull();
+  expect(screen.getByText('<img src=x onerror="alert(1)"> **not bold**')).toBeTruthy();
 });
-it("renders descriptions only as HTML and updates when the description changes", () => {
-  const { rerender } = render(<IssueDocument text={"## Not a heading"} />);
-  expect(screen.queryByRole("heading")).toBeNull();
-  expect(screen.getByText("## Not a heading")).toBeTruthy();
-  rerender(<IssueDocument text="<section><h2>Updated task</h2><p>Saved HTML</p></section>" />);
-  expect(screen.getByRole("heading", { name: "Updated task" })).toBeTruthy();
-});
-const criteria =
-  '<section><h2>验收条件</h2><ol class="issue-doc-criteria"><li class="issue-doc-done"><strong>可以识别阻塞。</strong>出现红色图标。</li><li>列表行为不受影响。</li></ol></section>';
-
-it("shows acceptance criteria as checkboxes with saved progress", () => {
+it("reports criterion changes by ID and shows them read-only without a handler", () => {
   const onCriterionChange = vi.fn();
-  const { container } = render(
-    <IssueDocument text={criteria} onCriterionChange={onCriterionChange} />,
+  const { rerender } = render(
+    <IssueDocument document={sampleDocument} onCriterionChange={onCriterionChange} />,
   );
-  const done = screen.getByRole("checkbox", { name: "可以识别阻塞。出现红色图标。" });
-  const open = screen.getByRole("checkbox", { name: "列表行为不受影响。" });
-  expect((done as HTMLInputElement).checked).toBe(true);
-  expect((open as HTMLInputElement).checked).toBe(false);
-  expect(container.querySelector(".issue-doc-progress")?.textContent).toBe("1/2");
+  const criteria = within(screen.getByRole("region", { name: "Acceptance criteria" }));
+  const done = criteria.getByRole("checkbox", { name: "可以识别阻塞。" }) as HTMLInputElement;
+  const open = criteria.getByRole("checkbox", { name: "列表行为不受影响。" }) as HTMLInputElement;
+  expect([done.checked, open.checked]).toEqual([true, false]);
   fireEvent.click(open);
-  expect(onCriterionChange).toHaveBeenCalledWith({
-    index: 1,
-    text: "列表行为不受影响。",
-    done: true,
-  });
-  expect((open as HTMLInputElement).checked).toBe(false);
-});
-it("shows criteria read-only when they cannot be changed", () => {
-  render(<IssueDocument text={criteria} />);
+  expect(onCriterionChange).toHaveBeenCalledWith("AC-2", true);
+  rerender(<IssueDocument document={sampleDocument} />);
   for (const box of screen.getAllByRole("checkbox"))
     expect((box as HTMLInputElement).disabled).toBe(true);
 });
-it("does not let authored HTML smuggle in its own checkboxes", () => {
-  render(
-    <IssueDocument
-      text={'<ul><li><input type="checkbox" checked>Fake</li></ul>'}
-      onCriterionChange={vi.fn()}
-    />,
+it("renders nothing for an empty document", () => {
+  const { container } = render(
+    <IssueDocument document={{ lead: "", sections: [], criteria: [] }} />,
   );
-  expect(screen.queryByRole("checkbox")).toBeNull();
-});
-it("checks one criterion in the stored source and keeps everything else", () => {
-  const source = `<article>\n  <p data-note="kept">Intro</p>\n  ${criteria}\n</article>`;
-  const updated = setCriterion(source, { index: 1, text: "列表行为不受影响。", done: true });
-  expect(updated).toBe(
-    source.replace("<li>列表行为不受影响。", '<li class="issue-doc-done">列表行为不受影响。'),
-  );
-  expect(setCriterion(updated, { index: 1, text: "列表行为不受影响。", done: false })).toBe(source);
-  expect(() => setCriterion(source, { index: 1, text: "已被改写的条件", done: true })).toThrow(
-    "Acceptance criteria changed",
-  );
+  expect(container.innerHTML).toBe("");
 });

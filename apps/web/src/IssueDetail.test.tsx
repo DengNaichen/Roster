@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IssueDetail } from "./IssueDetail";
 import { fixtureIssue, deferred, json } from "./test/fixtures";
+import type { IssueDocument } from "../../../packages/contracts/issue-document";
 
 vi.mock("./Assignee", () => ({
   AssigneeSelect: ({
@@ -473,50 +474,54 @@ it("ignores a log response after leaving the tab and reloads on return", async (
   expect(screen.queryByText(decision.summary)).toBeNull();
 });
 
-it("checks an acceptance criterion against the latest saved description", async () => {
-  const criteria = (first: string) =>
-    `<section><h2>验收条件</h2><ol class="issue-doc-criteria"><li>${first}</li><li>宽屏不回归。</li></ol></section>`;
-  let current = { ...fixtureIssue, description: criteria("窄窗口完整显示。") };
-  const patches: string[] = [];
+const withCriteria = (done = [false, false]) => ({
+  ...fixtureIssue,
+  document: {
+    lead: "",
+    sections: [] as IssueDocument["sections"],
+    criteria: [
+      { id: "AC-1", title: "第一条。", detail: "", done: done[0] },
+      { id: "AC-2", title: "第二条。", detail: "", done: done[1] },
+    ],
+  },
+});
+const box = (name: string) => screen.getByRole("checkbox", { name }) as HTMLInputElement;
+
+it("checks one criterion through its own endpoint and shows it at once", async () => {
+  let current = withCriteria();
+  const saves: { url: string; body: unknown }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn((_url, options) => {
+    vi.fn((url, options) => {
       if (options?.method === "PATCH") {
-        patches.push(JSON.parse(options.body).description);
-        current = { ...current, ...JSON.parse(options.body) };
+        saves.push({ url: String(url), body: JSON.parse(options.body) });
+        current = withCriteria([false, true]);
       }
       return Promise.resolve(json(current));
     }),
   );
   render(<IssueDetail {...props} />);
-  const box = await screen.findByRole("checkbox", { name: "宽屏不回归。" });
-  current = { ...current, description: `<p>Someone else added this.</p>${current.description}` };
-  fireEvent.click(box);
-  await waitFor(() =>
-    expect(
-      (screen.getByRole("checkbox", { name: "宽屏不回归。" }) as HTMLInputElement).checked,
-    ).toBe(true),
-  );
-  expect(patches).toEqual([
-    `<p>Someone else added this.</p>${criteria("窄窗口完整显示。").replace("<li>宽屏", '<li class="issue-doc-done">宽屏')}`,
-  ]);
+  fireEvent.click(await screen.findByRole("checkbox", { name: "第二条。" }));
+  expect(box("第二条。").checked).toBe(true);
+  expect(box("第二条。").disabled).toBe(false);
+  await waitFor(() => expect(saves).toHaveLength(1));
+  expect(saves[0].url).toMatch(/\/issues\/AL-1\/criteria\/AC-2$/);
+  expect(saves[0].body).toEqual({ done: true });
 });
 
-it("shows checked criteria at once and keeps quick clicks steady while saves finish", async () => {
-  let current = {
-    ...fixtureIssue,
-    description:
-      '<section><h2>验收条件</h2><ol class="issue-doc-criteria"><li>第一条。</li><li>第二条。</li></ol></section>',
-  };
+it("keeps quick clicks steady while earlier saves finish", async () => {
+  let current = withCriteria();
   const saves: { resolve: () => void }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn((_url, options) => {
+    vi.fn((url, options) => {
       if (options?.method !== "PATCH") return Promise.resolve(json(current));
+      const id = String(url).split("/").pop()!;
       return new Promise<Response>((resolve) =>
         saves.push({
           resolve: () => {
-            current = { ...current, ...JSON.parse(options.body) };
+            const done = current.document.criteria.map((c) => c.done || c.id === id);
+            current = withCriteria(done);
             resolve(json(current));
           },
         }),
@@ -524,42 +529,67 @@ it("shows checked criteria at once and keeps quick clicks steady while saves fin
     }),
   );
   render(<IssueDetail {...props} />);
-  const box = (name: string) => screen.getByRole("checkbox", { name }) as HTMLInputElement;
   await screen.findByRole("checkbox", { name: "第一条。" });
   fireEvent.click(box("第一条。"));
-  expect(box("第一条。").checked).toBe(true);
-  expect(box("第一条。").disabled).toBe(false);
   fireEvent.click(box("第二条。"));
-  expect(box("第二条。").checked).toBe(true);
+  expect([box("第一条。").checked, box("第二条。").checked]).toEqual([true, true]);
   await waitFor(() => expect(saves).toHaveLength(1));
   await act(async () => saves[0].resolve());
-  expect(box("第一条。").checked).toBe(true);
-  expect(box("第二条。").checked).toBe(true);
+  expect([box("第一条。").checked, box("第二条。").checked]).toEqual([true, true]);
   await waitFor(() => expect(saves).toHaveLength(2));
   await act(async () => saves[1].resolve());
-  expect(current.description.match(/issue-doc-done/g)).toHaveLength(2);
-  expect(box("第一条。").checked && box("第二条。").checked).toBe(true);
+  expect([box("第一条。").checked, box("第二条。").checked]).toEqual([true, true]);
 });
 
 it("rolls a criterion back when saving it fails", async () => {
-  const saved = {
-    ...fixtureIssue,
-    description: '<ol class="issue-doc-criteria"><li>第一条。</li></ol>',
-  };
   vi.stubGlobal(
     "fetch",
     vi.fn((_url, options) =>
       Promise.resolve(
-        options?.method === "PATCH" ? json({ error: "permission denied" }, 403) : json(saved),
+        options?.method === "PATCH"
+          ? json({ error: "permission denied" }, 403)
+          : json(withCriteria()),
       ),
     ),
   );
   render(<IssueDetail {...props} />);
   fireEvent.click(await screen.findByRole("checkbox", { name: "第一条。" }));
   await waitFor(() => expect(props.setError).toHaveBeenCalledWith("permission denied"));
-  await waitFor(() =>
-    expect((screen.getByRole("checkbox", { name: "第一条。" }) as HTMLInputElement).checked).toBe(
-      false,
-    ),
+  await waitFor(() => expect(box("第一条。").checked).toBe(false));
+});
+
+it("edits only the summary and keeps sections an agent added meanwhile", async () => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+  let current = withCriteria();
+  const patches: unknown[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url, options) => {
+      if (String(url).includes("/projects")) return Promise.resolve(json({ projects: [] }));
+      if (options?.method === "PATCH") {
+        const body = JSON.parse(options.body);
+        patches.push(body);
+        current = { ...current, ...body };
+      }
+      return Promise.resolve(json(current));
+    }),
   );
+  render(<IssueDetail {...props} editing />);
+  const summary = await screen.findByRole("textbox", { name: "Summary" });
+  const added = {
+    title: "Added by an agent",
+    blocks: [{ type: "paragraph" as const, text: "Context" }],
+  };
+  current = { ...current, document: { ...current.document, sections: [added] } };
+  fireEvent.change(summary, { target: { value: "New summary" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() => expect(patches).toHaveLength(1));
+  expect(patches[0]).toMatchObject({
+    document: { lead: "New summary", sections: [added], criteria: current.document.criteria },
+  });
 });

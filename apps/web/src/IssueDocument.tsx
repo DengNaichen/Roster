@@ -1,166 +1,174 @@
-import { type MouseEvent, useLayoutEffect, useMemo, useRef } from "react";
-import DOMPurify from "dompurify";
+import type {
+  IssueBlock,
+  IssueDocument as Document,
+} from "../../../packages/contracts/issue-document";
 import "./issue-document.css";
 
-const criterion = ".issue-doc-criteria > li";
-const doneClass = "issue-doc-done";
-const itemText = (item: Element) => item.textContent!.replace(/\s+/g, " ").trim();
+const number = (index: number) => String(index + 1).padStart(2, "0");
 
-// Issue HTML is document content: no scripts, styles, embeds or interactive controls.
-function sanitizeIssueFragment(source: string) {
-  const fragment = DOMPurify.sanitize(source, {
-    ALLOWED_TAGS: [
-      "article",
-      "section",
-      "header",
-      "aside",
-      "div",
-      "span",
-      "p",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "ul",
-      "ol",
-      "li",
-      "strong",
-      "b",
-      "em",
-      "i",
-      "s",
-      "del",
-      "br",
-      "hr",
-      "blockquote",
-      "pre",
-      "code",
-      "a",
-      "table",
-      "caption",
-      "thead",
-      "tbody",
-      "tfoot",
-      "tr",
-      "th",
-      "td",
-      "dl",
-      "dt",
-      "dd",
-      "figure",
-      "figcaption",
-    ],
-    ALLOWED_ATTR: ["class", "href", "title", "colspan", "rowspan", "scope", "start"],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
-    RETURN_DOM_FRAGMENT: true,
-  });
-  const classes = new Set([
-    "issue-doc-lead",
-    "issue-doc-columns",
-    "issue-doc-panel",
-    "issue-doc-scope",
-    "issue-doc-note",
-    "issue-doc-criteria",
-    doneClass,
-  ]);
-  for (const element of fragment.querySelectorAll("[class]")) {
-    const allowed = [...element.classList].filter((name) => classes.has(name));
-    if (allowed.length) element.setAttribute("class", allowed.join(" "));
-    else element.removeAttribute("class");
-  }
-  return fragment;
+// Backticks mark inline code; everything else is plain text.
+function Inline({ text }: { text: string }) {
+  return (
+    <>
+      {text
+        .split(/(`[^`]+`)/)
+        .map((part, index) =>
+          part.length > 2 && part.startsWith("`") && part.endsWith("`") ? (
+            <code key={index}>{part.slice(1, -1)}</code>
+          ) : (
+            part
+          ),
+        )}
+    </>
+  );
 }
 
-function serialize(fragment: DocumentFragment) {
-  const wrapper = document.createElement("div");
-  wrapper.append(fragment);
-  return wrapper.innerHTML;
+function Items({ items }: { items: string[] }) {
+  if (items.length === 1)
+    return (
+      <p>
+        <Inline text={items[0]} />
+      </p>
+    );
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={index}>
+          <Inline text={item} />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
-export function sanitizeIssueHtml(source: string) {
-  return serialize(sanitizeIssueFragment(source));
-}
-
-// Controls are added after sanitizing, so authored HTML can never contain them.
-function renderIssueHtml(source: string, checkable: boolean) {
-  const fragment = sanitizeIssueFragment(source);
-  for (const list of fragment.querySelectorAll(".issue-doc-criteria")) {
-    const items = [...list.children].filter((child) => child.tagName === "LI");
-    for (const item of items) {
-      const box = document.createElement("input");
-      box.type = "checkbox";
-      box.className = "issue-doc-check";
-      box.setAttribute("aria-label", itemText(item));
-      if (item.classList.contains(doneClass)) box.setAttribute("checked", "");
-      if (!checkable) box.setAttribute("disabled", "");
-      item.prepend(box);
+function Block({ block }: { block: IssueBlock }) {
+  switch (block.type) {
+    case "paragraph":
+      return (
+        <p>
+          <Inline text={block.text} />
+        </p>
+      );
+    case "list": {
+      const List = block.ordered ? "ol" : "ul";
+      return (
+        <List>
+          {block.items.map((item, index) => (
+            <li key={index}>
+              {item.title && <strong>{item.title}</strong>}
+              <Inline text={item.text} />
+            </li>
+          ))}
+        </List>
+      );
     }
-    const heading = list.closest("section")?.querySelector("h1, h2, h3, h4");
-    if (heading && items.length) {
-      const progress = document.createElement("span");
-      progress.className = "issue-doc-progress";
-      progress.setAttribute("aria-hidden", "true");
-      progress.textContent = `${items.filter((item) => item.classList.contains(doneClass)).length}/${items.length}`;
-      heading.append(progress);
-    }
+    case "compare":
+      return (
+        <div className="issue-doc-columns">
+          {[block.left, block.right].map((side, index) => (
+            <div key={index} className={`issue-doc-panel${index === 0 ? " issue-doc-scope" : ""}`}>
+              <h3>{side.title}</h3>
+              <Items items={side.items} />
+            </div>
+          ))}
+        </div>
+      );
+    case "table":
+      return (
+        <table>
+          <thead>
+            <tr>
+              {block.columns.map((column, index) => (
+                <th key={index} scope="col">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, index) => (
+              <tr key={index}>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex}>
+                    <Inline text={cell} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    case "note":
+      return (
+        <aside className="issue-doc-note">
+          {block.title && <h3>{block.title}</h3>}
+          <p>
+            <Inline text={block.text} />
+          </p>
+        </aside>
+      );
+    case "code":
+      return (
+        <pre>
+          <code>{block.text}</code>
+        </pre>
+      );
   }
-  return serialize(fragment);
-}
-
-export type CriterionChange = { index: number; text: string; done: boolean };
-
-// Edits the stored source rather than the sanitized copy, so everything else the author wrote is kept.
-export function setCriterion(source: string, { index, text, done }: CriterionChange) {
-  const template = document.createElement("template");
-  template.innerHTML = source;
-  const item = template.content.querySelectorAll(criterion)[index];
-  if (!item || itemText(item) !== text)
-    throw new Error("Acceptance criteria changed. Reload and try again.");
-  item.classList.toggle(doneClass, done);
-  if (!item.classList.length) item.removeAttribute("class");
-  return template.innerHTML;
 }
 
 export function IssueDocument({
-  text,
+  document,
   onCriterionChange,
 }: {
-  text: string;
-  onCriterionChange?: (change: CriterionChange) => void;
+  document: Document;
+  onCriterionChange?: (criterion: string, done: boolean) => void;
 }) {
-  const checkable = !!onCriterionChange;
-  const html = useMemo(() => renderIssueHtml(text, checkable), [text, checkable]);
-  const container = useRef<HTMLDivElement>(null);
-  const refocus = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    if (refocus.current === null) return;
-    const boxes = container.current?.querySelectorAll<HTMLElement>("input.issue-doc-check");
-    boxes?.[refocus.current]?.focus();
-    refocus.current = null;
-  }, [html]);
-  function toggle(event: MouseEvent<HTMLDivElement>) {
-    const box = (event.target as Element).closest("input.issue-doc-check");
-    if (!(box instanceof HTMLInputElement) || !onCriterionChange) return;
-    // The description decides what is shown, so a failed save rolls the box back.
-    event.preventDefault();
-    const item = box.parentElement!;
-    const index = [...event.currentTarget.querySelectorAll(criterion)].indexOf(item);
-    if (document.activeElement === box) refocus.current = index;
-    onCriterionChange({
-      index,
-      text: itemText(item),
-      done: box.checked,
-    });
-  }
+  const { lead, sections, criteria } = document;
+  if (!lead && !sections.length && !criteria.length) return null;
+  const done = criteria.filter((criterion) => criterion.done).length;
   return (
-    <div
-      ref={container}
-      className="issue-document"
-      onClick={toggle}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <article className="issue-document">
+      {lead && (
+        <p className="issue-doc-lead">
+          <Inline text={lead} />
+        </p>
+      )}
+      {sections.map((section, index) => (
+        <section key={index}>
+          <h2>
+            {number(index)} · {section.title}
+          </h2>
+          {section.blocks.map((block, blockIndex) => (
+            <Block key={blockIndex} block={block} />
+          ))}
+        </section>
+      ))}
+      {criteria.length > 0 && (
+        <section aria-label="Acceptance criteria">
+          <h2>
+            {number(sections.length)} · Acceptance criteria{" "}
+            <span className="issue-doc-progress">
+              {done}/{criteria.length}
+            </span>
+          </h2>
+          <ol className="issue-doc-criteria">
+            {criteria.map((criterion) => (
+              <li key={criterion.id} className={criterion.done ? "issue-doc-done" : undefined}>
+                <input
+                  type="checkbox"
+                  className="issue-doc-check"
+                  aria-label={criterion.title}
+                  checked={criterion.done}
+                  disabled={!onCriterionChange}
+                  onChange={(event) => onCriterionChange?.(criterion.id, event.target.checked)}
+                />
+                <strong>{criterion.title}</strong>
+                {criterion.detail && <Inline text={criterion.detail} />}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+    </article>
   );
 }
