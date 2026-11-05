@@ -1,9 +1,11 @@
 import { addLinkSchema } from '../../../../../contracts/activity.ts';
+import { issueDocumentText } from '../../../../../contracts/issue-document.ts';
 import {
   createSpecSchema,
   type SpecContent,
   specContentSchema,
 } from '../../../../../contracts/spec.ts';
+import { documentFromDescription } from '../../../modules/issues/index.ts';
 import { encodeSpec } from '../../../modules/specs/index.ts';
 import type { SnapshotStore } from './ports.ts';
 type Row = Record<string, unknown>;
@@ -152,7 +154,13 @@ export async function importSQLite(
           row.message = createSpecSchema.shape.message.parse(input.message) ?? '';
           normalizedSpecRevisions.set(input, parsed.data);
         }
-        if (table === 'issues') row.parent_id = null; // second pass after every issue exists
+        if (table === 'issues') {
+          row.parent_id = null; // second pass after every issue exists
+          const document = documentFromDescription(String(row.description ?? ''));
+          delete row.description;
+          row.document = JSON.stringify(document);
+          row.document_text = issueDocumentText(document);
+        }
         if (table === 'github_sync' && !row.last_updated_at) row.last_updated_at = null;
         await insert(table, row);
       }

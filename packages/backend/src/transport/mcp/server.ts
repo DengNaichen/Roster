@@ -43,7 +43,19 @@ const issueOutput = z.object({
   identifier: z.string(),
   team: z.string(),
   title: z.string(),
-  description: z.string(),
+  document: z.object({
+    lead: z.string(),
+    sections: z.array(
+      z.object({
+        title: z.string(),
+        blocks: z.array(z.object({ type: z.string() }).passthrough()),
+      }).passthrough(),
+    ),
+    criteria: z.array(
+      z.object({ id: z.string(), title: z.string(), detail: z.string(), done: z.boolean() })
+        .passthrough(),
+    ),
+  }).passthrough(),
   status: z.enum([
     'triage',
     'backlog',
@@ -323,14 +335,18 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   );
   tool(
     'create_issue',
-    'Create an issue in an accessible team.',
+    'Create an issue in an accessible team. The body is `document`: structured JSON with a lead, ' +
+      'titled sections of typed blocks, and acceptance criteria with IDs AC-1, AC-2, and so on. ' +
+      'Every text field is plain text; Markdown and HTML are shown literally.',
     createIssueSchema.extend(compatibleIssueFields).shape,
     false,
     (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
   );
   tool(
     'update_issue',
-    'Update a visible issue; omitted properties remain unchanged.',
+    'Update a visible issue; omitted properties remain unchanged. `document` replaces the whole ' +
+      'body: read it with get_issue, edit it, and send it back complete. Keep existing criterion ' +
+      'IDs and give new criteria the next unused number.',
     { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
     false,
     ({ identifier, ...i }) =>

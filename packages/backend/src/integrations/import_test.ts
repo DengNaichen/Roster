@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import { Pool } from 'npm:pg@8.23.1';
 import type { EditableSpecContent } from '../../../contracts/spec.ts';
 import { createDatabase } from '../platform/database/client.ts';
@@ -397,6 +398,19 @@ Deno.test({
           issue.decisions[0].actor === null && issue.children[0].identifier === 'AA-2' &&
           issue.pull_requests.length === 1,
       );
+      const described = {
+        lead: '',
+        sections: [{
+          title: 'Description',
+          blocks: [{ type: 'paragraph', text: 'Markdown **kept**' }],
+        }],
+        criteria: [],
+      };
+      assert(
+        isDeepStrictEqual(issue.document, described) &&
+          isDeepStrictEqual(issue.children[0].document, { lead: '', sections: [], criteria: [] }),
+        'Legacy descriptions become one Description paragraph; empty ones an empty document',
+      );
       const next = await service.createIssue(ctx, 'import-fixture', {
         team: 'AA',
         title: 'After import',
@@ -451,8 +465,19 @@ Deno.test({
         description: 'Project',
       }]);
       assert(imported.issues === 1 && imported.comments === 1 && imported.links === 1);
+      const fromLinear = await service.getIssue(ctx, 'import-fixture', 'AA-10');
+      assert(fromLinear.comments[0].author === 'Alice');
       assert(
-        (await service.getIssue(ctx, 'import-fixture', 'AA-10')).comments[0].author === 'Alice',
+        isDeepStrictEqual(fromLinear.document.sections, [{
+          title: 'Description',
+          blocks: [{ type: 'paragraph', text: 'Preserved' }],
+        }]),
+        'Linear descriptions convert like the migration backfill',
+      );
+      assert(
+        (await service.listIssues(ctx, 'import-fixture', { query: 'Preserved' })).items
+          .some((i) => i.identifier === 'AA-10'),
+        'Imported documents are searchable',
       );
       await cleanupWorkspace(setup, wid!);
       wid = undefined;

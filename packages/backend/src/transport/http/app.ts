@@ -20,6 +20,7 @@ import {
 import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
+import { describeIssues } from '../../platform/errors/validation.ts';
 import {
   capabilities,
   restCreateIssueSchema,
@@ -61,7 +62,11 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     }
     if (error instanceof z.ZodError) {
       return c.json({
-        error: { code: 'invalid_input', message: 'Invalid request', details: error.issues },
+        error: {
+          code: 'invalid_input',
+          message: 'Invalid request: ' + describeIssues(error.issues),
+          details: error.issues,
+        },
       }, 400);
     }
     return c.json({ error: { code: 'internal', message: 'Internal server error' } }, 500);

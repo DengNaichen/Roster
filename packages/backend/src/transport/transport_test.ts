@@ -280,7 +280,7 @@ Deno.test('MCP get_issue validates real bigint audit IDs without treating them a
       identifier: 'AL-1',
       team: 'AL',
       title: 'Issue',
-      description: 'Body',
+      document: { lead: 'Body', sections: [], criteria: [] },
       status: 'triage',
       type: null,
       priority: 0,

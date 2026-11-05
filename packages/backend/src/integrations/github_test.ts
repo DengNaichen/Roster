@@ -92,12 +92,19 @@ Deno.test({
       const issue = await s.createIssue(ctx, w.slug, {
         team: 'AA',
         title: 'Public title',
-        description: 'Public description',
+        document: {
+          lead: 'Public lead',
+          sections: [{
+            title: 'Scope',
+            blocks: [{ type: 'paragraph', text: 'Public description' }],
+          }],
+          criteria: [{ id: 'AC-1', title: 'Linked back', detail: '', done: true }],
+        },
       });
       const hidden = await s.createIssue(ctx, w.slug, {
         team: 'PR',
         title: 'PRIVATE TITLE',
-        description: 'PRIVATE BODY',
+        document: { lead: 'PRIVATE BODY', sections: [], criteria: [] },
       });
       pulls = [{
         number: 1,
@@ -119,8 +126,10 @@ Deno.test({
       assert((await s.getIssue(ctx, w.slug, issue.identifier)).status === 'in_review');
       assert(posts.length === 2, 'One linkback for each matched issue');
       assert(
-        posts.some((p) => p.includes('Public description')) &&
-          !posts.some((p) => p.includes('PRIVATE')),
+        posts.some((p) =>
+          p.includes('Public lead\\nScope\\nPublic description\\n[x] Linked back')
+        ) &&
+          !posts.some((p) => p.includes('PRIVATE')) && !posts.some((p) => p.includes('"lead"')),
         'Private title/body never leave the app',
       );
       await sync.sync(binding);

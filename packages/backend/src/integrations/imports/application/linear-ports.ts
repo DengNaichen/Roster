@@ -1,3 +1,4 @@
+import type { IssueDocument } from '../../../../../contracts/mod.ts';
 import type { Row } from '../../../application/records.ts';
 export type ImportResult<T = Row> = { rows: T[]; rowCount: number | null };
 export interface LinearRepository {
@@ -20,7 +21,7 @@ export interface LinearRepository {
       number: number;
       identifier: string;
       title: string;
-      description: string;
+      document: IssueDocument;
       status: string;
       type: string | null;
       priority: number;
