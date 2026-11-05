@@ -1,21 +1,25 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PageHeader } from "./PageHeader";
-import { EmojiPicker } from "./EmojiPicker";
+import { ChevronRight, Lock, Globe, Plus } from "lucide-react";
+import { PersonalSettings, WorkspaceSettings, IntegrationSettings } from "./SettingsSections";
+import { EntityEmoji, EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
 import { MembersSettings } from "./WorkspaceAccess";
 import { CycleSettingsSection } from "./CycleSettings";
-import { api, apiPath, RequestError, Team } from "./shared";
+import { api, apiPath, NavLink, pagePath, RequestError, Team } from "./shared";
 
 type TeamDirectory = { teams: Team[] };
 
 export function SettingsPage({
   section,
+  settingsTeam,
   onCreateTeam,
   teams,
   loading,
   onSaved,
 }: {
-  section: "teams" | "members";
+  section: "teams" | "members" | "personal" | "workspace" | "integrations";
+  settingsTeam?: string;
   onCreateTeam: () => void;
   teams: Team[];
   loading: boolean;
@@ -24,6 +28,7 @@ export function SettingsPage({
   const [directory, setDirectory] = useState<Team[] | null>(null);
   const [directoryError, setDirectoryError] = useState("");
   useEffect(() => {
+    if (section !== "teams") return;
     let active = true;
     api<TeamDirectory>(apiPath("/team-directory")).then(
       (result) => {
@@ -36,65 +41,111 @@ export function SettingsPage({
     return () => {
       active = false;
     };
-  }, []);
+  }, [section]);
   const entries = directory
     ? [...directory, ...teams.filter((team) => !directory.some((item) => item.key === team.key))]
     : teams;
+  const current = entries.find((team) => team.key === settingsTeam);
+  const title = {
+    teams: "Teams",
+    members: "Members",
+    personal: "Personal",
+    workspace: "Workspace",
+    integrations: "Integrations",
+  }[section];
   return (
     <>
       <PageHeader>
         <span className="settings-breadcrumb">Settings</span>
         <span>/</span>
-        <span>{section === "teams" ? "Teams" : "Members"}</span>
+        {settingsTeam ? (
+          <>
+            <NavLink to={pagePath("/settings/teams")}>Teams</NavLink>
+            <span>/</span>
+            <span>{current?.name ?? settingsTeam}</span>
+          </>
+        ) : (
+          <span>{title}</span>
+        )}
       </PageHeader>
       <div className="settings-page">
-        <header className="settings-heading settings-page-intro">
-          <div>
-            <h1>{section === "teams" ? "Teams" : "Members"}</h1>
-            <p>
-              {section === "teams"
-                ? "Give each team a space to organize its work."
-                : "Manage who has access to your workspace."}
-            </p>
-          </div>
-          {section === "teams" && (
-            <button className="button" onClick={onCreateTeam}>
-              Create team
-            </button>
-          )}
-        </header>
+        {section !== "members" && (
+          <header className="settings-heading settings-page-intro">
+            <h1>
+              {current ? (
+                <>
+                  <EntityEmoji emoji={current.emoji} teamKey={current.key} /> {current.name}
+                </>
+              ) : (
+                title
+              )}
+            </h1>
+            {section === "teams" && !settingsTeam && (
+              <button className="button" onClick={onCreateTeam}>
+                <Plus className="icon" />
+                Create team
+              </button>
+            )}
+          </header>
+        )}
+        {section === "personal" && <PersonalSettings />}
+        {section === "workspace" && <WorkspaceSettings />}
+        {section === "integrations" && <IntegrationSettings />}
         {section === "members" && <MembersSettings />}
-        {section === "teams" && directoryError && <RequestError message={directoryError} />}
-        {section === "teams" &&
-          (entries.length === 0 ? (
-            <p className="empty">
-              {loading ? "Loading teams…" : "No teams yet. Create a team to get started."}
-            </p>
-          ) : (
-            entries.map((team) => (
-              <TeamSettings
-                key={team.key}
-                team={team}
-                onSaved={(updated) => {
-                  setDirectory((items) =>
-                    [
-                      ...teams,
-                      ...(items ?? []).filter(
-                        (item) => !teams.some((known) => known.key === item.key),
-                      ),
-                    ].map((item) => (item.key === updated.key ? updated : item)),
-                  );
-                  onSaved(updated);
-                }}
-              />
-            ))
-          ))}
+        {section === "teams" && (
+          <>
+            {directoryError && <RequestError message={directoryError} />}
+            {settingsTeam ? (
+              current ? (
+                <TeamSettings
+                  key={current.key}
+                  team={current}
+                  onSaved={(updated) => {
+                    setDirectory((items) =>
+                      (items ?? teams).map((item) => (item.key === updated.key ? updated : item)),
+                    );
+                    onSaved(updated);
+                  }}
+                />
+              ) : (
+                <p className="empty">
+                  {loading || (!directory && !directoryError) ? "Loading…" : "Team not found."}
+                </p>
+              )
+            ) : (
+              <div className="settings-team-list">
+                {entries.map((team) => (
+                  <NavLink
+                    className="settings-team-row"
+                    key={team.key}
+                    to={pagePath(`/settings/teams/${encodeURIComponent(team.key)}`)}
+                  >
+                    <EntityEmoji emoji={team.emoji} teamKey={team.key} />
+                    <strong>{team.name}</strong>
+                    <span className="settings-team-key">{team.key}</span>
+                    <span
+                      title={team.private ? "Private team" : "Public team"}
+                      aria-label={team.private ? "Private team" : "Public team"}
+                    >
+                      {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
+                    </span>
+                    <ChevronRight className="icon" />
+                  </NavLink>
+                ))}
+                {entries.length === 0 && (
+                  <p className="empty">{loading ? "Loading…" : "No teams yet"}</p>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );
 }
 
 function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => void }) {
+  const [tab, setTab] = useState<"general" | "members" | "cycles">("general");
   const [draft, setDraft] = useState<{ name: string; emoji: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -136,64 +187,82 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
   }
 
   return (
-    <section className="team-settings" aria-labelledby={`settings-team-${team.key}`}>
-      <h2 id={`settings-team-${team.key}`}>{team.name}</h2>
-      <form onSubmit={save}>
-        <div className="settings-field">
-          <label htmlFor={`team-name-${team.key}`}>Name</label>
-          <div className="settings-name">
-            <EmojiPicker
-              value={value.emoji}
-              teamKey={team.key}
-              label={`Choose icon for ${team.name}`}
-              onChange={(emoji) => edit({ emoji })}
-              disabled={saving}
-            />
-            <input
-              id={`team-name-${team.key}`}
-              value={value.name}
-              onChange={(event) => edit({ name: event.target.value })}
-              required
-              disabled={saving}
-            />
+    <section className="team-settings" aria-label={`${team.name} settings`}>
+      <div className="settings-detail-tabs" role="group" aria-label="Team settings sections">
+        {(["general", "members", "cycles"] as const)
+          .filter((item) => item !== "members" || team.membership_enabled)
+          .map((item) => (
+            <button
+              className="button"
+              key={item}
+              aria-pressed={tab === item}
+              onClick={() => setTab(item)}
+            >
+              {item[0].toUpperCase() + item.slice(1)}
+            </button>
+          ))}
+      </div>
+      {tab === "general" && (
+        <form onSubmit={save}>
+          <div className="settings-field">
+            <label htmlFor={`team-name-${team.key}`}>Name</label>
+            <div className="settings-name">
+              <EmojiPicker
+                value={value.emoji}
+                teamKey={team.key}
+                label={`Choose icon for ${team.name}`}
+                onChange={(emoji) => edit({ emoji })}
+                disabled={saving}
+              />
+              <input
+                id={`team-name-${team.key}`}
+                value={value.name}
+                onChange={(event) => edit({ name: event.target.value })}
+                required
+                disabled={saving}
+              />
+            </div>
           </div>
-        </div>
-        <div className="settings-field">
-          <div>
-            <span>Identifier</span>
-            <p>Used in issue IDs. Cannot be changed.</p>
+          <div className="settings-field">
+            <div>
+              <span>Identifier</span>
+            </div>
+            <span className="settings-identifier" title="Cannot be changed">
+              <Lock className="icon" /> {team.key}
+            </span>
           </div>
-          <span className="settings-identifier">{team.key}</span>
-        </div>
-        {error && <RequestError message={error} />}
-        <footer>
-          <span role="status">{saved ? "Changes saved." : dirty ? "Unsaved changes" : ""}</span>
-          <button
-            type="button"
-            className="button"
-            disabled={saving || !dirty}
-            onClick={() => {
-              setDraft(null);
-              setError("");
-              setSaved(false);
-            }}
-          >
-            Reset
-          </button>
-          <button
-            type="submit"
-            className="button primary"
-            disabled={saving || !dirty || !value.name.trim()}
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </button>
-        </footer>
-      </form>
-      <CycleSettingsSection
-        team={team.key}
-        canManage={!team.membership_enabled || team.can_manage}
-      />
-      {team.membership_enabled && (
+          {error && <RequestError message={error} />}
+          <footer>
+            <span role="status">{saved ? "Changes saved." : dirty ? "Unsaved changes" : ""}</span>
+            <button
+              type="button"
+              className="button"
+              disabled={saving || !dirty}
+              onClick={() => {
+                setDraft(null);
+                setError("");
+                setSaved(false);
+              }}
+            >
+              Reset
+            </button>
+            <button
+              type="submit"
+              className="button primary"
+              disabled={saving || !dirty || !value.name.trim()}
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </footer>
+        </form>
+      )}
+      {tab === "cycles" && (
+        <CycleSettingsSection
+          team={team.key}
+          canManage={!team.membership_enabled || team.can_manage}
+        />
+      )}
+      {tab === "members" && team.membership_enabled && (
         <TeamAccess team={team} onChanged={() => window.location.reload()} />
       )}
     </section>

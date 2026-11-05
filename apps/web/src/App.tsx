@@ -218,6 +218,7 @@ function WorkspaceContent() {
               <LabelsPage />
             ) : (
               <SettingsPage
+                settingsTeam={route.kind === "settings" ? route.settingsTeam : undefined}
                 section={route.kind === "settings" ? (route.section ?? "teams") : "teams"}
                 onCreateTeam={() => setCreatingTeam(true)}
                 teams={teams.data.teams}

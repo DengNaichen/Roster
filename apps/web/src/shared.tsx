@@ -210,7 +210,11 @@ export type WorkspaceRoute =
   | { kind: "project"; id: number }
   | { kind: "issue"; identifier: string }
   | { kind: "labels" }
-  | { kind: "settings"; section?: "teams" | "members" }
+  | {
+      kind: "settings";
+      section?: "teams" | "members" | "personal" | "workspace" | "integrations";
+      settingsTeam?: string;
+    }
   | { kind: "invalid" };
 
 export function workspaceRoute(path: string): WorkspaceRoute {
@@ -224,6 +228,21 @@ export function workspaceRoute(path: string): WorkspaceRoute {
   const initiative = route.match(/^\/initiative\/([1-9][0-9]*)$/);
   if (initiative && Number.isSafeInteger(Number(initiative[1])))
     return { kind: "initiative", id: Number(initiative[1]) };
+  const settingsTeam = route.match(/^\/settings\/teams\/([^/]+)$/);
+  if (settingsTeam) {
+    try {
+      return {
+        kind: "settings",
+        section: "teams",
+        settingsTeam: decodeURIComponent(settingsTeam[1]),
+      };
+    } catch {
+      return { kind: "invalid" };
+    }
+  }
+  for (const section of ["personal", "workspace", "integrations"] as const) {
+    if (route === `/settings/${section}`) return { kind: "settings", section };
+  }
   if (route === "/settings/members") return { kind: "settings", section: "members" };
   if (route === "/settings/teams") return { kind: "settings", section: "teams" };
   if (route === "/settings/labels") return { kind: "labels" };

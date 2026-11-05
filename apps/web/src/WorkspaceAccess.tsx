@@ -91,7 +91,6 @@ export function MembersSettings() {
   return (
     <section className="team-settings members-settings" aria-labelledby="members-title">
       <h2 id="members-title">Members</h2>
-      <p>Members collaborate across this workspace. Admins manage access and invitations.</p>
       {!access && !error && <p>Loading members…</p>}
       <div className="member-list">
         {members.map((member) => (

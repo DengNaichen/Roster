@@ -64,9 +64,12 @@ export function Sidebar({
         <nav className="settings-navigation" aria-label="Settings navigation">
           {(
             [
+              { key: "personal", title: "Personal" },
+              { key: "workspace", title: "Workspace" },
               { key: "teams", title: "Teams" },
               { key: "members", title: "Members" },
               { key: "labels", title: "Labels" },
+              { key: "integrations", title: "Integrations" },
             ] as const
           ).map(({ key, title }) => {
             const selected =
@@ -77,7 +80,7 @@ export function Sidebar({
               <NavLink
                 key={key}
                 to={pagePath(`/settings/${key}`)}
-                className={`nav-item ${selected ? "active" : ""}`}
+                className={`nav-item ${key === "workspace" || key === "integrations" ? "settings-nav-break" : ""} ${selected ? "active" : ""}`}
                 aria-current={selected ? "page" : undefined}
               >
                 <span>{title}</span>

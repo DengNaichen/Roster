@@ -13,7 +13,6 @@ export default function LabelsPage() {
       </PageHeader>
       <div className="settings-labels-intro">
         <h1>Labels</h1>
-        <p>Organize issues with shared labels and groups.</p>
       </div>
       <LabelManager catalog={catalog} onMerged={() => {}} />
     </>
