@@ -1,6 +1,12 @@
 import { useCapabilities } from "./Capabilities";
 import {
   ArrowLeft,
+  UserRound,
+  Building2,
+  UsersRound,
+  ContactRound,
+  Tag,
+  Blocks,
   Orbit,
   DraftingCompass,
   Box,
@@ -64,14 +70,14 @@ export function Sidebar({
         <nav className="settings-navigation" aria-label="Settings navigation">
           {(
             [
-              { key: "personal", title: "Personal" },
-              { key: "workspace", title: "Workspace" },
-              { key: "teams", title: "Teams" },
-              { key: "members", title: "Members" },
-              { key: "labels", title: "Labels" },
-              { key: "integrations", title: "Integrations" },
+              { key: "personal", title: "Personal", Icon: UserRound },
+              { key: "workspace", title: "Workspace", Icon: Building2 },
+              { key: "teams", title: "Teams", Icon: UsersRound },
+              { key: "members", title: "Members", Icon: ContactRound },
+              { key: "labels", title: "Labels", Icon: Tag },
+              { key: "integrations", title: "Integrations", Icon: Blocks },
             ] as const
-          ).map(({ key, title }) => {
+          ).map(({ key, title, Icon }) => {
             const selected =
               route.kind === "labels"
                 ? key === "labels"
@@ -83,6 +89,7 @@ export function Sidebar({
                 className={`nav-item ${selected ? "active" : ""}`}
                 aria-current={selected ? "page" : undefined}
               >
+                <Icon className="icon" aria-hidden="true" />
                 <span>{title}</span>
               </NavLink>
             );
