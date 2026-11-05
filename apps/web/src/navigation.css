@@ -1484,9 +1484,9 @@
   display: grid;
   place-items: center;
   flex: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: var(--r-size-avatar-lg);
+  height: var(--r-size-avatar-lg);
+  border-radius: var(--r-radius-circle);
   color: var(--r-color-text-secondary);
   background: var(--r-color-bg-nav-current);
   font-size: var(--r-font-size-caption);
@@ -1639,9 +1639,6 @@
   margin-inline: calc(-1 * var(--r-space-12));
 }
 .settings-directory-table tbody td {
-  padding-block: var(--r-space-24);
-}
-.settings-directory-table.settings-teams-table tbody td {
   height: var(--r-size-row);
   padding-block: var(--r-space-4);
 }
