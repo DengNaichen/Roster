@@ -46,9 +46,9 @@
   --status-triage: #fc7840;
   --status-backlog: #737b86;
   --status-todo: #626974;
-  --status-agent-ready: #8665b0;
-  --status-in-progress: #987000;
-  --status-in-review: #258253;
+  --status-agent-ready: #12a8b8;
+  --status-in-progress: #eab000;
+  --status-in-review: #35bb74;
   --status-done: #5e6ad2;
   --status-canceled: #697789;
   --project-icon: #21899a;
@@ -257,9 +257,9 @@
     --status-triage: #fc7840;
     --status-backlog: #bec2c8;
     --status-todo: #e2e2e2;
-    --status-agent-ready: #b49bdd;
-    --status-in-progress: #f2c94c;
-    --status-in-review: #4cb782;
+    --status-agent-ready: #5fdbe8;
+    --status-in-progress: #ffe27a;
+    --status-in-review: #78e8b0;
     --status-done: #5e6ad2;
     --status-canceled: #95a2b3;
     --project-icon: #26b6c8;
