@@ -28,7 +28,11 @@ export function Session() {
   return (
     <div className="sidebar-account">
       {identity && (
-        <Popover.Root>
+        <Popover.Root
+          onOpenChange={(open) => {
+            if (open) setAppearance(readAppearance());
+          }}
+        >
           <Popover.Trigger asChild>
             <button
               type="button"

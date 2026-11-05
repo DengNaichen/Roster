@@ -210,7 +210,11 @@ export type WorkspaceRoute =
   | { kind: "project"; id: number }
   | { kind: "issue"; identifier: string }
   | { kind: "labels" }
-  | { kind: "settings" }
+  | {
+      kind: "settings";
+      section?: "teams" | "members" | "personal" | "workspace" | "integrations";
+      settingsTeam?: string;
+    }
   | { kind: "invalid" };
 
 export function workspaceRoute(path: string): WorkspaceRoute {
@@ -224,6 +228,24 @@ export function workspaceRoute(path: string): WorkspaceRoute {
   const initiative = route.match(/^\/initiative\/([1-9][0-9]*)$/);
   if (initiative && Number.isSafeInteger(Number(initiative[1])))
     return { kind: "initiative", id: Number(initiative[1]) };
+  const settingsTeam = route.match(/^\/settings\/teams\/([^/]+)$/);
+  if (settingsTeam) {
+    try {
+      return {
+        kind: "settings",
+        section: "teams",
+        settingsTeam: decodeURIComponent(settingsTeam[1]),
+      };
+    } catch {
+      return { kind: "invalid" };
+    }
+  }
+  for (const section of ["personal", "workspace", "integrations"] as const) {
+    if (route === `/settings/${section}`) return { kind: "settings", section };
+  }
+  if (route === "/settings/members") return { kind: "settings", section: "members" };
+  if (route === "/settings/teams") return { kind: "settings", section: "teams" };
+  if (route === "/settings/labels") return { kind: "labels" };
   if (route === "/settings") return { kind: "settings" };
   if (route === "/labels") return { kind: "labels" };
   const team = route.match(/^\/team\/([^/]+)\/(issues|triage|projects|cycles|specs)$/);
@@ -274,6 +296,7 @@ export function NavLink({
   unavailable,
   title,
   "aria-label": ariaLabel,
+  "aria-current": ariaCurrent,
 }: {
   to: string;
   className?: string;
@@ -281,6 +304,7 @@ export function NavLink({
   unavailable?: boolean;
   title?: string;
   "aria-label"?: string;
+  "aria-current"?: "page";
 }) {
   function open(event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) return;
@@ -293,6 +317,7 @@ export function NavLink({
       href={to}
       onClick={open}
       aria-label={ariaLabel}
+      aria-current={ariaCurrent}
       aria-disabled={unavailable || undefined}
       title={unavailable ? "This feature has not been migrated to Roster yet" : title}
       style={unavailable ? { opacity: 0.5 } : undefined}
@@ -591,6 +616,7 @@ export function ModalDialog({
 }: {
   className: string;
   "aria-label"?: string;
+  "aria-current"?: "page";
   "aria-labelledby"?: string;
   restoreFocus?: boolean;
   onClose: () => void;
@@ -601,11 +627,11 @@ export function ModalDialog({
     const element = ref.current!;
     const opener = document.activeElement as HTMLElement;
     element.showModal();
-    element
-      .querySelector<HTMLElement>(
-        'input:not([type="checkbox"]), select, textarea, button[role="combobox"]',
-      )!
-      .focus();
+    const initial =
+      element.querySelector<HTMLElement>(
+        'input:not([type="checkbox"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button[role="combobox"]:not([disabled])',
+      ) ?? element.querySelector<HTMLElement>("button:not([disabled])");
+    initial?.focus();
     return () => {
       element.close();
       if (restoreFocus) opener.focus();
