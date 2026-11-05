@@ -7,8 +7,13 @@ export default function LabelsPage() {
   return (
     <>
       <PageHeader>
+        <span className="settings-breadcrumb">Settings</span>
+        <span>/</span>
         <span>Labels</span>
       </PageHeader>
+      <div className="settings-labels-intro">
+        <h1>Labels</h1>
+      </div>
       <LabelManager catalog={catalog} onMerged={() => {}} />
     </>
   );

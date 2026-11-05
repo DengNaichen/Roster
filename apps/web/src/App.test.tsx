@@ -49,7 +49,7 @@ beforeEach(() => {
         );
       if (path.endsWith("/access"))
         return Promise.resolve(json({ enabled: false, role: "", subject: "" }));
-      if (path.endsWith("/teams"))
+      if (path.endsWith("/teams") || path.endsWith("/team-directory"))
         return Promise.resolve(
           json({ teams: [{ key: "AL", name: "Fixture team", emoji: "", next_number: 2 }] }),
         );
@@ -65,7 +65,7 @@ beforeEach(() => {
 it("loads settings independently of project and label catalogs", async () => {
   window.history.replaceState(null, "", "/default/settings");
   render(<App />);
-  await screen.findByRole("heading", { name: "Fixture team" });
+  await screen.findByRole("link", { name: /Fixture team/ });
   // The sidebar counts a team's Triage on its own; nothing else may load catalogs.
   const catalogCalls = calls.filter((path) => /projects|labels|issues/.test(path));
   expect(catalogCalls.every((path) => /\/issues\?.*status=triage/.test(path))).toBe(true);
@@ -74,7 +74,7 @@ it("loads settings independently of project and label catalogs", async () => {
 it("keeps the shell mounted, resets page state, and searches without reloading catalogs", async () => {
   render(<App />);
   await screen.findByRole("link", { name: "Fixture issue" });
-  const workspace = await screen.findByRole("button", { name: "Workspace: Fixture workspace" });
+  await screen.findByRole("button", { name: "Workspace: Fixture workspace" });
   const initialCatalogs = calls.filter((path) => !path.includes("/issues?"));
   fireEvent.click(screen.getByRole("button", { name: "Fixture team" }));
   fireEvent.click(screen.getByRole("checkbox", { name: "Select AL-1" }));
@@ -85,11 +85,9 @@ it("keeps the shell mounted, resets page state, and searches without reloading c
   await waitFor(() => expect(calls.some((path) => path.includes("query=fixture"))).toBe(true));
   expect(calls.filter((path) => !path.includes("/issues?"))).toEqual(initialCatalogs);
   act(() => navigate("/default/settings"));
-  await screen.findByRole("heading", { name: "Fixture team" });
-  expect(screen.getByRole("button", { name: "Workspace: Fixture workspace" })).toBe(workspace);
-  expect(screen.getByRole("button", { name: "Fixture team" }).getAttribute("aria-expanded")).toBe(
-    "false",
-  );
+  await screen.findByRole("link", { name: /Fixture team/ });
+  expect(screen.getByRole("navigation", { name: "Settings navigation" })).toBeTruthy();
+  expect(screen.queryByRole("navigation", { name: "Workspace navigation" })).toBeNull();
   act(() => navigate("/default/"));
   await screen.findByRole("link", { name: "Fixture issue" });
   expect((screen.getByRole("searchbox", { name: "Search issues" }) as HTMLInputElement).value).toBe(
@@ -101,7 +99,7 @@ it("keeps the shell mounted, resets page state, and searches without reloading c
   // Supabase session is held by AuthBoundary; workspace navigation never calls the removed Go auth endpoint.
   expect(calls.filter((path) => path === "/auth/session")).toHaveLength(0);
   expect(calls.filter((path) => path.endsWith("/teams"))).toHaveLength(1);
-  expect(calls.filter((path) => path === "/api/workspaces")).toHaveLength(1);
+  expect(calls.filter((path) => path === "/api/workspaces")).toHaveLength(2);
 });
 it("keeps Triage in its own team inbox and out of the issue list", async () => {
   const triaged = {
@@ -172,4 +170,47 @@ it("narrows the team issue list with Active, Backlog and All issues views", asyn
   // Done stays collapsed and Triage never joins the list.
   expect(screen.queryByText("done issue")).toBeNull();
   expect(screen.queryByText("triage issue")).toBeNull();
+});
+
+it("keeps settings navigation on direct entry and returns to the previous work page", async () => {
+  window.history.replaceState(null, "", "/default/team/AL/issues");
+  render(<App />);
+  await screen.findByRole("link", { name: "Fixture issue" });
+  act(() => navigate("/default/settings"));
+  await screen.findByRole("heading", { name: "Teams" });
+  fireEvent.click(screen.getByRole("link", { name: "Labels" }));
+  await screen.findByRole("heading", { name: "Labels" });
+  expect(window.location.pathname).toBe("/default/settings/labels");
+  expect(screen.getByRole("link", { name: "Labels" }).getAttribute("aria-current")).toBe("page");
+  fireEvent.click(screen.getByRole("link", { name: "Back to workspace" }));
+  await screen.findByRole("link", { name: "Fixture issue" });
+  expect(window.location.pathname).toBe("/default/team/AL/issues");
+});
+
+it("opens a single team's settings from the directory and resolves direct links", async () => {
+  window.history.replaceState(null, "", "/default/settings/teams");
+  const app = render(<App />);
+  fireEvent.click(await screen.findByRole("link", { name: /Fixture team/ }));
+  await screen.findByRole("textbox", { name: "Name" });
+  expect(window.location.pathname).toBe("/default/settings/teams/AL");
+  expect(calls.some((path) => path.includes("/cycles"))).toBe(false);
+  app.unmount();
+  render(<App />);
+  expect(((await screen.findByRole("textbox", { name: "Name" })) as HTMLInputElement).value).toBe(
+    "Fixture team",
+  );
+});
+
+it("persists personal appearance and opens integrations without fabricating connection state", async () => {
+  window.history.replaceState(null, "", "/default/settings/personal");
+  render(<App />);
+  fireEvent.click(await screen.findByRole("radio", { name: "Dark" }));
+  expect(document.documentElement.dataset.rosterTheme).toBe("dark");
+  expect(JSON.parse(localStorage.getItem("roster.appearance")!).theme).toBe("dark");
+  fireEvent.click(screen.getByRole("radio", { name: "Light" }));
+  act(() => navigate("/default/settings/integrations"));
+  await screen.findByRole("heading", { name: "GitHub" });
+  expect((screen.getByRole("button", { name: "Configure" }) as HTMLButtonElement).disabled).toBe(
+    true,
+  );
 });

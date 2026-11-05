@@ -2,7 +2,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--r-gap-interactive-rows);
   min-height: 0;
   overflow-y: auto;
   padding: var(--r-space-8);
@@ -102,12 +102,14 @@
   flex: 1;
 }
 .brand,
+.settings-back,
 .account-trigger {
   height: var(--r-size-menu-row);
   color: var(--r-color-text-primary);
   font-weight: var(--r-weight-semibold);
 }
-.brand {
+.brand,
+.settings-back {
   margin-bottom: var(--r-space-8);
 }
 .brand strong {
@@ -235,11 +237,12 @@
   display: none;
 }
 .scope-navigation,
+.settings-navigation,
 .team-destinations-list {
   display: flex;
   flex: none;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--r-gap-interactive-rows);
 }
 .team-navigation {
   display: flex;
@@ -270,7 +273,7 @@
   overflow: hidden;
 }
 .team-destinations-list > :first-child {
-  margin-top: 1px;
+  margin-top: var(--r-gap-interactive-rows);
 }
 .team-chevron {
   transition: transform var(--r-duration-disclosure) var(--r-ease-standard);
@@ -1100,4 +1103,577 @@
   border-color: var(--r-color-border-control);
   font: var(--r-type-field);
   background: var(--r-color-bg-surface);
+}
+
+/* Settings has its own navigation while retaining the workspace shell. */
+.settings-navigation {
+  flex: 1;
+}
+.settings-breadcrumb {
+  color: var(--r-color-text-muted);
+}
+.settings-shell .settings-page {
+  padding-top: var(--r-space-32);
+}
+.settings-page-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--r-space-16);
+  margin-bottom: var(--r-space-32);
+}
+.settings-shell .team-settings {
+  padding: var(--r-space-24);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+}
+.settings-labels-intro {
+  padding: var(--r-space-24) var(--r-space-24) var(--r-space-16);
+}
+.settings-labels-intro h1 {
+  font-size: var(--r-font-size-heading-md);
+  font-weight: var(--r-weight-semibold);
+}
+.settings-labels-intro p {
+  margin-top: var(--r-space-4);
+  color: var(--r-color-text-muted);
+  font-size: var(--r-font-size-caption);
+}
+@media (max-width: 639px) {
+  .settings-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .settings-sidebar {
+    display: block;
+    overflow: visible;
+    border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
+  }
+  .settings-sidebar .sidebar-account {
+    display: none;
+  }
+  .settings-navigation {
+    flex-direction: row;
+    gap: var(--r-space-4);
+  }
+  .settings-navigation .nav-item {
+    flex: 1;
+    width: auto;
+  }
+  .settings-shell .panel {
+    flex: 1;
+    min-height: 0;
+  }
+  .settings-shell .settings-page {
+    padding: var(--r-space-16);
+  }
+  .settings-shell .team-settings {
+    padding: var(--r-space-16);
+  }
+}
+
+.settings-team-list,
+.settings-general,
+.settings-integration-card {
+  border: 1px solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+  overflow: hidden;
+}
+.settings-team-row {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-16);
+  padding: var(--r-space-16);
+  color: var(--r-color-text-primary);
+  text-decoration: none;
+}
+.settings-team-row + .settings-team-row {
+  border-top: 1px solid var(--r-color-border-divider);
+}
+.settings-team-row:hover {
+  background: var(--r-color-bg-hover);
+}
+.settings-team-row strong {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.settings-team-key,
+.settings-team-row > .icon,
+.settings-profile p {
+  color: var(--r-color-text-muted);
+}
+.settings-detail-tabs {
+  display: flex;
+  gap: var(--r-space-8);
+  margin-bottom: var(--r-space-24);
+}
+.settings-detail-tabs [aria-pressed="true"] {
+  background: var(--r-color-bg-nav-current);
+}
+.settings-page-intro h1,
+.settings-inline,
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+}
+.settings-profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-bg-nav-current);
+  font-size: var(--r-font-size-heading-md);
+}
+.settings-sections {
+  display: grid;
+  gap: var(--r-space-32);
+}
+.settings-choice-group {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.settings-choice-group legend {
+  font-weight: var(--r-weight-semibold);
+  margin-bottom: var(--r-space-16);
+}
+.settings-choices {
+  display: flex;
+  gap: var(--r-space-12);
+}
+.settings-choice {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+  padding: var(--r-space-8);
+  position: relative;
+  cursor: pointer;
+}
+.settings-choice:has(input:checked) {
+  border-color: var(--r-color-link);
+  box-shadow: 0 0 0 1px var(--r-color-link);
+}
+.settings-choice:focus-within {
+  outline: 2px solid var(--r-color-link);
+  outline-offset: 3px;
+}
+.settings-choice input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.settings-theme-preview {
+  display: flex;
+  height: 86px;
+  border-radius: var(--r-radius-control);
+  overflow: hidden;
+  background: #f5f6f8;
+  border: 1px solid #d8dce3;
+}
+.settings-theme-preview > i {
+  width: 24%;
+  background: #e4e7ed;
+}
+.settings-theme-preview > span {
+  flex: 1;
+  padding: 16px 12px;
+}
+.settings-theme-preview b {
+  display: block;
+  height: 5px;
+  background: #c0c6d0;
+  margin-bottom: 9px;
+  border-radius: 2px;
+}
+.preview-dark {
+  background: #22252d;
+  border-color: #363a46;
+}
+.preview-dark > i {
+  background: #181b21;
+}
+.preview-dark b {
+  background: #4b5262;
+}
+.preview-system {
+  background: linear-gradient(90deg, #f5f6f8 50%, #22252d 50%);
+}
+.settings-choice-caption {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  padding: var(--r-space-12) var(--r-space-4) var(--r-space-4);
+  font-size: var(--r-font-size-caption);
+}
+.choice-check {
+  margin-left: auto;
+}
+.settings-density-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  height: 86px;
+  padding: 8px 16px;
+  background: var(--r-color-bg-hover);
+  border-radius: var(--r-radius-control);
+}
+.settings-density-preview i {
+  height: 12px;
+  border-radius: 3px;
+  background: var(--r-color-bg-nav-current);
+}
+.density-comfortable {
+  gap: 8px;
+}
+.density-comfortable i {
+  height: 18px;
+}
+.settings-general {
+  padding: 0 var(--r-space-24);
+}
+.settings-integration-header,
+.settings-integration-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-16);
+  padding: var(--r-space-24);
+}
+.settings-integration-header h2 {
+  font-size: var(--r-font-size-ui);
+}
+.settings-integration-header p,
+.settings-integration-footer,
+.settings-integration-status {
+  color: var(--r-color-text-muted);
+  font-size: var(--r-font-size-caption);
+}
+.settings-integration-status {
+  margin-left: auto;
+}
+.settings-integration-footer {
+  border-top: 1px solid var(--r-color-border-divider);
+  justify-content: space-between;
+}
+@media (max-width: 639px) {
+  .settings-navigation {
+    overflow-x: auto;
+  }
+  .settings-navigation .nav-item {
+    flex: 0 0 auto;
+  }
+  .settings-integration-header,
+  .settings-integration-footer {
+    flex-wrap: wrap;
+    padding: var(--r-space-16);
+  }
+  .settings-integration-status {
+    margin-left: 0;
+  }
+}
+.settings-page-intro > .button,
+.settings-integration-footer > .button,
+.settings-identifier {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-8);
+}
+.settings-github-mark {
+  border-radius: 50%;
+  background: #24292f;
+}
+
+.settings-shell .settings-directory-page {
+  max-width: 1120px;
+  padding: var(--r-space-64) var(--r-space-64) var(--r-space-32);
+}
+.settings-directory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+  margin-bottom: var(--r-space-24);
+}
+.settings-directory-search {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  width: min(360px, 45%);
+  height: var(--r-size-control);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-subtle);
+  padding-left: var(--r-space-12);
+  color: var(--r-color-text-muted);
+}
+.settings-directory-search:focus-within {
+  outline: 2px solid var(--r-color-link);
+  outline-offset: 2px;
+}
+.settings-directory-search input {
+  height: 100%;
+  padding-block: 0;
+  font: var(--r-type-ui);
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+.directory-primary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.settings-table-scroll {
+  overflow-x: auto;
+}
+.settings-directory-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--r-gap-interactive-rows);
+  text-align: left;
+  font-size: var(--r-font-size-ui);
+}
+.settings-directory-table th,
+.settings-directory-table td {
+  padding: var(--r-space-16) var(--r-space-12);
+  vertical-align: middle;
+}
+.settings-directory-table thead th {
+  color: var(--r-color-text-muted);
+  font-weight: var(--r-weight-medium);
+  white-space: nowrap;
+}
+.settings-directory-table tbody tr:not(.settings-directory-group):is(:hover, :focus-within) > td {
+  background: var(--r-color-bg-hover);
+}
+.settings-directory-group th {
+  background: var(--r-color-bg-hover);
+  color: var(--r-color-text-secondary);
+  font-weight: var(--r-weight-medium);
+  padding-block: var(--r-space-8);
+}
+.settings-directory-group span {
+  color: var(--r-color-text-muted);
+  margin-left: var(--r-space-8);
+}
+.settings-member-name,
+.settings-team-link {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+  color: var(--r-color-text-primary);
+  text-decoration: none;
+  min-width: 160px;
+}
+.settings-member-name strong {
+  overflow-wrap: anywhere;
+}
+.settings-member-name small {
+  display: block;
+  color: var(--r-color-text-muted);
+  font-weight: normal;
+  font-size: var(--r-font-size-caption);
+}
+.settings-member-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--r-size-avatar-lg);
+  height: var(--r-size-avatar-lg);
+  border-radius: var(--r-radius-circle);
+  color: var(--r-color-text-secondary);
+  background: var(--r-color-bg-nav-current);
+  font-size: var(--r-font-size-caption);
+}
+.settings-member-email {
+  color: var(--r-color-text-secondary);
+}
+.settings-member-email span {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-member-action {
+  text-align: right;
+}
+.member-inactive .settings-member-name,
+.member-inactive .settings-member-email {
+  opacity: 0.55;
+}
+.settings-role {
+  padding: 3px 7px;
+  border-radius: var(--r-radius-control);
+}
+.role-admin {
+  background: var(--r-color-bg-nav-current);
+}
+.settings-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-4);
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.settings-team-open {
+  color: var(--r-color-text-muted);
+}
+.settings-directory-message:empty {
+  display: none;
+}
+.settings-directory-message {
+  margin-top: var(--r-space-16);
+}
+.settings-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.settings-invite-content {
+  padding: var(--r-space-24);
+}
+.settings-invite-content p {
+  margin-bottom: var(--r-space-16);
+  color: var(--r-color-text-secondary);
+}
+.settings-invite-content input {
+  flex: 1;
+  min-width: 0;
+}
+.settings-invite-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--r-space-24);
+}
+@media (max-width: 767px) {
+  .settings-shell .settings-directory-page {
+    padding: var(--r-space-24) var(--r-space-16);
+  }
+  .settings-directory-toolbar {
+    flex-wrap: wrap;
+  }
+  .settings-directory-search {
+    width: 100%;
+  }
+  .settings-directory-table {
+    min-width: 580px;
+  }
+  .settings-teams-table {
+    min-width: 420px;
+  }
+}
+.settings-invite-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--r-space-16) var(--r-space-24);
+  border-bottom: 1px solid var(--r-color-border-divider);
+}
+.settings-directory-table th {
+  position: relative;
+}
+.settings-directory-search input:focus {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+.settings-teams-table th:first-child {
+  width: 70%;
+}
+.settings-teams-table .settings-team-key {
+  font-weight: normal;
+}
+.settings-teams-table td:last-child {
+  width: 40px;
+  color: var(--r-color-text-muted);
+}
+
+.settings-directory-table tbody td:first-child {
+  border-start-start-radius: var(--r-radius-control);
+  border-end-start-radius: var(--r-radius-control);
+}
+.settings-directory-table tbody td:last-child {
+  border-start-end-radius: var(--r-radius-control);
+  border-end-end-radius: var(--r-radius-control);
+}
+.settings-directory-group th {
+  border-radius: var(--r-radius-control);
+}
+
+/* Directory proportions follow the reference while sharing Roster's tokens. */
+.settings-directory-page .settings-page-intro {
+  margin-bottom: var(--r-space-24);
+}
+.settings-directory-page .settings-heading h1 {
+  font: var(--r-type-heading-lg);
+  letter-spacing: var(--r-tracking-heading);
+}
+.settings-directory-page .settings-directory-toolbar {
+  --r-size-control: var(--r-size-menu-row);
+  margin-bottom: var(--r-space-24);
+}
+.settings-directory-toolbar > .dropdown {
+  height: var(--r-size-control);
+  border-color: var(--r-color-border-divider);
+  background: var(--r-color-bg-subtle);
+}
+.settings-directory-toolbar .directory-primary-action {
+  height: var(--r-size-control);
+  padding-inline: var(--r-space-16);
+  border-radius: var(--r-radius-pill);
+}
+.settings-directory-page .settings-table-scroll {
+  margin-inline: calc(-1 * var(--r-space-12));
+}
+.settings-directory-table tbody td {
+  height: var(--r-size-row);
+  padding-block: var(--r-space-4);
+}
+.settings-member-name strong,
+.settings-team-link strong {
+  font-weight: var(--r-weight-medium);
+}
+.settings-directory-table .dropdown.settings-role {
+  min-height: var(--r-size-badge);
+  padding: 0 var(--r-space-8);
+  border-radius: var(--r-radius-small);
+}
+.settings-directory-table .role-admin {
+  background: var(--r-color-bg-selected);
+  color: var(--r-color-link);
+}
+.settings-directory-table .role-member {
+  background: transparent;
+  color: var(--r-color-text-secondary);
+}
+.settings-member-action .button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--r-color-text-muted);
+}
+.settings-member-action .button:hover,
+.settings-member-action .button:focus-visible {
+  background: var(--r-color-bg-pressed);
+  color: var(--r-color-text-primary);
+}
+@media (max-width: 1023px) and (min-width: 768px) {
+  .settings-shell .settings-directory-page {
+    padding-inline: var(--r-space-32);
+    padding-top: var(--r-space-48);
+  }
 }
