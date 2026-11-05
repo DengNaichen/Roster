@@ -8,6 +8,7 @@ import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-r
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
 import { IssueDocument } from "./IssueDocument";
+import { DescriptionField } from "./DescriptionField";
 import { WorkLogEntry, WorkLogList, ActivityTabs } from "./WorkLogs";
 import {
   RequestError,
@@ -687,16 +688,7 @@ function IssueEditor({
             disabled={saving}
           />
         </label>
-        <label className="composer-description">
-          <span className="composer-field-label">Description</span>
-          <textarea
-            rows={5}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Add a description… (HTML or Markdown)"
-            disabled={saving}
-          />
-        </label>
+        <DescriptionField value={description} onChange={setDescription} disabled={saving} />
         <div className="composer-properties">
           <label className="composer-property">
             <Users className="icon" />
