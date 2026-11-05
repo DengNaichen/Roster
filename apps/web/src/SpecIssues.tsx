@@ -10,6 +10,8 @@ import {
   apiPath,
   columns,
   columnsFor,
+  issueScopes,
+  type IssueScope,
   ModalDialog,
   RequestError,
   type IssueSort,
@@ -36,6 +38,7 @@ export default function SpecIssues({
 }) {
   const [savingLinks, setSavingLinks] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [scope, setScope] = useState<IssueScope>("active");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [priority, setPriority] = useState<Priority | "">("");
   const [type, setType] = useState("");
@@ -66,7 +69,9 @@ export default function SpecIssues({
       { team: "", type, query, priority, labelFilter, assignee, specIdentifier: id },
       setError,
     );
+  const statuses = issueScopes.find((item) => item.value === scope)?.statuses;
   const visible = issues
+    .filter((issue) => !statuses || statuses.includes(issue.status))
     .filter((issue) => filter === "all" || issue.status === filter)
     .sort((a, b) =>
       sort === "priority"
@@ -130,6 +135,14 @@ export default function SpecIssues({
       </div>
       <IssueFilters
         layout="spec"
+        scope={{
+          value: scope,
+          onChange: (value) => {
+            setScope(value);
+            setFilter("all");
+            setSelected([]);
+          },
+        }}
         assignee={assignee}
         setAssignee={setAssignee}
         membershipEnabled={teams.data.teams.some((t) => t.membership_enabled)}
@@ -194,7 +207,10 @@ export default function SpecIssues({
       )}
       <IssueViews
         view={view}
-        visibleColumns={columnsFor(view).filter((c) => grouped[c.status].length > 0)}
+        visibleColumns={columnsFor(view)
+          .filter((c) => grouped[c.status].length > 0)
+          .sort((a, b) => Number(a.status === "triage") - Number(b.status === "triage"))
+          .map((c) => (c.status === "triage" ? { ...c, label: "待确认反馈" } : c))}
         grouped={grouped}
         loading={loading}
         isCollapsed={(status) => !!collapsed[status]}
