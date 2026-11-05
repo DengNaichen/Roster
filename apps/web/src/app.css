@@ -1238,7 +1238,8 @@ button:focus-visible {
 .select-menu,
 .workspace-menu,
 .account-menu,
-.filter-popover {
+.filter-popover,
+.display-popover {
   z-index: 20;
   width: var(--menu-width);
   max-height: var(--radix-select-content-available-height);
