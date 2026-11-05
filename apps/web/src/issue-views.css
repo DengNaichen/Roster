@@ -204,6 +204,8 @@
 .list-row .issue-meta-secondary {
   display: flex;
   align-items: center;
+  /* Keep the trailing edge beside the assignee when expanded slots overflow. */
+  justify-content: flex-end;
   flex: 0 1 auto;
   gap: var(--r-space-4);
   min-width: 0;
