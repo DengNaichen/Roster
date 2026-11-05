@@ -312,7 +312,7 @@ const statusColors: Record<Status, string> = {
 };
 
 // Backlog and planned states are rings; progress fills a pie inside the ring.
-// Triage and closed states use solid discs with a mark in the panel color.
+// Triage, agent-ready and closed states use solid discs with a mark in the panel color.
 const ring = <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />;
 const disc = <circle cx="7" cy="7" r="7" fill="currentColor" />;
 const statusGlyphs: Record<Status, ReactNode> = {
@@ -337,8 +337,8 @@ const statusGlyphs: Record<Status, ReactNode> = {
   todo: ring,
   agent_ready: (
     <>
-      {ring}
-      <circle cx="7" cy="7" r="2" fill="currentColor" />
+      {disc}
+      <path className="status-mark" d="M7.6 3.5L4.8 7.5h2.4l-.6 3 2.8-4H7.2z" />
     </>
   ),
   in_progress: (
