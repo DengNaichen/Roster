@@ -65,5 +65,7 @@ it("connects Bezier curves horizontally at card centers", () => {
     expect(edge.points[1].x).toBeGreaterThan(edge.points[0].x);
     expect(edge.points.at(-2)!.x).toBeLessThan(to.x);
     expect(edge.path).toContain(" C");
+    expect(edge.points.at(-2)).toEqual({ x: to.x - 18, y: to.y + 60 });
+    expect(edge.path.endsWith(` L${to.x - 7},${to.y + 60}`)).toBe(true);
   }
 });

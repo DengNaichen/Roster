@@ -62,12 +62,20 @@ export function dependencyLayout(graph: SpecDependencies, visible: Set<string>) 
         y: from.y + dependencyNodeSize.height / 2,
       };
       const end = { x: to.x, y: to.y + dependencyNodeSize.height / 2 };
-      const bend = Math.max(28, (end.x - start.x) / 2);
-      const points = [start, { x: start.x + bend, y: start.y }, { x: end.x - bend, y: end.y }, end];
+      // Reserve a horizontal landing before the arrow, even for steep curves.
+      const landing = { x: end.x - 18, y: end.y };
+      const bend = Math.max(12, (landing.x - start.x) / 2);
+      const points = [
+        start,
+        { x: start.x + bend, y: start.y },
+        { x: landing.x - bend, y: end.y },
+        landing,
+        end,
+      ];
       return {
         ...edge,
         points,
-        path: `M${start.x},${start.y} C${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${end.x},${end.y}`,
+        path: `M${start.x},${start.y} C${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${landing.x},${landing.y} L${end.x - 7},${end.y}`,
       };
     });
   return {
