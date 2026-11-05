@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { SpecDependencyDemo } from "./SpecDependencyDemo";
 import { NewIssueDialog } from "./Dialogs";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, type ViewMode } from "./IssueViews";
@@ -36,6 +37,9 @@ export default function SpecIssues({
   linksError: string;
   onLinksChanged: () => Promise<void>;
 }) {
+  const [dependencies, setDependencies] = useState(
+    new URLSearchParams(location.search).get("view") === "dependencies",
+  );
   const [savingLinks, setSavingLinks] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [scope, setScope] = useState<IssueScope>("active");
@@ -135,6 +139,13 @@ export default function SpecIssues({
       </div>
       <IssueFilters
         layout="spec"
+        dependencies={{
+          active: dependencies,
+          onSelect: () => {
+            setDependencies(true);
+            setSelected([]);
+          },
+        }}
         scope={{
           value: scope,
           onChange: (value) => {
@@ -164,7 +175,10 @@ export default function SpecIssues({
         catalog={catalog}
         clearSelection={() => setSelected([])}
         view={view}
-        setView={setView}
+        setView={(value) => {
+          setDependencies(false);
+          setView(value);
+        }}
         visibleCount={visible.length}
         selectVisible={() => setSelected(visible.map((i) => i.identifier))}
         selectionDisabled={loading}
@@ -198,38 +212,42 @@ export default function SpecIssues({
           Retry linked issues
         </button>
       )}
-      {!loading && !loadError && !linksError && visible.length === 0 && (
+      {!dependencies && !loading && !loadError && !linksError && visible.length === 0 && (
         <p className="scope-description">
           {linked.length
             ? "No linked issues match these filters."
             : "No linked issues yet. Link existing issues or create a new one."}
         </p>
       )}
-      <IssueViews
-        view={view}
-        visibleColumns={columnsFor(view)
-          .filter((c) => grouped[c.status].length > 0)
-          .sort((a, b) => Number(a.status === "triage") - Number(b.status === "triage"))
-          .map((c) => (c.status === "triage" ? { ...c, label: "待确认反馈" } : c))}
-        grouped={grouped}
-        loading={loading}
-        isCollapsed={(status) => !!collapsed[status]}
-        toggleGroup={(status) =>
-          setCollapsed((current) => ({ ...current, [status]: !current[status] }))
-        }
-        actions={{
-          selected,
-          toggle: (identifier) =>
-            setSelected((current) =>
-              current.includes(identifier)
-                ? current.filter((i) => i !== identifier)
-                : [...current, identifier],
-            ),
-          savingPriorities,
-          changePriority,
-          moveIssue,
-        }}
-      />
+      {dependencies ? (
+        <SpecDependencyDemo scope={scope} />
+      ) : (
+        <IssueViews
+          view={view}
+          visibleColumns={columnsFor(view)
+            .filter((c) => grouped[c.status].length > 0)
+            .sort((a, b) => Number(a.status === "triage") - Number(b.status === "triage"))
+            .map((c) => (c.status === "triage" ? { ...c, label: "待确认反馈" } : c))}
+          grouped={grouped}
+          loading={loading}
+          isCollapsed={(status) => !!collapsed[status]}
+          toggleGroup={(status) =>
+            setCollapsed((current) => ({ ...current, [status]: !current[status] }))
+          }
+          actions={{
+            selected,
+            toggle: (identifier) =>
+              setSelected((current) =>
+                current.includes(identifier)
+                  ? current.filter((i) => i !== identifier)
+                  : [...current, identifier],
+              ),
+            savingPriorities,
+            changePriority,
+            moveIssue,
+          }}
+        />
+      )}
       {creating && (
         <NewIssueDialog
           teams={teams.data.teams}
