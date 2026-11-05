@@ -2,7 +2,6 @@ import { ChevronDown } from "lucide-react";
 import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import {
-  columns,
   IssueMeta,
   IssueSummary,
   issueTeamKey,
@@ -36,7 +35,7 @@ export function IssueViews({
   actions,
 }: {
   view: ViewMode;
-  visibleColumns: (typeof columns)[number][];
+  visibleColumns: { status: Status; label: string; hint: string }[];
   grouped: Record<Status, IssueSummary[]>;
   loading: boolean;
   isCollapsed: (status: Status) => boolean;

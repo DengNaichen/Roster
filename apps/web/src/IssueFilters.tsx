@@ -101,7 +101,7 @@ export function IssueFilters({
   return (
     <div className={`issue-toolbar${layout === "spec" ? " issue-toolbar-spec" : ""}`}>
       <div className="chips toolbar-filters">
-        {scope && (
+        {scope && layout !== "spec" && (
           <div className="segmented" role="tablist" aria-label="Issue views">
             {issueScopes.map((item) => (
               <button
@@ -390,6 +390,18 @@ export function IssueFilters({
               aria-label="Issue display"
             >
               <div className="toolbar-popover-heading">Display</div>
+              {scope && layout === "spec" && (
+                <label className="toolbar-field">
+                  Issue scope
+                  <Dropdown
+                    variant="block"
+                    aria-label="Issue scope"
+                    value={scope.value}
+                    onChange={(value) => scope.onChange(value as IssueScope)}
+                    options={issueScopes}
+                  />
+                </label>
+              )}
               <nav className="toolbar-view-switch" aria-label="Issue view">
                 <button
                   type="button"
