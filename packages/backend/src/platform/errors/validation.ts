@@ -11,3 +11,9 @@ export function text(value: unknown, label: string): string {
   }
   return (value as string).trim();
 }
+/** `path: message` for each schema violation, so callers can locate the field to fix. */
+export function describeIssues(issues: { path: PropertyKey[]; message: string }[]): string {
+  return issues.map((issue) =>
+    issue.path.length ? `${issue.path.map(String).join('.')}: ${issue.message}` : issue.message
+  ).join('; ');
+}

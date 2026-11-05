@@ -1,7 +1,8 @@
 import type { RequestContext } from '../../../contracts/mod.ts';
+import { checkIssueCriterionSchema } from '../../../contracts/issue-document.ts';
 import * as schemas from '../../../contracts/schemas.ts';
 import { identity } from '../modules/access/index.ts';
-import { fail } from '../platform/errors/validation.ts';
+import { describeIssues, fail } from '../platform/errors/validation.ts';
 import type { Service } from './mod.ts';
 export function guardService(service: Service): Service {
   const validators: Record<
@@ -9,7 +10,11 @@ export function guardService(service: Service): Service {
     {
       safeParse: (
         value: unknown,
-      ) => { success: boolean; data?: unknown; error?: unknown };
+      ) => {
+        success: boolean;
+        data?: unknown;
+        error?: { issues: { path: PropertyKey[]; message: string }[] };
+      };
     }
   > = {
     createWorkspace: schemas.createWorkspaceSchema,
@@ -23,6 +28,7 @@ export function guardService(service: Service): Service {
     listIssues: schemas.listIssuesSchema,
     createIssue: schemas.createIssueSchema,
     updateIssue: schemas.updateIssueSchema,
+    checkIssueCriterion: checkIssueCriterionSchema,
   };
   const inputIndex: Record<string, number> = {
     createWorkspace: 1,
@@ -31,6 +37,7 @@ export function guardService(service: Service): Service {
     changeTeamMember: 3,
     joinTeam: 3,
     updateIssue: 3,
+    checkIssueCriterion: 3,
   };
   return new Proxy(service, {
     get(target, key: keyof Service) {
@@ -42,7 +49,9 @@ export function guardService(service: Service): Service {
         if (validator) {
           const index = inputIndex[key] ?? 2;
           const result = validator.safeParse(args[index] ?? {});
-          if (!result.success) fail('invalid_input', 'Invalid input');
+          if (!result.success) {
+            fail('invalid_input', 'Invalid input: ' + describeIssues(result.error!.issues));
+          }
           args[index] = result.data;
         }
         try {

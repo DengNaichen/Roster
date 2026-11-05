@@ -9,7 +9,7 @@ export const fixtureIssue: IssueDetails = {
   decisions: [],
   identifier: "AL-1",
   title: "Fixture issue",
-  description: "Test description",
+  document: { lead: "Test description", sections: [], criteria: [] },
   status: "todo",
   priority: 0,
   type: "bug",

@@ -261,9 +261,10 @@
   --r-status-triage: light-dark(var(--r-ref-orange-light), var(--r-ref-orange-dark));
   --r-status-backlog: var(--r-color-text-muted);
   --r-status-todo: var(--r-color-text-secondary);
-  --r-status-agent-ready: light-dark(var(--r-ref-purple-light), var(--r-ref-purple-dark));
-  --r-status-in-progress: light-dark(var(--r-ref-amber-light), var(--r-ref-amber-dark));
-  --r-status-in-review: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));
+  /* Status glyphs use brighter accents than text and feedback surfaces. */
+  --r-status-agent-ready: light-dark(#12a8b8, #5fdbe8);
+  --r-status-in-progress: light-dark(#eab000, #ffe27a);
+  --r-status-in-review: light-dark(#35bb74, #78e8b0);
   --r-status-done: light-dark(var(--r-ref-indigo-600), var(--r-ref-indigo-200));
   --r-status-canceled: var(--r-color-text-muted);
   --r-pr-open: light-dark(var(--r-ref-green-light), var(--r-ref-green-dark));

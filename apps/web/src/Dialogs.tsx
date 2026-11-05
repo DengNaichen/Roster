@@ -5,7 +5,7 @@ import { AssigneeSelect } from "./Assignee";
 import { Box, Users, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
-import { DescriptionField } from "./DescriptionField";
+import { SummaryField } from "./SummaryField";
 import {
   RequestError,
   api,
@@ -46,7 +46,7 @@ export function NewIssueDialog({
   );
   const [projectID, setProjectID] = useState(initialProject?.id ?? 0);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [summary, setSummary] = useState("");
   const [priority, setPriority] = useState<Priority>(0);
   const [cycleID, setCycleID] = useState(initialCycleID);
   const [assignee, setAssignee] = useState("");
@@ -73,7 +73,7 @@ export function NewIssueDialog({
       const created = await api<Issue>(apiPath("/issues"), "POST", {
         team,
         title,
-        description,
+        ...(summary.trim() && { document: { lead: summary, sections: [], criteria: [] } }),
         status,
         project_id: projectID,
         priority,
@@ -120,7 +120,7 @@ export function NewIssueDialog({
             disabled={saving}
           />
         </label>
-        <DescriptionField value={description} onChange={setDescription} disabled={saving} />
+        <SummaryField value={summary} onChange={setSummary} disabled={saving} />
         <div className="composer-properties">
           {teams.length > 0 ? (
             <label className="composer-property">

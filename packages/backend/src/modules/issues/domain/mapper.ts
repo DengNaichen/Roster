@@ -7,7 +7,7 @@ export function issueDTO(r: Row): Issue {
     identifier: String(r.identifier),
     team: String(r.team),
     title: String(r.title),
-    description: String(r.description),
+    document: r.document as Issue['document'],
     status: r.status as Issue['status'],
     type: r.type as Issue['type'],
     priority: Number(r.priority),

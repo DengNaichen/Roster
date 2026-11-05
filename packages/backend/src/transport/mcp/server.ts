@@ -6,6 +6,7 @@ import * as cycles from '../../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
+  checkIssueCriterionSchema,
   createIssueSchema,
   createTeamSchema,
   createWorkspaceSchema,
@@ -43,7 +44,19 @@ const issueOutput = z.object({
   identifier: z.string(),
   team: z.string(),
   title: z.string(),
-  description: z.string(),
+  document: z.object({
+    lead: z.string(),
+    sections: z.array(
+      z.object({
+        title: z.string(),
+        blocks: z.array(z.object({ type: z.string() }).passthrough()),
+      }).passthrough(),
+    ),
+    criteria: z.array(
+      z.object({ id: z.string(), title: z.string(), detail: z.string(), done: z.boolean() })
+        .passthrough(),
+    ),
+  }).passthrough(),
   status: z.enum([
     'triage',
     'backlog',
@@ -167,6 +180,7 @@ const resultSchemas: Record<string, z.ZodType> = {
   }),
   create_issue: issueOutput,
   update_issue: issueOutput,
+  check_issue_criterion: issueOutput,
 };
 export function createMcpServer(service: Service, ctx: RequestContext, workspace: string) {
   const server = new McpServer({ name: 'roster', version: '0.1.0' });
@@ -323,18 +337,31 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   );
   tool(
     'create_issue',
-    'Create an issue in an accessible team.',
+    'Create an issue in an accessible team. The body is `document`: structured JSON with a lead, ' +
+      'titled sections of typed blocks, and acceptance criteria with IDs AC-1, AC-2, and so on. ' +
+      'Every text field is plain text; Markdown and HTML are shown literally.',
     createIssueSchema.extend(compatibleIssueFields).shape,
     false,
     (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
   );
   tool(
     'update_issue',
-    'Update a visible issue; omitted properties remain unchanged.',
+    'Update a visible issue; omitted properties remain unchanged. `document` replaces the whole ' +
+      'body: read it with get_issue, edit it, and send it back complete. Keep existing criterion ' +
+      'IDs and give new criteria the next unused number. To tick one criterion after verifying ' +
+      'it, call check_issue_criterion instead of rewriting the document.',
     { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
     false,
     ({ identifier, ...i }) =>
       service.updateIssue(ctx, workspace, identifier, restUpdateIssueSchema.parse(i)),
+  );
+  tool(
+    'check_issue_criterion',
+    'Set done on one acceptance criterion by ID without rewriting the document. Mark it done ' +
+      'only after verifying the outcome, and record the evidence with add_work_log.',
+    { identifier: z.string(), ...checkIssueCriterionSchema.shape },
+    false,
+    ({ identifier, ...i }) => service.checkIssueCriterion(ctx, workspace, identifier, i),
   );
   tool(
     'list_assignees',
