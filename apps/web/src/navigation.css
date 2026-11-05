@@ -1387,7 +1387,7 @@
 
 .settings-shell .settings-directory-page {
   max-width: 1120px;
-  padding: 48px 48px 32px;
+  padding: var(--r-space-64) var(--r-space-64) var(--r-space-32);
 }
 .settings-directory-toolbar {
   display: flex;
@@ -1401,8 +1401,9 @@
   gap: var(--r-space-8);
   width: min(360px, 45%);
   height: var(--r-size-control);
-  border: var(--r-border-width) solid var(--r-color-border-control);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
   border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-subtle);
   padding-left: var(--r-space-12);
   color: var(--r-color-text-muted);
 }
@@ -1613,4 +1614,66 @@
 }
 .settings-directory-group th {
   border-radius: var(--r-radius-control);
+}
+
+/* Directory proportions follow the reference while sharing Roster's tokens. */
+.settings-directory-page .settings-page-intro {
+  margin-bottom: var(--r-space-24);
+}
+.settings-directory-page .settings-heading h1 {
+  font: var(--r-type-heading-lg);
+  letter-spacing: var(--r-tracking-heading);
+}
+.settings-directory-page .settings-directory-toolbar {
+  --r-size-control: var(--r-size-menu-row);
+  margin-bottom: var(--r-space-24);
+}
+.settings-directory-toolbar > .dropdown {
+  height: var(--r-size-control);
+  border-color: var(--r-color-border-divider);
+  background: var(--r-color-bg-subtle);
+}
+.settings-directory-toolbar .directory-primary-action {
+  height: var(--r-size-control);
+  padding-inline: var(--r-space-16);
+  border-radius: var(--r-radius-pill);
+}
+.settings-directory-page .settings-table-scroll {
+  margin-inline: calc(-1 * var(--r-space-12));
+}
+.settings-directory-table tbody td {
+  padding-block: var(--r-space-24);
+}
+.settings-member-name strong,
+.settings-team-link strong {
+  font-weight: var(--r-weight-medium);
+}
+.settings-directory-table .dropdown.settings-role {
+  min-height: var(--r-size-badge);
+  padding: 0 var(--r-space-8);
+  border-radius: var(--r-radius-small);
+}
+.settings-directory-table .role-admin {
+  background: var(--r-color-bg-selected);
+  color: var(--r-color-link);
+}
+.settings-directory-table .role-member {
+  background: transparent;
+  color: var(--r-color-text-secondary);
+}
+.settings-member-action .button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--r-color-text-muted);
+}
+.settings-member-action .button:hover,
+.settings-member-action .button:focus-visible {
+  background: var(--r-color-bg-pressed);
+  color: var(--r-color-text-primary);
+}
+@media (max-width: 1023px) and (min-width: 768px) {
+  .settings-shell .settings-directory-page {
+    padding-inline: var(--r-space-32);
+    padding-top: var(--r-space-48);
+  }
 }

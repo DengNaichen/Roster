@@ -1,4 +1,4 @@
-import { Search, Plus, X, Copy, Check, ArrowDown, ArrowUp } from "lucide-react";
+import { Search, X, Copy, Check, ArrowDown, ArrowUp } from "lucide-react";
 import { Fragment } from "react";
 import { Dropdown } from "./Dropdown";
 import { useEffect, useRef, useState } from "react";
@@ -150,7 +150,6 @@ export function MembersSettings() {
               setInviting(true);
             }}
           >
-            <Plus className="icon" />
             Invite
           </button>
         )}
@@ -194,8 +193,11 @@ export function MembersSettings() {
                         <td>
                           <div className="settings-member-name">
                             <span className="settings-member-avatar" aria-hidden="true">
-                              {Array.from(member.name || member.email || "?")
+                              {(member.name || member.email || "?")
+                                .trim()
+                                .split(/\s+/)
                                 .slice(0, 2)
+                                .map((part) => Array.from(part)[0])
                                 .join("")
                                 .toUpperCase()}
                             </span>
@@ -211,6 +213,8 @@ export function MembersSettings() {
                         <td>
                           {admin ? (
                             <Dropdown
+                              variant="ghost"
+                              className={`settings-role role-${member.role}`}
                               aria-label={`Role for ${member.name || member.subject}`}
                               value={member.role}
                               disabled={busy}

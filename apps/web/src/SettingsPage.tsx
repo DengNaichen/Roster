@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { PageHeader } from "./PageHeader";
-import { ChevronRight, Lock, Globe, Plus, Search, ArrowDown, ArrowUp } from "lucide-react";
+import { ChevronRight, Lock, Globe, Search, ArrowDown, ArrowUp } from "lucide-react";
 import { PersonalSettings, WorkspaceSettings, IntegrationSettings } from "./SettingsSections";
 import { EntityEmoji, EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
@@ -166,7 +166,6 @@ function TeamDirectory({
           ]}
         />
         <button className="button primary directory-primary-action" onClick={onCreateTeam}>
-          <Plus className="icon" />
           Create team
         </button>
       </div>
