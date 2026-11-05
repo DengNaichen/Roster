@@ -7,7 +7,7 @@ import { codingAgentName, personName } from "./shared";
 import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
-import { IssueDocument } from "./IssueDocument";
+import { type CriterionChange, IssueDocument, setCriterion } from "./IssueDocument";
 import { DescriptionField } from "./DescriptionField";
 import { WorkLogEntry, WorkLogList, ActivityTabs } from "./WorkLogs";
 import {
@@ -71,6 +71,7 @@ export function IssueDetail({
   const [savingPriority, setSavingPriority] = useState(false);
   const [savingCycle, setSavingCycle] = useState(false);
   const [savingAssignee, setSavingAssignee] = useState(false);
+  const pendingCriteria = useRef(0);
   const [posting, setPosting] = useState(false);
   const requests = useRequestScope(identifier);
   const path = apiPath(`/issues/${identifier}`);
@@ -160,6 +161,44 @@ export function IssueDetail({
       },
     );
     if (saved) await loadIssue();
+  }
+
+  // Shown at once and saved in click order; a response only replaces the text when no later click is still pending.
+  async function changeCriterion(change: CriterionChange) {
+    setError("");
+    try {
+      const shown = setCriterion(issue!.description, change);
+      setIssue((current) => ({ ...current!, description: shown }));
+    } catch (cause) {
+      setError((cause as Error).message);
+      return;
+    }
+    pendingCriteria.current++;
+    try {
+      await requests.write(
+        identifier,
+        async () => {
+          const latest = await api<Issue>(path);
+          return api<Issue>(path, "PATCH", {
+            description: setCriterion(latest.description, change),
+          });
+        },
+        (updated) => {
+          const later = pendingCriteria.current > 1;
+          setIssue((current) => ({
+            ...current!,
+            ...updated,
+            description: later ? current!.description : updated.description,
+          }));
+        },
+        (cause) => {
+          setError(cause.message);
+          void loadIssue();
+        },
+      );
+    } finally {
+      pendingCriteria.current--;
+    }
   }
 
   async function postComment(event: FormEvent) {
@@ -348,7 +387,7 @@ export function IssueDetail({
           )}
         </section>
         <article className="detail-main">
-          <IssueDocument text={issue.description} />
+          <IssueDocument text={issue.description} onCriterionChange={changeCriterion} />
           {issue.decisions.length > 0 && (
             <section className="detail-section decision-section" aria-label="Decisions">
               <h2>

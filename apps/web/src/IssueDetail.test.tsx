@@ -472,3 +472,94 @@ it("ignores a log response after leaving the tab and reloads on return", async (
   await screen.findByText(progress.summary);
   expect(screen.queryByText(decision.summary)).toBeNull();
 });
+
+it("checks an acceptance criterion against the latest saved description", async () => {
+  const criteria = (first: string) =>
+    `<section><h2>验收条件</h2><ol class="issue-doc-criteria"><li>${first}</li><li>宽屏不回归。</li></ol></section>`;
+  let current = { ...fixtureIssue, description: criteria("窄窗口完整显示。") };
+  const patches: string[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((_url, options) => {
+      if (options?.method === "PATCH") {
+        patches.push(JSON.parse(options.body).description);
+        current = { ...current, ...JSON.parse(options.body) };
+      }
+      return Promise.resolve(json(current));
+    }),
+  );
+  render(<IssueDetail {...props} />);
+  const box = await screen.findByRole("checkbox", { name: "宽屏不回归。" });
+  current = { ...current, description: `<p>Someone else added this.</p>${current.description}` };
+  fireEvent.click(box);
+  await waitFor(() =>
+    expect(
+      (screen.getByRole("checkbox", { name: "宽屏不回归。" }) as HTMLInputElement).checked,
+    ).toBe(true),
+  );
+  expect(patches).toEqual([
+    `<p>Someone else added this.</p>${criteria("窄窗口完整显示。").replace("<li>宽屏", '<li class="issue-doc-done">宽屏')}`,
+  ]);
+});
+
+it("shows checked criteria at once and keeps quick clicks steady while saves finish", async () => {
+  let current = {
+    ...fixtureIssue,
+    description:
+      '<section><h2>验收条件</h2><ol class="issue-doc-criteria"><li>第一条。</li><li>第二条。</li></ol></section>',
+  };
+  const saves: { resolve: () => void }[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((_url, options) => {
+      if (options?.method !== "PATCH") return Promise.resolve(json(current));
+      return new Promise<Response>((resolve) =>
+        saves.push({
+          resolve: () => {
+            current = { ...current, ...JSON.parse(options.body) };
+            resolve(json(current));
+          },
+        }),
+      );
+    }),
+  );
+  render(<IssueDetail {...props} />);
+  const box = (name: string) => screen.getByRole("checkbox", { name }) as HTMLInputElement;
+  await screen.findByRole("checkbox", { name: "第一条。" });
+  fireEvent.click(box("第一条。"));
+  expect(box("第一条。").checked).toBe(true);
+  expect(box("第一条。").disabled).toBe(false);
+  fireEvent.click(box("第二条。"));
+  expect(box("第二条。").checked).toBe(true);
+  await waitFor(() => expect(saves).toHaveLength(1));
+  await act(async () => saves[0].resolve());
+  expect(box("第一条。").checked).toBe(true);
+  expect(box("第二条。").checked).toBe(true);
+  await waitFor(() => expect(saves).toHaveLength(2));
+  await act(async () => saves[1].resolve());
+  expect(current.description.match(/issue-doc-done/g)).toHaveLength(2);
+  expect(box("第一条。").checked && box("第二条。").checked).toBe(true);
+});
+
+it("rolls a criterion back when saving it fails", async () => {
+  const saved = {
+    ...fixtureIssue,
+    description: '<ol class="issue-doc-criteria"><li>第一条。</li></ol>',
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((_url, options) =>
+      Promise.resolve(
+        options?.method === "PATCH" ? json({ error: "permission denied" }, 403) : json(saved),
+      ),
+    ),
+  );
+  render(<IssueDetail {...props} />);
+  fireEvent.click(await screen.findByRole("checkbox", { name: "第一条。" }));
+  await waitFor(() => expect(props.setError).toHaveBeenCalledWith("permission denied"));
+  await waitFor(() =>
+    expect((screen.getByRole("checkbox", { name: "第一条。" }) as HTMLInputElement).checked).toBe(
+      false,
+    ),
+  );
+});

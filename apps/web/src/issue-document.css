@@ -80,12 +80,37 @@
   margin-bottom: 0;
 }
 .issue-document .issue-doc-criteria {
-  padding-left: var(--space-24);
+  list-style: none;
+  padding-left: 0;
 }
 .issue-document .issue-doc-criteria li {
+  position: relative;
   border-bottom: 1px solid var(--border);
-  padding: var(--space-12) var(--space-4);
+  padding: var(--space-12) var(--space-4) var(--space-12) var(--space-32);
   margin: 0;
+}
+.issue-document .issue-doc-check {
+  position: absolute;
+  left: var(--space-4);
+  top: calc(var(--space-12) + 0.45em);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--success);
+  cursor: pointer;
+}
+.issue-document .issue-doc-check:disabled {
+  cursor: default;
+}
+.issue-document .issue-doc-criteria li.issue-doc-done {
+  color: var(--text-3);
+}
+.issue-document .issue-doc-progress {
+  margin-left: var(--space-8);
+  color: var(--muted);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
 }
 .issue-document .issue-doc-criteria li:last-child {
   border-bottom: 0;
