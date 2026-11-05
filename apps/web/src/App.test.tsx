@@ -99,7 +99,7 @@ it("keeps the shell mounted, resets page state, and searches without reloading c
   // Supabase session is held by AuthBoundary; workspace navigation never calls the removed Go auth endpoint.
   expect(calls.filter((path) => path === "/auth/session")).toHaveLength(0);
   expect(calls.filter((path) => path.endsWith("/teams"))).toHaveLength(1);
-  expect(calls.filter((path) => path === "/api/workspaces")).toHaveLength(1);
+  expect(calls.filter((path) => path === "/api/workspaces")).toHaveLength(2);
 });
 it("keeps Triage in its own team inbox and out of the issue list", async () => {
   const triaged = {

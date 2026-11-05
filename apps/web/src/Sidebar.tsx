@@ -1,9 +1,6 @@
 import { useCapabilities } from "./Capabilities";
 import {
   ArrowLeft,
-  Users,
-  ContactRound,
-  Tags,
   Orbit,
   DraftingCompass,
   Box,
@@ -48,30 +45,31 @@ export function Sidebar({
           Back to workspace
         </NavLink>
       )}
-      <div className="sidebar-top">
-        <WorkspaceMenu />
-        <button
-          type="button"
-          className="button navigation-toggle"
-          aria-expanded={expanded}
-          aria-controls="workspace-navigation"
-          onClick={() => setExpanded(!expanded)}
-        >
-          <Menu className="icon" />
-          Navigation
-        </button>
-      </div>
+      {!settings && (
+        <div className="sidebar-top">
+          <WorkspaceMenu />
+          <button
+            type="button"
+            className="button navigation-toggle"
+            aria-expanded={expanded}
+            aria-controls="workspace-navigation"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <Menu className="icon" />
+            Navigation
+          </button>
+        </div>
+      )}
       {settings ? (
         <nav className="settings-navigation" aria-label="Settings navigation">
           <h1 className="settings-nav-title">Settings</h1>
-          <div className="sidebar-label">Workspace</div>
           {(
             [
-              { key: "teams", title: "Teams", Icon: Users },
-              { key: "members", title: "Members", Icon: ContactRound },
-              { key: "labels", title: "Labels", Icon: Tags },
+              { key: "teams", title: "Teams" },
+              { key: "members", title: "Members" },
+              { key: "labels", title: "Labels" },
             ] as const
-          ).map(({ key, title, Icon }) => {
+          ).map(({ key, title }) => {
             const selected =
               route.kind === "labels"
                 ? key === "labels"
@@ -83,7 +81,6 @@ export function Sidebar({
                 className={`nav-item ${selected ? "active" : ""}`}
                 aria-current={selected ? "page" : undefined}
               >
-                <Icon className="icon" />
                 <span>{title}</span>
               </NavLink>
             );
