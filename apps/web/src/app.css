@@ -1235,7 +1235,8 @@ button:focus-visible {
   height: var(--list-control-size);
   padding: 0;
 }
-.select-menu {
+.select-menu,
+.workspace-menu {
   z-index: 20;
   width: var(--menu-width);
   max-height: var(--radix-select-content-available-height);

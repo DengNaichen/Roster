@@ -149,7 +149,6 @@
 .workspace-trigger .icon {
   flex: none;
 }
-.workspace-menu,
 .account-menu,
 .toolbar-popover {
   z-index: 20;
@@ -167,6 +166,10 @@
 .account-menu {
   width: var(--sidebar-width);
 }
+.workspace-menu {
+  max-width: calc(100vw - var(--space-16));
+  max-height: var(--radix-popover-content-available-height);
+}
 .workspace-list {
   max-height: 50dvh;
   overflow: auto;
@@ -176,8 +179,25 @@
 }
 .workspace-option {
   height: auto;
-  min-height: var(--sidebar-identity-height);
-  padding-block: var(--sidebar-label-gap);
+  min-height: var(--space-32);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-lg);
+  color: var(--text-2);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+}
+.workspace-option:hover,
+.workspace-option[aria-current="page"],
+.workspace-option[aria-current="page"]:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.workspace-option:focus-visible {
+  outline-offset: calc(-1 * var(--focus-width));
+}
+.workspace-menu .icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 .workspace-avatar {
   color: var(--sidebar-color);
@@ -201,7 +221,7 @@
   max-width: 100%;
 }
 .workspace-option strong {
-  font-weight: var(--sidebar-font-weight);
+  font-weight: inherit;
 }
 .workspace-option small {
   color: var(--sidebar-muted-color);
