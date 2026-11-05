@@ -2,7 +2,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--r-gap-interactive-rows);
   min-height: 0;
   overflow-y: auto;
   padding: var(--r-space-8);
@@ -240,7 +240,7 @@
   display: flex;
   flex: none;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--r-gap-interactive-rows);
 }
 .team-navigation {
   display: flex;
@@ -271,7 +271,7 @@
   overflow: hidden;
 }
 .team-destinations-list > :first-child {
-  margin-top: 1px;
+  margin-top: var(--r-gap-interactive-rows);
 }
 .team-chevron {
   transition: transform var(--r-duration-disclosure) var(--r-ease-standard);
@@ -1435,7 +1435,7 @@
 .settings-directory-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 0 var(--r-gap-interactive-rows);
   text-align: left;
   font-size: var(--r-font-size-ui);
 }
