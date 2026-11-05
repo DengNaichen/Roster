@@ -494,6 +494,19 @@ export function AssigneeBadge({
   );
 }
 
+function IssueMetaItem({ children, expandable }: { children: ReactNode; expandable: boolean }) {
+  return (
+    <span className="issue-meta-item" tabIndex={expandable ? 0 : undefined}>
+      {children}
+      {expandable && (
+        <span className="issue-meta-reveal" aria-hidden="true">
+          {children}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function IssueMeta({
   issue,
   layout = "inline",
@@ -506,12 +519,12 @@ export function IssueMeta({
       <AssigneeBadge person={issue.assignee} avatar={layout === "row"} />
       <span className="issue-meta-secondary">
         {issue.labels.slice(0, 2).map((label) => (
-          <span className="issue-meta-item" key={label.id}>
+          <IssueMetaItem key={label.id} expandable={layout === "row"}>
             <LabelBadge label={label} />
-          </span>
+          </IssueMetaItem>
         ))}
         {issue.labels.length > 2 && (
-          <span className="issue-meta-item">
+          <IssueMetaItem expandable={layout === "row"}>
             <span
               className="label-overflow"
               title={issue.labels
@@ -521,18 +534,18 @@ export function IssueMeta({
             >
               +{issue.labels.length - 2}
             </span>
-          </span>
+          </IssueMetaItem>
         )}
         {issue.type && (
-          <span className="issue-meta-item">
+          <IssueMetaItem expandable={layout === "row"}>
             <span className="type-label" data-type={issue.type} title={issue.type}>
               <span className="label-dot" />
               <span className="type-label-name">{issue.type}</span>
             </span>
-          </span>
+          </IssueMetaItem>
         )}
         {issue.project && (
-          <span className="issue-meta-item">
+          <IssueMetaItem expandable={layout === "row"}>
             <span className="project-label" title={issue.project}>
               {issue.project_emoji ? (
                 <span className="project-emoji" aria-hidden="true">
@@ -543,7 +556,7 @@ export function IssueMeta({
               )}
               <span>{issue.project}</span>
             </span>
-          </span>
+          </IssueMetaItem>
         )}
       </span>
     </span>

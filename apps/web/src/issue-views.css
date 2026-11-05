@@ -178,7 +178,7 @@
 .list-row .issue-meta {
   flex: 0 1 auto;
   justify-content: flex-end;
-  max-width: min(46%, 30rem);
+  max-width: calc(100% - min(12rem, 50%) - var(--space-8));
   min-width: var(--r-size-avatar);
   gap: var(--space-8);
 }
@@ -207,8 +207,7 @@
   flex: 0 1 auto;
   gap: var(--space-4);
   min-width: 0;
-  max-width: clamp(0px, calc(80cqi - 28rem), 26rem);
-  overflow: hidden;
+  overflow: visible;
 }
 .list-row .issue-meta-secondary:empty {
   display: none;
@@ -256,7 +255,7 @@
   height: var(--space-8);
 }
 .list-title {
-  flex: 1 1 16rem;
+  flex: 1 1 auto;
   min-width: min(10rem, 50%);
   overflow: hidden;
   color: var(--text);
@@ -506,4 +505,45 @@
 }
 .list-row.is-selected {
   box-shadow: inset 2px 0 var(--r-color-border-selected);
+}
+
+/* An independent preview grows toward the title without resizing any slots. */
+.issue-meta-reveal {
+  display: none;
+}
+.list-row .issue-meta-item:is(:hover, :focus-visible) {
+  z-index: 2;
+}
+.list-row .issue-meta-item:is(:hover, :focus-visible) > .issue-meta-reveal {
+  display: block;
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  width: max-content;
+  max-width: min(24rem, 70cqi);
+  border-radius: var(--radius-pill);
+  background: var(--row-surface);
+  box-shadow: var(--r-shadow-overlay);
+}
+.list-row .issue-meta-reveal > :is(.type-label, .project-label, .label-badge, .label-overflow) {
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-24);
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  gap: var(--space-8);
+  padding-inline: var(--space-8);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--row-surface);
+  font-size: var(--font-size-12);
+  color: var(--text);
+  white-space: nowrap;
+}
+.list-row .issue-meta-item:focus-visible {
+  outline: none;
+}
+.list-row .issue-meta-item:focus-visible > .issue-meta-reveal {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
 }
