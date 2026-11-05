@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { PageHeader } from "./PageHeader";
-import { ChevronRight, Lock, Globe, Plus, Search } from "lucide-react";
+import { ChevronRight, Lock, Globe, Plus, Search, ArrowDown, ArrowUp } from "lucide-react";
 import { PersonalSettings, WorkspaceSettings, IntegrationSettings } from "./SettingsSections";
 import { EntityEmoji, EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
@@ -134,13 +134,14 @@ function TeamDirectory({
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [ascending, setAscending] = useState(true);
   const visible = entries
     .filter(
       (team) =>
         `${team.name} ${team.key}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
         (filter === "all" || (filter === "private") === team.private),
     )
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name) * (ascending ? 1 : -1));
   return (
     <>
       <div className="settings-directory-toolbar">
@@ -155,12 +156,12 @@ function TeamDirectory({
           />
         </label>
         <Dropdown
-          aria-label="Team access"
+          aria-label="Team visibility"
           value={filter}
           onChange={setFilter}
           options={[
             { value: "all", label: "All" },
-            { value: "public", label: "Public" },
+            { value: "public", label: "Workspace" },
             { value: "private", label: "Private" },
           ]}
         />
@@ -173,9 +174,12 @@ function TeamDirectory({
         <table className="settings-directory-table settings-teams-table">
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Identifier</th>
-              <th scope="col">Access</th>
+              <th scope="col" aria-sort={ascending ? "ascending" : "descending"}>
+                <button className="settings-sort" onClick={() => setAscending(!ascending)}>
+                  Name{ascending ? <ArrowDown className="icon" /> : <ArrowUp className="icon" />}
+                </button>
+              </th>
+              <th scope="col">Visibility</th>
               <th scope="col">
                 <span className="settings-sr-only">Open team</span>
               </th>
@@ -191,13 +195,13 @@ function TeamDirectory({
                   >
                     <EntityEmoji emoji={team.emoji} teamKey={team.key} />
                     <strong>{team.name}</strong>
+                    <span className="settings-team-key">{team.key}</span>
                   </NavLink>
                 </td>
-                <td className="settings-team-key">{team.key}</td>
                 <td>
                   <span className="settings-inline">
                     {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
-                    {team.private ? "Private" : "Public"}
+                    {team.private ? "Private" : "Workspace"}
                   </span>
                 </td>
                 <td>

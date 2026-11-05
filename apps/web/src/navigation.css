@@ -1593,3 +1593,16 @@
   outline: none;
   box-shadow: none;
 }
+.settings-teams-table th:first-child {
+  width: 70%;
+}
+.settings-teams-table .settings-team-key {
+  font-weight: normal;
+}
+.settings-teams-table td {
+  padding-block: var(--r-space-24);
+}
+.settings-teams-table td:last-child {
+  width: 40px;
+  color: var(--r-color-text-muted);
+}
