@@ -24,7 +24,6 @@ import {
 // Filter and display preferences share a compact toolbar above the results.
 export function IssueFilters({
   layout = "default",
-  dependencies,
   assignee,
   setAssignee,
   membershipEnabled,
@@ -54,7 +53,6 @@ export function IssueFilters({
   selectionDisabled,
 }: {
   layout?: "default" | "spec";
-  dependencies?: { active: boolean; onSelect: () => void };
   assignee: string;
   setAssignee: (value: string) => void;
   membershipEnabled: boolean;
@@ -407,8 +405,8 @@ export function IssueFilters({
               <nav className="toolbar-view-switch" aria-label="Issue view">
                 <button
                   type="button"
-                  className={!dependencies?.active && view === "list" ? "active" : ""}
-                  aria-pressed={!dependencies?.active && view === "list"}
+                  className={view === "list" ? "active" : ""}
+                  aria-pressed={view === "list"}
                   onClick={() => setView("list")}
                 >
                   <List className="icon" />
@@ -416,23 +414,13 @@ export function IssueFilters({
                 </button>
                 <button
                   type="button"
-                  className={!dependencies?.active && view === "board" ? "active" : ""}
-                  aria-pressed={!dependencies?.active && view === "board"}
+                  className={view === "board" ? "active" : ""}
+                  aria-pressed={view === "board"}
                   onClick={() => setView("board")}
                 >
                   <Columns2 className="icon" />
                   Board
                 </button>
-                {dependencies && (
-                  <button
-                    type="button"
-                    aria-pressed={dependencies.active}
-                    className={dependencies.active ? "active" : ""}
-                    onClick={dependencies.onSelect}
-                  >
-                    Dependencies
-                  </button>
-                )}
               </nav>
               <label className="toolbar-field">
                 Ordering
