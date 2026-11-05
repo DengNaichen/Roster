@@ -42,7 +42,7 @@ it("lays out disconnected nodes and rejects cyclic input", () => {
     ),
   ).toThrow("cycle");
 });
-it("routes skip-level edges around cards and connects at their horizontal centers", () => {
+it("connects Bezier curves horizontally at card centers", () => {
   const layout = dependencyLayout(
     {
       nodes,
@@ -61,22 +61,9 @@ it("routes skip-level edges around cards and connects at their horizontal center
     expect(edge.points[0]).toEqual({ x: from.x + 236, y: from.y + 60 });
     expect(edge.points.at(-1)).toEqual({ x: to.x, y: to.y + 60 });
     expect(edge.points.at(-2)!.y).toBe(to.y + 60);
-    for (let i = 1; i < edge.points.length; i++) {
-      const a = edge.points[i - 1],
-        b = edge.points[i];
-      for (const node of layout.nodes) {
-        const crosses =
-          a.x === b.x
-            ? a.x > node.x &&
-              a.x < node.x + 236 &&
-              Math.max(a.y, b.y) > node.y &&
-              Math.min(a.y, b.y) < node.y + 120
-            : a.y > node.y &&
-              a.y < node.y + 120 &&
-              Math.max(a.x, b.x) > node.x &&
-              Math.min(a.x, b.x) < node.x + 236;
-        expect(crosses).toBe(false);
-      }
-    }
+    expect(edge.points[1].y).toBe(from.y + 60);
+    expect(edge.points[1].x).toBeGreaterThan(edge.points[0].x);
+    expect(edge.points.at(-2)!.x).toBeLessThan(to.x);
+    expect(edge.path).toContain(" C");
   }
 });

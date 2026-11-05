@@ -62,21 +62,12 @@ export function dependencyLayout(graph: SpecDependencies, visible: Set<string>) 
         y: from.y + dependencyNodeSize.height / 2,
       };
       const end = { x: to.x, y: to.y + dependencyNodeSize.height / 2 };
-      const points =
-        to.x - from.x <= 292
-          ? [start, { x: start.x + 28, y: start.y }, { x: start.x + 28, y: end.y }, end]
-          : [
-              start,
-              { x: start.x + 20, y: start.y },
-              { x: start.x + 20, y: from.y + 138 },
-              { x: end.x - 28, y: from.y + 138 },
-              { x: end.x - 28, y: end.y },
-              end,
-            ];
+      const bend = Math.max(28, (end.x - start.x) / 2);
+      const points = [start, { x: start.x + bend, y: start.y }, { x: end.x - bend, y: end.y }, end];
       return {
         ...edge,
         points,
-        path: points.map((point, i) => `${i ? "L" : "M"}${point.x},${point.y}`).join(" "),
+        path: `M${start.x},${start.y} C${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${end.x},${end.y}`,
       };
     });
   return {
