@@ -39,6 +39,9 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.14.15
         version: 3.14.25(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      dompurify:
+        specifier: ^3.4.17
+        version: 3.4.17
       lucide-react:
         specifier: ^1.48.0
         version: 1.66.0(@types/react@19.3.0)(react@19.3.1)

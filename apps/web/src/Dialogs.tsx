@@ -5,6 +5,7 @@ import { AssigneeSelect } from "./Assignee";
 import { Box, Users, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
+import { DescriptionField } from "./DescriptionField";
 import {
   RequestError,
   api,
@@ -119,16 +120,7 @@ export function NewIssueDialog({
             disabled={saving}
           />
         </label>
-        <label className="composer-description">
-          <span className="composer-field-label">Description</span>
-          <textarea
-            rows={5}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Add a description… (Markdown)"
-            disabled={saving}
-          />
-        </label>
+        <DescriptionField value={description} onChange={setDescription} disabled={saving} />
         <div className="composer-properties">
           {teams.length > 0 ? (
             <label className="composer-property">
