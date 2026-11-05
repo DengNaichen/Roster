@@ -498,11 +498,6 @@ function IssueMetaItem({ children, expandable }: { children: ReactNode; expandab
   return (
     <span className="issue-meta-item" tabIndex={expandable ? 0 : undefined}>
       {children}
-      {expandable && (
-        <span className="issue-meta-reveal" aria-hidden="true">
-          {children}
-        </span>
-      )}
     </span>
   );
 }
@@ -520,7 +515,7 @@ export function IssueMeta({
       <span className="issue-meta-secondary">
         {issue.labels.slice(0, 2).map((label) => (
           <IssueMetaItem key={label.id} expandable={layout === "row"}>
-            <LabelBadge label={label} />
+            <LabelBadge label={label} tooltip={layout !== "row"} />
           </IssueMetaItem>
         ))}
         {issue.labels.length > 2 && (
@@ -538,7 +533,11 @@ export function IssueMeta({
         )}
         {issue.type && (
           <IssueMetaItem expandable={layout === "row"}>
-            <span className="type-label" data-type={issue.type} title={issue.type}>
+            <span
+              className="type-label"
+              data-type={issue.type}
+              title={layout === "row" ? undefined : issue.type}
+            >
               <span className="label-dot" />
               <span className="type-label-name">{issue.type}</span>
             </span>
@@ -546,7 +545,7 @@ export function IssueMeta({
         )}
         {issue.project && (
           <IssueMetaItem expandable={layout === "row"}>
-            <span className="project-label" title={issue.project}>
+            <span className="project-label" title={layout === "row" ? undefined : issue.project}>
               {issue.project_emoji ? (
                 <span className="project-emoji" aria-hidden="true">
                   {issue.project_emoji}
@@ -563,11 +562,15 @@ export function IssueMeta({
   );
 }
 
-export function LabelBadge({ label }: { label: Label }) {
+export function LabelBadge({ label, tooltip = true }: { label: Label; tooltip?: boolean }) {
   return (
     <span
       className="label-badge"
-      title={`${label.name}${label.archived ? " (archived)" : ""}${label.description ? ` — ${label.description}` : ""}`}
+      title={
+        tooltip
+          ? `${label.name}${label.archived ? " (archived)" : ""}${label.description ? ` — ${label.description}` : ""}`
+          : undefined
+      }
     >
       <span className="label-dot" style={{ backgroundColor: label.color }} />
       <span>{label.name}</span>

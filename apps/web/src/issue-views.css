@@ -507,43 +507,23 @@
   box-shadow: inset 2px 0 var(--r-color-border-selected);
 }
 
-/* An independent preview grows toward the title without resizing any slots. */
-.issue-meta-reveal {
-  display: none;
+/* Expand the existing capsule in place; its neighbours keep sharing the
+   remaining space. No duplicate badge, elevated surface, or layout jump. */
+.list-row .issue-meta-item {
+  transition: flex-shrink var(--r-duration-disclosure) var(--r-ease-standard);
+}
+.list-row .issue-meta-item > * {
+  transition: max-width var(--r-duration-disclosure) var(--r-ease-standard);
 }
 .list-row .issue-meta-item:is(:hover, :focus-visible) {
-  z-index: 2;
+  flex-shrink: 0;
+  z-index: 1;
 }
-.list-row .issue-meta-item:is(:hover, :focus-visible) > .issue-meta-reveal {
-  display: block;
-  position: absolute;
-  inset-inline-end: 0;
-  top: 0;
-  width: max-content;
+.list-row .issue-meta-item:is(:hover, :focus-visible) > * {
   max-width: min(24rem, 70cqi);
-  border-radius: var(--radius-pill);
-  background: var(--row-surface);
-  box-shadow: var(--r-shadow-overlay);
-}
-.list-row .issue-meta-reveal > :is(.type-label, .project-label, .label-badge, .label-overflow) {
-  display: inline-flex;
-  align-items: center;
-  height: var(--space-24);
-  width: max-content;
-  max-width: 100%;
-  min-width: 0;
-  gap: var(--space-8);
-  padding-inline: var(--space-8);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--row-surface);
-  font-size: var(--font-size-12);
-  color: var(--text);
-  white-space: nowrap;
 }
 .list-row .issue-meta-item:focus-visible {
-  outline: none;
-}
-.list-row .issue-meta-item:focus-visible > .issue-meta-reveal {
   outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+  outline-offset: var(--r-focus-offset);
+  border-radius: var(--radius-pill);
 }
