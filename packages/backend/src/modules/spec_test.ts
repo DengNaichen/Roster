@@ -257,11 +257,60 @@ Deno.test({
         'not_found',
       );
       const hidden = await s.createSpec(member, w.slug, { team: 'SEC', content: sample() });
+      const graphSpec = await s.createSpec(owner, w.slug, { team: 'AL', content: sample() });
+      const leaf = await s.createIssue(owner, w.slug, { team: 'AL', title: 'Dependency leaf' });
+      const root = await s.createIssue(owner, w.slug, {
+        team: 'AL',
+        title: 'External prerequisite',
+      });
+      const middle = await s.createIssue(owner, w.slug, {
+        team: 'AL',
+        title: 'Middle prerequisite',
+      });
+      const secret = await s.createIssue(member, w.slug, {
+        team: 'SEC',
+        title: 'Hidden prerequisite',
+      });
+      const behind = await s.createIssue(owner, w.slug, {
+        team: 'AL',
+        title: 'Only reachable through secret',
+      });
+      assert((await s.getSpecDependencies(owner, w.slug, graphSpec.identifier)).nodes.length === 0);
+      await s.linkSpecIssues(owner, w.slug, {
+        identifier: graphSpec.identifier,
+        issues: [leaf.identifier],
+      });
+      for (const [a, b] of [[root, middle], [middle, leaf], [secret, leaf], [behind, secret]]) {
+        await s.addRelation(member, w.slug, {
+          identifier: a.identifier,
+          other: b.identifier,
+          kind: 'blocks',
+        });
+      }
+      await s.addRelation(owner, w.slug, {
+        identifier: root.identifier,
+        other: leaf.identifier,
+        kind: 'related',
+      });
+      const graph = await s.getSpecDependencies(owner, w.slug, graphSpec.identifier);
+      assert(graph.nodes.length === 3 && graph.edges.length === 2);
+      assert(graph.nodes.find((n) => n.id === leaf.id)?.external === false);
+      assert(graph.nodes.find((n) => n.id === root.id)?.external === true);
+      assert(
+        !JSON.stringify(graph).includes(secret.id) && !JSON.stringify(graph).includes(behind.id),
+      );
+      const fullGraph = await s.getSpecDependencies(member, w.slug, graphSpec.identifier);
+      assert(fullGraph.nodes.length === 5 && fullGraph.edges.length === 4);
+      await rejects(
+        () => s.getSpecDependencies(outsider, w.slug, graphSpec.identifier),
+        'forbidden',
+      );
       assert(hidden.author?.subject === member.identity.subject);
       for (
         const fn of [
           () => s.getSpec(owner, w.slug, hidden.identifier),
           () => s.getSpecDesign(owner, w.slug, hidden.identifier),
+          () => s.getSpecDependencies(owner, w.slug, hidden.identifier),
           () =>
             s.setSpecDesign(owner, w.slug, {
               identifier: hidden.identifier,

@@ -137,6 +137,16 @@ export async function exerciseSpecTransports(
   });
   const linksPath = `/specs/${created.identifier}/issues`;
   await rest(linksPath, 'POST', { issues: [issue.identifier] });
+  const prerequisite = await service.createIssue(ctx, slug, { team, title: 'Prerequisite' });
+  await service.addRelation(ctx, slug, {
+    identifier: prerequisite.identifier,
+    other: issue.identifier,
+    kind: 'blocks',
+  });
+  const graph = await rest(`/specs/${created.identifier}/dependencies`);
+  const mcpGraph = await call('get_spec_dependencies', { identifier: created.identifier });
+  assert(JSON.stringify(graph) === JSON.stringify(mcpGraph));
+  assert((graph as { edges: unknown[] }).edges.length === 1);
   const linkedRest = await rest(linksPath + '?limit=-1') as { issues: { identifier: string }[] };
   assert(linkedRest.issues.some((item) => item.identifier === issue.identifier));
   await rest(linksPath, 'POST', { issues: [] }, 400);

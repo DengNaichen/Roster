@@ -30,6 +30,36 @@ const activeFields = sql`adopted.number as active_number,adopted.title as active
 
 export function createSpecsRepository(db: Executor): SpecsRepository {
   return {
+    dependencies({ workspaceId, specId, subject }) {
+      return one(
+        db,
+        sql`with recursive
+        visible_issues as materialized (
+          select i.id,i.identifier,i.title,i.status,i.assignee_subject from roster.issues i
+          join roster.teams t on t.id=i.team_id
+          where i.workspace_id=${workspaceId} and ${visible(subject)}
+        ),
+        links as (select v.id from visible_issues v join roster.spec_issues s on s.issue_id=v.id where s.spec_id=${specId}),
+        visible_edges as materialized (
+          select r.issue_id as source,r.other_id as target from roster.relations r
+          join visible_issues a on a.id=r.issue_id join visible_issues b on b.id=r.other_id
+          where r.workspace_id=${workspaceId} and r.kind='blocks'
+        ),
+        ancestors(id) as (
+          select id from links
+          union
+          select e.source from visible_edges e join ancestors a on a.id=e.target
+        )
+        select
+          coalesce((select json_agg(json_build_object(
+            'id',v.id,'identifier',v.identifier,'title',v.title,'status',v.status,
+            'external',not exists(select 1 from links l where l.id=v.id),
+            'assignee',case when u.subject is null then null else json_build_object('subject',u.subject,'name',u.name,'email',u.email) end
+          ) order by v.identifier) from ancestors a join visible_issues v on v.id=a.id left join roster.users u on u.subject=v.assignee_subject),'[]'::json) as nodes,
+          coalesce((select json_agg(json_build_object('from',e.source,'to',e.target) order by e.source,e.target)
+          from visible_edges e join ancestors a on a.id=e.source join ancestors b on b.id=e.target),'[]'::json) as edges`,
+      );
+    },
     getDesign(specId) {
       return rows(
         db,

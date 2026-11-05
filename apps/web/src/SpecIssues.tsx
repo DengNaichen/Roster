@@ -1,4 +1,6 @@
-import { type ReactNode, useState } from "react";
+import type { SpecDependencies as SpecGraph } from "../../../packages/contracts/spec";
+import { IssueDependencyHint, indexDependencies } from "./IssueDependencyHint";
+import { type ReactNode, useMemo, useState } from "react";
 import { NewIssueDialog } from "./Dialogs";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, type ViewMode } from "./IssueViews";
@@ -57,6 +59,14 @@ export default function SpecIssues({
   const [linkQuery, setLinkQuery] = useState("");
   const [pending, setPending] = useState<string[]>([]);
   const catalog = useLabels();
+  const dependencyResource = useResource<SpecGraph | null>(
+    apiPath(`/specs/${encodeURIComponent(id)}/dependencies`),
+    null,
+  );
+  const dependencyIndex = useMemo(
+    () => indexDependencies(dependencyResource.data ?? { nodes: [], edges: [] }),
+    [dependencyResource.data],
+  );
   const teams = useResource<{ teams: Team[] }>(apiPath("/teams"), { teams: [] });
   const candidates = useResource<{ issues: IssueSummary[] }>(
     linking ? apiPath("/issues?limit=-1") : null,
@@ -98,7 +108,7 @@ export default function SpecIssues({
         issues: identifiers,
       });
       setSelected([]);
-      await Promise.all([loadIssues(), onLinksChanged()]);
+      await Promise.all([loadIssues(), onLinksChanged(), dependencyResource.reload()]);
       return true;
     } catch (cause) {
       setError((cause as Error).message);
@@ -172,6 +182,14 @@ export default function SpecIssues({
       {(error || loadError || linksError) && (
         <RequestError message={error || loadError || linksError} />
       )}
+      {view === "list" && dependencyResource.error && (
+        <div className="scope-description">
+          依赖关系暂时无法加载。
+          <button className="ghost" onClick={() => void dependencyResource.reload()}>
+            重试
+          </button>
+        </div>
+      )}
       {selectedVisible.length > 0 && (
         <div className="selection-toolbar" role="toolbar" aria-label="Selected issues">
           <span>{selectedVisible.length} selected</span>
@@ -207,6 +225,15 @@ export default function SpecIssues({
       )}
       <IssueViews
         view={view}
+        renderExtra={(issue) =>
+          !dependencyResource.loading && !dependencyResource.error ? (
+            <IssueDependencyHint
+              identifier={issue.identifier}
+              status={issue.status}
+              relation={dependencyIndex.get(issue.identifier)}
+            />
+          ) : null
+        }
         visibleColumns={columnsFor(view)
           .filter((c) => grouped[c.status].length > 0)
           .sort((a, b) => Number(a.status === "triage") - Number(b.status === "triage"))
@@ -227,7 +254,10 @@ export default function SpecIssues({
             ),
           savingPriorities,
           changePriority,
-          moveIssue,
+          moveIssue: async (identifier, status) => {
+            await moveIssue(identifier, status);
+            await dependencyResource.reload();
+          },
         }}
       />
       {creating && (

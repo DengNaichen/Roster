@@ -9,6 +9,7 @@ import {
   setSpecDesignSchema,
   type Spec,
   specContentSchema,
+  specDependenciesSchema,
   type SpecRevision,
   type SpecRevisionSummary,
   specStoredStatusSchema,
@@ -147,6 +148,17 @@ export function createSpecService(db: UnitOfWork, options: { now?: () => Date } 
         teamId: t ? (t.id) : undefined,
       });
       return result.map(specSummary);
+    },
+    async getSpecDependencies(ctx, slug, identifier) {
+      const w = await workspace(db, ctx, slug);
+      const sp = await readSpec(db, ctx, w, identifier);
+      return specDependenciesSchema.parse(
+        await db.specs.dependencies({
+          workspaceId: w.id,
+          specId: sp.id,
+          subject: ctx.identity.subject,
+        }),
+      );
     },
     async getSpecDesign(ctx, slug, identifier) {
       const w = await workspace(db, ctx, slug);

@@ -744,6 +744,17 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
       ),
   );
   app.get(
+    '/api/w/:workspace/specs/:identifier/dependencies',
+    async (c) =>
+      c.json(
+        await s.getSpecDependencies(
+          c.get('requestContext'),
+          c.req.param('workspace'),
+          c.req.param('identifier'),
+        ),
+      ),
+  );
+  app.get(
     '/api/w/:workspace/specs/:identifier/design',
     async (c) =>
       c.json(

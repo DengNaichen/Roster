@@ -1,5 +1,14 @@
 import { ChevronDown } from "lucide-react";
-import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  Fragment,
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import {
   IssueMeta,
@@ -33,6 +42,7 @@ export function IssueViews({
   isCollapsed,
   toggleGroup,
   actions,
+  renderExtra,
 }: {
   view: ViewMode;
   visibleColumns: { status: Status; label: string; hint: string }[];
@@ -41,6 +51,7 @@ export function IssueViews({
   isCollapsed: (status: Status) => boolean;
   toggleGroup: (status: Status) => void;
   actions: IssueActions;
+  renderExtra?: (issue: IssueSummary) => ReactNode;
 }) {
   const [dropTarget, setDropTarget] = useState<Status | null>(null);
   const [scroll, setScroll] = useState<HTMLElement | null>(null);
@@ -110,6 +121,7 @@ export function IssueViews({
       selected={selected.has(issue.identifier)}
       saving={saving.has(issue.identifier)}
       handlers={handlers}
+      extra={view === "list" ? renderExtra?.(issue) : undefined}
     />
   );
 
@@ -214,6 +226,7 @@ export function IssueViews({
                     selected={selected}
                     saving={saving}
                     handlers={handlers}
+                    renderExtra={renderExtra}
                   />
                 ) : (
                   grouped[column.status].map((issue) => (
@@ -244,12 +257,14 @@ const IssueControls = memo(function IssueControls({
   selected,
   saving,
   handlers,
+  extra,
 }: {
   issue: IssueSummary;
   view: ViewMode;
   selected: boolean;
   saving: boolean;
   handlers: RowHandlers;
+  extra?: ReactNode;
 }) {
   const selection = (
     <input
@@ -314,6 +329,7 @@ const IssueControls = memo(function IssueControls({
         <NavLink to={href} className="list-title">
           {issue.title}
         </NavLink>
+        {extra}
         <IssueMeta issue={issue} />
       </div>
       <time
@@ -347,9 +363,11 @@ function VirtualIssueRows({
   saving,
   handlers,
   layoutKey,
+  renderExtra,
 }: {
   issues: IssueSummary[];
   layoutKey: string;
+  renderExtra?: (issue: IssueSummary) => ReactNode;
   scroll: HTMLElement | null;
   selected: Set<string>;
   saving: Set<string>;
@@ -458,6 +476,7 @@ function VirtualIssueRows({
                 selected={selected.has(issue.identifier)}
                 saving={saving.has(issue.identifier)}
                 handlers={handlers}
+                extra={renderExtra?.(issue)}
               />
             </article>
           </Fragment>
