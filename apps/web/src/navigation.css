@@ -1400,7 +1400,8 @@
   align-items: center;
   gap: var(--r-space-8);
   width: min(360px, 45%);
-  border: 1px solid var(--r-color-border-control);
+  height: var(--r-size-control);
+  border: var(--r-border-width) solid var(--r-color-border-control);
   border-radius: var(--r-radius-control);
   padding-left: var(--r-space-12);
   color: var(--r-color-text-muted);
@@ -1410,6 +1411,9 @@
   outline-offset: 2px;
 }
 .settings-directory-search input {
+  height: 100%;
+  padding-block: 0;
+  font: var(--r-type-ui);
   width: 100%;
   min-width: 0;
   border: 0;
@@ -1429,7 +1433,8 @@
 }
 .settings-directory-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
   font-size: var(--r-font-size-ui);
 }
@@ -1443,7 +1448,7 @@
   font-weight: var(--r-weight-medium);
   white-space: nowrap;
 }
-.settings-directory-table tbody tr:not(.settings-directory-group):hover {
+.settings-directory-table tbody tr:not(.settings-directory-group):is(:hover, :focus-within) > td {
   background: var(--r-color-bg-hover);
 }
 .settings-directory-group th {
@@ -1596,4 +1601,16 @@
 .settings-teams-table td:last-child {
   width: 40px;
   color: var(--r-color-text-muted);
+}
+
+.settings-directory-table tbody td:first-child {
+  border-start-start-radius: var(--r-radius-control);
+  border-end-start-radius: var(--r-radius-control);
+}
+.settings-directory-table tbody td:last-child {
+  border-start-end-radius: var(--r-radius-control);
+  border-end-end-radius: var(--r-radius-control);
+}
+.settings-directory-group th {
+  border-radius: var(--r-radius-control);
 }
