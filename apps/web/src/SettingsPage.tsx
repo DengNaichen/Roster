@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { Dropdown } from "./Dropdown";
 import { PageHeader } from "./PageHeader";
-import { ChevronRight, Lock, Globe, Plus } from "lucide-react";
+import { ChevronRight, Lock, Globe, Plus, Search } from "lucide-react";
 import { PersonalSettings, WorkspaceSettings, IntegrationSettings } from "./SettingsSections";
 import { EntityEmoji, EmojiPicker } from "./EmojiPicker";
 import { TeamAccess } from "./TeamAccess";
@@ -68,7 +69,9 @@ export function SettingsPage({
           <span>{title}</span>
         )}
       </PageHeader>
-      <div className="settings-page">
+      <div
+        className={`settings-page ${section === "members" || (section === "teams" && !settingsTeam) ? "settings-directory-page" : ""}`}
+      >
         {section !== "members" && (
           <header className="settings-heading settings-page-intro">
             <h1>
@@ -80,12 +83,6 @@ export function SettingsPage({
                 title
               )}
             </h1>
-            {section === "teams" && !settingsTeam && (
-              <button className="button" onClick={onCreateTeam}>
-                <Plus className="icon" />
-                Create team
-              </button>
-            )}
           </header>
         )}
         {section === "personal" && <PersonalSettings />}
@@ -113,33 +110,109 @@ export function SettingsPage({
                 </p>
               )
             ) : (
-              <div className="settings-team-list">
-                {entries.map((team) => (
-                  <NavLink
-                    className="settings-team-row"
-                    key={team.key}
-                    to={pagePath(`/settings/teams/${encodeURIComponent(team.key)}`)}
-                  >
-                    <EntityEmoji emoji={team.emoji} teamKey={team.key} />
-                    <strong>{team.name}</strong>
-                    <span className="settings-team-key">{team.key}</span>
-                    <span
-                      title={team.private ? "Private team" : "Public team"}
-                      aria-label={team.private ? "Private team" : "Public team"}
-                    >
-                      {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
-                    </span>
-                    <ChevronRight className="icon" />
-                  </NavLink>
-                ))}
-                {entries.length === 0 && (
-                  <p className="empty">{loading ? "Loading…" : "No teams yet"}</p>
-                )}
-              </div>
+              <TeamDirectory
+                entries={entries}
+                loading={loading || (!directory && !directoryError)}
+                onCreateTeam={onCreateTeam}
+              />
             )}
           </>
         )}
       </div>
+    </>
+  );
+}
+
+function TeamDirectory({
+  entries,
+  loading,
+  onCreateTeam,
+}: {
+  entries: Team[];
+  loading: boolean;
+  onCreateTeam: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const visible = entries
+    .filter(
+      (team) =>
+        `${team.name} ${team.key}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
+        (filter === "all" || (filter === "private") === team.private),
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return (
+    <>
+      <div className="settings-directory-toolbar">
+        <label className="settings-directory-search">
+          <Search className="icon" />
+          <input
+            type="search"
+            aria-label="Search teams"
+            placeholder="Search teams"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+        <Dropdown
+          aria-label="Team access"
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "all", label: "All" },
+            { value: "public", label: "Public" },
+            { value: "private", label: "Private" },
+          ]}
+        />
+        <button className="button primary directory-primary-action" onClick={onCreateTeam}>
+          <Plus className="icon" />
+          Create team
+        </button>
+      </div>
+      <div className="settings-table-scroll">
+        <table className="settings-directory-table settings-teams-table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Identifier</th>
+              <th scope="col">Access</th>
+              <th scope="col">
+                <span className="settings-sr-only">Open team</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((team) => (
+              <tr key={team.key}>
+                <td>
+                  <NavLink
+                    className="settings-team-link"
+                    to={pagePath(`/settings/teams/${encodeURIComponent(team.key)}`)}
+                  >
+                    <EntityEmoji emoji={team.emoji} teamKey={team.key} />
+                    <strong>{team.name}</strong>
+                  </NavLink>
+                </td>
+                <td className="settings-team-key">{team.key}</td>
+                <td>
+                  <span className="settings-inline">
+                    {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
+                    {team.private ? "Private" : "Public"}
+                  </span>
+                </td>
+                <td>
+                  <ChevronRight className="icon" aria-hidden="true" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {visible.length === 0 && (
+        <p className="empty">
+          {loading ? "Loading…" : query || filter !== "all" ? "No matching teams" : "No teams yet"}
+        </p>
+      )}
     </>
   );
 }

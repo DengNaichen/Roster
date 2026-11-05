@@ -627,11 +627,11 @@ export function ModalDialog({
     const element = ref.current!;
     const opener = document.activeElement as HTMLElement;
     element.showModal();
-    element
-      .querySelector<HTMLElement>(
-        'input:not([type="checkbox"]), select, textarea, button[role="combobox"]',
-      )!
-      .focus();
+    const initial =
+      element.querySelector<HTMLElement>(
+        'input:not([type="checkbox"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button[role="combobox"]:not([disabled])',
+      ) ?? element.querySelector<HTMLElement>("button:not([disabled])");
+    initial?.focus();
     return () => {
       element.close();
       if (restoreFocus) opener.focus();
