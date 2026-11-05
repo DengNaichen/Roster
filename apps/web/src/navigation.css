@@ -235,6 +235,7 @@
   display: none;
 }
 .scope-navigation,
+.settings-navigation,
 .team-destinations-list {
   display: flex;
   flex: none;
@@ -1150,7 +1151,7 @@
     display: none;
   }
   .settings-navigation {
-    display: flex;
+    flex-direction: row;
     gap: var(--r-space-4);
   }
   .settings-navigation .nav-item {
