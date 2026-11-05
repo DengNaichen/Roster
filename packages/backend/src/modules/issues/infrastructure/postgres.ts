@@ -1,4 +1,9 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
+import {
+  emptyIssueDocument,
+  type IssueDocument,
+  issueDocumentText,
+} from '../../../../../contracts/mod.ts';
 import type { Database } from '../../../platform/database/client.ts';
 import { one, type Row } from '../../../platform/database/query.ts';
 import { createSession } from '../../../platform/database/session.ts';
@@ -10,6 +15,8 @@ import type { IssueDependencies, IssueSnapshot, StoredIssue } from '../applicati
 import { assignee, createIssueQueries, hydrateCoreIssues, validateParent } from './queries.ts';
 import { readIssue } from './read-model.ts';
 
+const documentColumns = (document: IssueDocument) =>
+  sql`${JSON.stringify(document)}::jsonb,${issueDocumentText(document)}`;
 function snapshot(row: Row): IssueSnapshot {
   return {
     ...row,
@@ -46,11 +53,11 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
           insert: async (w, t, number, input, refs) => {
             const row = await one(
               tx,
-              sql`insert into roster.issues(workspace_id,team_id,number,identifier,title,description,status,type,priority,assignee_subject,project_id,cycle_id,parent_id) values(${w.id},${t.id},${number},${
+              sql`insert into roster.issues(workspace_id,team_id,number,identifier,title,document,document_text,status,type,priority,assignee_subject,project_id,cycle_id,parent_id) values(${w.id},${t.id},${number},${
                 input.team + '-' + number
-              },${input.title.trim()},${input.description ?? ''},${input.status ?? 'triage'},${
-                input.type ?? null
-              },${
+              },${input.title.trim()},${documentColumns(input.document ?? emptyIssueDocument)},${
+                input.status ?? 'triage'
+              },${input.type ?? null},${
                 input.priority ?? 0
               },${refs.assignee},${refs.project},${refs.cycle},${refs.parent}) returning *`,
             );
@@ -63,17 +70,29 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
           },
           update: async (r, input, refs) => {
             await tx.execute(
-              sql`update roster.issues set title=${input.title?.trim() ?? r.title},description=${
-                input.description ?? r.description
-              },status=${input.status ?? r.status},type=${
+              sql`update roster.issues set title=${input.title?.trim() ?? r.title},${
+                input.document === undefined
+                  ? sql``
+                  : sql`(document,document_text)=(${documentColumns(input.document)}),`
+              }status=${input.status ?? r.status},type=${
                 input.type === undefined ? r.type : input.type
               },priority=${
                 input.priority ?? r.priority
               },assignee_subject=${refs.assignee},project_id=${refs.project},cycle_id=${refs.cycle},parent_id=${refs.parent},updated_at=clock_timestamp() where id=${r.id}`,
             );
           },
-          audit: (ctx, w, kind, before, after) =>
-            audit(session, ctx, w, kind, before, after, after.id),
+          lockDocument: async (r) =>
+            (await one(tx, sql`select document from roster.issues where id=${r.id} for update`))
+              .document as IssueDocument,
+          writeDocument: async (r, document) => {
+            await tx.execute(
+              sql`update roster.issues set (document,document_text)=(${
+                documentColumns(document)
+              }),updated_at=clock_timestamp() where id=${r.id}`,
+            );
+          },
+          audit: (ctx, w, kind, issueId, before, after) =>
+            audit(session, ctx, w, kind, before, after, issueId),
           output: async (ctx, w, r) => (await hydrateCoreIssues(tx, ctx, w, [r]))[0],
         });
       }),

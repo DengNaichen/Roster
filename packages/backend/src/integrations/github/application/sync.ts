@@ -140,7 +140,7 @@ export function createGitHubSync(db: UnitOfWork, options: GitHubOptions, client:
                   await request(`/repos/${binding.repo}/issues/${p.number}/comments`, {
                     body: (issue.private
                       ? `**${id}**`
-                      : `**${id} · ${issue.title}**\n\n<details>\n\n${issue.description}\n\n</details>`) +
+                      : `**${id} · ${issue.title}**\n\n<details>\n\n${issue.document_text}\n\n</details>`) +
                       `\n\n${marker}`,
                   });
                 }

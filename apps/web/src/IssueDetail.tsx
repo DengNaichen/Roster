@@ -7,8 +7,8 @@ import { codingAgentName, personName } from "./shared";
 import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
-import { type CriterionChange, IssueDocument, setCriterion } from "./IssueDocument";
-import { DescriptionField } from "./DescriptionField";
+import { IssueDocument } from "./IssueDocument";
+import { SummaryField } from "./SummaryField";
 import { WorkLogEntry, WorkLogList, ActivityTabs } from "./WorkLogs";
 import {
   RequestError,
@@ -163,32 +163,29 @@ export function IssueDetail({
     if (saved) await loadIssue();
   }
 
-  // Shown at once and saved in click order; a response only replaces the text when no later click is still pending.
-  async function changeCriterion(change: CriterionChange) {
+  // Shown at once and saved in click order; a response only replaces the document when no later click is still pending.
+  async function changeCriterion(criterion: string, done: boolean) {
     setError("");
-    try {
-      const shown = setCriterion(issue!.description, change);
-      setIssue((current) => ({ ...current!, description: shown }));
-    } catch (cause) {
-      setError((cause as Error).message);
-      return;
-    }
+    setIssue((current) => ({
+      ...current!,
+      document: {
+        ...current!.document,
+        criteria: current!.document.criteria.map((item) =>
+          item.id === criterion ? { ...item, done } : item,
+        ),
+      },
+    }));
     pendingCriteria.current++;
     try {
       await requests.write(
         identifier,
-        async () => {
-          const latest = await api<Issue>(path);
-          return api<Issue>(path, "PATCH", {
-            description: setCriterion(latest.description, change),
-          });
-        },
+        () => api<Issue>(`${path}/criteria/${encodeURIComponent(criterion)}`, "PATCH", { done }),
         (updated) => {
           const later = pendingCriteria.current > 1;
           setIssue((current) => ({
             ...current!,
             ...updated,
-            description: later ? current!.description : updated.description,
+            document: later ? current!.document : updated.document,
           }));
         },
         (cause) => {
@@ -387,7 +384,7 @@ export function IssueDetail({
           )}
         </section>
         <article className="detail-main">
-          <IssueDocument text={issue.description} onCriterionChange={changeCriterion} />
+          <IssueDocument document={issue.document} onCriterionChange={changeCriterion} />
           {issue.decisions.length > 0 && (
             <section className="detail-section decision-section" aria-label="Decisions">
               <h2>
@@ -671,7 +668,7 @@ function IssueEditor({
   );
   const projects = data.projects;
   const [title, setTitle] = useState(issue.title);
-  const [description, setDescription] = useState(issue.description);
+  const [summary, setSummary] = useState(issue.document.lead);
   const [status, setStatus] = useState(issue.status);
   const [priority, setPriority] = useState(issue.priority);
   const [saving, setSaving] = useState(false);
@@ -683,8 +680,16 @@ function IssueEditor({
     setError("");
     const path = apiPath(`/issues/${issue.identifier}`);
     await write(
-      () =>
-        api<Issue>(path, "PATCH", { title, description, status, priority, project_id: projectID }),
+      async () => {
+        const fields = { title, status, priority, project_id: projectID };
+        if (summary === issue.document.lead) return api<Issue>(path, "PATCH", fields);
+        // Only the summary is edited here; keep sections and criteria an agent may have changed since.
+        const latest = await api<Issue>(path);
+        return api<Issue>(path, "PATCH", {
+          ...fields,
+          document: { ...latest.document, lead: summary },
+        });
+      },
       (updated) => {
         void onSave(updated);
       },
@@ -727,7 +732,7 @@ function IssueEditor({
             disabled={saving}
           />
         </label>
-        <DescriptionField value={description} onChange={setDescription} disabled={saving} />
+        <SummaryField value={summary} onChange={setSummary} disabled={saving} />
         <div className="composer-properties">
           <label className="composer-property">
             <Users className="icon" />

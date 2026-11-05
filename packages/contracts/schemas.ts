@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidEmoji } from './catalog.ts';
+import { issueDocumentSchema } from './issue-document.ts';
 const subject = z.string().uuid();
 const status = z.enum([
   'triage',
@@ -48,7 +49,7 @@ export const createIssueSchema = z.strictObject({
   parent: z.string().max(100).optional(),
   team: z.string().min(1).max(6),
   title: z.string().trim().min(1).max(500),
-  description: z.string().max(100000).optional(),
+  document: issueDocumentSchema.optional(),
   status: status.optional(),
   type: type.nullable().optional(),
   priority: z.number().int().min(0).max(4).optional(),

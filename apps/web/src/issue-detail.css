@@ -227,32 +227,9 @@
   line-height: var(--line-title);
 }
 .issue-composer .composer-description textarea {
-  font-family: var(--mono);
-  font-size: var(--font-size-13);
+  font-size: var(--font-size-14);
   line-height: var(--line-prose);
-  height: 40dvh;
-}
-.issue-composer .composer-description {
-  display: grid;
-  gap: var(--space-8);
-}
-.issue-composer .composer-description > .segmented {
-  justify-self: start;
-  margin-left: calc(-1 * var(--space-8));
-}
-.issue-composer .composer-description > .segmented button {
-  padding: var(--space-2) var(--space-10);
-  font-size: var(--font-size-12);
-}
-.composer-preview {
-  min-height: 7.5em;
-  max-height: 40dvh;
-  overflow-y: auto;
-  padding-block: var(--space-4);
-}
-.composer-preview-empty {
-  margin: 0;
-  color: var(--faint);
+  max-height: 35dvh;
 }
 .issue-composer .composer-title input:focus-visible,
 .issue-composer .composer-description textarea:focus-visible {

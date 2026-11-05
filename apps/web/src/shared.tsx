@@ -1,3 +1,4 @@
+import type { IssueDocument } from "../../../packages/contracts/issue-document";
 import { api as integrationApi } from "./integration";
 import { normalizeIssueResponse } from "./issueCompatibility";
 import {
@@ -99,7 +100,7 @@ export type IssueSummary = {
   project_emoji: string;
 };
 
-export type Issue = IssueSummary & { description: string };
+export type Issue = IssueSummary & { document: IssueDocument };
 
 // Historical team keys may contain hyphens; only the final segment is a number.
 export const issueTeamKey = (identifier: string) =>

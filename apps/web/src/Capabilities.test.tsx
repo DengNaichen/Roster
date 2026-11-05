@@ -118,7 +118,7 @@ test("missing backend collections are marked as unmigrated rather than shown as 
         return json({
           identifier: "AL-1",
           title: "Migrated issue",
-          description: "Original description",
+          document: { lead: "Original description", sections: [], criteria: [] },
           status: "todo",
           priority: 0,
           type: null,

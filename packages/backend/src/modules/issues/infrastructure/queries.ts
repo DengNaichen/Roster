@@ -168,7 +168,7 @@ export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | '
       );
       if (input.query) {
         predicates.push(
-          sql`(i.title ilike ${'%' + input.query + '%'} or i.description ilike ${
+          sql`(i.title ilike ${'%' + input.query + '%'} or i.document_text ilike ${
             '%' + input.query + '%'
           })`,
         );

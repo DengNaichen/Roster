@@ -7,6 +7,7 @@ import * as cycles from '../../../../contracts/cycles.ts';
 import {
   AppError,
   changeTeamMemberSchema,
+  checkIssueCriterionSchema,
   createTeamSchema,
   createWorkspaceSchema,
   joinTeamSchema,
@@ -20,6 +21,7 @@ import {
 import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
+import { describeIssues } from '../../platform/errors/validation.ts';
 import {
   capabilities,
   restCreateIssueSchema,
@@ -61,7 +63,11 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     }
     if (error instanceof z.ZodError) {
       return c.json({
-        error: { code: 'invalid_input', message: 'Invalid request', details: error.issues },
+        error: {
+          code: 'invalid_input',
+          message: 'Invalid request: ' + describeIssues(error.issues),
+          details: error.issues,
+        },
       }, 400);
     }
     return c.json({ error: { code: 'internal', message: 'Internal server error' } }, 500);
@@ -324,6 +330,23 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
             c.req.param('workspace'),
             c.req.param('identifier'),
             await body(c, updateIssueSchema.pick({ status: true }).required()),
+          ),
+        ),
+      ),
+  );
+  app.patch(
+    '/api/w/:workspace/issues/:identifier/criteria/:criterion',
+    async (c) =>
+      c.json(
+        restIssue(
+          await s.checkIssueCriterion(
+            c.get('requestContext'),
+            c.req.param('workspace'),
+            c.req.param('identifier'),
+            checkIssueCriterionSchema.parse({
+              ...await body(c, checkIssueCriterionSchema.omit({ criterion: true })),
+              criterion: c.req.param('criterion'),
+            }),
           ),
         ),
       ),

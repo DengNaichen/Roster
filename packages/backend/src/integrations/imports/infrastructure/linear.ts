@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from 'npm:pg@8.23.1';
+import { issueDocumentText } from '../../../../../contracts/mod.ts';
 import type { LinearRepository, LinearStore } from '../application/linear-ports.ts';
 import { transaction } from './transaction.ts';
 function repository(client: PoolClient): LinearRepository {
@@ -42,7 +43,7 @@ function repository(client: PoolClient): LinearRepository {
         number,
         identifier,
         title,
-        description,
+        document,
         status,
         type,
         priority,
@@ -52,14 +53,15 @@ function repository(client: PoolClient): LinearRepository {
       },
     ) {
       return client.query(
-        'insert into roster.issues(workspace_id,team_id,number,identifier,title,description,status,type,priority,project_id,created_at,updated_at) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning id',
+        'insert into roster.issues(workspace_id,team_id,number,identifier,title,document,document_text,status,type,priority,project_id,created_at,updated_at) values($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13) returning id',
         [
           workspaceId,
           teamId,
           number,
           identifier,
           title,
-          description,
+          JSON.stringify(document),
+          issueDocumentText(document),
           status,
           type,
           priority,

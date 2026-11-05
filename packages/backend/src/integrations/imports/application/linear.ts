@@ -1,4 +1,5 @@
 import { addLinkSchema } from '../../../../../contracts/activity.ts';
+import { documentFromDescription } from '../../../modules/issues/index.ts';
 import type { LinearStore } from './linear-ports.ts';
 type Comment = {
   body: string;
@@ -100,7 +101,7 @@ export async function importLinear(
         number: i.number,
         identifier: i.identifier,
         title: i.title,
-        description: i.description ?? '',
+        document: documentFromDescription(i.description ?? ''),
         status: statuses[i.state.name],
         type: kind(i),
         priority: i.priority,

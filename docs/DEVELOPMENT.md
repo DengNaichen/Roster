@@ -15,6 +15,14 @@ VITE_LOCAL_PREVIEW=true node scripts/toolchain.mjs --filter @roster/web dev --po
 
 访问 `http://127.0.0.1:5178/roster`。修改保存在该本地数据库，重启不覆盖已有工作区。预览只有一个固定用户，不能用于验证多用户登录或 OAuth；生产构建即使设置 `VITE_LOCAL_PREVIEW=true` 也不会启用免登录。
 
+## Issue 正文
+
+Issue 正文是结构化 JSON `document`，契约见 `packages/contracts/issue-document.ts`：导语 `lead`、带标题的 `sections`（段落、列表、对比、表格、提示、代码块）和验收条件 `criteria`（稳定 ID `AC-n`）。所有文本字段按纯文本显示，不解释 Markdown 或 HTML。REST 与 MCP 在边界用同一个 zod schema 校验，错误信息带字段路径，例如 `document.criteria.1.id: Duplicate criterion ID AC-1`。
+
+`create_issue` 与 `update_issue` 的 `document` 整体替换正文；不传则保持不变。勾选单条验收条件使用 `PATCH /api/w/:workspace/issues/:identifier/criteria/:criterion`（正文 `{"done": true}`）或 MCP `check_issue_criterion`（参数 `identifier`、`criterion`、`done`）。服务端在锁住任务行的事务内只改这一条，审计事件 `issue.criterion_updated` 只记录 `{criterion, done}` 的前后值；状态未变时不写入。未知 ID 返回 `not_found`，权限与修改任务相同。
+
+搜索匹配标题和 `document_text`，即 `issueDocumentText` 生成的纯文本，不匹配 JSON 键名。迁移 `20261105000200_issue_documents.sql` 把旧 `description` 转为一个名为 Description 的段落（超过 5000 字符截断），空正文转为空文档，然后删除该列。Linear 与 SQLite 导入用同一规则转换。
+
 ## Spec Design
 
 Design 页签读取 `GET /api/w/:workspace/specs/:identifier/design`。共享文档使用 Spec 的工作区与团队权限。尚无共享版本时，浏览器可以只读展示此前保存在本机的草稿。
