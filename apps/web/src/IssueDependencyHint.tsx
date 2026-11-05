@@ -33,6 +33,11 @@ export function IssueDependencyHint({
   if (!relation || (!relation.before.length && !relation.after.length)) return null;
   const blockers = relation.before.filter((node) => node.status !== "done");
   const blocked = status !== "done" && status !== "canceled" && blockers.length > 0;
+  const blocking =
+    status !== "done" &&
+    status !== "canceled" &&
+    !relation.before.length &&
+    relation.after.some((node) => node.status !== "done" && node.status !== "canceled");
   const label = blocked
     ? blockers.length === 1
       ? `被 ${blockers[0].identifier} 阻塞`
@@ -48,7 +53,7 @@ export function IssueDependencyHint({
       <Popover.Trigger asChild>
         <button
           type="button"
-          className={`issue-dependency-hint ${blocked ? "is-blocked" : ""}`}
+          className={`issue-dependency-hint ${blocked ? "is-blocked" : blocking ? "is-blocking" : ""}`}
           aria-label={`${identifier} 依赖关系：${label}`}
           title={label}
         >

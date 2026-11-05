@@ -15,7 +15,8 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.issue-dependency-hint.is-blocked {
+.issue-dependency-hint.is-blocked,
+.issue-dependency-hint.is-blocking {
   color: var(--error-text);
 }
 .issue-dependency-hint:hover,
