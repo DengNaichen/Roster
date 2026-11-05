@@ -164,7 +164,7 @@ function SpecOverview({ spec }: { spec: Spec }) {
           </button>
         </div>
       ) : content ? (
-        <SpecDocument progress={spec.issue_progress} spec={specView(content, spec.created_at)} />
+        <SpecDocument spec={specView(content, spec.created_at)} />
       ) : (
         <p className="empty">Loading active revision…</p>
       )}
