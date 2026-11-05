@@ -72,9 +72,9 @@ it("updates after prerequisites complete and leaves unrelated tasks unadorned", 
       }}
     />,
   );
-  expect(screen.getByRole("button").textContent).toBe("前置已完成");
+  expect(screen.getByRole("button").getAttribute("title")).toBe("前置已完成");
   rerender(<IssueDependencyHint identifier="RO-2" status="done" relation={relation} />);
-  expect(screen.getByRole("button").textContent).toBe("前置 1 项");
+  expect(screen.getByRole("button").getAttribute("title")).toBe("前置 1 项");
   rerender(
     <IssueDependencyHint
       identifier="RO-4"

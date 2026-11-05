@@ -1,3 +1,4 @@
+import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import type { SpecDependencies } from "../../../packages/contracts/spec";
 import { AssigneeBadge, NavLink, pagePath, StatusIcon, columns } from "./shared";
@@ -41,6 +42,8 @@ export function IssueDependencyHint({
         ? `前置 ${relation.before.length} 项`
         : "前置已完成"
       : `后续 ${relation.after.length} 项`;
+  const RelationIcon = relation.before.length ? CircleArrowLeft : CircleArrowRight;
+  const count = blocked ? blockers.length : relation.before.length || relation.after.length;
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
@@ -48,8 +51,10 @@ export function IssueDependencyHint({
           type="button"
           className={`issue-dependency-hint ${blocked ? "is-blocked" : ""}`}
           aria-label={`${identifier} 依赖关系：${label}`}
+          title={label}
         >
-          {label}
+          <RelationIcon className="icon" aria-hidden="true" />
+          <span aria-hidden="true">{count}</span>
         </button>
       </Popover.Trigger>
       <Popover.Portal>
