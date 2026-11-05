@@ -1,80 +1,78 @@
 .issue-document {
-  color: var(--text-2);
-  font-size: var(--font-size-14);
-  line-height: 1.8;
+  color: var(--r-color-text-primary);
+  font: var(--r-type-prose);
   overflow-wrap: anywhere;
 }
 .issue-document :is(h1, h2, h3, h4) {
-  color: var(--text);
-  font-weight: var(--weight-heading);
+  color: var(--r-color-text-primary);
+  font-weight: var(--r-weight-semibold);
   line-height: 1.5;
 }
 .issue-document :is(h1, h2) {
-  font-size: var(--font-size-16);
-  margin: var(--space-32) 0 var(--space-12);
+  font: var(--r-type-heading-sm);
+  margin: var(--r-space-32) 0 var(--r-space-12);
 }
 .issue-document h3 {
-  font-size: var(--font-size-14);
-  margin: 0 0 var(--space-8);
+  font-size: var(--r-font-size-body);
+  margin: 0 0 var(--r-space-8);
 }
 .issue-document p {
-  margin: 0 0 var(--space-12);
+  margin: 0 0 var(--r-space-12);
 }
 .issue-document .issue-doc-lead {
-  color: var(--text-2);
-  font-size: var(--font-size-15);
-  line-height: 1.85;
-  margin-bottom: var(--space-24);
+  color: var(--r-color-text-primary);
+  font: var(--r-type-prose);
+  margin-bottom: var(--r-space-24);
 }
 .issue-document section + section {
-  border-top: 1px solid var(--border);
-  margin-top: var(--space-24);
-  padding-top: var(--space-4);
+  border-top: 1px solid var(--r-color-border-divider);
+  margin-top: var(--r-space-24);
+  padding-top: var(--r-space-4);
 }
 .issue-document :is(ul, ol) {
-  padding-left: var(--space-24);
-  margin: var(--space-8) 0 var(--space-16);
+  padding-left: var(--r-space-24);
+  margin: var(--r-space-8) 0 var(--r-space-16);
 }
 .issue-document li {
-  padding-left: var(--space-4);
-  margin-block: var(--space-8);
+  padding-left: var(--r-space-4);
+  margin-block: var(--r-space-8);
 }
 .issue-document li::marker {
-  color: var(--muted);
+  color: var(--r-color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 .issue-document strong {
-  color: var(--text);
-  font-weight: var(--weight-medium);
+  color: var(--r-color-text-primary);
+  font-weight: var(--r-weight-medium);
 }
 .issue-document a {
-  color: var(--accent);
+  color: var(--r-color-link);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .issue-document .issue-doc-columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: var(--space-12);
+  gap: var(--r-space-12);
 }
 .issue-document .issue-doc-panel {
-  padding: var(--space-16);
-  border-radius: var(--radius-lg);
-  background: var(--raised);
+  padding: var(--r-space-16);
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-bg-subtle);
 }
 .issue-document .issue-doc-panel > :last-child {
   margin-bottom: 0;
 }
 .issue-document .issue-doc-scope {
-  background: color-mix(in srgb, var(--success) 6%, var(--surface-card));
+  background: var(--r-color-success-bg);
 }
 .issue-document .issue-doc-scope h3 {
-  color: var(--success);
+  color: var(--r-color-success-fg);
 }
 .issue-document .issue-doc-note {
-  padding: var(--space-16);
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--status-in-progress) 7%, var(--surface-card));
+  padding: var(--r-space-16);
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-warning-bg);
 }
 .issue-document .issue-doc-note > :last-child {
   margin-bottom: 0;
@@ -85,31 +83,31 @@
 }
 .issue-document .issue-doc-criteria li {
   position: relative;
-  border-bottom: 1px solid var(--border);
-  padding: var(--space-12) var(--space-4) var(--space-12) var(--space-32);
+  border-bottom: 1px solid var(--r-color-border-divider);
+  padding: var(--r-space-12) var(--r-space-4) var(--r-space-12) var(--r-space-32);
   margin: 0;
 }
 .issue-document .issue-doc-check {
   position: absolute;
-  left: var(--space-4);
-  top: calc(var(--space-12) + 0.45em);
+  left: var(--r-space-4);
+  top: calc(var(--r-space-12) + 0.45em);
   width: 15px;
   height: 15px;
   margin: 0;
-  accent-color: var(--success);
+  accent-color: var(--r-color-success-fg);
   cursor: pointer;
 }
 .issue-document .issue-doc-check:disabled {
   cursor: default;
 }
 .issue-document .issue-doc-criteria li.issue-doc-done {
-  color: var(--text-3);
+  color: var(--r-color-text-secondary);
 }
 .issue-document .issue-doc-progress {
-  margin-left: var(--space-8);
-  color: var(--muted);
-  font-size: var(--font-size-13);
-  font-weight: var(--weight-regular);
+  margin-left: var(--r-space-8);
+  color: var(--r-color-text-muted);
+  font-size: var(--r-font-size-ui);
+  font-weight: var(--r-weight-regular);
   font-variant-numeric: tabular-nums;
 }
 .issue-document .issue-doc-criteria li:last-child {
@@ -120,45 +118,45 @@
   max-width: 100%;
   overflow-x: auto;
   border-collapse: collapse;
-  margin-block: var(--space-16);
-  font-size: var(--font-size-13);
+  margin-block: var(--r-space-16);
+  font-size: var(--r-font-size-ui);
 }
 .issue-document :is(th, td) {
   text-align: left;
-  padding: var(--space-12);
-  border-bottom: 1px solid var(--border);
+  padding: var(--r-space-12);
+  border-bottom: 1px solid var(--r-color-border-divider);
   vertical-align: top;
 }
 .issue-document th {
-  background: var(--raised);
-  color: var(--muted);
-  font-weight: var(--weight-medium);
+  background: var(--r-color-bg-subtle);
+  color: var(--r-color-text-muted);
+  font-weight: var(--r-weight-medium);
   white-space: nowrap;
 }
 .issue-document code {
-  font-family: var(--mono);
+  font-family: var(--r-font-mono);
   font-size: 0.9em;
-  background: var(--raised);
-  border-radius: var(--radius);
+  background: var(--r-color-bg-subtle);
+  border-radius: var(--r-radius-control);
   padding: 2px 5px;
 }
 .issue-document pre {
-  padding: var(--space-16);
-  border-radius: var(--radius-lg);
-  background: var(--raised);
+  padding: var(--r-space-16);
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-bg-subtle);
   overflow-x: auto;
 }
 .issue-document pre code {
   padding: 0;
 }
 .issue-document blockquote {
-  margin: var(--space-16) 0;
-  padding: var(--space-16);
-  background: var(--raised);
-  border-radius: var(--radius-lg);
+  margin: var(--r-space-16) 0;
+  padding: var(--r-space-16);
+  background: var(--r-color-bg-subtle);
+  border-radius: var(--r-radius-panel);
 }
 .issue-document hr {
   border: 0;
-  border-top: 1px solid var(--border);
-  margin-block: var(--space-24);
+  border-top: 1px solid var(--r-color-border-divider);
+  margin-block: var(--r-space-24);
 }

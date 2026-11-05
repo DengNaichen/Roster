@@ -173,77 +173,79 @@ export function IssueViews({
       ))}
     </section>
   ) : (
-    <section
-      ref={setScroll}
-      className={`list-view ${actions.selected.length ? "selection-active" : ""}`}
-      aria-label="Issue list"
-    >
-      <span className="identifier-width" aria-hidden="true">
-        {identifiers.map((identifier) => (
-          <span key={identifier}>{identifier}</span>
-        ))}
-      </span>
-      {visibleColumns.map((column) => (
-        <section className="list-group" key={column.status}>
-          <div className="group-header-wrap">
-            <button
-              type="button"
-              className="group-header"
-              data-status={column.status}
-              aria-expanded={!isCollapsed(column.status)}
-              aria-controls={`rows-${column.status}`}
-              onClick={(event) => {
-                const button = event.currentTarget;
-                groupAnchor.current = { button, top: button.getBoundingClientRect().top };
-                toggleGroup(column.status);
-              }}
+    <div className="issue-list-container">
+      <section
+        ref={setScroll}
+        className={`list-view ${actions.selected.length ? "selection-active" : ""}`}
+        aria-label="Issue list"
+      >
+        <span className="identifier-width" aria-hidden="true">
+          {identifiers.map((identifier) => (
+            <span key={identifier}>{identifier}</span>
+          ))}
+        </span>
+        {visibleColumns.map((column) => (
+          <section className="list-group" key={column.status}>
+            <div className="group-header-wrap">
+              <button
+                type="button"
+                className="group-header"
+                data-status={column.status}
+                aria-expanded={!isCollapsed(column.status)}
+                aria-controls={`rows-${column.status}`}
+                onClick={(event) => {
+                  const button = event.currentTarget;
+                  groupAnchor.current = { button, top: button.getBoundingClientRect().top };
+                  toggleGroup(column.status);
+                }}
+              >
+                <ChevronDown className="icon chevron" />
+                <StatusIcon status={column.status} />
+                <span className="group-label">
+                  <span>{column.label}</span>
+                  <small>{grouped[column.status].length}</small>
+                </span>
+              </button>
+            </div>
+            {/* A collapsed group renders no rows; the empty container keeps the header's aria-controls target. */}
+            <div
+              className="list-rows"
+              id={`rows-${column.status}`}
+              hidden={isCollapsed(column.status)}
             >
-              <ChevronDown className="icon chevron" />
-              <StatusIcon status={column.status} />
-              <span className="group-label">
-                <span>{column.label}</span>
-                <small>{grouped[column.status].length}</small>
-              </span>
-            </button>
-          </div>
-          {/* A collapsed group renders no rows; the empty container keeps the header's aria-controls target. */}
-          <div
-            className="list-rows"
-            id={`rows-${column.status}`}
-            hidden={isCollapsed(column.status)}
-          >
-            {!isCollapsed(column.status) && (
-              <>
-                {loading && <p className="list-empty">Loading…</p>}
-                {!loading && grouped[column.status].length === 0 && (
-                  <p className="list-empty">No issues</p>
-                )}
-                {grouped[column.status].length > 50 ? (
-                  <VirtualIssueRows
-                    layoutKey={layoutKey}
-                    issues={grouped[column.status]}
-                    scroll={scroll}
-                    selected={selected}
-                    saving={saving}
-                    handlers={handlers}
-                    renderExtra={renderExtra}
-                  />
-                ) : (
-                  grouped[column.status].map((issue) => (
-                    <article
-                      className={`list-row ${selected.has(issue.identifier) ? "is-selected" : ""}`}
-                      key={issue.identifier}
-                    >
-                      {row(issue)}
-                    </article>
-                  ))
-                )}
-              </>
-            )}
-          </div>
-        </section>
-      ))}
-    </section>
+              {!isCollapsed(column.status) && (
+                <>
+                  {loading && <p className="list-empty">Loading…</p>}
+                  {!loading && grouped[column.status].length === 0 && (
+                    <p className="list-empty">No issues</p>
+                  )}
+                  {grouped[column.status].length > 50 ? (
+                    <VirtualIssueRows
+                      layoutKey={layoutKey}
+                      issues={grouped[column.status]}
+                      scroll={scroll}
+                      selected={selected}
+                      saving={saving}
+                      handlers={handlers}
+                      renderExtra={renderExtra}
+                    />
+                  ) : (
+                    grouped[column.status].map((issue) => (
+                      <article
+                        className={`list-row ${selected.has(issue.identifier) ? "is-selected" : ""}`}
+                        key={issue.identifier}
+                      >
+                        {row(issue)}
+                      </article>
+                    ))
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+        ))}
+      </section>
+    </div>
   );
 }
 
@@ -326,11 +328,11 @@ const IssueControls = memo(function IssueControls({
       </NavLink>
       {status}
       <div className="row-content">
-        <NavLink to={href} className="list-title">
+        <NavLink to={href} className="list-title" title={issue.title}>
           {issue.title}
         </NavLink>
         {extra}
-        <IssueMeta issue={issue} />
+        <IssueMeta issue={issue} layout="row" />
       </div>
       <time
         className="row-date"
@@ -375,9 +377,8 @@ function VirtualIssueRows({
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [margin, setMargin] = useState(0);
-  const [rowHeight, setRowHeight] = useState(() =>
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--row-height")),
-  );
+  // Initial estimate only; measure rendered pixels rather than parsing a rem token.
+  const [rowHeight, setRowHeight] = useState(36);
   const [focused, setFocused] = useState<string | null>(null);
   const focusedIndex = issues.findIndex((issue) => issue.identifier === focused);
   const getItemKey = useCallback((index: number) => issues[index].identifier, [issues]);
@@ -422,15 +423,21 @@ function VirtualIssueRows({
       setMargin(
         rows.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop,
       );
-      setRowHeight(parseFloat(getComputedStyle(rows).getPropertyValue("--row-height")));
+      const height = rows.querySelector(".list-row")?.getBoundingClientRect().height;
+      if (height && height > 0) setRowHeight(height);
     };
     update();
     // Preceding groups can resize without changing the viewport's dimensions.
     const observer = new ResizeObserver(update);
     observer.observe(list);
     for (const group of list.children) observer.observe(group);
+    const firstRow = rows.querySelector(".list-row");
+    if (firstRow) observer.observe(firstRow);
     return () => observer.disconnect();
   }, [scroll]);
+  useLayoutEffect(() => {
+    virtual.measure();
+  }, [rowHeight, virtual]);
   useLayoutEffect(() => {
     const rows = container.current!;
     let width = rows.clientWidth;

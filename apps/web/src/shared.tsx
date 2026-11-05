@@ -272,12 +272,14 @@ export function NavLink({
   className,
   children,
   unavailable,
+  title,
   "aria-label": ariaLabel,
 }: {
   to: string;
   className?: string;
   children: ReactNode;
   unavailable?: boolean;
+  title?: string;
   "aria-label"?: string;
 }) {
   function open(event: MouseEvent) {
@@ -292,7 +294,7 @@ export function NavLink({
       onClick={open}
       aria-label={ariaLabel}
       aria-disabled={unavailable || undefined}
-      title={unavailable ? "This feature has not been migrated to Roster yet" : undefined}
+      title={unavailable ? "This feature has not been migrated to Roster yet" : title}
       style={unavailable ? { opacity: 0.5 } : undefined}
     >
       {children}
@@ -301,14 +303,14 @@ export function NavLink({
 }
 
 const statusColors: Record<Status, string> = {
-  triage: "var(--status-triage)",
-  backlog: "var(--status-backlog)",
-  todo: "var(--status-todo)",
-  agent_ready: "var(--status-agent-ready)",
-  in_progress: "var(--status-in-progress)",
-  in_review: "var(--status-in-review)",
-  done: "var(--status-done)",
-  canceled: "var(--status-canceled)",
+  triage: "var(--r-status-triage)",
+  backlog: "var(--r-status-backlog)",
+  todo: "var(--r-status-todo)",
+  agent_ready: "var(--r-status-agent-ready)",
+  in_progress: "var(--r-status-in-progress)",
+  in_review: "var(--r-status-in-review)",
+  done: "var(--r-status-done)",
+  canceled: "var(--r-status-canceled)",
 };
 
 // Backlog and planned states are rings; progress fills a pie inside the ring.
@@ -466,63 +468,110 @@ export function StatusSelect({
   );
 }
 
-export function AssigneeBadge({ person }: { person: Identity | null }) {
+export function AssigneeBadge({
+  person,
+  avatar = false,
+}: {
+  person: Identity | null;
+  avatar?: boolean;
+}) {
+  const name = person ? personName(person) : "Unassigned";
   return (
     <span
       className="assignee-badge"
-      title={person ? `Assignee: ${personName(person)}` : "Unassigned"}
+      title={person ? `Assignee: ${name}` : name}
+      role={avatar ? "img" : undefined}
+      aria-label={avatar ? `Assignee: ${name}` : undefined}
     >
-      <UserRound className="icon" />
-      <span>{person ? personName(person) : "Unassigned"}</span>
+      {avatar ? (
+        <span className="assignee-avatar" aria-hidden="true">
+          {person ? Array.from(name)[0].toUpperCase() : <UserRound className="icon" />}
+        </span>
+      ) : (
+        <UserRound className="icon" />
+      )}
+      <span className="assignee-name">{name}</span>
     </span>
   );
 }
 
-export function IssueMeta({ issue }: { issue: IssueSummary }) {
+function IssueMetaItem({ children, expandable }: { children: ReactNode; expandable: boolean }) {
+  return (
+    <span className="issue-meta-item" tabIndex={expandable ? 0 : undefined}>
+      {children}
+    </span>
+  );
+}
+
+export function IssueMeta({
+  issue,
+  layout = "inline",
+}: {
+  issue: IssueSummary;
+  layout?: "inline" | "row";
+}) {
   return (
     <span className="issue-meta">
-      <AssigneeBadge person={issue.assignee} />
-      {issue.labels.slice(0, 2).map((label) => (
-        <LabelBadge key={label.id} label={label} />
-      ))}
-      {issue.labels.length > 2 && (
-        <span
-          className="label-overflow"
-          title={issue.labels
-            .slice(2)
-            .map((l) => l.name)
-            .join(", ")}
-        >
-          +{issue.labels.length - 2}
-        </span>
-      )}
-      {issue.type && (
-        <span className="type-label" data-type={issue.type} title={issue.type}>
-          <span className="label-dot" />
-          {issue.type}
-        </span>
-      )}
-      {issue.project && (
-        <span className="project-label" title={issue.project}>
-          {issue.project_emoji ? (
-            <span className="project-emoji" aria-hidden="true">
-              {issue.project_emoji}
+      <AssigneeBadge person={issue.assignee} avatar={layout === "row"} />
+      <span className="issue-meta-secondary">
+        {issue.labels.slice(0, 2).map((label) => (
+          <IssueMetaItem key={label.id} expandable={layout === "row"}>
+            <LabelBadge label={label} tooltip={layout !== "row"} />
+          </IssueMetaItem>
+        ))}
+        {issue.labels.length > 2 && (
+          <IssueMetaItem expandable={layout === "row"}>
+            <span
+              className="label-overflow"
+              title={issue.labels
+                .slice(2)
+                .map((l) => l.name)
+                .join(", ")}
+            >
+              +{issue.labels.length - 2}
             </span>
-          ) : (
-            <Box className="icon" />
-          )}
-          <span>{issue.project}</span>
-        </span>
-      )}
+          </IssueMetaItem>
+        )}
+        {issue.type && (
+          <IssueMetaItem expandable={layout === "row"}>
+            <span
+              className="type-label"
+              data-type={issue.type}
+              title={layout === "row" ? undefined : issue.type}
+            >
+              <span className="label-dot" />
+              <span className="type-label-name">{issue.type}</span>
+            </span>
+          </IssueMetaItem>
+        )}
+        {issue.project && (
+          <IssueMetaItem expandable={layout === "row"}>
+            <span className="project-label" title={layout === "row" ? undefined : issue.project}>
+              {issue.project_emoji ? (
+                <span className="project-emoji" aria-hidden="true">
+                  {issue.project_emoji}
+                </span>
+              ) : (
+                <Box className="icon" />
+              )}
+              <span>{issue.project}</span>
+            </span>
+          </IssueMetaItem>
+        )}
+      </span>
     </span>
   );
 }
 
-export function LabelBadge({ label }: { label: Label }) {
+export function LabelBadge({ label, tooltip = true }: { label: Label; tooltip?: boolean }) {
   return (
     <span
       className="label-badge"
-      title={`${label.name}${label.archived ? " (archived)" : ""}${label.description ? ` — ${label.description}` : ""}`}
+      title={
+        tooltip
+          ? `${label.name}${label.archived ? " (archived)" : ""}${label.description ? ` — ${label.description}` : ""}`
+          : undefined
+      }
     >
       <span className="label-dot" style={{ backgroundColor: label.color }} />
       <span>{label.name}</span>

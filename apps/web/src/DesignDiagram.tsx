@@ -1,15 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { isDarkAppearance, resolveColorTokens, subscribeAppearance } from "./appearance";
 
 const renderer = import("mermaid");
-const preference = "(prefers-color-scheme: dark)";
-function subscribeTheme(update: () => void) {
-  const media = window.matchMedia(preference);
-  media.addEventListener("change", update);
-  return () => media.removeEventListener("change", update);
-}
-function isDark() {
-  return window.matchMedia(preference).matches;
-}
 
 // Mermaid draws each sequence participant twice. Match both boxes by name.
 function tintNodes(svg: string, colors: string[], surface: string) {
@@ -30,7 +22,7 @@ function tintNodes(svg: string, colors: string[], surface: string) {
 }
 
 export default function DesignDiagram({ source }: { source: string }) {
-  const dark = useSyncExternalStore(subscribeTheme, isDark);
+  const dark = useSyncExternalStore(subscribeAppearance, isDarkAppearance);
   const [result, setResult] = useState({ image: "", error: "" });
   useEffect(() => {
     let active = true;
@@ -38,12 +30,21 @@ export default function DesignDiagram({ source }: { source: string }) {
       try {
         const { default: mermaid } = await renderer;
         if (!active) return;
-        const css = getComputedStyle(document.documentElement);
-        const token = (name: string) => css.getPropertyValue(name).trim();
-        const text = token("--text"),
-          surface = token("--surface-card"),
-          node = token("--raised"),
-          line = token("--text-3");
+        const names = [
+          "--r-color-text-primary",
+          "--r-color-bg-surface",
+          "--r-color-bg-subtle",
+          "--r-color-text-secondary",
+          "--r-color-link",
+          "--r-color-success-fg",
+          "--r-pr-merged",
+        ];
+        const resolved = resolveColorTokens(names);
+        const token = (name: string) => resolved[names.indexOf(name)];
+        const text = token("--r-color-text-primary"),
+          surface = token("--r-color-bg-surface"),
+          node = token("--r-color-bg-subtle"),
+          line = token("--r-color-text-secondary");
         mermaid.initialize({
           startOnLoad: false,
           securityLevel: "strict",
@@ -61,7 +62,7 @@ export default function DesignDiagram({ source }: { source: string }) {
             actorTextColor: text,
             actorBorder: line,
             actorLineColor: line,
-            signalColor: token("--link"),
+            signalColor: token("--r-color-link"),
             signalTextColor: text,
             labelBoxBkgColor: node,
             labelBoxBorderColor: line,
@@ -70,7 +71,7 @@ export default function DesignDiagram({ source }: { source: string }) {
             edgeLabelBackground: surface,
             stateBkg: node,
             stateBorder: line,
-            transitionColor: token("--link"),
+            transitionColor: token("--r-color-link"),
             transitionLabelColor: text,
             stateLabelColor: text,
           },
@@ -88,7 +89,7 @@ export default function DesignDiagram({ source }: { source: string }) {
               encodeURIComponent(
                 tintNodes(
                   svg,
-                  [token("--accent"), token("--success"), token("--pr-merged")],
+                  [token("--r-color-link"), token("--r-color-success-fg"), token("--r-pr-merged")],
                   surface,
                 ),
               ),

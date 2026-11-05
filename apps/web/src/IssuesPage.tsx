@@ -7,7 +7,6 @@ import { NewIssueDialog } from "./Dialogs";
 import { EmojiPicker, EntityEmoji } from "./EmojiPicker";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, ViewMode } from "./IssueViews";
-import { LabelPicker } from "./Labels";
 import { emptyLabelFilter, LabelFilterValue, useLabels } from "./useLabels";
 import { PageHeader } from "./PageHeader";
 import { ProjectDialog, ProjectOverview } from "./ProjectManagement";
@@ -57,7 +56,6 @@ export default function IssuesPage({
   const catalog = useLabels();
   const [labelFilter, setLabelFilter] = useState<LabelFilterValue>(emptyLabelFilter);
   const [selected, setSelected] = useState<string[]>([]);
-  const [batchLabels, setBatchLabels] = useState(false);
   const [error, setError] = useState("");
   const triage = route.kind === "triage";
   const [chosenFilter, setFilter] = useState<Status | "all">("all");
@@ -102,7 +100,6 @@ export default function IssuesPage({
     loadIssues,
     moveIssue: moveIssueRequest,
     changePriority,
-    writeLabels,
   } = useIssues(
     {
       cycleID: route.kind === "cycle" ? route.id : undefined,
@@ -400,36 +397,6 @@ export default function IssuesPage({
         </p>
       )}
       {error && <RequestError message={error} />}
-      {!scopeError && !showOverview && !loading && selectedVisible.length > 0 && (
-        <div className="selection-toolbar" role="toolbar" aria-label="Selected issues">
-          <button
-            type="button"
-            className="ghost"
-            onClick={() =>
-              setSelected(
-                issues
-                  .filter((issue) => visibleStatuses.has(issue.status))
-                  .map((issue) => issue.identifier),
-              )
-            }
-          >
-            Select visible
-          </button>
-          <span>{selectedVisible.length} selected</span>
-          <button
-            className="button"
-            disabled={!capabilities.labels}
-            title={!capabilities.labels ? "Labels have not been migrated yet" : undefined}
-            onClick={() => setBatchLabels(true)}
-          >
-            Change labels
-          </button>
-          <button className="ghost" onClick={() => setSelected([])}>
-            Clear selection
-          </button>
-        </div>
-      )}
-
       {!scopeError &&
         !showOverview &&
         (!loading && teams.length === 0 ? (
@@ -467,19 +434,6 @@ export default function IssuesPage({
           teams={teams}
           onClose={() => setProjectDialog(false)}
           onSaved={saveProject}
-        />
-      )}
-      {batchLabels && (
-        <LabelPicker
-          write={(save, success, failure) => writeLabels(selectedVisible, save, success, failure)}
-          identifiers={selectedVisible}
-          current={null}
-          catalog={catalog}
-          onClose={() => setBatchLabels(false)}
-          onChanged={async () => {
-            await loadIssues();
-            setSelected([]);
-          }}
         />
       )}
       {creating && (

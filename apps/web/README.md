@@ -1,5 +1,22 @@
 # Roster web
 
+## Design tokens
+
+`src/tokens.css` owns Roster's palette, semantic roles, typography, spacing, density,
+layout, interaction states, and business colors. Use `--r-*` roles for new styles.
+Components consume these roles directly; there is no compatibility alias layer.
+Shared font sizes also have `--r-font-size-*` roles for individual overrides.
+Component-only geometry and data-driven timeline positions stay local.
+
+The account menu offers System / Light / Dark appearance and Compact / Comfortable
+density. Preferences are saved locally; unavailable storage does not block changes.
+Theme and density attributes live on `document.documentElement`. Rem dimensions keep
+the browser's default root font size; reading typography does not shrink with density.
+Measure rendered row pixels for virtual lists and resolve actual CSS colors before
+passing them to diagram libraries. See the token file for usage and accessibility rules.
+
+## Development
+
 The original InfTask React/Vite frontend, copied from commit `0f7740bfbc29ba2755a778bba8a0f04074ea1224`. The existing History router, request hooks, CSS, Radix controls, list/board views, Markdown detail, dialogs and tests are retained. Supabase Auth is connected through `src/integration`; the simplified replacement UI has been removed.
 
 From the repository root:

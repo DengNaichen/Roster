@@ -2,14 +2,14 @@
   --timeline-min-width: 1050px;
   --timeline-name-width: 200px;
   --timeline-dates-width: 220px;
-  --timeline-row-height: 44px;
+  --timeline-row-height: var(--r-size-row);
   --timeline-bar-height: 20px;
 }
 .project-timeline {
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-16);
+  padding: var(--r-space-16);
 }
 .timeline-controls {
   flex-wrap: wrap;
@@ -17,7 +17,7 @@
 .timeline-controls label,
 .project-date-fields {
   display: flex;
-  gap: var(--space-12);
+  gap: var(--r-space-12);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -27,8 +27,8 @@
 }
 .timeline-scroll {
   overflow-x: auto;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
 }
 .timeline-grid {
   min-width: var(--timeline-min-width);
@@ -39,16 +39,16 @@
   grid-template-columns: var(--timeline-name-width) 1fr var(--timeline-dates-width);
   min-height: var(--timeline-row-height);
   align-items: center;
-  border-bottom: var(--border-width) solid var(--border);
+  border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
 }
 .timeline-heading {
-  color: var(--text-3);
-  background: var(--raised);
-  font-size: var(--font-size-12);
+  color: var(--r-color-text-secondary);
+  background: var(--r-color-bg-subtle);
+  font-size: var(--r-font-size-caption);
 }
 .timeline-heading > span,
 .timeline-name {
-  padding: var(--space-12);
+  padding: var(--r-space-12);
 }
 .timeline-name {
   overflow: hidden;
@@ -59,18 +59,18 @@
 .timeline-axis {
   position: relative;
   height: var(--timeline-row-height);
-  border-left: var(--border-width) solid var(--border);
+  border-left: var(--r-border-width) solid var(--r-color-border-divider);
 }
 .timeline-axis > span {
   position: absolute;
-  top: var(--space-12);
+  top: var(--r-space-12);
   white-space: nowrap;
 }
 .timeline-track {
   background-image: linear-gradient(
     to right,
-    var(--border) var(--border-width),
-    transparent var(--border-width)
+    var(--r-color-border-divider) var(--r-border-width),
+    transparent var(--r-border-width)
   );
   background-size: calc(100% / 6) 100%;
 }
@@ -78,14 +78,14 @@
   position: absolute;
   top: calc((var(--timeline-row-height) - var(--timeline-bar-height)) / 2);
   height: var(--timeline-bar-height);
-  min-width: var(--space-1);
-  background: var(--accent);
+  min-width: 1px;
+  background: var(--r-color-link);
   border: 0;
-  border-radius: var(--radius);
+  border-radius: var(--r-radius-control);
   cursor: pointer;
 }
 .timeline-bar:hover {
-  background: var(--accent-hover);
+  background: var(--r-color-bg-action-hover);
 }
 .timeline-point {
   width: var(--timeline-bar-height);
@@ -95,28 +95,28 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: var(--border-width);
-  background: var(--error-text);
+  width: var(--r-border-width);
+  background: var(--r-chart-today);
 }
 .timeline-dates {
-  font-size: var(--font-size-12);
+  font-size: var(--r-font-size-caption);
   text-align: left;
-  padding: var(--space-12);
+  padding: var(--r-space-12);
 }
 .timeline-outside {
-  margin: var(--space-8);
+  margin: var(--r-space-8);
 }
 .timeline-unscheduled {
-  margin-top: var(--space-16);
+  margin-top: var(--r-space-16);
 }
 .timeline-unscheduled h2 {
-  font-size: var(--font-size-12);
-  color: var(--text-3);
+  font-size: var(--r-font-size-caption);
+  color: var(--r-color-text-secondary);
 }
 .timeline-unscheduled .project-actions {
   justify-content: space-between;
-  border-bottom: var(--border-width) solid var(--border);
-  padding: var(--space-8);
+  border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
+  padding: var(--r-space-8);
 }
 .initiative-description {
   white-space: pre-wrap;
