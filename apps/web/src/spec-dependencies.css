@@ -23,8 +23,6 @@
   position: relative;
   width: 1120px;
   height: 460px;
-  background-image: radial-gradient(var(--border-strong) 0.7px, transparent 0.7px);
-  background-size: 20px 20px;
 }
 .dependency-edges {
   position: absolute;
@@ -42,31 +40,34 @@
   stroke: var(--accent);
   color: var(--accent);
 }
-.dependency-node {
+.card.dependency-node {
   position: absolute;
   width: 236px;
+  min-height: 100px;
   display: grid;
   gap: var(--space-8);
-  padding: var(--space-12);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  color: var(--text);
   text-align: left;
   cursor: pointer;
-  min-height: 100px;
+  -webkit-user-drag: none;
+  color: var(--text);
 }
-.dependency-node.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--drop-bg);
-}
-.dependency-node.context {
+.dependency-node.context:not(.is-selected) {
   background: var(--raised);
-  color: var(--text-3);
 }
-.dependency-node strong {
+.dependency-node.context .card-identifier {
+  color: var(--faint);
+}
+.dependency-node .card-identifier {
+  color: var(--muted);
+  padding: 0;
+}
+.dependency-node .card-heading {
+  margin: 0;
+  align-items: center;
+}
+.dependency-node .card-title {
+  padding: 0;
   font-size: var(--font-size-14);
-  font-weight: var(--weight-medium);
 }
 .dependency-node-meta {
   display: flex;

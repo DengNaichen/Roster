@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { columns, issueScopes, StatusIcon, type IssueScope, type Status } from "./shared";
+import {
+  columns,
+  issueScopes,
+  AssigneeBadge,
+  StatusIcon,
+  type IssueScope,
+  type Status,
+} from "./shared";
 import "./spec-dependencies.css";
 
 type Node = {
@@ -136,21 +143,20 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
             .map((n) => (
               <button
                 key={n.id}
-                className={`dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "selected" : ""}`}
+                className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "is-selected" : ""}`}
                 style={{ left: n.x, top: n.y }}
                 onClick={() => setSelected(n.id)}
                 aria-pressed={selected === n.id}
               >
-                <span className="dependency-node-meta">
-                  <span>{n.id}</span>
-                  <span>
+                <span className="card-identifier">{n.id}</span>
+                <span className="card-heading">
+                  <span title={columns.find((c) => c.status === n.status)?.label}>
                     <StatusIcon status={n.status} />
-                    {columns.find((c) => c.status === n.status)?.label}
                   </span>
+                  <span className="card-title">{n.title}</span>
                 </span>
-                <strong>{n.title}</strong>
                 <span className="dependency-node-meta">
-                  <span>{n.owner}</span>
+                  <AssigneeBadge person={{ subject: n.owner, name: n.owner, email: "" }} />
                   <span>
                     {n.status === "done"
                       ? "已完成"
