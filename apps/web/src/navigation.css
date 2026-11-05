@@ -1596,9 +1596,6 @@
 .settings-teams-table .settings-team-key {
   font-weight: normal;
 }
-.settings-teams-table td {
-  padding-block: var(--r-space-24);
-}
 .settings-teams-table td:last-child {
   width: 40px;
   color: var(--r-color-text-muted);
@@ -1643,6 +1640,10 @@
 }
 .settings-directory-table tbody td {
   padding-block: var(--r-space-24);
+}
+.settings-directory-table.settings-teams-table tbody td {
+  height: var(--r-size-row);
+  padding-block: var(--r-space-4);
 }
 .settings-member-name strong,
 .settings-team-link strong {
