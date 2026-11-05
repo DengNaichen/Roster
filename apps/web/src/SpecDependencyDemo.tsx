@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { Play } from "lucide-react";
 import { Dropdown } from "./Dropdown";
 import { useState } from "react";
 import {
@@ -131,7 +131,14 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
                       <path
                         d={`M${x},${y} C${x + 28},${y} ${to.x - 28},${to.y + 50} ${to.x - 9},${to.y + 50}`}
                       />
-                      <ChevronRight x={to.x - 22} y={to.y + 42} width={16} height={16} />
+                      <Play
+                        x={to.x - 16}
+                        y={to.y + 44}
+                        width={12}
+                        height={12}
+                        fill="currentColor"
+                        strokeWidth={0}
+                      />
                     </g>
                   );
                 })}
