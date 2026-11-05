@@ -411,6 +411,20 @@ it("loads real scoped links beyond 50 rows and persists link/unlink through remo
         } else linked = [...linked, candidate];
         return json({ identifier: "SPEC-42", issues, linked: init?.method === "POST" });
       }
+      if (path.endsWith("/specs/SPEC-42/dependencies"))
+        return json({
+          nodes: linked.map((issue) => ({
+            id: issue.identifier,
+            identifier: issue.identifier,
+            title: issue.title,
+            status: issue.status,
+            assignee: null,
+            external: false,
+          })),
+          edges: linked.some((issue) => issue.identifier === "AL-1")
+            ? [{ from: "AL-1", to: "AL-55" }]
+            : [],
+        });
       if (path.includes("/specs/SPEC-42/issues?")) {
         expect(path).toContain("limit=-1");
         return json({ issues: linked });
@@ -425,6 +439,7 @@ it("loads real scoped links beyond 50 rows and persists link/unlink through remo
   const mounted = render(<SpecPage id="SPEC-42" />);
   fireEvent.click(await screen.findByRole("tab", { name: "Issues · 55" }));
   expect(await screen.findByText("Linked issue 55")).toBeTruthy();
+  expect(await screen.findByRole("button", { name: "AL-55 依赖关系：被 AL-1 阻塞" })).toBeTruthy();
   expect(screen.queryByRole("tab", { name: "History" })).toBeNull();
   fireEvent.click(screen.getByRole("checkbox", { name: "Select AL-1" }));
   failUnlink = true;
