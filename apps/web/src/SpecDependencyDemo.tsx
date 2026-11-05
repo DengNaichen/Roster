@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+import { Dropdown } from "./Dropdown";
 import { useState } from "react";
 import {
   columns,
@@ -18,72 +20,67 @@ type Node = {
   owner: string;
   description: string;
 };
-const nodes: Node[] = [
-  {
-    id: "D-01",
-    title: "定义关联数据模型",
-    status: "done",
-    x: 28,
-    y: 190,
-    owner: "Chen",
-    description: "确定唯一约束、双向查询和解除关联的语义。",
-  },
-  {
-    id: "D-02",
-    title: "实现关联读写接口",
-    status: "in_progress",
-    x: 300,
-    y: 90,
-    owner: "Agent",
-    description: "提供建立、查询和解除关联的公共入口。完成后网页和 MCP 可以并行接入。",
-  },
-  {
-    id: "D-03",
-    title: "确认私有团队权限",
-    status: "backlog",
-    x: 300,
-    y: 290,
-    owner: "Lin",
-    description: "确认关联两端的可见性以及计数规则。这项工作尚未安排，会阻塞最终验收。",
-  },
-  {
-    id: "D-04",
-    title: "接入 Spec 关联列表",
-    status: "todo",
-    x: 572,
-    y: 50,
-    owner: "Chen",
-    description: "展示关联任务，并支持从列表打开详情。等待接口完成。",
-  },
-  {
-    id: "D-05",
-    title: "接入 MCP 关联工具",
-    status: "todo",
-    x: 572,
-    y: 220,
-    owner: "Agent",
-    description: "让 Agent 通过同一业务规则读写关联。可以与网页接入并行进行。",
-  },
-  {
-    id: "D-06",
-    title: "联调与验收",
-    status: "todo",
-    x: 844,
-    y: 190,
-    owner: "Lin",
-    description: "覆盖重复请求、权限变化和双向读取。三个前置任务完成后开始。",
-  },
+const lanes = [
+  ["确定关联语义", "建立关联表", "实现关联写入", "接入网页操作", "验证并发请求", "验收关联行为"],
+  [
+    "确认可见性规则",
+    "实现权限查询",
+    "校验关联两端",
+    "接入私有团队过滤",
+    "验证权限变化",
+    "验收访问边界",
+  ],
+  [
+    "定义接口契约",
+    "实现双向查询",
+    "注册 MCP 工具",
+    "接入 Agent 调用",
+    "验证重试行为",
+    "验收 MCP 集成",
+  ],
+  [
+    "定义进度口径",
+    "实现计数查询",
+    "增加查询索引",
+    "接入进度展示",
+    "验证分页与计数",
+    "验收进度统计",
+  ],
+  ["整理历史数据", "制定数据迁移", "编写迁移脚本", "准备灰度数据", "验证回退路径", "发布前检查"],
 ];
-const edges = [
-  ["D-01", "D-02"],
-  ["D-01", "D-03"],
-  ["D-02", "D-04"],
-  ["D-02", "D-05"],
-  ["D-03", "D-06"],
-  ["D-04", "D-06"],
-  ["D-05", "D-06"],
-];
+const nodeId = (lane: number, stage: number) =>
+  "D-" + String(lane * 6 + stage + 1).padStart(2, "0");
+const nodes: Node[] = lanes.flatMap((titles, lane) =>
+  titles.map((title, stage) => ({
+    id: nodeId(lane, stage),
+    title,
+    status: (stage === 0
+      ? "done"
+      : stage === 1
+        ? lane === 1
+          ? "backlog"
+          : "in_progress"
+        : "todo") as Status,
+    x: 28 + stage * 292,
+    y: 36 + lane * 156,
+    owner: ["Chen", "Lin", "Agent"][lane % 3],
+    description: `“${title}”属于示例实施路线 ${lane + 1}，用于观察多任务的先后关系。完成后可推进右侧后续工作。`,
+  })),
+);
+const edges: string[][] = lanes.flatMap((_, lane) =>
+  Array.from({ length: 5 }, (_, stage) => [nodeId(lane, stage), nodeId(lane, stage + 1)]),
+);
+edges.push(
+  [nodeId(0, 1), nodeId(2, 2)],
+  [nodeId(1, 2), nodeId(0, 3)],
+  [nodeId(3, 4), nodeId(4, 5)],
+  [nodeId(2, 4), nodeId(4, 5)],
+);
+const width = 1756,
+  height = 820;
 export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
+  const [zoom, setZoom] = useState("0.75");
+  const scale = Number(zoom);
   const [selected, setSelected] = useState("D-02");
   const statuses = issueScopes.find((s) => s.value === scope)?.statuses;
   const focused = new Set(
@@ -102,71 +99,73 @@ export function SpecDependencyDemo({ scope }: { scope: IssueScope }) {
   return (
     <div className="dependency-demo">
       <div className="dependency-caption">
-        <span>依赖图 · 示例数据</span>
+        <span>依赖图 · 30 个示例任务 · {shown.size} 个可见</span>
+        <Dropdown
+          aria-label="Graph zoom"
+          value={zoom}
+          onChange={setZoom}
+          options={[
+            { value: "0.5", label: "50%" },
+            { value: "0.75", label: "75%" },
+            { value: "1", label: "100%" },
+          ]}
+        />
         <span>箭头指向后续任务 · 淡色为范围外的前置任务</span>
       </div>
       <div className="dependency-scroll">
-        <div className="dependency-canvas">
-          <svg className="dependency-edges" viewBox="0 0 1120 460" aria-hidden="true">
-            <defs>
-              <marker
-                id="dependency-arrow"
-                viewBox="0 0 10 10"
-                refX="9"
-                refY="5"
-                markerWidth="6"
-                markerHeight="6"
-                orient="auto"
-              >
-                <path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="currentColor" />
-              </marker>
-            </defs>
-            {edges
-              .filter(([a, b]) => shown.has(a) && shown.has(b))
-              .map(([a, b]) => {
-                const from = nodes.find((n) => n.id === a)!,
-                  to = nodes.find((n) => n.id === b)!;
-                const x = from.x + 236,
-                  y = from.y + 50;
-                return (
-                  <path
-                    key={a + b}
-                    className={selected === a || selected === b ? "highlight" : ""}
-                    d={`M${x},${y} C${x + 18},${y} ${to.x - 18},${to.y + 50} ${to.x - 3},${to.y + 50}`}
-                    markerEnd="url(#dependency-arrow)"
-                  />
-                );
-              })}
-          </svg>
-          {nodes
-            .filter((n) => shown.has(n.id))
-            .map((n) => (
-              <button
-                key={n.id}
-                className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "is-selected" : ""}`}
-                style={{ left: n.x, top: n.y }}
-                onClick={() => setSelected(n.id)}
-                aria-pressed={selected === n.id}
-              >
-                <span className="card-identifier">{n.id}</span>
-                <span className="card-heading">
-                  <span title={columns.find((c) => c.status === n.status)?.label}>
-                    <StatusIcon status={n.status} />
+        <div style={{ width: width * scale, height: height * scale }}>
+          <div
+            className="dependency-canvas"
+            style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}
+          >
+            <svg className="dependency-edges" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
+              {edges
+                .filter(([a, b]) => shown.has(a) && shown.has(b))
+                .map(([a, b]) => {
+                  const from = nodes.find((n) => n.id === a)!,
+                    to = nodes.find((n) => n.id === b)!;
+                  const x = from.x + 236,
+                    y = from.y + 50;
+                  return (
+                    <g key={a + b} className={selected === a || selected === b ? "highlight" : ""}>
+                      <path
+                        d={`M${x},${y} C${x + 28},${y} ${to.x - 28},${to.y + 50} ${to.x - 9},${to.y + 50}`}
+                      />
+                      <ChevronRight x={to.x - 22} y={to.y + 42} width={16} height={16} />
+                    </g>
+                  );
+                })}
+            </svg>
+            {nodes
+              .filter((n) => shown.has(n.id))
+              .map((n) => (
+                <button
+                  key={n.id}
+                  className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "is-selected" : ""}`}
+                  style={{ left: n.x, top: n.y }}
+                  onClick={() => setSelected(n.id)}
+                  aria-pressed={selected === n.id}
+                >
+                  <span className="card-identifier">{n.id}</span>
+                  <span className="card-heading">
+                    <span title={columns.find((c) => c.status === n.status)?.label}>
+                      <StatusIcon status={n.status} />
+                    </span>
+                    <span className="card-title">{n.title}</span>
                   </span>
-                  <span className="card-title">{n.title}</span>
-                </span>
-                <span className="dependency-node-meta">
-                  <AssigneeBadge person={{ subject: n.owner, name: n.owner, email: "" }} />
-                  <span>
-                    {n.status === "done"
-                      ? "已完成"
-                      : blockers(n.id).length
-                        ? `等待 ${blockers(n.id).length} 项`
-                        : "前置已就绪"}
+                  <span className="dependency-node-meta">
+                    <AssigneeBadge person={{ subject: n.owner, name: n.owner, email: "" }} />
+                    <span>
+                      {n.status === "done"
+                        ? "已完成"
+                        : blockers(n.id).length
+                          ? `等待 ${blockers(n.id).length} 项`
+                          : "前置已就绪"}
+                    </span>
                   </span>
-                </span>
-              </button>
-            ))}
+                </button>
+              ))}
+          </div>
         </div>
       </div>
       {current && (

@@ -21,22 +21,20 @@
 }
 .dependency-canvas {
   position: relative;
-  width: 1120px;
-  height: 460px;
 }
 .dependency-edges {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  color: var(--muted);
+  color: var(--faint);
 }
-.dependency-edges > path {
+.dependency-edges > g > path {
   fill: none;
-  stroke: var(--border-strong);
+  stroke: currentColor;
   stroke-width: 1.5;
 }
-.dependency-edges > path.highlight {
+.dependency-edges > g.highlight {
   stroke: var(--accent);
   color: var(--accent);
 }
