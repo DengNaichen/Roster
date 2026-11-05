@@ -80,7 +80,7 @@ export function Sidebar({
               <NavLink
                 key={key}
                 to={pagePath(`/settings/${key}`)}
-                className={`nav-item ${key === "workspace" || key === "integrations" ? "settings-nav-break" : ""} ${selected ? "active" : ""}`}
+                className={`nav-item ${selected ? "active" : ""}`}
                 aria-current={selected ? "page" : undefined}
               >
                 <span>{title}</span>

@@ -102,12 +102,14 @@
   flex: 1;
 }
 .brand,
+.settings-back,
 .account-trigger {
   height: var(--r-size-menu-row);
   color: var(--r-color-text-primary);
   font-weight: var(--r-weight-semibold);
 }
-.brand {
+.brand,
+.settings-back {
   margin-bottom: var(--r-space-8);
 }
 .brand strong {
@@ -1101,9 +1103,6 @@
 }
 
 /* Settings has its own navigation while retaining the workspace shell. */
-.settings-back {
-  margin-bottom: var(--r-space-16);
-}
 .settings-navigation {
   flex: 1;
 }
@@ -1158,9 +1157,6 @@
     flex: 1;
     width: auto;
   }
-  .settings-back {
-    margin-bottom: var(--r-space-8);
-  }
   .settings-shell .panel {
     flex: 1;
     min-height: 0;
@@ -1173,9 +1169,6 @@
   }
 }
 
-.settings-nav-break {
-  margin-top: var(--r-space-24);
-}
 .settings-team-list,
 .settings-general,
 .settings-integration-card {
@@ -1369,9 +1362,6 @@
   }
   .settings-navigation .nav-item {
     flex: 0 0 auto;
-  }
-  .settings-nav-break {
-    margin-top: 0;
   }
   .settings-integration-header,
   .settings-integration-footer {
