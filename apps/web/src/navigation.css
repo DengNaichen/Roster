@@ -150,22 +150,15 @@
   flex: none;
 }
 .workspace-menu,
-.account-menu,
-.toolbar-popover {
-  z-index: 20;
-  max-width: calc(100vw - var(--space-16));
-  max-height: var(--radix-popover-content-available-height);
-  overflow: auto;
-  padding: var(--space-4);
-  color: var(--text-2);
-  background: var(--raised);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-menu);
-}
-.workspace-menu,
 .account-menu {
   width: var(--sidebar-width);
+}
+.workspace-menu,
+.account-menu,
+.filter-popover,
+.display-popover {
+  max-width: calc(100vw - var(--space-16));
+  max-height: var(--radix-popover-content-available-height);
 }
 .workspace-list {
   max-height: 50dvh;
@@ -174,10 +167,31 @@
 .workspace-menu .dialog-hint {
   padding: var(--space-8);
 }
-.workspace-option {
+.workspace-option,
+.account-menu .toolbar-menu-action {
   height: auto;
-  min-height: var(--sidebar-identity-height);
-  padding-block: var(--sidebar-label-gap);
+  min-height: var(--space-32);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-lg);
+  color: var(--text-2);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+}
+.workspace-option:hover,
+.workspace-option[aria-current="page"],
+.workspace-option[aria-current="page"]:hover,
+.account-menu .toolbar-menu-action:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.workspace-option:focus-visible,
+.account-menu .toolbar-menu-action:focus-visible {
+  outline-offset: calc(-1 * var(--focus-width));
+}
+.workspace-menu .icon,
+.account-menu .icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 .workspace-avatar {
   color: var(--sidebar-color);
@@ -201,7 +215,7 @@
   max-width: 100%;
 }
 .workspace-option strong {
-  font-weight: var(--sidebar-font-weight);
+  font-weight: inherit;
 }
 .workspace-option small {
   color: var(--sidebar-muted-color);
@@ -320,6 +334,10 @@
 .account-identity small {
   color: var(--sidebar-muted-color);
   font-size: var(--sidebar-caption-size);
+}
+.account-menu .account-identity strong {
+  color: var(--text-2);
+  font-weight: var(--weight-regular);
 }
 .account-error {
   padding: var(--sidebar-inset);
@@ -483,6 +501,33 @@
   color: var(--text);
   background: var(--button-hover);
 }
+:is(.filter-popover, .display-popover, .issue-dependency-popover) .toolbar-popover-heading {
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+}
+:is(.filter-popover, .display-popover) .toolbar-field,
+.filter-popover .toolbar-label-field,
+:is(.filter-popover, .display-popover) .dropdown {
+  color: var(--text-2);
+  font-size: var(--font-size-13);
+}
+.filter-popover .toolbar-popover-done,
+.display-popover .toolbar-menu-action {
+  min-height: var(--space-32);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+  background: transparent;
+}
+.filter-popover .toolbar-popover-done:hover,
+.display-popover .toolbar-menu-action:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.filter-popover .toolbar-popover-done:focus-visible,
+.display-popover .toolbar-menu-action:focus-visible {
+  outline-offset: calc(-1 * var(--focus-width));
+}
 .toolbar-view-switch {
   display: flex;
   gap: var(--space-4);
@@ -511,6 +556,23 @@
 .toolbar-view-switch button:hover {
   background: var(--button-hover);
   color: var(--text);
+}
+.display-popover .toolbar-view-switch {
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-panel);
+  padding: var(--space-4);
+}
+.display-popover .toolbar-view-switch button {
+  min-height: var(--space-32);
+  border-radius: var(--radius-lg);
+  color: var(--text-2);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+}
+.display-popover .toolbar-view-switch button.active,
+.display-popover .toolbar-view-switch button:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 .selection-toolbar {
   display: flex;

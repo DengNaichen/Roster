@@ -1235,7 +1235,13 @@ button:focus-visible {
   height: var(--list-control-size);
   padding: 0;
 }
-.select-menu {
+.select-menu,
+.workspace-menu,
+.account-menu,
+.filter-popover,
+.display-popover,
+.issue-dependency-popover,
+.emoji-picker {
   z-index: 20;
   width: var(--menu-width);
   max-height: var(--radix-select-content-available-height);
@@ -1417,17 +1423,12 @@ input.dropdown-required {
 .emoji-picker {
   display: flex;
   flex-direction: column;
-  z-index: 20;
   width: var(--emoji-picker-width);
   max-width: calc(100vw - var(--space-16));
   height: var(--emoji-picker-height);
   max-height: var(--radix-popover-content-available-height);
   overflow: hidden;
-  color: var(--text-2);
-  background: var(--dialog-bg);
-  border: var(--border-width) solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-menu);
+  padding: 0;
 }
 .emoji-picker-heading {
   flex: none;
@@ -1440,9 +1441,8 @@ input.dropdown-required {
   align-items: center;
   height: 100%;
   color: var(--text);
-  border-bottom: var(--space-2) solid var(--accent);
   font-size: var(--font-size-13);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-regular);
 }
 .emoji-search {
   display: flex;
@@ -1460,6 +1460,7 @@ input.dropdown-required {
   background: transparent;
   color: var(--text);
   outline: none;
+  font-size: var(--font-size-13);
 }
 .emoji-search:focus-within {
   border-bottom-color: var(--accent);
@@ -1499,17 +1500,17 @@ input.dropdown-required {
   color: var(--text);
   background: transparent;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   font-family: var(--font-emoji);
   font-size: var(--font-size-20);
   line-height: 1;
 }
 .emoji-option:hover,
 .emoji-option:focus {
-  background: var(--button-hover);
+  background: var(--hover);
 }
 .emoji-option[aria-pressed="true"] {
-  background: var(--selected);
+  background: var(--hover);
   outline: var(--border-width) solid var(--accent);
   outline-offset: calc(-1 * var(--border-width));
 }
@@ -1540,6 +1541,18 @@ input.dropdown-required {
 }
 .emoji-picker .error {
   margin: var(--space-8);
+}
+.emoji-picker-footer .ghost {
+  min-height: var(--space-32);
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-lg);
+  color: var(--text-2);
+  font-size: var(--font-size-13);
+  font-weight: var(--weight-regular);
+}
+.emoji-picker-footer .ghost:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 
 /* Scope destinations remain available on narrow screens. */
