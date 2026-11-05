@@ -13,7 +13,7 @@ import {
 import "./spec-dependencies.css";
 import type { SpecDependencies as SpecGraph } from "../../../packages/contracts/spec";
 import { useResource } from "./useResource";
-import { dependencyLayout } from "./dependencyLayout";
+import { dependencyLayout, dependencyNodeSize } from "./dependencyLayout";
 
 export function SpecDependencies({ id, visible }: { id: string; visible: string[] }) {
   const resource = useResource<SpecGraph | null>(
@@ -75,29 +75,25 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
             style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}
           >
             <svg className="dependency-edges" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-              {edges
-                .filter(([a, b]) => shown.has(a) && shown.has(b))
-                .map(([a, b]) => {
-                  const from = nodes.find((n) => n.id === a)!,
-                    to = nodes.find((n) => n.id === b)!;
-                  const x = from.x + 236,
-                    y = from.y + 50;
-                  return (
-                    <g key={a + b} className={selected === a || selected === b ? "highlight" : ""}>
-                      <path
-                        d={`M${x},${y} C${x + 28},${y} ${to.x - 28},${to.y + 50} ${to.x - 9},${to.y + 50}`}
-                      />
-                      <Play
-                        x={to.x - 16}
-                        y={to.y + 44}
-                        width={12}
-                        height={12}
-                        fill="currentColor"
-                        strokeWidth={0}
-                      />
-                    </g>
-                  );
-                })}
+              {relations.map(({ from, to, path, points }) => {
+                const end = points[points.length - 1];
+                return (
+                  <g
+                    key={from + to}
+                    className={selected === from || selected === to ? "highlight" : ""}
+                  >
+                    <path d={path} />
+                    <Play
+                      x={end.x - 10}
+                      y={end.y - 6}
+                      width={12}
+                      height={12}
+                      fill="currentColor"
+                      strokeWidth={0}
+                    />
+                  </g>
+                );
+              })}
             </svg>
             {nodes
               .filter((n) => shown.has(n.id))
@@ -105,7 +101,7 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
                 <button
                   key={n.id}
                   className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "is-selected" : ""}`}
-                  style={{ left: n.x, top: n.y }}
+                  style={{ left: n.x, top: n.y, ...dependencyNodeSize }}
                   onClick={() => setSelected(n.id)}
                   aria-pressed={selected === n.id}
                 >
@@ -117,7 +113,9 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
                     <span title={columns.find((c) => c.status === n.status)?.label}>
                       <StatusIcon status={n.status} />
                     </span>
-                    <span className="card-title">{n.title}</span>
+                    <span className="card-title" title={n.title}>
+                      {n.title}
+                    </span>
                   </span>
                   <span className="dependency-node-meta">
                     <AssigneeBadge person={n.assignee} />

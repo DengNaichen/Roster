@@ -33,6 +33,7 @@
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
+  stroke-linejoin: round;
 }
 .dependency-edges > g.highlight {
   stroke: var(--accent);
@@ -40,8 +41,8 @@
 }
 .card.dependency-node {
   position: absolute;
-  width: 236px;
-  min-height: 100px;
+  box-sizing: border-box;
+  grid-template-rows: auto 1fr auto;
   display: grid;
   gap: var(--space-8);
   text-align: left;
@@ -64,6 +65,10 @@
   align-items: center;
 }
 .dependency-node .card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   padding: 0;
   font-size: var(--font-size-14);
 }

@@ -1,4 +1,6 @@
 import type { SpecDependencies } from "../../../packages/contracts/spec";
+export const dependencyNodeSize = { width: 236, height: 120 };
+
 export function dependencyLayout(graph: SpecDependencies, visible: Set<string>) {
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
   const parents = new Map<string, string[]>(),
@@ -49,9 +51,37 @@ export function dependencyLayout(graph: SpecDependencies, visible: Set<string>) 
     }
     return { ...node, x: 28 + column * 292, y: 36 + row * 156 };
   });
+  const positioned = new Map(nodes.map((node) => [node.id, node]));
+  const edges = graph.edges
+    .filter((e) => shown.has(e.from) && shown.has(e.to))
+    .map((edge) => {
+      const from = positioned.get(edge.from)!;
+      const to = positioned.get(edge.to)!;
+      const start = {
+        x: from.x + dependencyNodeSize.width,
+        y: from.y + dependencyNodeSize.height / 2,
+      };
+      const end = { x: to.x, y: to.y + dependencyNodeSize.height / 2 };
+      const points =
+        to.x - from.x <= 292
+          ? [start, { x: start.x + 28, y: start.y }, { x: start.x + 28, y: end.y }, end]
+          : [
+              start,
+              { x: start.x + 20, y: start.y },
+              { x: start.x + 20, y: from.y + 138 },
+              { x: end.x - 28, y: from.y + 138 },
+              { x: end.x - 28, y: end.y },
+              end,
+            ];
+      return {
+        ...edge,
+        points,
+        path: points.map((point, i) => `${i ? "L" : "M"}${point.x},${point.y}`).join(" "),
+      };
+    });
   return {
     nodes,
-    edges: graph.edges.filter((e) => shown.has(e.from) && shown.has(e.to)),
+    edges,
     width: Math.max(600, ...nodes.map((n) => n.x + 264)),
     height: Math.max(280, ...nodes.map((n) => n.y + 144)),
   };
