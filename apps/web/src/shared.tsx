@@ -210,7 +210,7 @@ export type WorkspaceRoute =
   | { kind: "project"; id: number }
   | { kind: "issue"; identifier: string }
   | { kind: "labels" }
-  | { kind: "settings" }
+  | { kind: "settings"; section?: "teams" | "members" }
   | { kind: "invalid" };
 
 export function workspaceRoute(path: string): WorkspaceRoute {
@@ -224,6 +224,9 @@ export function workspaceRoute(path: string): WorkspaceRoute {
   const initiative = route.match(/^\/initiative\/([1-9][0-9]*)$/);
   if (initiative && Number.isSafeInteger(Number(initiative[1])))
     return { kind: "initiative", id: Number(initiative[1]) };
+  if (route === "/settings/members") return { kind: "settings", section: "members" };
+  if (route === "/settings/teams") return { kind: "settings", section: "teams" };
+  if (route === "/settings/labels") return { kind: "labels" };
   if (route === "/settings") return { kind: "settings" };
   if (route === "/labels") return { kind: "labels" };
   const team = route.match(/^\/team\/([^/]+)\/(issues|triage|projects|cycles|specs)$/);
@@ -274,6 +277,7 @@ export function NavLink({
   unavailable,
   title,
   "aria-label": ariaLabel,
+  "aria-current": ariaCurrent,
 }: {
   to: string;
   className?: string;
@@ -281,6 +285,7 @@ export function NavLink({
   unavailable?: boolean;
   title?: string;
   "aria-label"?: string;
+  "aria-current"?: "page";
 }) {
   function open(event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) return;
@@ -293,6 +298,7 @@ export function NavLink({
       href={to}
       onClick={open}
       aria-label={ariaLabel}
+      aria-current={ariaCurrent}
       aria-disabled={unavailable || undefined}
       title={unavailable ? "This feature has not been migrated to Roster yet" : title}
       style={unavailable ? { opacity: 0.5 } : undefined}
@@ -591,6 +597,7 @@ export function ModalDialog({
 }: {
   className: string;
   "aria-label"?: string;
+  "aria-current"?: "page";
   "aria-labelledby"?: string;
   restoreFocus?: boolean;
   onClose: () => void;

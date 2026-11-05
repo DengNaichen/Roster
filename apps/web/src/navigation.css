@@ -1099,3 +1099,88 @@
   font: var(--r-type-field);
   background: var(--r-color-bg-surface);
 }
+
+/* Settings has its own navigation while retaining the workspace shell. */
+.settings-back {
+  margin-bottom: var(--r-space-16);
+}
+.settings-nav-title {
+  margin: var(--r-space-24) var(--r-space-8) var(--r-space-16);
+  font-size: var(--r-font-size-heading-md);
+  font-weight: var(--r-weight-semibold);
+  color: var(--r-color-text-primary);
+}
+.settings-sidebar .navigation-toggle {
+  display: none;
+}
+.settings-navigation {
+  flex: 1;
+}
+.settings-breadcrumb {
+  color: var(--r-color-text-muted);
+}
+.settings-shell .settings-page {
+  padding-top: var(--r-space-32);
+}
+.settings-page-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--r-space-16);
+  margin-bottom: var(--r-space-32);
+}
+.settings-shell .team-settings {
+  padding: var(--r-space-24);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+}
+.settings-labels-intro {
+  padding: var(--r-space-24) var(--r-space-24) var(--r-space-16);
+}
+.settings-labels-intro h1 {
+  font-size: var(--r-font-size-heading-md);
+  font-weight: var(--r-weight-semibold);
+}
+.settings-labels-intro p {
+  margin-top: var(--r-space-4);
+  color: var(--r-color-text-muted);
+  font-size: var(--r-font-size-caption);
+}
+@media (max-width: 639px) {
+  .settings-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .settings-sidebar {
+    display: block;
+    overflow: visible;
+    border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
+  }
+  .settings-sidebar .sidebar-top,
+  .settings-sidebar .sidebar-account,
+  .settings-nav-title,
+  .settings-navigation .sidebar-label {
+    display: none;
+  }
+  .settings-navigation {
+    display: flex;
+    gap: var(--r-space-4);
+  }
+  .settings-navigation .nav-item {
+    flex: 1;
+    width: auto;
+  }
+  .settings-back {
+    margin-bottom: var(--r-space-8);
+  }
+  .settings-shell .panel {
+    flex: 1;
+    min-height: 0;
+  }
+  .settings-shell .settings-page {
+    padding: var(--r-space-16);
+  }
+  .settings-shell .team-settings {
+    padding: var(--r-space-16);
+  }
+}

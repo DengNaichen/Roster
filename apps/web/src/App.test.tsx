@@ -74,7 +74,7 @@ it("loads settings independently of project and label catalogs", async () => {
 it("keeps the shell mounted, resets page state, and searches without reloading catalogs", async () => {
   render(<App />);
   await screen.findByRole("link", { name: "Fixture issue" });
-  const workspace = await screen.findByRole("button", { name: "Workspace: Fixture workspace" });
+  await screen.findByRole("button", { name: "Workspace: Fixture workspace" });
   const initialCatalogs = calls.filter((path) => !path.includes("/issues?"));
   fireEvent.click(screen.getByRole("button", { name: "Fixture team" }));
   fireEvent.click(screen.getByRole("checkbox", { name: "Select AL-1" }));
@@ -86,10 +86,8 @@ it("keeps the shell mounted, resets page state, and searches without reloading c
   expect(calls.filter((path) => !path.includes("/issues?"))).toEqual(initialCatalogs);
   act(() => navigate("/default/settings"));
   await screen.findByRole("heading", { name: "Fixture team" });
-  expect(screen.getByRole("button", { name: "Workspace: Fixture workspace" })).toBe(workspace);
-  expect(screen.getByRole("button", { name: "Fixture team" }).getAttribute("aria-expanded")).toBe(
-    "false",
-  );
+  expect(screen.getByRole("navigation", { name: "Settings navigation" })).toBeTruthy();
+  expect(screen.queryByRole("navigation", { name: "Workspace navigation" })).toBeNull();
   act(() => navigate("/default/"));
   await screen.findByRole("link", { name: "Fixture issue" });
   expect((screen.getByRole("searchbox", { name: "Search issues" }) as HTMLInputElement).value).toBe(
@@ -172,4 +170,19 @@ it("narrows the team issue list with Active, Backlog and All issues views", asyn
   // Done stays collapsed and Triage never joins the list.
   expect(screen.queryByText("done issue")).toBeNull();
   expect(screen.queryByText("triage issue")).toBeNull();
+});
+
+it("keeps settings navigation on direct entry and returns to the previous work page", async () => {
+  window.history.replaceState(null, "", "/default/team/AL/issues");
+  render(<App />);
+  await screen.findByRole("link", { name: "Fixture issue" });
+  act(() => navigate("/default/settings"));
+  await screen.findByRole("heading", { name: "Teams" });
+  fireEvent.click(screen.getByRole("link", { name: "Labels" }));
+  await screen.findByRole("heading", { name: "Labels" });
+  expect(window.location.pathname).toBe("/default/settings/labels");
+  expect(screen.getByRole("link", { name: "Labels" }).getAttribute("aria-current")).toBe("page");
+  fireEvent.click(screen.getByRole("link", { name: "Back to workspace" }));
+  await screen.findByRole("link", { name: "Fixture issue" });
+  expect(window.location.pathname).toBe("/default/team/AL/issues");
 });

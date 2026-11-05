@@ -119,11 +119,17 @@ function WorkspaceView() {
 function WorkspaceContent() {
   const capabilities = useCapabilities();
   const [location, setLocation] = useState({ path: window.location.pathname, visit: 0 });
+  const [returnTo, setReturnTo] = useState(pagePath("/"));
   const [view, setView] = useState<ViewMode>("list");
   const [sort, setSort] = useState<IssueSort>("auto");
   const [creatingTeam, setCreatingTeam] = useState(false);
   const teams = useResource<{ teams: Team[] }>(apiPath("/teams"), { teams: [] });
   const route = useMemo(() => workspaceRoute(location.path), [location.path]);
+  useEffect(() => {
+    if (route.kind !== "settings" && route.kind !== "labels" && route.kind !== "invalid") {
+      setReturnTo(location.path + window.location.search + window.location.hash);
+    }
+  }, [location.path, route.kind]);
   useEffect(() => {
     const sync = () => {
       setLocation((previous) => ({ path: window.location.pathname, visit: previous.visit + 1 }));
@@ -149,9 +155,12 @@ function WorkspaceContent() {
     !teams.error &&
     !teams.data.teams.some((team) => team.key === scopeTeam);
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell ${route.kind === "settings" || route.kind === "labels" ? "settings-shell" : ""}`}
+    >
       <Sidebar
         route={route}
+        returnTo={returnTo}
         visit={location.visit}
         teams={teams.data.teams}
         onCreateTeam={() => setCreatingTeam(true)}
@@ -209,6 +218,8 @@ function WorkspaceContent() {
               <LabelsPage />
             ) : (
               <SettingsPage
+                section={route.kind === "settings" ? (route.section ?? "teams") : "teams"}
+                onCreateTeam={() => setCreatingTeam(true)}
                 teams={teams.data.teams}
                 loading={teams.loading}
                 onSaved={(updated) =>
@@ -225,8 +236,10 @@ function WorkspaceContent() {
         <CreateTeamDialog
           onClose={() => setCreatingTeam(false)}
           onCreate={(created) => {
+            setCreatingTeam(false);
             teams.update((data) => ({ teams: [...data.teams, created] }));
-            navigate(pagePath(`/team/${encodeURIComponent(created.key)}/issues`));
+            if (route.kind !== "settings")
+              navigate(pagePath(`/team/${encodeURIComponent(created.key)}/issues`));
           }}
         />
       )}

@@ -1,5 +1,9 @@
 import { useCapabilities } from "./Capabilities";
 import {
+  ArrowLeft,
+  Users,
+  ContactRound,
+  Tags,
   Orbit,
   DraftingCompass,
   Box,
@@ -22,19 +26,28 @@ export function Sidebar({
   visit,
   teams,
   onCreateTeam,
+  returnTo,
 }: {
   route: WorkspaceRoute;
   visit: number;
   teams: Team[];
   onCreateTeam: () => void;
+  returnTo: string;
 }) {
   const capabilities = useCapabilities();
   const [expanded, setExpanded] = useState(false);
   useEffect(() => setExpanded(false), [visit]);
   const active = (kind: "issues" | "projects", team = "") =>
     route.kind === kind && route.team === team;
+  const settings = route.kind === "settings" || route.kind === "labels";
   return (
-    <aside className="sidebar scope-sidebar">
+    <aside className={`sidebar scope-sidebar ${settings ? "settings-sidebar" : ""}`}>
+      {settings && (
+        <NavLink className="nav-item settings-back" to={returnTo}>
+          <ArrowLeft className="icon" />
+          Back to workspace
+        </NavLink>
+      )}
       <div className="sidebar-top">
         <WorkspaceMenu />
         <button
@@ -48,53 +61,83 @@ export function Sidebar({
           Navigation
         </button>
       </div>
-      <nav
-        id="workspace-navigation"
-        className={`scope-navigation ${expanded ? "expanded" : ""}`}
-        aria-label="Workspace navigation"
-      >
-        <div className="sidebar-label">Workspace</div>
-        <NavLink
-          unavailable={!capabilities.projects}
-          className={`nav-item ${active("projects") ? "active" : ""}`}
-          to={pagePath("/projects")}
+      {settings ? (
+        <nav className="settings-navigation" aria-label="Settings navigation">
+          <h1 className="settings-nav-title">Settings</h1>
+          <div className="sidebar-label">Workspace</div>
+          {(
+            [
+              { key: "teams", title: "Teams", Icon: Users },
+              { key: "members", title: "Members", Icon: ContactRound },
+              { key: "labels", title: "Labels", Icon: Tags },
+            ] as const
+          ).map(({ key, title, Icon }) => {
+            const selected =
+              route.kind === "labels"
+                ? key === "labels"
+                : route.kind === "settings" && (route.section ?? "teams") === key;
+            return (
+              <NavLink
+                key={key}
+                to={pagePath(`/settings/${key}`)}
+                className={`nav-item ${selected ? "active" : ""}`}
+                aria-current={selected ? "page" : undefined}
+              >
+                <Icon className="icon" />
+                <span>{title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+      ) : (
+        <nav
+          id="workspace-navigation"
+          className={`scope-navigation ${expanded ? "expanded" : ""}`}
+          aria-label="Workspace navigation"
         >
-          <Box className="icon" />
-          <span className="nav-label">All projects</span>
-          {!capabilities.projects && <small>Not migrated</small>}
-        </NavLink>
-        <NavLink
-          unavailable={!capabilities.initiatives}
-          className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`}
-          to={pagePath("/initiatives")}
-        >
-          <Telescope className="icon" />
-          <span className="nav-label">Initiatives</span>
-          {!capabilities.initiatives && <small>Not migrated</small>}
-        </NavLink>
-        <div className="sidebar-label sidebar-heading">
-          <span>Teams</span>
-          <button
-            type="button"
-            className="ghost"
-            aria-label="Create team"
-            title="Create team"
-            onClick={onCreateTeam}
+          <div className="sidebar-label">Workspace</div>
+          <NavLink
+            unavailable={!capabilities.projects}
+            className={`nav-item ${active("projects") ? "active" : ""}`}
+            to={pagePath("/projects")}
           >
-            <Plus className="icon" />
-          </button>
-        </div>
-        {teams
-          .filter(
-            (item) =>
-              !item.membership_enabled ||
-              item.joined ||
-              ("team" in route && route.team === item.key),
-          )
-          .map((item) => (
-            <TeamNavigation key={item.key} team={item} route={route} visit={visit} />
-          ))}
-      </nav>
+            <Box className="icon" />
+            <span className="nav-label">All projects</span>
+            {!capabilities.projects && <small>Not migrated</small>}
+          </NavLink>
+          <NavLink
+            unavailable={!capabilities.initiatives}
+            className={`nav-item ${route.kind === "initiatives" || route.kind === "initiative" ? "active" : ""}`}
+            to={pagePath("/initiatives")}
+          >
+            <Telescope className="icon" />
+            <span className="nav-label">Initiatives</span>
+            {!capabilities.initiatives && <small>Not migrated</small>}
+          </NavLink>
+          <div className="sidebar-label sidebar-heading">
+            <span>Teams</span>
+            <button
+              type="button"
+              className="ghost"
+              aria-label="Create team"
+              title="Create team"
+              onClick={onCreateTeam}
+            >
+              <Plus className="icon" />
+            </button>
+          </div>
+          {teams
+            .filter(
+              (item) =>
+                !item.membership_enabled ||
+                item.joined ||
+                ("team" in route && route.team === item.key),
+            )
+            .map((item) => (
+              <TeamNavigation key={item.key} team={item} route={route} visit={visit} />
+            ))}
+        </nav>
+      )}
       <Session />
     </aside>
   );
