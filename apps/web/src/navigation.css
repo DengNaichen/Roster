@@ -149,7 +149,6 @@
 .workspace-trigger .icon {
   flex: none;
 }
-.account-menu,
 .toolbar-popover {
   z-index: 20;
   max-width: calc(100vw - var(--space-16));
@@ -166,7 +165,8 @@
 .account-menu {
   width: var(--sidebar-width);
 }
-.workspace-menu {
+.workspace-menu,
+.account-menu {
   max-width: calc(100vw - var(--space-16));
   max-height: var(--radix-popover-content-available-height);
 }
@@ -177,7 +177,8 @@
 .workspace-menu .dialog-hint {
   padding: var(--space-8);
 }
-.workspace-option {
+.workspace-option,
+.account-menu .toolbar-menu-action {
   height: auto;
   min-height: var(--space-32);
   padding: var(--space-4) var(--space-8);
@@ -188,14 +189,17 @@
 }
 .workspace-option:hover,
 .workspace-option[aria-current="page"],
-.workspace-option[aria-current="page"]:hover {
+.workspace-option[aria-current="page"]:hover,
+.account-menu .toolbar-menu-action:hover {
   color: var(--text);
   background: var(--hover);
 }
-.workspace-option:focus-visible {
+.workspace-option:focus-visible,
+.account-menu .toolbar-menu-action:focus-visible {
   outline-offset: calc(-1 * var(--focus-width));
 }
-.workspace-menu .icon {
+.workspace-menu .icon,
+.account-menu .icon {
   width: var(--icon-size);
   height: var(--icon-size);
 }
@@ -340,6 +344,10 @@
 .account-identity small {
   color: var(--sidebar-muted-color);
   font-size: var(--sidebar-caption-size);
+}
+.account-menu .account-identity strong {
+  color: var(--text-2);
+  font-weight: var(--weight-regular);
 }
 .account-error {
   padding: var(--sidebar-inset);

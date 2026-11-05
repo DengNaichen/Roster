@@ -1236,7 +1236,8 @@ button:focus-visible {
   padding: 0;
 }
 .select-menu,
-.workspace-menu {
+.workspace-menu,
+.account-menu {
   z-index: 20;
   width: var(--menu-width);
   max-height: var(--radix-select-content-available-height);

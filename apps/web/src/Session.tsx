@@ -16,15 +16,6 @@ export function Session() {
       setBusy(false);
     }
   }
-  if (preview)
-    return (
-      <div className="sidebar-account">
-        <div className="account-identity">
-          <strong>Local preview</strong>
-          <small>Isolated demo data · Roster</small>
-        </div>
-      </div>
-    );
   if (!identity && !error) return null;
   const name = identity && (identity.name || identity.email || identity.subject);
   return (
@@ -62,7 +53,8 @@ export function Session() {
                 type="button"
                 className="toolbar-menu-action"
                 onClick={() => void logout()}
-                disabled={busy}
+                disabled={busy || preview}
+                title={preview ? "Sign out is unavailable in local preview" : undefined}
               >
                 <LogOut className="icon" />
                 {busy ? "Signing out…" : "Sign out"}
@@ -70,6 +62,12 @@ export function Session() {
             </Popover.Content>
           </Popover.Portal>
         </Popover.Root>
+      )}
+      {preview && (
+        <div className="account-identity">
+          <strong>Local preview</strong>
+          <small>Isolated demo data · Roster</small>
+        </div>
       )}
       {error && (
         <p className="account-error" role="alert">
