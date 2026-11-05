@@ -54,28 +54,28 @@ if (!(await service.listWorkspaces(ctx)).some((w) => w.slug === slug)) {
       '欢迎来到 Roster',
       'in_progress',
       2,
-      '这是免登录的本地预览。你可以创建任务、修改状态和优先级，所有修改都会保存在独立的本地数据库里。',
+      '<p>这是免登录的本地预览。你可以创建任务、修改状态和优先级，所有修改都会保存在独立的本地数据库里。</p>',
     ],
     [
       '体验任务的状态流转',
       'todo',
       3,
-      '打开详情页，试着把状态从 Todo 改为 In progress，再改为 Done。',
+      '<p>打开详情页，试着把状态从 Todo 改为 In progress，再改为 Done。</p>',
     ],
-    ['给下一次迭代写一份计划', 'backlog', 3, '点击 Edit issue 可以修改标题和说明。'],
+    ['给下一次迭代写一份计划', 'backlog', 3, '<p>点击 Edit issue 可以修改标题和说明。</p>'],
     [
       '检查成员与邀请设置',
       'todo',
       2,
-      'Settings & members 页面提供工作区角色、邀请链接和私有团队配置。本地免登录模式固定使用一个开发者身份。',
+      '<p>Settings &amp; members 页面提供工作区角色、邀请链接和私有团队配置。本地免登录模式固定使用一个开发者身份。</p>',
     ],
     [
       '连接 MCP 与共享业务层',
       'in_review',
       2,
-      'REST 和 MCP 调用同一套任务与权限服务。云端 OAuth 仍需要独立配置。',
+      '<p>REST 和 MCP 调用同一套任务与权限服务。云端 OAuth 仍需要独立配置。</p>',
     ],
-    ['初始化 TypeScript 工作区', 'done', 3, 'React、Hono、Drizzle 和 Postgres 首版已接通。'],
+    ['初始化 TypeScript 工作区', 'done', 3, '<p>React、Hono、Drizzle 和 Postgres 首版已接通。</p>'],
   ];
   for (const [title, status, priority, description] of examples) {
     await service.createIssue(ctx, slug, {
@@ -91,7 +91,7 @@ if (!(await service.listWorkspaces(ctx)).some((w) => w.slug === slug)) {
   await service.createIssue(ctx, slug, {
     team: 'LAB',
     title: '私有团队中的实验任务',
-    description: '当前本地开发者是这个团队的 Owner。',
+    description: '<p>当前本地开发者是这个团队的 Owner。</p>',
     status: 'backlog',
     type: 'chore',
   });
