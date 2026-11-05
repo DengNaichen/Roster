@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
 import { Dropdown } from "./Dropdown";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   columns,
   apiPath,
@@ -13,29 +13,50 @@ import {
 import "./spec-dependencies.css";
 import type { SpecDependencies as SpecGraph } from "../../../packages/contracts/spec";
 import { useResource } from "./useResource";
-import { dependencyLayout, dependencyNodeSize } from "./dependencyLayout";
+import { dependencyLayout, dependencyNodeSize, dependencyFocus } from "./dependencyLayout";
 
 export function SpecDependencies({ id, visible }: { id: string; visible: string[] }) {
   const resource = useResource<SpecGraph | null>(
     apiPath(`/specs/${encodeURIComponent(id)}/dependencies`),
     null,
   );
-  const [zoom, setZoom] = useState("0.75");
-  const scale = Number(zoom);
+  const [zoom, setZoom] = useState("0.5");
+  const viewport = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 1000, height: 600 });
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() =>
+      setViewportSize({ width: element.clientWidth, height: element.clientHeight }),
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [resource.data, visible.length]);
   const [selected, setSelected] = useState("");
-  let layout: ReturnType<typeof dependencyLayout>;
-  try {
-    layout = dependencyLayout(resource.data ?? { nodes: [], edges: [] }, new Set(visible));
-  } catch {
+  const layout = useMemo(() => {
+    try {
+      return dependencyLayout(resource.data ?? { nodes: [], edges: [] }, new Set(visible));
+    } catch {
+      return null;
+    }
+  }, [resource.data, visible]);
+  if (!layout)
     return <RequestError message="Unable to lay out dependencies. The graph contains a cycle." />;
-  }
   const { nodes, edges: relations, width, height } = layout;
+  const scale =
+    zoom === "fit"
+      ? Math.max(
+          0.1,
+          Math.min(1, (viewportSize.width - 24) / width, (viewportSize.height - 24) / height),
+        )
+      : Number(zoom);
   const edges = relations.map((e) => [e.from, e.to]);
   const focused = new Set(
     nodes.filter((n) => !n.external && visible.includes(n.identifier)).map((n) => n.id),
   );
   const shown = new Set(nodes.map((n) => n.id));
   const current = nodes.find((n) => n.id === selected && shown.has(n.id));
+  const focus = dependencyFocus(relations, current?.id ?? "");
   const blockers = (id: string) =>
     edges
       .filter(([, to]) => to === id)
@@ -53,7 +74,12 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
   if (!resource.data) return <p className="empty">Loading dependencies…</p>;
   if (!nodes.length) return <p className="empty">No linked issues match these filters.</p>;
   return (
-    <div className="dependency-demo">
+    <div
+      className="dependency-demo"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") setSelected("");
+      }}
+    >
       <div className="dependency-caption">
         <span>依赖图 · {shown.size} 个可见任务</span>
         <Dropdown
@@ -61,14 +87,40 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
           value={zoom}
           onChange={setZoom}
           options={[
+            { value: "fit", label: "适应画布" },
+            { value: "0.35", label: "35%" },
             { value: "0.5", label: "50%" },
             { value: "0.75", label: "75%" },
             { value: "1", label: "100%" },
           ]}
         />
-        <span>箭头指向后续任务 · 淡色为范围外的前置任务 · 仅展示有权查看的关系</span>
+        <span>从左向右依赖 · 点击任务聚焦上下游 · 仅展示有权查看的关系</span>
       </div>
-      <div className="dependency-scroll">
+      <section className="dependency-selection" aria-label="Dependency focus">
+        {current ? (
+          <>
+            <div className="dependency-selection-heading">
+              <span className="spec-id">{current.identifier}</span>
+              <h3>{current.title}</h3>
+              <NavLink to={pagePath(`/issue/${current.identifier}`)}>打开任务</NavLink>
+              <button className="button" onClick={() => setSelected("")}>
+                取消聚焦
+              </button>
+            </div>
+            <p aria-live="polite">
+              上游 {focus.ancestors.size} 项 · 下游 {focus.descendants.size} 项
+              {blockers(current.id).length
+                ? ` · 等待 ${blockers(current.id)
+                    .map((n) => n.identifier)
+                    .join("、")}`
+                : " · 无未完成的可见前置任务"}
+            </p>
+          </>
+        ) : (
+          <p>选择任务查看上游前置和下游影响；再次点击或按 Esc 取消聚焦。</p>
+        )}
+      </section>
+      <div className="dependency-scroll" ref={viewport}>
         <div style={{ width: width * scale, height: height * scale }}>
           <div
             className="dependency-canvas"
@@ -80,7 +132,9 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
                 return (
                   <g
                     key={from + to}
-                    className={selected === from || selected === to ? "highlight" : ""}
+                    className={
+                      current ? (focus.includesEdge(from, to) ? "highlight" : "is-dimmed") : ""
+                    }
                   >
                     <path d={path} />
                     <Play
@@ -100,9 +154,9 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
               .map((n) => (
                 <button
                   key={n.id}
-                  className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${selected === n.id ? "is-selected" : ""}`}
+                  className={`card dependency-node ${focused.has(n.id) ? "" : "context"} ${current?.id === n.id ? "is-selected" : ""} ${current && !focus.nodes.has(n.id) ? "is-dimmed" : ""}`}
                   style={{ left: n.x, top: n.y, ...dependencyNodeSize }}
-                  onClick={() => setSelected(n.id)}
+                  onClick={() => setSelected(selected === n.id ? "" : n.id)}
                   aria-pressed={selected === n.id}
                 >
                   <span className="card-identifier">
@@ -132,23 +186,6 @@ export function SpecDependencies({ id, visible }: { id: string; visible: string[
           </div>
         </div>
       </div>
-      {current && (
-        <section className="dependency-selection">
-          <div>
-            <span className="spec-id">{current.identifier}</span>
-            <h3>{current.title}</h3>
-          </div>
-          <NavLink to={pagePath(`/issue/${current.identifier}`)}>打开任务详情</NavLink>
-          <p className="dependency-caption">
-            {blockers(current.id).length
-              ? "尚未完成的前置任务 · " +
-                blockers(current.id)
-                  .map((n) => n.identifier + " " + n.title)
-                  .join("、")
-              : "没有尚未完成的可见前置任务"}
-          </p>
-        </section>
-      )}
     </div>
   );
 }

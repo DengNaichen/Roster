@@ -1,3 +1,4 @@
+import { graphlib, layout as arrange } from "@dagrejs/dagre";
 import type { SpecDependencies } from "../../../packages/contracts/spec";
 export const dependencyNodeSize = { width: 236, height: 120 };
 
@@ -36,52 +37,104 @@ export function dependencyLayout(graph: SpecDependencies, visible: Set<string>) 
     }
   }
   if (queue.length !== shown.size) throw new Error("The dependency graph contains a cycle.");
-  const rows = new Map<number, number>();
+  const relations = graph.edges.filter((e) => shown.has(e.from) && shown.has(e.to));
+  const connected = new Set(relations.flatMap((e) => [e.from, e.to]));
+  const dag = new graphlib.Graph()
+    .setGraph({
+      rankdir: "LR",
+      ranker: "network-simplex",
+      nodesep: 24,
+      edgesep: 12,
+      ranksep: 40,
+      marginx: 28,
+      marginy: 36,
+    })
+    .setDefaultEdgeLabel(() => ({}));
+  // Reserve space around cards for curves and horizontal arrow landings.
+  for (const id of [...connected].sort())
+    dag.setNode(id, {
+      width: dependencyNodeSize.width + 40,
+      height: dependencyNodeSize.height + 8,
+    });
+  for (const edge of [...relations].sort((a, b) =>
+    `${a.from}:${a.to}`.localeCompare(`${b.from}:${b.to}`),
+  ))
+    dag.setEdge(edge.from, edge.to);
+  if (connected.size) arrange(dag);
+  const independentTop = connected.size ? (dag.graph().height ?? 0) + 40 : 36;
   let independent = 0;
-  const connected = queue.filter((id) => parents.has(id) || children.has(id));
   const nodes = queue.map((id) => {
-    const node = byId.get(id)!;
-    let column = ranks.get(id) ?? 0,
-      row = rows.get(column) ?? 0;
-    rows.set(column, row + 1);
-    if (connected.length === 0) {
-      column = independent % 4;
-      row = Math.floor(independent / 4);
-      independent++;
+    if (connected.has(id)) {
+      const placed = dag.node(id);
+      return {
+        ...byId.get(id)!,
+        x: placed.x - dependencyNodeSize.width / 2,
+        y: placed.y - dependencyNodeSize.height / 2,
+      };
     }
-    return { ...node, x: 28 + column * 292, y: 36 + row * 156 };
+    const index = independent++;
+    return {
+      ...byId.get(id)!,
+      x: 52 + (index % 4) * 284,
+      y: independentTop + Math.floor(index / 4) * 156,
+    };
   });
   const positioned = new Map(nodes.map((node) => [node.id, node]));
-  const edges = graph.edges
-    .filter((e) => shown.has(e.from) && shown.has(e.to))
-    .map((edge) => {
-      const from = positioned.get(edge.from)!;
-      const to = positioned.get(edge.to)!;
-      const start = {
-        x: from.x + dependencyNodeSize.width,
-        y: from.y + dependencyNodeSize.height / 2,
-      };
-      const end = { x: to.x, y: to.y + dependencyNodeSize.height / 2 };
-      // Reserve a horizontal landing before the arrow, even for steep curves.
-      const landing = { x: end.x - 18, y: end.y };
-      const bend = Math.max(12, (landing.x - start.x) / 2);
-      const points = [
-        start,
-        { x: start.x + bend, y: start.y },
-        { x: landing.x - bend, y: end.y },
-        landing,
-        end,
-      ];
-      return {
-        ...edge,
-        points,
-        path: `M${start.x},${start.y} C${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${landing.x},${landing.y} L${end.x - 7},${end.y}`,
-      };
-    });
+  const edges = relations.map((edge) => {
+    const from = positioned.get(edge.from)!;
+    const to = positioned.get(edge.to)!;
+    const start = {
+      x: from.x + dependencyNodeSize.width,
+      y: from.y + dependencyNodeSize.height / 2,
+    };
+    const end = { x: to.x, y: to.y + dependencyNodeSize.height / 2 };
+    const departure = { x: start.x + 18, y: start.y };
+    const landing = { x: end.x - 18, y: end.y };
+    const waypoints = dag
+      .edge(edge.from, edge.to)
+      .points.filter(
+        (point: { x: number; y: number }) => point.x > departure.x && point.x < landing.x,
+      );
+    const points = [start, departure, ...waypoints, landing, end];
+    let path = `M${start.x},${start.y} L${departure.x},${departure.y}`;
+    const curve = [departure, ...waypoints, landing];
+    for (let i = 1; i < curve.length; i++) {
+      const a = curve[i - 1],
+        b = curve[i],
+        mid = (a.x + b.x) / 2;
+      path += ` C${mid},${a.y} ${mid},${b.y} ${b.x},${b.y}`;
+    }
+    path += ` L${end.x - 7},${end.y}`;
+    return { ...edge, points, path };
+  });
   return {
     nodes,
     edges,
     width: Math.max(600, ...nodes.map((n) => n.x + 264)),
-    height: Math.max(280, ...nodes.map((n) => n.y + 144)),
+    height: Math.max(280, ...nodes.map((n) => n.y + 156)),
   };
+}
+
+export function dependencyFocus(edges: SpecDependencies["edges"], selected: string) {
+  const walk = (reverse: boolean) => {
+    const found = new Set<string>();
+    const pending = [selected];
+    for (let i = 0; i < pending.length; i++) {
+      for (const edge of edges) {
+        const from = reverse ? edge.to : edge.from,
+          to = reverse ? edge.from : edge.to;
+        if (from !== pending[i] || to === selected || found.has(to)) continue;
+        found.add(to);
+        pending.push(to);
+      }
+    }
+    return found;
+  };
+  const ancestors = walk(true),
+    descendants = walk(false);
+  const nodes = new Set([selected, ...ancestors, ...descendants]);
+  const includesEdge = (from: string, to: string) =>
+    ((ancestors.has(from) || from === selected) && (ancestors.has(to) || to === selected)) ||
+    ((descendants.has(from) || from === selected) && (descendants.has(to) || to === selected));
+  return { ancestors, descendants, nodes, includesEdge };
 }

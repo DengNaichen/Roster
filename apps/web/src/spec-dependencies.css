@@ -1,10 +1,13 @@
 .dependency-demo {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   padding: var(--space-16);
 }
 .dependency-caption {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   gap: var(--space-12);
@@ -13,6 +16,8 @@
   font-size: var(--font-size-12);
 }
 .dependency-scroll {
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -85,8 +90,12 @@
   gap: var(--space-4);
 }
 .dependency-selection {
-  margin-top: var(--space-16);
-  padding: var(--space-16);
+  box-sizing: border-box;
+  height: 76px;
+  flex-shrink: 0;
+  overflow: auto;
+  margin-top: var(--space-12);
+  padding: var(--space-12);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 }
@@ -100,6 +109,34 @@
   font-size: var(--font-size-15);
 }
 .dependency-selection p {
-  font-size: var(--font-size-13);
-  color: var(--text-2);
+  font-size: var(--font-size-12);
+  color: var(--muted);
+  margin: var(--space-8) 0 0;
+}
+
+.dependency-node.is-dimmed {
+  opacity: 0.3;
+}
+.dependency-edges > g.is-dimmed {
+  opacity: 0.1;
+}
+.dependency-node.is-selected {
+  border-color: var(--accent);
+}
+.dependency-selection-heading {
+  flex-wrap: wrap;
+}
+.dependency-selection-heading h3 {
+  flex: 1;
+}
+.dependency-selection-heading a {
+  font-size: var(--font-size-12);
+}
+.dependency-edges {
+  pointer-events: none;
+}
+
+.dependency-node.is-dimmed:hover,
+.dependency-node.is-dimmed:focus-visible {
+  opacity: 0.7;
 }
