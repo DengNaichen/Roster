@@ -118,17 +118,41 @@
   --r-weight-regular: 400;
   --r-weight-medium: 500;
   --r-weight-semibold: 600;
-  --r-type-caption: var(--r-weight-regular) 0.75rem / 1rem var(--r-font-ui);
-  --r-type-label: var(--r-weight-medium) 0.75rem / 1rem var(--r-font-ui);
-  --r-type-ui: var(--r-weight-regular) 0.8125rem / 1.25rem var(--r-font-ui);
-  --r-type-ui-strong: var(--r-weight-medium) 0.8125rem / 1.25rem var(--r-font-ui);
-  --r-type-body: var(--r-weight-regular) 0.875rem / 1.375rem var(--r-font-ui);
+  /* Shared typography dimensions for styles that override a single font axis. */
+  --r-font-size-micro: 0.5rem;
+  --r-font-size-micro-lg: 0.5625rem;
+  --r-font-size-caption: 0.75rem;
+  --r-font-size-ui: 0.8125rem;
+  --r-font-size-body: 0.875rem;
+  --r-font-size-prose: 0.9375rem;
+  --r-font-size-heading-sm: 1rem;
+  --r-font-size-heading-md: 1.25rem;
+  --r-font-size-heading-lg: 1.5rem;
+  --r-line-height-heading: 1.3333;
+  --r-line-height-heading-relaxed: 1.5;
+  --r-line-height-compact: 1.4;
+  --r-line-height-ui: 1.5385;
+  --r-line-height-prose: 1.7333;
+  --r-line-height-control: 1.25rem;
+  --r-tracking-heading-subtle: -0.01em;
+  --r-tracking-mark: 0.02em;
+  --r-font-features: "cv01", "ss03";
+  --r-font-optical-heading: 32;
+
+  --r-type-caption: var(--r-weight-regular) var(--r-font-size-caption) / 1rem var(--r-font-ui);
+  --r-type-label: var(--r-weight-medium) var(--r-font-size-caption) / 1rem var(--r-font-ui);
+  --r-type-ui: var(--r-weight-regular) var(--r-font-size-ui) / 1.25rem var(--r-font-ui);
+  --r-type-ui-strong: var(--r-weight-medium) var(--r-font-size-ui) / 1.25rem var(--r-font-ui);
+  --r-type-body: var(--r-weight-regular) var(--r-font-size-body) / 1.375rem var(--r-font-ui);
   --r-type-field: var(--r-type-body);
-  --r-type-prose: var(--r-weight-regular) 0.9375rem / 1.625rem var(--r-font-ui);
-  --r-type-heading-sm: var(--r-weight-semibold) 1rem / 1.5rem var(--r-font-ui);
-  --r-type-heading-md: var(--r-weight-semibold) 1.25rem / 1.75rem var(--r-font-ui);
-  --r-type-heading-lg: var(--r-weight-semibold) 1.5rem / 2rem var(--r-font-ui);
-  --r-type-code: var(--r-weight-regular) 0.8125rem / 1.25rem var(--r-font-mono);
+  --r-type-prose: var(--r-weight-regular) var(--r-font-size-prose) / 1.625rem var(--r-font-ui);
+  --r-type-heading-sm:
+    var(--r-weight-semibold) var(--r-font-size-heading-sm) / 1.5rem var(--r-font-ui);
+  --r-type-heading-md:
+    var(--r-weight-semibold) var(--r-font-size-heading-md) / 1.75rem var(--r-font-ui);
+  --r-type-heading-lg:
+    var(--r-weight-semibold) var(--r-font-size-heading-lg) / 2rem var(--r-font-ui);
+  --r-type-code: var(--r-weight-regular) var(--r-font-size-ui) / 1.25rem var(--r-font-mono);
   --r-tracking-heading: -0.02em;
   /* Numeric tables use font-variant-numeric: tabular-nums; prose does not. */
 
@@ -359,9 +383,6 @@
  * 6. Test real English/Chinese content, long names, 200% zoom, keyboard use,
  *    both themes, touch targets, and reduced motion across representative pages.
  * 7. Color-pair checks alone do not certify application accessibility.
- * 8. Migration is semantic: --text-3/--muted/--faint are not safely replaceable
- *    by one blind search-and-replace. Inventory each usage by its purpose.
- * 9. Adopt shared controls/navigation first, then lists/settings, then reading
- *    surfaces, then special data views. Keep one temporary legacy adapter and
- *    retire it as callers migrate; new code must use the v1 roles directly.
+ * 8. Components consume semantic roles directly; do not add compatibility aliases.
+ *    Keep component-specific geometry local instead of creating global tokens.
  */

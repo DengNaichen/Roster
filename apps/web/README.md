@@ -4,9 +4,9 @@
 
 `src/tokens.css` owns Roster's palette, semantic roles, typography, spacing, density,
 layout, interaction states, and business colors. Use `--r-*` roles for new styles.
-`src/tokens-legacy.css` adapts older components while their callers are migrated;
-do not add a second theme map or new numeric aliases there. Component-only geometry
-and data-driven timeline positions stay local.
+Components consume these roles directly; there is no compatibility alias layer.
+Shared font sizes also have `--r-font-size-*` roles for individual overrides.
+Component-only geometry and data-driven timeline positions stay local.
 
 The account menu offers System / Light / Dark appearance and Compact / Comfortable
 density. Preferences are saved locally; unavailable storage does not block changes.

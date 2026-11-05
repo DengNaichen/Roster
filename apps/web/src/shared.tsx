@@ -303,14 +303,14 @@ export function NavLink({
 }
 
 const statusColors: Record<Status, string> = {
-  triage: "var(--status-triage)",
-  backlog: "var(--status-backlog)",
-  todo: "var(--status-todo)",
-  agent_ready: "var(--status-agent-ready)",
-  in_progress: "var(--status-in-progress)",
-  in_review: "var(--status-in-review)",
-  done: "var(--status-done)",
-  canceled: "var(--status-canceled)",
+  triage: "var(--r-status-triage)",
+  backlog: "var(--r-status-backlog)",
+  todo: "var(--r-status-todo)",
+  agent_ready: "var(--r-status-agent-ready)",
+  in_progress: "var(--r-status-in-progress)",
+  in_review: "var(--r-status-in-review)",
+  done: "var(--r-status-done)",
+  canceled: "var(--r-status-canceled)",
 };
 
 // Backlog and planned states are rings; progress fills a pie inside the ring.
