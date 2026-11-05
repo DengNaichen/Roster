@@ -849,44 +849,14 @@
     display: none;
   }
 }
-@media (max-width: 1023px) {
-  .brand {
-    margin: 0;
-  }
+/* During development, simply hide navigation once the workspace is truly narrow.
+   A replacement mobile navigation pattern will be designed separately. */
+@media (max-width: 639px) {
   .scope-sidebar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .sidebar-top {
-    justify-content: space-between;
-  }
-  .navigation-toggle {
-    display: flex;
-    flex: none;
-    width: auto;
-  }
-  .scope-navigation {
     display: none;
   }
-  .scope-navigation.expanded {
-    display: flex;
-    max-height: 50dvh;
-    overflow-y: auto;
-  }
-  .sidebar-account {
-    padding: 0;
-  }
-  .account-trigger {
-    width: auto;
-    max-width: 100%;
-    margin-left: auto;
-  }
-  .account-trigger > span:not(.account-avatar) {
-    max-width: var(--search-width);
-  }
-  .session-bar {
-    padding-block: var(--space-4);
-  }
+}
+@media (max-width: 1023px) {
   .issue-toolbar {
     padding: var(--space-6) var(--space-8);
     gap: var(--space-4);

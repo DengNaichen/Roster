@@ -215,7 +215,8 @@
   --r-layout-column-gap: var(--r-space-32);
   /* Breakpoints are CSS conditions, not var()-usable CSS media-query tokens:
    * 40rem / 640px: narrow viewport; 16px gutters, full-width forms/dialogs.
-   * 64rem / 1024px: persistent sidebar can fit; below it use a drawer.
+   * 40rem / 640px: keep the sidebar above this width; hide it below.
+   * Mobile navigation is intentionally deferred during development.
    * 80rem / 1280px: detail property column can sit beside the reading column.
    * Stack detail properties above content when space is insufficient.
    * Data grids may scroll locally; prose and the whole page must reflow.

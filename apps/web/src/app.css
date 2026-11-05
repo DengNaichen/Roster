@@ -711,13 +711,13 @@ button:focus-visible {
   max-width: 100%;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 639px) {
   .app-shell {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
   }
   .panel {
-    margin: 0 var(--space-8) var(--space-8);
+    margin: var(--space-8);
   }
   .header-row {
     padding: 0 var(--space-16);
