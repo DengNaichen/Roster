@@ -16,7 +16,7 @@
   cursor: pointer;
 }
 .issue-dependency-hint.is-blocked {
-  color: var(--status-in-progress);
+  color: var(--error-text);
 }
 .issue-dependency-hint:hover,
 .issue-dependency-hint[data-state="open"] {
