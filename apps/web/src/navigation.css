@@ -1104,15 +1104,6 @@
 .settings-back {
   margin-bottom: var(--r-space-16);
 }
-.settings-nav-title {
-  margin: var(--r-space-24) var(--r-space-8) var(--r-space-16);
-  font-size: var(--r-font-size-heading-md);
-  font-weight: var(--r-weight-semibold);
-  color: var(--r-color-text-primary);
-}
-.settings-sidebar .navigation-toggle {
-  display: none;
-}
 .settings-navigation {
   flex: 1;
 }
@@ -1156,10 +1147,7 @@
     overflow: visible;
     border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
   }
-  .settings-sidebar .sidebar-top,
-  .settings-sidebar .sidebar-account,
-  .settings-nav-title,
-  .settings-navigation .sidebar-label {
+  .settings-sidebar .sidebar-account {
     display: none;
   }
   .settings-navigation {

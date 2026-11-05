@@ -62,7 +62,6 @@ export function Sidebar({
       )}
       {settings ? (
         <nav className="settings-navigation" aria-label="Settings navigation">
-          <h1 className="settings-nav-title">Settings</h1>
           {(
             [
               { key: "teams", title: "Teams" },
