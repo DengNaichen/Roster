@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108.72 108.72">
+  <style>
+    .ns { stop-color: #4a0d2e } .ne { stop-color: #6e1846 } .o { fill: #b8407e; stroke: #b8407e }
+    @media (prefers-color-scheme: dark) {
+      .ns { stop-color: #7a1a50 } .ne { stop-color: #9a2a68 } .o { fill: #c04a88; stroke: #c04a88 }
+    }
+  </style>
+  <defs>
+    <linearGradient id="near" x2="1" y2="1"><stop class="ns"/><stop offset="1" class="ne"/></linearGradient>
+    <linearGradient id="far" x2="1" y2="1"><stop stop-color="#e3a8c6"/><stop offset="1" stop-color="#f3d3e3"/></linearGradient>
+    <path id="n" d="M7 7L95 41L59 59L41 95Z" stroke-width="14" stroke-linejoin="round"/>
+    <path id="f" d="M24.28 24.28L101.72 54.2L70.04 70.04L54.2 101.72Z" stroke-width="12.32" stroke-linejoin="round"/>
+    <mask id="overlap" maskUnits="userSpaceOnUse"><use href="#f" fill="#fff" stroke="#fff"/></mask>
+  </defs>
+  <use href="#f" fill="url(#far)" stroke="url(#far)"/>
+  <use href="#n" fill="url(#near)" stroke="url(#near)"/>
+  <use href="#n" class="o" mask="url(#overlap)"/>
+</svg>

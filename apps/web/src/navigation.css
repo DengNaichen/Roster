@@ -115,7 +115,6 @@
 .brand strong {
   font-weight: inherit;
 }
-.brand-mark,
 .workspace-avatar,
 .account-avatar {
   display: grid;
@@ -126,13 +125,9 @@
   border-radius: var(--r-radius-control);
 }
 .brand-mark {
+  flex: none;
   width: var(--r-size-icon-lg);
   height: var(--r-size-icon-lg);
-  color: var(--r-color-text-on-action);
-  background: var(--r-color-link);
-  font-size: var(--r-font-size-micro-lg);
-  font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-mark);
 }
 .workspace-trigger {
   flex-shrink: 1;

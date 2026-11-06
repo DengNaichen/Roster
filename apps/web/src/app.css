@@ -1363,10 +1363,6 @@ input.dropdown-required {
 .dropdown-block {
   border-color: var(--r-color-border-control);
 }
-.brand-mark {
-  background: var(--r-color-bg-action);
-  color: var(--r-color-text-on-action);
-}
 @media (pointer: coarse) {
   .chip,
   .chip button,

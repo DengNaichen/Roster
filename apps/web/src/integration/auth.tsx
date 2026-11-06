@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import type { OAuthAuthorizationDetails, Session } from "@supabase/supabase-js";
+import { RosterLogo } from "../RosterLogo";
 import { configured, localPreview, supabase } from "./api";
 type Identity = { subject: string; name: string; email: string };
 type State = {
@@ -73,17 +74,7 @@ function Login({ error: initial }: { error?: unknown }) {
   return (
     <main className="roster-login">
       <section aria-labelledby="login-title" className="roster-login-card">
-        <svg
-          className="roster-login-mark"
-          aria-hidden="true"
-          viewBox="0 0 40 40"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M7 4h15c7.5 0 12 4.2 12 11 0 5-2.7 8.7-7.2 10.3L35 36H24.8L15 22.5V36H7V4Zm8 7v8h6.5c3 0 4.7-1.3 4.7-4s-1.7-4-4.7-4H15Z"
-          />
-        </svg>
+        <RosterLogo className="roster-login-mark" />
         <h1 id="login-title">Log in to Roster</h1>
         {(["google", "github"] as const).map((provider) => {
           const name = provider === "google" ? "Google" : "GitHub";
