@@ -804,106 +804,11 @@ button:focus-visible {
   height: var(--r-size-menu-row);
   padding: var(--r-space-4);
 }
-.label-manager {
-  overflow-y: auto;
-  padding: var(--r-space-12) var(--r-space-24) var(--r-space-32);
-}
-.label-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--r-space-12);
-  margin: 0 0 var(--r-space-16);
-  padding: var(--r-space-4) 0;
-}
-.label-toolbar input[type="search"] {
-  width: 240px;
-  min-width: 0;
-  min-height: var(--r-size-control);
-  padding: 0 10px;
-  background: transparent;
-  border: var(--r-border-width) solid var(--r-color-border-divider);
-  border-radius: var(--r-radius-control);
-  font-size: var(--r-font-size-ui);
-}
-.label-toolbar input[type="search"]:focus-visible {
-  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
-  outline-offset: var(--r-focus-offset);
-}
-.label-toolbar label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--r-color-text-muted);
-  font-size: var(--r-font-size-ui);
-}
-.label-toolbar-actions {
-  display: flex;
-  gap: var(--r-space-8);
-  margin-left: auto;
-}
-.label-section {
-  margin-bottom: var(--r-space-16);
-  border: var(--r-border-width) solid var(--r-color-border-divider);
-  border-radius: var(--r-radius-panel);
-}
-.label-section header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  padding: var(--r-space-8) 14px;
-}
-.label-section h2 {
-  color: var(--r-color-text-secondary);
-  font-size: var(--r-font-size-caption);
-  font-weight: var(--r-weight-medium);
-  overflow-wrap: anywhere;
-}
-.label-section header small {
-  color: var(--r-color-text-muted);
-  font-size: var(--r-font-size-caption);
-}
-.label-section header button {
-  margin-left: auto;
-}
-.label-settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--r-space-12);
-  padding: 10px 14px;
-  border-top: var(--r-border-width) solid var(--r-color-border-divider);
-}
-.label-settings-row > div:first-child {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.label-settings-row .label-help {
-  margin-top: var(--r-space-4);
-}
-.label-row-actions {
-  display: flex;
-  flex: none;
-  gap: 6px;
-}
-.label-empty {
-  padding: 14px;
-}
 .issue-selection {
   flex: none;
   accent-color: var(--r-color-link);
 }
 @media (max-width: 760px) {
-  .label-manager {
-    padding: var(--r-space-12) var(--r-space-16);
-  }
-  .label-toolbar-actions {
-    margin-left: 0;
-  }
-  .label-settings-row {
-    flex-wrap: wrap;
-  }
   .label-dialog form,
   .label-dialog-body {
     padding-inline: var(--r-space-16);

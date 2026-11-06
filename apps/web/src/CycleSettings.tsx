@@ -29,7 +29,6 @@ export function CycleSettingsSection({ team, canManage }: { team: string; canMan
   );
   return (
     <section className="cycle-settings" aria-label={`${team} cycles`}>
-      <h3>Cycles</h3>
       {resource.error ? (
         <>
           <RequestError message={resource.error} />
@@ -104,7 +103,7 @@ function CycleSettingsForm({
   }
   const off = saving || !canManage;
   return (
-    <form onSubmit={save}>
+    <form className="settings-card" onSubmit={save}>
       <div className="settings-field">
         <div>
           <label htmlFor={`cycles-enabled-${team}`}>Enable cycles</label>

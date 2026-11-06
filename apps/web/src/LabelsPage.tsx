@@ -11,10 +11,13 @@ export default function LabelsPage() {
         <span>/</span>
         <span>Labels</span>
       </PageHeader>
-      <div className="settings-labels-intro">
-        <h1>Labels</h1>
+      <div className="settings-page">
+        <header className="settings-heading">
+          <h1>Labels</h1>
+          <p>Labels tag issues across every team. A group allows one label per issue.</p>
+        </header>
+        <LabelManager catalog={catalog} onMerged={() => {}} />
       </div>
-      <LabelManager catalog={catalog} onMerged={() => {}} />
     </>
   );
 }

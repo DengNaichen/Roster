@@ -238,6 +238,7 @@
   --r-layout-sidebar: 15rem; /* 240px */
   --r-layout-properties: 17.5rem; /* 280px */
   --r-layout-reading: 45rem; /* 720px */
+  --r-layout-settings: 40rem; /* 640px; one column shared by every settings page */
   --r-layout-form: 30rem; /* 480px */
   --r-layout-content: 70rem; /* 1120px; summaries/settings, not all screens */
   --r-layout-dialog-sm: 25rem; /* 400px; confirmation */

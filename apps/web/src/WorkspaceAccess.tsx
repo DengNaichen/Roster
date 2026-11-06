@@ -16,6 +16,16 @@ type Member = {
 
 type MemberList = { members: Member[] };
 
+export function initials(name: string) {
+  return (name || "?")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => Array.from(part)[0])
+    .join("")
+    .toUpperCase();
+}
+
 export function MembersSettings() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -117,10 +127,7 @@ export function MembersSettings() {
         (ascending ? 1 : -1),
     );
   return (
-    <section className="settings-member-directory" aria-labelledby="members-title">
-      <header className="settings-heading settings-page-intro">
-        <h1 id="members-title">Members</h1>
-      </header>
+    <section aria-label="Member directory">
       <div className="settings-directory-toolbar">
         <label className="settings-directory-search">
           <Search className="icon" />
@@ -192,14 +199,8 @@ export function MembersSettings() {
                       >
                         <td>
                           <div className="settings-member-name">
-                            <span className="settings-member-avatar" aria-hidden="true">
-                              {(member.name || member.email || "?")
-                                .trim()
-                                .split(/\s+/)
-                                .slice(0, 2)
-                                .map((part) => Array.from(part)[0])
-                                .join("")
-                                .toUpperCase()}
+                            <span className="settings-avatar" aria-hidden="true">
+                              {initials(member.name || member.email)}
                             </span>
                             <strong>
                               {member.name || member.email || member.subject}

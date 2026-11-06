@@ -260,23 +260,3 @@
   flex-shrink: 0;
   color: var(--r-color-text-muted);
 }
-
-.cycle-settings {
-  margin-top: var(--r-space-24);
-}
-.cycle-settings h3 {
-  margin: 0 0 var(--r-space-12);
-  font-size: var(--r-font-size-body);
-  font-weight: var(--r-weight-medium);
-}
-.cycle-settings .settings-field p {
-  margin: var(--r-space-4) 0 0;
-  color: var(--r-color-text-muted);
-  font-size: var(--r-font-size-caption);
-}
-.cycle-advanced > summary {
-  padding: var(--r-space-12) 0;
-  color: var(--r-color-text-muted);
-  font-size: var(--r-font-size-ui);
-  cursor: pointer;
-}
