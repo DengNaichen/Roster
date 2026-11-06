@@ -11,6 +11,7 @@ import {
   Workspace,
   workspaceSlug,
 } from "./shared";
+import { RosterLogo } from "./RosterLogo";
 import { WorkspaceAccess } from "./WorkspaceAccess";
 
 type WorkspaceList = { workspaces: Workspace[] };
@@ -73,9 +74,7 @@ export function WorkspaceMenu() {
             aria-label={`Workspace: ${current?.name ?? slug}`}
             title={current?.name ?? slug}
           >
-            <span className="brand-mark" aria-hidden="true">
-              IT
-            </span>
+            <RosterLogo className="brand-mark" />
             <strong>{current?.name ?? slug}</strong>
             <ChevronDown className="icon" />
           </button>

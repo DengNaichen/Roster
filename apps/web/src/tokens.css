@@ -176,6 +176,15 @@
   --r-color-link: light-dark(var(--r-ref-indigo-700), var(--r-ref-indigo-200));
   --r-color-link-hover: light-dark(var(--r-ref-indigo-800), var(--r-ref-indigo-300));
 
+  /* Brand mark only (RosterLogo, public/favicon.svg); not UI accents. Dark
+   * mode lifts the near cursor so it stays visible on dark surfaces.
+   */
+  --r-brand-near-start: light-dark(#4a0d2e, #7a1a50);
+  --r-brand-near-end: light-dark(#6e1846, #9a2a68);
+  --r-brand-far-start: #e3a8c6;
+  --r-brand-far-end: #f3d3e3;
+  --r-brand-overlap: light-dark(#b8407e, #c04a88);
+
   /* Neutral, selection, and action states are separate contracts. */
   --r-color-bg-hover: light-dark(var(--r-ref-neutral-100), var(--r-ref-neutral-850));
   --r-color-bg-pressed: light-dark(var(--r-ref-neutral-200), var(--r-ref-neutral-800));
