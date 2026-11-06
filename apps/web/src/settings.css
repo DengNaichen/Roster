@@ -1,0 +1,644 @@
+/*
+ * Every settings page shares one column, one heading, and two surfaces:
+ * a card of field rows for preferences, and an open list for directories.
+ * Directory text aligns with the heading; hover and group bands bleed past it.
+ */
+.settings-page {
+  --settings-bleed: var(--r-space-12);
+  width: 100%;
+  max-width: calc(var(--r-layout-settings) + 2 * var(--r-space-24));
+  margin: 0 auto;
+  padding: var(--r-space-48) var(--r-space-24) var(--r-space-64);
+  overflow-y: auto;
+}
+.settings-heading {
+  margin-bottom: var(--r-space-32);
+}
+.settings-heading h1 {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  overflow-wrap: anywhere;
+  color: var(--r-color-text-primary);
+  font: var(--r-type-heading-md);
+  letter-spacing: var(--r-tracking-heading);
+}
+.settings-heading p {
+  margin-top: var(--r-space-4);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-ui);
+}
+.settings-heading:has(+ .team-settings) {
+  margin-bottom: var(--r-space-16);
+}
+.settings-tabs {
+  margin: 0 0 var(--r-space-32) calc(-1 * var(--r-space-12));
+}
+
+.settings-section + .settings-section {
+  margin-top: var(--r-space-32);
+}
+.settings-section-head {
+  margin-bottom: var(--r-space-12);
+}
+.settings-section-head h2 {
+  color: var(--r-color-text-primary);
+  font: var(--r-type-ui);
+  font-weight: var(--r-weight-semibold);
+}
+.settings-section-head p {
+  margin-top: var(--r-space-2);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+
+.settings-card {
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-bg-surface);
+}
+.settings-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--r-space-16);
+  min-height: 3.5rem;
+  padding: var(--r-space-12) var(--r-space-16);
+}
+.settings-card .settings-field:not(:first-child),
+.settings-card > .dialog-hint,
+.settings-card > details > .dialog-hint,
+.settings-card > .error,
+.cycle-advanced > summary {
+  border-top: var(--r-border-width) solid var(--r-color-border-divider);
+}
+.settings-field > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--r-color-text-primary);
+  font-weight: var(--r-weight-medium);
+}
+.settings-field strong {
+  font-weight: var(--r-weight-medium);
+}
+.settings-field .button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--r-space-8);
+  white-space: nowrap;
+}
+.settings-field p {
+  margin-top: var(--r-space-2);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+.settings-field-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+}
+.settings-field-identity h2 {
+  font: inherit;
+}
+.settings-control {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--r-space-8);
+  color: var(--r-color-text-secondary);
+}
+.settings-card > .dialog-hint,
+.settings-card > details > .dialog-hint,
+.settings-card > .error {
+  margin: 0;
+  padding: var(--r-space-12) var(--r-space-16);
+}
+.cycle-advanced > summary {
+  padding: var(--r-space-12) var(--r-space-16);
+  color: var(--r-color-text-muted);
+  cursor: pointer;
+}
+.settings-card > footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--r-space-8);
+  padding: var(--r-space-12) var(--r-space-16);
+  border-top: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: 0 0 var(--r-radius-panel) var(--r-radius-panel);
+  background: var(--r-color-bg-canvas);
+}
+.settings-card > footer > span {
+  margin-right: auto;
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+
+.settings-name {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  width: min(20rem, 55%);
+  min-width: 0;
+}
+.settings-name input {
+  flex: 1;
+  min-width: 0;
+  height: var(--r-size-control);
+  padding: 0 var(--r-space-8);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-surface);
+  font: var(--r-type-ui);
+}
+.settings-name input:focus-visible {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+  outline-offset: var(--r-focus-offset);
+}
+.settings-name .emoji-trigger {
+  flex: none;
+  width: var(--r-size-control);
+  height: var(--r-size-control);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-surface);
+}
+.settings-name .entity-emoji {
+  width: var(--r-space-16);
+  height: var(--r-space-16);
+  font-size: var(--r-font-size-body);
+}
+.settings-identifier {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-code);
+}
+
+.settings-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--r-size-avatar-lg);
+  height: var(--r-size-avatar-lg);
+  border-radius: var(--r-radius-circle);
+  background: var(--r-color-bg-nav-current);
+  color: var(--r-color-text-secondary);
+  font: var(--r-type-caption);
+  font-weight: var(--r-weight-semibold);
+}
+.settings-directory-table .settings-avatar {
+  width: var(--r-space-24);
+  height: var(--r-space-24);
+  font-size: var(--r-font-size-micro-lg);
+}
+.settings-github-mark {
+  flex: none;
+  border-radius: var(--r-radius-circle);
+  background: #24292f;
+}
+
+.settings-themes {
+  display: flex;
+  gap: var(--r-space-8);
+}
+.settings-theme {
+  display: grid;
+  gap: var(--r-space-4);
+  width: 5.25rem;
+  color: var(--r-color-text-secondary);
+  font: var(--r-type-caption);
+  text-align: center;
+  cursor: pointer;
+}
+.settings-theme:has(input:checked) {
+  color: var(--r-color-text-primary);
+  font-weight: var(--r-weight-medium);
+}
+.settings-theme input,
+.settings-segmented input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.settings-theme-preview {
+  display: flex;
+  height: 3.25rem;
+  overflow: hidden;
+  border: var(--r-border-width) solid #d8dce3;
+  border-radius: var(--r-radius-control);
+  background: #f5f6f8;
+}
+.settings-theme:has(input:checked) .settings-theme-preview {
+  outline: 2px solid var(--r-color-link);
+  outline-offset: 1px;
+}
+.settings-theme:has(input:focus-visible) .settings-theme-preview {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+  outline-offset: 3px;
+}
+.settings-theme-preview > i {
+  width: 28%;
+  background: #e4e7ed;
+}
+.settings-theme-preview > span {
+  flex: 1;
+  padding: 10px 8px;
+}
+.settings-theme-preview b {
+  display: block;
+  height: 3px;
+  margin-bottom: 6px;
+  border-radius: 2px;
+  background: #c0c6d0;
+}
+.preview-dark {
+  border-color: #363a46;
+  background: #22252d;
+}
+.preview-dark > i {
+  background: #181b21;
+}
+.preview-dark b {
+  background: #4b5262;
+}
+.preview-system {
+  background: linear-gradient(90deg, #f5f6f8 50%, #22252d 50%);
+}
+.settings-segmented {
+  display: inline-flex;
+  padding: var(--r-space-2);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-subtle);
+}
+.settings-segmented label {
+  padding: var(--r-space-2) var(--r-space-12);
+  border-radius: var(--r-radius-small);
+  color: var(--r-color-text-muted);
+  font-weight: var(--r-weight-medium);
+  cursor: pointer;
+}
+.settings-segmented label:has(input:checked) {
+  background: var(--r-color-bg-surface);
+  color: var(--r-color-text-primary);
+  box-shadow: 0 1px 2px light-dark(rgb(17 20 24 / 12%), rgb(0 0 0 / 40%));
+}
+.settings-segmented label:has(input:focus-visible) {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+}
+
+/* Directories: open lists in the same column, Linear-style group bands. */
+.settings-directory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  margin-bottom: var(--r-space-16);
+}
+.settings-directory-search {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  width: min(16rem, 100%);
+  height: var(--r-size-control);
+  padding-left: var(--r-space-8);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-surface);
+  color: var(--r-color-text-muted);
+}
+.settings-directory-search:focus-within {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+  outline-offset: var(--r-focus-offset);
+}
+.settings-directory-search input,
+.settings-directory-search input:focus {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  font: var(--r-type-ui);
+}
+.settings-directory-toolbar > .dropdown {
+  height: var(--r-size-control);
+  border-color: var(--r-color-border-divider);
+}
+.settings-directory-check {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  color: var(--r-color-text-secondary);
+}
+.directory-primary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.settings-directory-toolbar .directory-primary-action ~ .button {
+  margin-left: 0;
+}
+
+.settings-table-scroll {
+  margin-inline: calc(-1 * var(--settings-bleed));
+  overflow-x: auto;
+}
+.settings-directory-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--r-gap-interactive-rows);
+  font: var(--r-type-ui);
+  text-align: left;
+}
+.settings-directory-table th,
+.settings-directory-table td {
+  padding: 0 var(--settings-bleed);
+  vertical-align: middle;
+}
+.settings-directory-table thead th {
+  height: var(--r-size-menu-row);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+  font-weight: var(--r-weight-medium);
+  white-space: nowrap;
+}
+.settings-directory-table tbody td {
+  height: var(--r-space-48);
+}
+.settings-directory-group th,
+.settings-list-group {
+  height: var(--r-size-menu-row);
+  border-radius: var(--r-radius-panel);
+  background: var(--r-color-bg-subtle);
+  color: var(--r-color-text-secondary);
+  font: var(--r-type-caption);
+  font-weight: var(--r-weight-medium);
+}
+.settings-directory-group:not(:first-child) th {
+  height: calc(var(--r-size-menu-row) + var(--r-space-8));
+  border-top: var(--r-space-8) solid transparent;
+  background-clip: padding-box;
+}
+.settings-directory-group span,
+.settings-list-group small {
+  margin-left: var(--r-space-8);
+  color: var(--r-color-text-muted);
+  font: inherit;
+  font-weight: var(--r-weight-regular);
+}
+.settings-directory-table tbody tr:not(.settings-directory-group):is(:hover, :focus-within) > td,
+.settings-list-row:is(:hover, :focus-within) {
+  background: color-mix(in srgb, var(--r-color-bg-hover) 60%, transparent);
+}
+.settings-directory-table tbody td:first-child {
+  border-start-start-radius: var(--r-radius-panel);
+  border-end-start-radius: var(--r-radius-panel);
+}
+.settings-directory-table tbody td:last-child {
+  border-start-end-radius: var(--r-radius-panel);
+  border-end-end-radius: var(--r-radius-panel);
+}
+.settings-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-4);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.settings-member-name,
+.settings-team-link {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+  min-width: 10rem;
+  color: var(--r-color-text-primary);
+  text-decoration: none;
+}
+.settings-member-name strong,
+.settings-team-link strong {
+  overflow-wrap: anywhere;
+  font-weight: var(--r-weight-medium);
+}
+.settings-member-name small {
+  display: block;
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+.settings-team-key {
+  color: var(--r-color-text-muted);
+}
+.settings-member-email,
+.settings-inline {
+  color: var(--r-color-text-secondary);
+}
+.settings-member-email span {
+  display: block;
+  max-width: 13.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.member-inactive .settings-member-name,
+.member-inactive .settings-member-email {
+  opacity: 0.55;
+}
+.settings-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+}
+.settings-role {
+  padding: 3px 7px;
+  border-radius: var(--r-radius-small);
+}
+.settings-directory-table .dropdown.settings-role {
+  min-height: var(--r-size-badge);
+  padding: 0 var(--r-space-8);
+}
+.role-admin {
+  background: var(--r-color-bg-selected);
+  color: var(--r-color-link);
+}
+.role-member {
+  color: var(--r-color-text-secondary);
+}
+.settings-directory-table .role-member {
+  background: transparent;
+}
+.settings-member-action {
+  text-align: right;
+}
+.settings-member-action .button,
+.settings-list-row .button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--r-color-text-muted);
+}
+.settings-member-action .button:is(:hover, :focus-visible),
+.settings-list-row .button:is(:hover, :focus-visible) {
+  background: var(--r-color-bg-pressed);
+  color: var(--r-color-text-primary);
+}
+.settings-teams-table th:first-child {
+  width: 65%;
+}
+.settings-teams-table td:last-child {
+  width: 2.5rem;
+  color: var(--r-color-text-muted);
+}
+
+/* Non-table lists (labels) share the table's band and row shape. */
+.settings-list {
+  display: grid;
+  gap: var(--r-gap-interactive-rows);
+  margin-inline: calc(-1 * var(--settings-bleed));
+}
+.settings-list-group {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-8);
+  padding: 0 var(--settings-bleed);
+}
+.settings-list-section {
+  display: grid;
+  gap: var(--r-gap-interactive-rows);
+}
+.settings-list-section + .settings-list-section {
+  margin-top: var(--r-space-8);
+}
+.settings-list-group h2 {
+  font: inherit;
+}
+.settings-list-group small {
+  margin-left: 0;
+}
+.settings-list-group > .ghost {
+  margin-left: auto;
+  color: var(--r-color-text-muted);
+}
+.settings-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--r-space-12);
+  min-height: var(--r-space-48);
+  padding: var(--r-space-8) var(--settings-bleed);
+  border-radius: var(--r-radius-panel);
+}
+.settings-list-row > :first-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.settings-list-row .label-help {
+  margin-top: var(--r-space-4);
+}
+.settings-list-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--r-space-4);
+  color: var(--r-color-text-muted);
+}
+.settings-list-empty {
+  padding: var(--r-space-12) var(--settings-bleed);
+  color: var(--r-color-text-muted);
+}
+
+.team-member-add .dropdown {
+  width: 13rem;
+  border-color: var(--r-color-border-divider);
+}
+.settings-card > .settings-list-empty {
+  padding: var(--r-space-16);
+}
+.team-join-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--r-space-8);
+  padding: var(--r-space-12) var(--r-space-16);
+  border-top: var(--r-border-width) solid var(--r-color-border-divider);
+  background: var(--r-color-bg-canvas);
+}
+.team-join-confirm p {
+  flex-basis: 100%;
+  color: var(--r-color-text-secondary);
+}
+
+.settings-directory-message:empty {
+  display: none;
+}
+.settings-directory-message {
+  margin-top: var(--r-space-16);
+}
+.settings-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.settings-invite-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--r-space-16) var(--r-space-24);
+  border-bottom: var(--r-border-width) solid var(--r-color-border-divider);
+}
+.settings-invite-content {
+  padding: var(--r-space-24);
+}
+.settings-invite-content p {
+  margin-bottom: var(--r-space-16);
+  color: var(--r-color-text-secondary);
+}
+.settings-invite-content input {
+  flex: 1;
+  min-width: 0;
+}
+.settings-invite-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--r-space-24);
+}
+
+@media (max-width: 767px) {
+  .settings-page {
+    padding: var(--r-space-24) var(--r-space-16) var(--r-space-48);
+  }
+  .settings-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--r-space-8);
+  }
+  .settings-name {
+    width: 100%;
+  }
+  .settings-directory-toolbar {
+    flex-wrap: wrap;
+  }
+  .settings-directory-search {
+    width: 100%;
+  }
+  .settings-directory-table {
+    min-width: 36rem;
+  }
+  .settings-teams-table {
+    min-width: 26rem;
+  }
+}
+.settings-page input[type="checkbox"] {
+  accent-color: var(--r-color-link);
+}

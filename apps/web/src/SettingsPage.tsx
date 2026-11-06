@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, Fragment, useEffect, useRef, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { PageHeader } from "./PageHeader";
 import { ChevronRight, Lock, Globe, Search, ArrowDown, ArrowUp } from "lucide-react";
@@ -47,12 +47,12 @@ export function SettingsPage({
     ? [...directory, ...teams.filter((team) => !directory.some((item) => item.key === team.key))]
     : teams;
   const current = entries.find((team) => team.key === settingsTeam);
-  const title = {
-    teams: "Teams",
-    members: "Members",
-    personal: "Personal",
-    workspace: "Workspace",
-    integrations: "Integrations",
+  const [title, description] = {
+    teams: ["Teams", "Teams group issues, cycles, and members."],
+    members: ["Members", "People who can access this workspace."],
+    personal: ["Personal", "Your profile and how Roster looks on this device."],
+    workspace: ["Workspace", "The name and address everyone in this workspace sees."],
+    integrations: ["Integrations", "Services connected to this workspace."],
   }[section];
   return (
     <>
@@ -69,22 +69,25 @@ export function SettingsPage({
           <span>{title}</span>
         )}
       </PageHeader>
-      <div
-        className={`settings-page ${section === "members" || (section === "teams" && !settingsTeam) ? "settings-directory-page" : ""}`}
-      >
-        {section !== "members" && (
-          <header className="settings-heading settings-page-intro">
-            <h1>
-              {current ? (
-                <>
-                  <EntityEmoji emoji={current.emoji} teamKey={current.key} /> {current.name}
-                </>
-              ) : (
-                title
-              )}
-            </h1>
-          </header>
-        )}
+      <div className="settings-page">
+        <header className="settings-heading">
+          <h1>
+            {current ? (
+              <>
+                <EntityEmoji emoji={current.emoji} teamKey={current.key} /> {current.name}
+              </>
+            ) : (
+              title
+            )}
+          </h1>
+          <p>
+            {current
+              ? current.private
+                ? "Private team. Only its members can see its issues."
+                : "Everyone in the workspace can see this team."
+              : description}
+          </p>
+        </header>
         {section === "personal" && <PersonalSettings />}
         {section === "workspace" && <WorkspaceSettings />}
         {section === "integrations" && <IntegrationSettings />}
@@ -185,29 +188,49 @@ function TeamDirectory({
             </tr>
           </thead>
           <tbody>
-            {visible.map((team) => (
-              <tr key={team.key}>
-                <td>
-                  <NavLink
-                    className="settings-team-link"
-                    to={pagePath(`/settings/teams/${encodeURIComponent(team.key)}`)}
-                  >
-                    <EntityEmoji emoji={team.emoji} teamKey={team.key} />
-                    <strong>{team.name}</strong>
-                    <span className="settings-team-key">{team.key}</span>
-                  </NavLink>
-                </td>
-                <td>
-                  <span className="settings-inline">
-                    {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
-                    {team.private ? "Private" : "Workspace"}
-                  </span>
-                </td>
-                <td>
-                  <ChevronRight className="icon" aria-hidden="true" />
-                </td>
-              </tr>
-            ))}
+            {(
+              [
+                ["Your teams", true],
+                ["Other teams", false],
+              ] as const
+            ).map(([label, joined]) => {
+              const group = visible.filter((team) => Boolean(team.joined) === joined);
+              return (
+                group.length > 0 && (
+                  <Fragment key={label}>
+                    <tr className="settings-directory-group">
+                      <th colSpan={3} scope="rowgroup">
+                        {label}
+                        <span>{group.length}</span>
+                      </th>
+                    </tr>
+                    {group.map((team) => (
+                      <tr key={team.key}>
+                        <td>
+                          <NavLink
+                            className="settings-team-link"
+                            to={pagePath(`/settings/teams/${encodeURIComponent(team.key)}`)}
+                          >
+                            <EntityEmoji emoji={team.emoji} teamKey={team.key} />
+                            <strong>{team.name}</strong>
+                            <span className="settings-team-key">{team.key}</span>
+                          </NavLink>
+                        </td>
+                        <td>
+                          <span className="settings-inline">
+                            {team.private ? <Lock className="icon" /> : <Globe className="icon" />}
+                            {team.private ? "Private" : "Workspace"}
+                          </span>
+                        </td>
+                        <td>
+                          <ChevronRight className="icon" aria-hidden="true" />
+                        </td>
+                      </tr>
+                    ))}
+                  </Fragment>
+                )
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -264,13 +287,15 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
 
   return (
     <section className="team-settings" aria-label={`${team.name} settings`}>
-      <div className="settings-detail-tabs" role="group" aria-label="Team settings sections">
+      <div className="segmented settings-tabs" role="tablist" aria-label="Team settings sections">
         {(["general", "members", "cycles"] as const)
           .filter((item) => item !== "members" || team.membership_enabled)
           .map((item) => (
             <button
-              className="button"
+              type="button"
+              role="tab"
               key={item}
+              aria-selected={tab === item}
               aria-pressed={tab === item}
               onClick={() => setTab(item)}
             >
@@ -279,9 +304,12 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
           ))}
       </div>
       {tab === "general" && (
-        <form onSubmit={save}>
+        <form className="settings-card" onSubmit={save}>
           <div className="settings-field">
-            <label htmlFor={`team-name-${team.key}`}>Name</label>
+            <div>
+              <label htmlFor={`team-name-${team.key}`}>Name</label>
+              <p>Shown in the sidebar and team menus.</p>
+            </div>
             <div className="settings-name">
               <EmojiPicker
                 value={value.emoji}
@@ -302,6 +330,7 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
           <div className="settings-field">
             <div>
               <span>Identifier</span>
+              <p>Prefix for issue numbers. It can't be changed.</p>
             </div>
             <span className="settings-identifier" title="Cannot be changed">
               <Lock className="icon" /> {team.key}

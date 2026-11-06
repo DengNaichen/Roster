@@ -1,5 +1,6 @@
 import { Dropdown } from "./Dropdown";
 import { FormEvent, useState } from "react";
+import { Search } from "lucide-react";
 import { api, apiPath, Label, LabelBadge, LabelGroup, RequestError } from "./shared";
 import { Catalog } from "./useLabels";
 import { LabelDialog, labelTitle } from "./Labels";
@@ -17,67 +18,69 @@ export function LabelManager({ catalog, onMerged }: { catalog: Catalog; onMerged
       labelTitle(l, catalog.groups).toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <section className="label-manager" aria-label="Label settings">
-      <div className="label-toolbar">
-        <input
-          type="search"
-          aria-label="Search label settings"
-          placeholder="Search labels…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <label>
+    <section aria-label="Label settings">
+      <div className="settings-directory-toolbar">
+        <label className="settings-directory-search">
+          <Search className="icon" />
+          <input
+            type="search"
+            aria-label="Search label settings"
+            placeholder="Search labels"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+        <label className="settings-directory-check">
           <input
             type="checkbox"
             checked={archived}
             onChange={(e) => setArchived(e.target.checked)}
-          />{" "}
+          />
           Show archived
         </label>
-        <span className="label-toolbar-actions">
-          <button className="button" onClick={() => setGroupEditor("new")}>
-            New group
-          </button>
-          <button className="button primary" onClick={() => setEditor("new")}>
-            New label
-          </button>
-        </span>
+        <button className="button directory-primary-action" onClick={() => setGroupEditor("new")}>
+          New group
+        </button>
+        <button className="button primary" onClick={() => setEditor("new")}>
+          New label
+        </button>
       </div>
       {catalog.error && <RequestError message={catalog.error} />}
-      {[{ id: 0, name: "Ungrouped" }, ...catalog.groups].map((group) => (
-        <section className="label-section" key={group.id}>
-          <header>
-            <h2>{group.name}</h2>
-            <small>{group.id ? "Single select" : "Multiple labels"}</small>
-            {group.id !== 0 && (
-              <button className="ghost" onClick={() => setGroupEditor(group)}>
-                Rename group
-              </button>
-            )}
-          </header>
-          {labels
-            .filter((l) => l.group_id === group.id)
-            .map((l) => (
-              <div className="label-settings-row" key={l.id}>
-                <div>
-                  <LabelBadge label={l} />
-                  <p className="label-help">{l.description}</p>
-                </div>
-                <div className="label-row-actions">
-                  <button className="button" onClick={() => setEditor(l)}>
-                    Edit
+      <div className="settings-list">
+        {[{ id: 0, name: "Ungrouped" }, ...catalog.groups].map((group) => {
+          const members = labels.filter((l) => l.group_id === group.id);
+          return (
+            <section className="settings-list-section" key={group.id} aria-label={group.name}>
+              <header className="settings-list-group">
+                <h2>{group.name}</h2>
+                <small>{group.id ? "Single select" : "Multiple labels"}</small>
+                {group.id !== 0 && (
+                  <button className="ghost" onClick={() => setGroupEditor(group)}>
+                    Rename group
                   </button>
-                  <button className="ghost" onClick={() => setMerge(l)}>
-                    Merge
-                  </button>
+                )}
+              </header>
+              {members.map((l) => (
+                <div className="settings-list-row" key={l.id}>
+                  <div>
+                    <LabelBadge label={l} />
+                    {l.description && <p className="label-help">{l.description}</p>}
+                  </div>
+                  <div className="settings-list-actions">
+                    <button className="button" onClick={() => setEditor(l)}>
+                      Edit
+                    </button>
+                    <button className="button" onClick={() => setMerge(l)}>
+                      Merge
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          {!labels.some((l) => l.group_id === group.id) && (
-            <p className="label-help label-empty">No labels</p>
-          )}
-        </section>
-      ))}
+              ))}
+              {members.length === 0 && <p className="settings-list-empty">No labels</p>}
+            </section>
+          );
+        })}
+      </div>
       {editor && <LabelEditor label={editor} catalog={catalog} onClose={() => setEditor(null)} />}
       {groupEditor && (
         <GroupEditor group={groupEditor} catalog={catalog} onClose={() => setGroupEditor(null)} />
