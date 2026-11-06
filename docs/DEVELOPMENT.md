@@ -152,9 +152,32 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno 
 
 ## Vercel 手动部署
 
-在仓库根通过 Vercel CLI 手动创建/关联项目并部署，不连接 GitHub 自动部署。根 `vercel.json` 已配置安装命令、构建命令、`apps/web/dist` 输出目录和 SPA rewrite。项目根保持仓库根，确保共享 contracts 在构建上下文可见。
+日常发布由 GitHub Actions 执行。需要手动恢复时，在仓库根通过 Vercel CLI 关联项目并部署。根 `vercel.json` 已配置安装命令、构建命令、`apps/web/dist` 输出目录和 SPA rewrite。项目根保持仓库根，确保共享 contracts 在构建上下文可见。
 
-用户目前不需要 CI/CD：不配置 GitHub Actions，也不启用基于 push 的自动发布。执行发布时应使用显式的手动部署入口。
+### GitHub Actions 自动部署
+
+[delivery.yml](../.github/workflows/delivery.yml) 在 PR、`main` push 和手动运行时执行格式、lint、类型、架构、前端测试/构建，以及临时 Postgres 17 上的全部迁移和后端集成测试。PR 不读取生产凭据，不部署。手动运行非 `main` 分支也只验证。
+
+`main` 验证通过后进入 `production` environment：检查凭据 → 拉取 Vercel production 配置并构建 → Supabase 数据库迁移 → `api`、`mcp` 函数 → 发布 Vercel prebuilt 产物。整个 main 流程串行，正在运行的发布不会被新提交取消；GitHub 可将尚未开始的排队运行替换为更新提交。Vercel 不要再单独开启 Git 自动部署，否则它会绕过这里的测试与后端顺序。
+
+首次启用，在仓库 Settings → Secrets and variables → Actions（或 `production` environment）添加：
+
+| 类型 | 名称 | 值 |
+| --- | --- | --- |
+| Secret | `SUPABASE_ACCESS_TOKEN` | 有目标项目权限的 Supabase access token |
+| Secret | `SUPABASE_DB_PASSWORD` | 目标 Supabase 数据库密码，供 CLI 迁移使用 |
+| Secret | `VERCEL_TOKEN` | 有目标团队和项目部署权限的 Vercel token |
+| Variable | `SUPABASE_PROJECT_REF` | 当前项目 `qietzaqhmforixtpicjd` |
+| Variable | `VERCEL_ORG_ID` | 当前团队 `team_cU33prMrSFgbhI1qNpC2fmnw` |
+| Variable | `VERCEL_PROJECT_ID` | 当前项目 `prj_GETdvx0784lNbGkn0MnLa6DOTMjy` |
+
+这些 ID 来自现有本地项目绑定，切换目标时需重新核对。缺少任一配置时发布在云端写入前失败。配置凭据后可在 Actions → CI and production deployment → Run workflow 选择 `main` 首次发布；也可等待下一次合并。建议把 `Check and test` 设为 main 分支保护的必需检查。
+
+Vercel 项目根保持仓库根，Production 中需已有 `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_API_BASE_URL`。工作流校验前端指向本次部署的 Supabase 项目，再开始构建。Supabase 的运行时 secrets（例如专用 `DATABASE_URL`、`ALLOWED_ORIGINS`、`MCP_PUBLIC_URL`）和 Auth provider/回调配置仍在 Supabase 管理，不从仓库覆盖。**自动发布代码不会自动开通 Google/GitHub 登录。**
+
+`jobs`、`github-webhook` 尚需单独配置 GitHub 凭据、HMAC、后台 token 和 Cron，暂不纳入自动发布；按下文后台任务流程单独启用。Supabase CLI 固定为 3.0.0，Vercel CLI 固定为 65.12.1；升级时一起核对参数和部署结果。
+
+发布不是跨服务事务：迁移成功后若函数或 Vercel 发布失败，已执行的迁移不会撤销。迁移必须兼容旧前端/函数，破坏性变更拆分发布。修复原因后重新运行失败的 job，或重新运行 main 工作流；已应用迁移由 Supabase 迁移记录跳过。前端紧急恢复可使用 Vercel 的历史部署回滚，后端可从已验证版本手动重新部署函数；数据库用新迁移向前修复，不自动执行 down/reset，恢复备份需单独评估。
 
 ## MCP
 

@@ -1,0 +1,125 @@
+name: CI and production deployment
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never interrupt a production migration or publish midway through a run.
+concurrency:
+  group: delivery-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Check and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      ROSTER_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/roster_test
+      ROSTER_ACTIVITY_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/roster_activity_test
+      ROSTER_INTEGRATIONS_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/roster_integrations_test
+      ROSTER_IMPORT_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/roster_import_test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Install fixed project toolchain
+        run: node scripts/toolchain.mjs setup
+      - name: Formatting, lint, types and architecture
+        run: node scripts/toolchain.mjs check
+      - name: Frontend tests
+        run: node scripts/toolchain.mjs test:web
+      - name: Frontend build
+        run: node scripts/toolchain.mjs build
+      - name: Create isolated databases and apply all migrations
+        shell: bash
+        run: |
+          psql postgresql://postgres@127.0.0.1:5432/postgres -v ON_ERROR_STOP=1 \
+            -c 'CREATE ROLE anon NOLOGIN' -c 'CREATE ROLE authenticated NOLOGIN'
+          for database in roster_test roster_activity_test roster_integrations_test roster_import_test; do
+            createdb -h 127.0.0.1 -U postgres "$database"
+            DATABASE_URL="postgresql://postgres@127.0.0.1:5432/$database" \
+              node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read scripts/migrate.ts
+          done
+      - name: Backend tests including Postgres integration
+        run: node scripts/toolchain.mjs deno task test
+
+  deploy:
+    name: Deploy production
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check deployment configuration before touching production
+        shell: bash
+        run: |
+          missing=0
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_REF VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing GitHub Actions secret or variable: $name"
+              missing=1
+            fi
+          done
+          exit "$missing"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+        with:
+          version: 3.0.0
+      - name: Install Vercel CLI
+        run: npm install --global vercel@65.12.1
+      - name: Pull production frontend configuration
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Require production frontend settings
+        run: |
+          node --env-file=.vercel/.env.production.local --input-type=module <<'JS'
+          for (const name of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_API_BASE_URL']) {
+            if (!process.env[name]) throw new Error(`Missing Vercel production variable: ${name}`);
+          }
+          const base = `https://${process.env.SUPABASE_PROJECT_REF}.supabase.co`;
+          if (process.env.VITE_SUPABASE_URL.replace(/\/$/, '') !== base ||
+              process.env.VITE_API_BASE_URL.replace(/\/$/, '') !== `${base}/functions/v1/api`) {
+            throw new Error('Vercel frontend must target the Supabase project being deployed');
+          }
+          JS
+      - name: Build frontend before changing the backend
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+      - name: Apply production database migrations
+        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --yes
+      - name: Deploy API and MCP
+        run: supabase functions deploy api mcp --remote="$SUPABASE_PROJECT_REF" --use-api --yes
+      - name: Publish prebuilt frontend
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

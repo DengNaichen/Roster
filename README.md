@@ -17,7 +17,7 @@
 - SQLite 全量快照迁入、Linear 导入、Postgres 备份与恢复工具。
 - REST、MCP、Supabase JWT 校验、网页登录与 OAuth 授权界面。
 
-原生产 MCP 的 45 个工具均已迁移并有契约清单测试。本仓库没有 CI/CD；验证和部署手动执行。GitHub 真实仓库连接、Supabase OAuth 与云端 Cron 需要部署凭据/配置；本地测试不向外部仓库发消息。
+原生产 MCP 的 45 个工具均已迁移并有契约清单测试。GitHub Actions 在 PR 中运行验证，合并到 `main` 后自动部署数据库、API/MCP 和前端；首次启用需要配置部署凭据。GitHub 真实仓库连接、Supabase OAuth 与云端 Cron 需要部署凭据/配置；本地测试不向外部仓库发消息。
 
 ## 目录
 
@@ -75,6 +75,6 @@ node scripts/toolchain.mjs deno task test
 
 MCP 使用 Supabase 默认 `authenticated` audience，提供受保护资源发现。目前没有资源专属 JWT audience 绑定；真实远端 OAuth 登录、刷新及客户端兼容仍需在部署环境验收。
 
-## 手动部署
+## 部署
 
-部署步骤、环境变量和未验证边界见 [开发说明](docs/DEVELOPMENT.md)。不得把 `DATABASE_URL` 或 service-role key 写入任何 `VITE_*` 变量。
+自动部署、手动恢复、环境变量和未验证边界见 [开发说明](docs/DEVELOPMENT.md)。不得把 `DATABASE_URL` 或 service-role key 写入任何 `VITE_*` 变量。
