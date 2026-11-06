@@ -5,7 +5,7 @@ description: "管理 Roster 的分支、worktree 及其本地预览隔离、提�
 
 # Git Workflow
 
-本 skill 拥有 Roster 的 Git 操作流程。远端只有 GitHub `DengNaichen/Roster`（`origin`），用 `gh` 操作，首次使用前检查 `gh auth status`。本仓库没有 CI/CD，验证在本地执行。
+本 skill 拥有 Roster 的 Git 操作流程。远端只有 GitHub `DengNaichen/Roster`（`origin`），用 `gh` 操作，首次使用前检查 `gh auth status`。GitHub Actions 在 PR 中执行验证，合并 main 后自动部署生产；提交前仍须本地验证。配置和恢复方式见 docs/DEVELOPMENT.md。
 
 ## 开始前检查
 
