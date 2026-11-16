@@ -24,6 +24,7 @@ import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
 import { restCreateIssueSchema, restUpdateIssueSchema } from '../http/compat.ts';
+import { compressMcpResponse } from './compression.ts';
 const compatibleIssueFields = {
   type: z.union([createIssueSchema.shape.type, z.literal('')]),
   assignee: z.union([createIssueSchema.shape.assignee, z.literal('')]),
@@ -724,6 +725,6 @@ export function createMcpFetch(options: McpOptions) {
     const handler = createMcpHandler(() => createMcpServer(options.service, ctx, match[1]));
     const response = await handler.fetch(request);
     for (const [key, value] of headers) response.headers.set(key, value);
-    return response;
+    return compressMcpResponse(request, response);
   };
 }
