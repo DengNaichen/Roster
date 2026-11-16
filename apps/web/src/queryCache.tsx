@@ -1,3 +1,4 @@
+import { writeFilter } from "./issueCache";
 import { writeStarted, writeFinished } from "./integration/cache-events";
 import {
   QueryCache,
@@ -109,12 +110,20 @@ export function createCacheScope(client: QueryClient, subject: string) {
   const pending = new Map<string | null, number>();
   const queues = new Map<string, Promise<unknown>>();
   const waiters = new Map<string | null, Set<() => void>>();
-  const filter = (path: string) => ({
-    predicate: (query: Query) => belongs(query, subject, workspaceScope(path)),
+  const filter = (path: string, properties = false) => ({
+    predicate: writeFilter(subject, path, client, properties),
   });
+  const confirmations = new Set<(path: string, value: unknown) => void>();
   return {
     client,
     subject,
+    onConfirmed(listener: (path: string, value: unknown) => void) {
+      confirmations.add(listener);
+      return () => confirmations.delete(listener);
+    },
+    confirm(path: string, value: unknown) {
+      confirmations.forEach((listener) => listener(path, value));
+    },
     reject(path: string, error: unknown) {
       // A forbidden write or missing sub-resource need not deny reading the parent.
       // Only explicit workspace denial proves access loss; otherwise the ensuing GET decides.
@@ -130,7 +139,7 @@ export function createCacheScope(client: QueryClient, subject: string) {
     },
     async enqueue<T>(path: string, entities: string[], run: () => Promise<T>) {
       const keys = entities.map((entity) => JSON.stringify([workspaceScope(path), entity]));
-      const operation = Promise.all(keys.map((key) => queues.get(key))).then(run);
+      const operation = Promise.all(keys.map((key) => queues.get(key)?.catch(() => {}))).then(run);
       keys.forEach((key) => queues.set(key, operation));
       try {
         return await operation;
@@ -143,12 +152,23 @@ export function createCacheScope(client: QueryClient, subject: string) {
     invalidate(path: string, active = false) {
       return client.invalidateQueries({ ...filter(path), refetchType: active ? "active" : "none" });
     },
-    beginWrite(path: string) {
+    beginWrite(path: string, options: { invalidate?: boolean; properties?: boolean } = {}) {
       const workspace = workspaceScope(path);
       const count = pending.get(workspace) ?? 0;
       pending.set(workspace, count + 1);
-      if (!count) void client.cancelQueries(filter(path));
-      void client.invalidateQueries({ ...filter(path), refetchType: "none" });
+      const affected = filter(path, options.properties);
+      const interrupted = client
+        .getQueryCache()
+        .findAll(affected)
+        .filter((query) => query.state.fetchStatus !== "idle")
+        .map((query) => ({ query, state: query.state }));
+      // Each newly queued write must cancel its own affected old reads, even when another entity is pending.
+      void client.cancelQueries(affected);
+      interrupted.forEach(({ query, state }) =>
+        query.setState({ ...state, fetchStatus: "idle", isInvalidated: true }),
+      );
+      if (options.invalidate !== false)
+        void client.invalidateQueries({ ...affected, refetchType: "none" });
       let released = false;
       return () => {
         if (released) return;
@@ -162,7 +182,10 @@ export function createCacheScope(client: QueryClient, subject: string) {
           ready?.forEach((resolve) => resolve());
           // Cancellation must defer an initial/refresh read, never leave it idle forever.
           void client.refetchQueries(
-            { ...filter(path), type: "active", stale: true },
+            {
+              predicate: (query) => belongs(query, subject, workspace) && query.state.isInvalidated,
+              type: "active",
+            },
             { cancelRefetch: false },
           );
         }

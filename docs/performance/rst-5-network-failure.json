@@ -1,0 +1,49 @@
+{
+  "mode": "real browser Network.setBlockedURLs; normal local API readback",
+  "at": "2026-11-16T09:08:40.431Z",
+  "beforePriority": 3,
+  "afterPriority": 3,
+  "title": "Medium",
+  "pending": null,
+  "alerts": [
+    "Failed to fetch"
+  ],
+  "requests": [
+    {
+      "resource": "issues",
+      "method": "PATCH",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 35.60000002384186,
+      "endMs": 38.90000009536743
+    },
+    {
+      "resource": "issues",
+      "method": "GET",
+      "status": 200,
+      "bytes": 32,
+      "sqlCount": 3,
+      "startMs": 39.40000009536743,
+      "endMs": 48.10000002384186
+    },
+    {
+      "resource": "issues",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 39.5,
+      "endMs": 42.10000002384186
+    },
+    {
+      "resource": "teams",
+      "method": "GET",
+      "status": null,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 39.60000002384186,
+      "endMs": null
+    }
+  ]
+}

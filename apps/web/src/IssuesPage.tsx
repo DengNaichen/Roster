@@ -97,7 +97,7 @@ export default function IssuesPage({
     issues,
     loading: issuesLoading,
     loadError,
-    savingPriorities,
+    pendingIssues,
     loadIssues,
     moveIssue: moveIssueRequest,
     changePriority,
@@ -229,8 +229,6 @@ export default function IssuesPage({
 
   async function moveIssue(identifier: string, status: Status) {
     await moveIssueRequest(identifier, status);
-    window.dispatchEvent(new Event(triageChanged));
-    await cycle.reload();
   }
   async function addIssue(issue: IssueSummary) {
     setSavedIssue(issue);
@@ -520,7 +518,7 @@ export default function IssuesPage({
               actions={{
                 selected: selectedVisible,
                 toggle: toggleIssue,
-                savingPriorities,
+                pendingIssues,
                 changePriority,
                 moveIssue,
               }}

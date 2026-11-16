@@ -1,3 +1,4 @@
+import { useIssueMutations } from "./issueMutations";
 import { Dropdown } from "./Dropdown";
 import { UnavailableField, useCapabilities } from "./Capabilities";
 import { CycleSelect } from "./Cycles";
@@ -67,7 +68,6 @@ export function IssueDetail({
   const [activityTab, setActivityTab] = useState<"comments" | "work-logs">("comments");
   const [comment, setComment] = useState("");
   const [labelsOpen, setLabelsOpen] = useState(false);
-  const [savingPriority, setSavingPriority] = useState(false);
   const [savingCycle, setSavingCycle] = useState(false);
   const [savingAssignee, setSavingAssignee] = useState(false);
   const pendingCriteria = useRef(0);
@@ -83,38 +83,17 @@ export function IssueDetail({
   const commentRevision = useRef(0);
   const delegationHistory = useRef<HTMLElement>(null);
 
-  async function changeStatus(status: Status) {
-    await requests.write(
-      identifier,
-      () => api<Issue>(`${path}/status`, "PATCH", { status }),
-      (updated) => setIssue((current) => ({ ...current!, ...updated })),
-      (cause) => setError(cause.message),
-    );
-  }
-
-  async function changePriority(priority: Priority) {
-    setSavingPriority(true);
-    setError("");
-    await requests.write(
-      identifier,
-      () => api<Issue>(path, "PATCH", { priority }),
-      (updated) => {
-        setIssue((current) => ({ ...current!, ...updated }));
-        setSavingPriority(false);
-      },
-      (cause) => {
-        setError(cause.message);
-        setSavingPriority(false);
-      },
-    );
-  }
+  const properties = useIssueMutations(apiPath("/issues"), setError);
+  const pending = properties.pendingIssues.includes(identifier);
+  const changeStatus = (status: Status) => properties.moveIssue(identifier, status);
+  const changePriority = (priority: Priority) => properties.changePriority(identifier, priority);
 
   async function changeCycle(cycle_id: number) {
     setSavingCycle(true);
     setError("");
     await requests.write(
       identifier,
-      () => api<Issue>(path, "PATCH", { cycle_id }),
+      (api) => api<Issue>(path, "PATCH", { cycle_id }),
       (updated) => {
         setIssue((current) => ({ ...current!, ...updated }));
         setSavingCycle(false);
@@ -130,7 +109,7 @@ export function IssueDetail({
     setError("");
     const saved = await requests.write(
       identifier,
-      () => api<Issue>(path, "PATCH", { assignee }),
+      (api) => api<Issue>(path, "PATCH", { assignee }),
       (updated) => {
         setIssue((current) => ({ ...current!, ...updated }));
         setSavingAssignee(false);
@@ -159,7 +138,7 @@ export function IssueDetail({
     try {
       await requests.write(
         identifier,
-        () => api<Issue>(`${path}/criteria/${encodeURIComponent(criterion)}`, "PATCH", { done }),
+        (api) => api<Issue>(`${path}/criteria/${encodeURIComponent(criterion)}`, "PATCH", { done }),
         (updated) => {
           const later = pendingCriteria.current > 1;
           setIssue((current) => ({
@@ -186,7 +165,7 @@ export function IssueDetail({
     setError("");
     await requests.write(
       identifier,
-      () => api<Comment>(`${path}/comments`, "POST", { body: comment }),
+      (api) => api<Comment>(`${path}/comments`, "POST", { body: comment }),
       (added) => {
         setIssue((current) => ({ ...current!, comments: [...current!.comments, added] }));
         if (commentRevision.current === submittedRevision) setComment("");
@@ -224,6 +203,11 @@ export function IssueDetail({
     <div className="detail">
       <div className="detail-content">
         {loadError && <RequestError message={loadError} />}
+        {pending && (
+          <p className="scope-description" role="status">
+            Saving changes…
+          </p>
+        )}
         <header className="detail-heading">
           <h1>{issue.title}</h1>
         </header>
@@ -234,7 +218,11 @@ export function IssueDetail({
               <div>
                 <dt className="detail-property-term">Status</dt>
                 <dd>
-                  <StatusSelect issue={issue} onChange={(status) => void changeStatus(status)} />
+                  <StatusSelect
+                    issue={issue}
+                    pending={pending}
+                    onChange={(status) => void changeStatus(status)}
+                  />
                 </dd>
               </div>
               <div>
@@ -243,7 +231,7 @@ export function IssueDetail({
                   <PrioritySelect
                     priority={issue.priority}
                     label={`Change priority for ${identifier}`}
-                    disabled={savingPriority}
+                    pending={pending}
                     emptyLabel="Set priority"
                     onChange={(next) => void changePriority(next)}
                   />
@@ -627,7 +615,7 @@ function IssueEditor({
   onClose: () => void;
   onSave: (issue: Issue) => Promise<void>;
   write: (
-    save: () => Promise<Issue>,
+    save: (request: typeof api) => Promise<Issue>,
     success: (issue: Issue) => void,
     failure: (cause: Error) => void,
   ) => Promise<boolean>;
@@ -660,7 +648,7 @@ function IssueEditor({
     setError("");
     const path = apiPath(`/issues/${issue.identifier}`);
     await write(
-      async () => {
+      async (api) => {
         const fields = { title, status, priority, project_id: projectID };
         if (summary === issue.document.lead) return api<Issue>(path, "PATCH", fields);
         // Only the summary is edited here; keep sections and criteria an agent may have changed since.

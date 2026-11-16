@@ -1,0 +1,79 @@
+{
+  "at": "2026-11-16T09:11:05.279Z",
+  "mode": "restricted local application service membership change; actual REST PATCH 403",
+  "privateTitleVisible": false,
+  "alerts": [
+    "Workspace access denied",
+    "Workspace access denied",
+    "Workspace access denied"
+  ],
+  "requests": [
+    {
+      "resource": "issues",
+      "method": "PATCH",
+      "status": 403,
+      "bytes": 66,
+      "sqlCount": null,
+      "startMs": 26.899999976158142,
+      "endMs": 31.899999976158142
+    },
+    {
+      "resource": "teams",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 30.799999952316284,
+      "endMs": 34.700000047683716
+    },
+    {
+      "resource": "labels",
+      "method": "GET",
+      "status": 403,
+      "bytes": 66,
+      "sqlCount": null,
+      "startMs": 30.899999976158142,
+      "endMs": 34.700000047683716
+    },
+    {
+      "resource": "other",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 31,
+      "endMs": 34.700000047683716
+    },
+    {
+      "resource": "issues",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 31,
+      "endMs": 34.700000047683716
+    },
+    {
+      "resource": "teams",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 31.100000023841858,
+      "endMs": 31.799999952316284
+    },
+    {
+      "resource": "teams",
+      "method": "GET",
+      "status": 0,
+      "bytes": null,
+      "sqlCount": null,
+      "startMs": 31.100000023841858,
+      "endMs": 31.799999952316284
+    }
+  ],
+  "recovered": {
+    "title": "Permission fixture issue",
+    "priority": "Medium"
+  }
+}

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { api, apiPath, RequestError } from "./shared";
+import { apiPath, RequestError } from "./shared";
 import { CyclePage, CycleSettings, emptyCycles } from "./Cycles";
 import { useRequestScope } from "./useRequestScope";
 import { useResource } from "./useResource";
@@ -89,7 +89,7 @@ function CycleSettingsForm({
     setError("");
     await requests.write(
       team,
-      () => api<CyclePage>(apiPath(`/teams/${encodeURIComponent(team)}/cycles`), "PUT", draft),
+      (api) => api<CyclePage>(apiPath(`/teams/${encodeURIComponent(team)}/cycles`), "PUT", draft),
       (page) => {
         onSaved(page);
         setSaving(false);
