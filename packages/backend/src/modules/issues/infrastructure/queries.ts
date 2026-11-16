@@ -1,8 +1,13 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
 import { type Issue, type RequestContext, statuses } from '../../../../../contracts/mod.ts';
 import type { Service } from '../../../application/mod.ts';
-import type { Database } from '../../../platform/database/client.ts';
-import { type Executor, one, type Row, rows } from '../../../platform/database/query.ts';
+import {
+  type Executor,
+  measuredExecutor,
+  one,
+  type Row,
+  rows,
+} from '../../../platform/database/query.ts';
 import { createSession } from '../../../platform/database/session.ts';
 import { fail } from '../../../platform/errors/validation.ts';
 import { iso } from '../../../platform/time.ts';
@@ -91,7 +96,8 @@ export async function validateParent(
   return p.id;
 }
 
-export function createIssueQueries(db: Database): Pick<Service, 'listIssues' | 'getIssue'> {
+export function createIssueQueries(executor: Executor): Pick<Service, 'listIssues' | 'getIssue'> {
+  const db = measuredExecutor(executor);
   const session = createSession(db);
   return {
     async listIssues(ctx, slug, input = {}) {

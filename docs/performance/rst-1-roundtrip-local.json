@@ -1,0 +1,3334 @@
+{
+  "schema": 2,
+  "workspace": "perf-baseline-v2",
+  "method": "input event to DOM match and two animation frames",
+  "measuredAt": "2026-11-16T05:55:02.009Z",
+  "environment": {
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "origin": "http://127.0.0.1:5260",
+    "visibility": "visible",
+    "online": true
+  },
+  "samples": [
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 365.8000000715256,
+      "matchedAt": 1794808492120.2,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 370.7000000476837,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.5,
+          "endMs": 23
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 315.5,
+          "endMs": 355.2000000476837
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 315.7000000476837,
+          "endMs": 328.7000000476837
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 315.8000000715256,
+          "endMs": 329.10000002384186
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 315.90000009536743,
+          "endMs": 359.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 316,
+          "endMs": 333.90000009536743
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 316,
+          "endMs": 331.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 364.40000009536743,
+          "endMs": null
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 364.60000002384186,
+          "endMs": null
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 364.7000000476837,
+          "endMs": null
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 364.8000000715256,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 4,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 87.70000004768372,
+      "matchedAt": 1794808492306.8,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 97.39999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9,
+          "endMs": 24.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.200000047683716,
+          "endMs": 16.600000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.299999952316284,
+          "endMs": 16.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.299999952316284,
+          "endMs": 16.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.299999952316284,
+          "endMs": 38.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 28.899999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 28.899999976158142
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.600000023841858,
+          "endMs": 33.10000002384186
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.600000023841858,
+          "endMs": 42.60000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 47.10000002384186,
+      "matchedAt": 1794808492616.2,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 58,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.100000023841858,
+          "endMs": 18.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.399999976158142,
+          "endMs": 34.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.399999976158142,
+          "endMs": 18.700000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 19.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 43.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 22.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.600000023841858,
+          "endMs": 21.899999976158142
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46,
+          "endMs": 50.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46.200000047683716,
+          "endMs": 55
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46.39999997615814,
+          "endMs": 50.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46.5,
+          "endMs": 57.10000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 79.5,
+      "matchedAt": 1794808492799.0999,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 89.79999995231628,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.600000023841858,
+          "endMs": 22.899999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.799999952316284,
+          "endMs": 22.700000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.799999952316284,
+          "endMs": 21.799999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.899999976158142,
+          "endMs": 23.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.899999976158142,
+          "endMs": 26.399999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16,
+          "endMs": 27.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16,
+          "endMs": 24.299999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.100000023841858,
+          "endMs": 28.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.200000047683716,
+          "endMs": 44.60000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 29.299999952316284,
+      "matchedAt": 1794808493113.5999,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 41.299999952316284,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10,
+          "endMs": 13.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.199999928474426,
+          "endMs": 20.399999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.299999952316284,
+          "endMs": 13.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 13.599999904632568
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 25.59999990463257
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 15.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 15.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 28,
+          "endMs": 30.199999928474426
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 28.199999928474426,
+          "endMs": 35.09999990463257
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 28.299999952316284,
+          "endMs": 31.399999976158142
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 28.399999976158142,
+          "endMs": 38.09999990463257
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 71.89999997615814,
+      "matchedAt": 1794808493307,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 82.89999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 23.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.100000023841858,
+          "endMs": 23.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.200000047683716,
+          "endMs": 23.200000047683716
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.299999952316284,
+          "endMs": 24.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.299999952316284,
+          "endMs": 25.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.399999976158142,
+          "endMs": 27
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.399999976158142,
+          "endMs": 25.100000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.5,
+          "endMs": 27.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.5,
+          "endMs": 30.5
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 51.799999952316284,
+      "matchedAt": 1794808493687.9,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 65.60000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 15.799999952316284,
+          "endMs": 21.200000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16,
+          "endMs": 36.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.100000023841858,
+          "endMs": 21.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.100000023841858,
+          "endMs": 22
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.299999952316284,
+          "endMs": 48.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.299999952316284,
+          "endMs": 23.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.399999976158142,
+          "endMs": 24.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 50.60000002384186,
+          "endMs": 56.200000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 50.700000047683716,
+          "endMs": 62.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 50.89999997615814,
+          "endMs": 61.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 51,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 54.10000002384186,
+      "matchedAt": 1794808493845.7,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 63.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.600000023841858,
+          "endMs": 16.799999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.899999976158142,
+          "endMs": 16.799999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.899999976158142,
+          "endMs": 16.799999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5,
+          "endMs": 16.799999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.100000023841858,
+          "endMs": 19.100000023841858
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.299999952316284,
+          "endMs": 19.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.299999952316284,
+          "endMs": 19.299999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.399999976158142,
+          "endMs": 19.299999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.399999976158142,
+          "endMs": 23.299999952316284
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 50.5,
+      "matchedAt": 1794808494176.2,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.299999952316284,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.299999952316284,
+          "endMs": 21.299999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 36.699999928474426
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 20.899999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 21.199999928474426
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 46.39999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 30.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 30.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 48.89999997615814,
+          "endMs": 52.799999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.10000002384186,
+          "endMs": 53.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.299999952316284,
+          "endMs": 52.799999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.39999997615814,
+          "endMs": 55.60000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 71.39999997615814,
+      "matchedAt": 1794808494372.0999,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 81,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 17.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.799999952316284,
+          "endMs": 16.699999928474426
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 16.799999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 18.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11,
+          "endMs": 24.199999928474426
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11,
+          "endMs": 22.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 24.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 24.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 33.5
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 43.39999997615814,
+      "matchedAt": 1794808494685.7,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 51.09999990463257,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 8.899999976158142,
+          "endMs": 14.799999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.099999904632568,
+          "endMs": 28.399999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.299999952316284,
+          "endMs": 14.599999904632568
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.299999952316284,
+          "endMs": 14.699999928474426
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.399999976158142,
+          "endMs": 40.699999928474426
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.399999976158142,
+          "endMs": 17.59999990463257
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 17.59999990463257
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 42.5,
+          "endMs": 46.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 42.699999928474426,
+          "endMs": null
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 42.799999952316284,
+          "endMs": 49.09999990463257
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 42.89999997615814,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 2,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 55.300000071525574,
+      "matchedAt": 1794808494855.8,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 64.39999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.700000047683716,
+          "endMs": 19.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.8000000715255737,
+          "endMs": 18.600000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.899999976158142,
+          "endMs": 19.700000047683716
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.899999976158142,
+          "endMs": 19.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.899999976158142,
+          "endMs": 23
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4,
+          "endMs": 21.399999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.100000023841858,
+          "endMs": 22.899999976158142
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.100000023841858,
+          "endMs": 23.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.200000047683716,
+          "endMs": 26.5
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 56.09999990463257,
+      "matchedAt": 1794808495181.4,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 68.09999990463257,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 20.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.099999904632568,
+          "endMs": 47.89999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.099999904632568,
+          "endMs": 25
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 25
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 52.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.299999952316284,
+          "endMs": 31.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.299999952316284,
+          "endMs": 31.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 54.89999997615814,
+          "endMs": 57.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 55.09999990463257,
+          "endMs": 59.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 55.199999928474426,
+          "endMs": 58.59999990463257
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 55.199999928474426,
+          "endMs": 61
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 83.90000009536743,
+      "matchedAt": 1794808495368.8,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 93.90000009536743,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.600000023841858,
+          "endMs": 25.40000009536743
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.90000009536743,
+          "endMs": 26.800000071525574
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.100000023841858,
+          "endMs": 26.800000071525574
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.100000023841858,
+          "endMs": 26.90000009536743
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.200000047683716,
+          "endMs": 33.90000009536743
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.40000009536743,
+          "endMs": 35
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.40000009536743,
+          "endMs": 35
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.40000009536743,
+          "endMs": 36.90000009536743
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.5,
+          "endMs": 42.700000047683716
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 53.89999997615814,
+      "matchedAt": 1794808495695.5,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 76.29999995231628,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.200000047683716,
+          "endMs": 20.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 42.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 17.799999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 17.799999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 50.89999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 28.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 28.399999976158142
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52.700000047683716,
+          "endMs": 55.200000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52.89999997615814,
+          "endMs": 57.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 53.10000002384186,
+          "endMs": 56.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 53.10000002384186,
+          "endMs": 60
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 60.700000047683716,
+      "matchedAt": 1794808495861.5999,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 69.90000009536743,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.4000000953674316,
+          "endMs": 15.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.600000023841858,
+          "endMs": 15.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.8000000715255737,
+          "endMs": 15.200000047683716
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.8000000715255737,
+          "endMs": 15.200000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.9000000953674316,
+          "endMs": 18.600000023841858
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.9000000953674316,
+          "endMs": 19
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 3.9000000953674316,
+          "endMs": 19
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4,
+          "endMs": 20
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4,
+          "endMs": 29.200000047683716
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 56.89999997615814,
+      "matchedAt": 1794808496191.5,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 67,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.200000047683716,
+          "endMs": 24.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.399999976158142,
+          "endMs": 40.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.5,
+          "endMs": 24.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.600000023841858,
+          "endMs": 24.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.600000023841858,
+          "endMs": 53.60000002384186
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.700000047683716,
+          "endMs": 27.399999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.700000047683716,
+          "endMs": 27.399999976158142
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 55.89999997615814,
+          "endMs": 60
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56,
+          "endMs": 66.29999995231628
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56.10000002384186,
+          "endMs": 61.799999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 56.200000047683716,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 76.5,
+      "matchedAt": 1794808496378.5,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 86.10000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.300000071525574,
+          "endMs": 21.899999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.5,
+          "endMs": 22.600000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.5,
+          "endMs": 22.700000047683716
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.5,
+          "endMs": 22.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.600000023841858,
+          "endMs": 30.600000023841858
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.700000047683716,
+          "endMs": 31.600000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.700000047683716,
+          "endMs": 31.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.700000047683716,
+          "endMs": 33.10000002384186
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.700000047683716,
+          "endMs": 38.300000071525574
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 40.89999997615814,
+      "matchedAt": 1794808496682.5,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 51.700000047683716,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.200000047683716,
+          "endMs": 15.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 27.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 15.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 15.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 38
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 17
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 17.200000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 39.799999952316284,
+          "endMs": 44.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 39.89999997615814,
+          "endMs": 48.200000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 40.10000002384186,
+          "endMs": 47.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 40.10000002384186,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 72.09999990463257,
+      "matchedAt": 1794808496873.4,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 80.69999992847443,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.299999952316284,
+          "endMs": 23.09999990463257
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.5,
+          "endMs": 23
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.5,
+          "endMs": 23.59999990463257
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.59999990463257,
+          "endMs": 23.59999990463257
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.699999928474426,
+          "endMs": 34.89999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.799999952316284,
+          "endMs": 32.89999997615814
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.799999952316284,
+          "endMs": 35
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 35
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 44.199999928474426
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 44.09999990463257,
+      "matchedAt": 1794808497194.9,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 50.89999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 17.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.599999904632568,
+          "endMs": 31.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 17.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.799999952316284,
+          "endMs": 17.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 40.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 23
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 23.09999990463257
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 42.799999952316284,
+          "endMs": 46.799999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 43,
+          "endMs": 49
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 43.09999990463257,
+          "endMs": 49
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 43.09999990463257,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 66.89999997615814,
+      "matchedAt": 1794808497374.0999,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 75.29999995231628,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 6.799999952316284,
+          "endMs": 17.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7,
+          "endMs": 17.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7,
+          "endMs": 17.5
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.100000023841858,
+          "endMs": 17.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.100000023841858,
+          "endMs": 21.799999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.299999952316284,
+          "endMs": 19.600000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.399999976158142,
+          "endMs": 19.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.399999976158142,
+          "endMs": 21.799999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 7.5,
+          "endMs": 30.600000023841858
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 46.800000071525574,
+      "matchedAt": 1794808497688.7,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.60000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.800000071525574,
+          "endMs": 16.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10,
+          "endMs": 37.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10,
+          "endMs": 17.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.100000023841858,
+          "endMs": 17.200000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.200000047683716,
+          "endMs": 43.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.200000047683716,
+          "endMs": 26.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.200000047683716,
+          "endMs": 26.100000023841858
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.300000071525574,
+          "endMs": 47.800000071525574
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.5,
+          "endMs": 50.200000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.800000071525574,
+          "endMs": 49.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.800000071525574,
+          "endMs": 52.800000071525574
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 74.10000002384186,
+      "matchedAt": 1794808497876,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 83.70000004768372,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.800000071525574,
+          "endMs": 24.100000023841858
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.90000009536743,
+          "endMs": 27.90000009536743
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17,
+          "endMs": 28.100000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.100000023841858,
+          "endMs": 28.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.100000023841858,
+          "endMs": 38.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.200000047683716,
+          "endMs": 36.800000071525574
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.300000071525574,
+          "endMs": 36.90000009536743
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.300000071525574,
+          "endMs": 38.90000009536743
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.300000071525574,
+          "endMs": 42.200000047683716
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 46.5,
+      "matchedAt": 1794808498205.0999,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 67.70000004768372,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 16.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.200000047683716,
+          "endMs": 32
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.299999952316284,
+          "endMs": 16.299999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.299999952316284,
+          "endMs": 16.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 43
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 20.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 20.100000023841858
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.200000047683716,
+          "endMs": 47.700000047683716
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.39999997615814,
+          "endMs": 49.89999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.5,
+          "endMs": 49.10000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 45.5,
+          "endMs": 52.39999997615814
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 82.89999997615814,
+      "matchedAt": 1794808498400.5999,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 92.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.899999976158142,
+          "endMs": 24.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19,
+          "endMs": 24.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.100000023841858,
+          "endMs": 24.100000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.199999928474426,
+          "endMs": 24.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.199999928474426,
+          "endMs": 35.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.199999928474426,
+          "endMs": 35.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.299999952316284,
+          "endMs": 33.299999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.299999952316284,
+          "endMs": 36.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.399999976158142,
+          "endMs": 45.39999997615814
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 65.39999997615814,
+      "matchedAt": 1794808498740.4,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 85.20000004768372,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 26.200000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 56.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 26.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.800000071525574,
+          "endMs": 25.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.800000071525574,
+          "endMs": 62.39999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.899999976158142,
+          "endMs": 36.10000002384186
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11,
+          "endMs": 37.300000071525574
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 64.39999997615814,
+          "endMs": 73.30000007152557
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 64.60000002384186,
+          "endMs": 78.20000004768372
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 64.70000004768372,
+          "endMs": 77.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 64.70000004768372,
+          "endMs": 80.70000004768372
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 78.10000002384186,
+      "matchedAt": 1794808498913.3,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 87.39999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.600000023841858,
+          "endMs": 45.10000002384186
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.799999952316284,
+          "endMs": 44.799999952316284
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 44.799999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 45.699999928474426
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.899999976158142,
+          "endMs": 47.699999928474426
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18,
+          "endMs": 49
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.100000023841858,
+          "endMs": 47.799999952316284
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.199999928474426,
+          "endMs": 49
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 18.199999928474426,
+          "endMs": 51.10000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 52.800000071525574,
+      "matchedAt": 1794808499237.2,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.300000071525574,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.800000071525574,
+          "endMs": 29.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.200000047683716,
+          "endMs": 42.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.200000047683716,
+          "endMs": 30.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.300000071525574,
+          "endMs": 30.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.40000009536743,
+          "endMs": 49.300000071525574
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.5,
+          "endMs": 34.90000009536743
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 20.5,
+          "endMs": 33
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 51.700000047683716,
+          "endMs": 56.90000009536743
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 51.800000071525574,
+          "endMs": null
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52,
+          "endMs": 58.10000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": null,
+          "startMs": 52,
+          "endMs": null
+        }
+      ],
+      "pendingAtVisible": 2,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 79.5,
+      "matchedAt": 1794808499449.2,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 88.69999992847443,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.100000023841858,
+          "endMs": 26.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.299999952316284,
+          "endMs": 26.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 26.399999976158142
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 28.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.399999976158142,
+          "endMs": 32.699999928474426
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.600000023841858,
+          "endMs": 30.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.600000023841858,
+          "endMs": 32.699999928474426
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.600000023841858,
+          "endMs": 32.699999928474426
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.699999928474426,
+          "endMs": 42.39999997615814
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 52.89999997615814,
+      "matchedAt": 1794808499761.9,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.300000071525574,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.5,
+          "endMs": 41.10000002384186
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.800000071525574,
+          "endMs": 45.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.800000071525574,
+          "endMs": 41
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.899999976158142,
+          "endMs": 41
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.899999976158142,
+          "endMs": 49.39999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10,
+          "endMs": 42.10000002384186
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10,
+          "endMs": 42.10000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 51.800000071525574,
+          "endMs": 54.800000071525574
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52,
+          "endMs": 56.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52.200000047683716,
+          "endMs": 55.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 52.200000047683716,
+          "endMs": 58.39999997615814
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 62.60000002384186,
+      "matchedAt": 1794808499946.5,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 71,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 29.700000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.800000071525574,
+          "endMs": 18.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.900000095367432,
+          "endMs": 29.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.900000095367432,
+          "endMs": 18.800000071525574
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.900000095367432,
+          "endMs": 32
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11,
+          "endMs": 32.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11,
+          "endMs": 33.10000002384186
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.200000047683716,
+          "endMs": 32.300000071525574
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.200000047683716,
+          "endMs": 35.40000009536743
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 49.89999997615814,
+      "matchedAt": 1794808500275.0999,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 60,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.199999928474426,
+          "endMs": 33.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.5,
+          "endMs": 41.60000002384186
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.5,
+          "endMs": 36.10000002384186
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.600000023841858,
+          "endMs": 36.10000002384186
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.600000023841858,
+          "endMs": 46
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.699999928474426,
+          "endMs": 37.699999928474426
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 11.699999928474426,
+          "endMs": 37.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 48.699999928474426,
+          "endMs": 50.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 48.799999952316284,
+          "endMs": 53.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 48.89999997615814,
+          "endMs": 53.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49,
+          "endMs": 54.89999997615814
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 81.79999995231628,
+      "matchedAt": 1794808500465.9,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 90.79999995231628,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.100000023841858,
+          "endMs": 20.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 20.399999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 20.399999976158142
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.399999976158142,
+          "endMs": 21.299999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 34.60000002384186
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 31.899999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 33
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.700000047683716,
+          "endMs": 34.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.799999952316284,
+          "endMs": 42.60000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 50.700000047683716,
+      "matchedAt": 1794808500784.3,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.799999952316284,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.200000047683716,
+          "endMs": 18.399999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.399999976158142,
+          "endMs": 36.39999997615814
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.600000023841858,
+          "endMs": 16.399999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.600000023841858,
+          "endMs": 17.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.700000047683716,
+          "endMs": 47.799999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.700000047683716,
+          "endMs": 25
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 9.700000047683716,
+          "endMs": 25.299999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.60000002384186,
+          "endMs": 52.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.799999952316284,
+          "endMs": 54
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.89999997615814,
+          "endMs": 53.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 49.89999997615814,
+          "endMs": 56.10000002384186
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 83.60000002384186,
+      "matchedAt": 1794808500968.7,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 93.39999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.700000047683716,
+          "endMs": 23.100000023841858
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.899999976158142,
+          "endMs": 23.100000023841858
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 16.899999976158142,
+          "endMs": 23.100000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17,
+          "endMs": 23.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17,
+          "endMs": 29.200000047683716
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.100000023841858,
+          "endMs": 25.200000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.200000047683716,
+          "endMs": 25.200000047683716
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.200000047683716,
+          "endMs": 29.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 17.200000047683716,
+          "endMs": 53
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 57.800000071525574,
+      "matchedAt": 1794808501292.2,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 67.20000004768372,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.600000023841858,
+          "endMs": 27.100000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.700000047683716,
+          "endMs": 43.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.700000047683716,
+          "endMs": 27
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.800000071525574,
+          "endMs": 27.800000071525574
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.90000009536743,
+          "endMs": 53.800000071525574
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.90000009536743,
+          "endMs": 35.700000047683716
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 19.90000009536743,
+          "endMs": 35.90000009536743
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56.5,
+          "endMs": 60.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56.60000002384186,
+          "endMs": 63.300000071525574
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56.700000047683716,
+          "endMs": 62.40000009536743
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 56.800000071525574,
+          "endMs": 65.5
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 68.40000009536743,
+      "matchedAt": 1794808501469.3,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 78,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 4.900000095367432,
+          "endMs": 15.300000071525574
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.100000023841858,
+          "endMs": 15.300000071525574
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.200000047683716,
+          "endMs": 15.300000071525574
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.200000047683716,
+          "endMs": 15.300000071525574
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.200000047683716,
+          "endMs": 19.90000009536743
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.300000071525574,
+          "endMs": 19.800000071525574
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.300000071525574,
+          "endMs": 21.600000023841858
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.400000095367432,
+          "endMs": 22.700000047683716
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.400000095367432,
+          "endMs": 31.5
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "list-to-detail",
+      "matchedMs": 47.699999928474426,
+      "matchedAt": 1794808501789.9,
+      "pendingAtMatch": 4,
+      "online": true,
+      "ms": 59.299999952316284,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.299999952316284,
+          "endMs": 18.600000023841858
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.5,
+          "endMs": 33.10000002384186
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 18.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.600000023841858,
+          "endMs": 18.699999928474426
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 45.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.699999928474426,
+          "endMs": 21.899999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 10.799999952316284,
+          "endMs": 23
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46.799999952316284,
+          "endMs": 48.89999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 46.89999997615814,
+          "endMs": 52.799999952316284
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 47.10000002384186,
+          "endMs": 50.10000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "startMs": 47.10000002384186,
+          "endMs": 53.199999928474426
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    },
+    {
+      "schema": 2,
+      "scenario": "detail-to-list",
+      "matchedMs": 56.699999928474426,
+      "matchedAt": 1794808501948,
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 65.79999995231628,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.299999952316284,
+          "endMs": 16.899999976158142
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.399999976158142,
+          "endMs": 16.899999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.5,
+          "endMs": 16.899999976158142
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.599999904632568,
+          "endMs": 16.899999976158142
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.599999904632568,
+          "endMs": 25.299999952316284
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.799999952316284,
+          "endMs": 23.399999976158142
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.799999952316284,
+          "endMs": 22.59999990463257
+        },
+        {
+          "resource": "projects",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.799999952316284,
+          "endMs": 25.299999952316284
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "startMs": 5.799999952316284,
+          "endMs": 29
+        }
+      ],
+      "pendingAtVisible": 0,
+      "visibility": "visible"
+    }
+  ]
+}
