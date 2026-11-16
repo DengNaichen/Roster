@@ -1,0 +1,2 @@
+[mcp_servers.roster-self]
+url = "https://qietzaqhmforixtpicjd.supabase.co/functions/v1/mcp/w/roster/mcp"
