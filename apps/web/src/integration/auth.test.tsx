@@ -115,6 +115,8 @@ it("shows consent errors without a loading message", async () => {
   );
   await screen.findByText("Consent unavailable");
   expect(screen.queryByText("Loading authorization…")).toBeNull();
+  expect(screen.getByText("Signed in as Member (member@example.com)")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Back to Roster" }).getAttribute("href")).toBe("/");
 });
 
 it.each([
