@@ -1,0 +1,1598 @@
+{
+  "schema": 1,
+  "workspace": "perf-baseline-v2",
+  "identifier": "PERF-50",
+  "field": "status",
+  "latencyMs": 300,
+  "count": 20,
+  "measuredAt": "2026-11-16T08:38:08.990Z",
+  "environment": {
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "origin": "http://127.0.0.1:5209",
+    "visibility": "visible",
+    "online": true
+  },
+  "method": "DOM feedback plus completed request window; Node readback outside measured window",
+  "samples": [
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 326.39999997615814,
+      "matchedAt": 1794818270118.8,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 335,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 8.300000071525574,
+          "endMs": 322
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 321.10000002384186,
+          "endMs": 636.6000000238419
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 321.39999997615814,
+          "endMs": 636.7000000476837
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.60000002384186,
+          "endMs": 636.7000000476837
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.60000002384186,
+          "endMs": 636.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 321.7000000476837,
+          "endMs": 636.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 321.8000000715256,
+          "endMs": 636.5
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 322,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 317.89999997615814,
+      "matchedAt": 1794818271068.8,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 324.7000000476837,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 6.600000023841858,
+          "endMs": 313.60000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 312.7000000476837,
+          "endMs": 626.7000000476837
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 313.10000002384186,
+          "endMs": 626.7000000476837
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.2000000476837,
+          "endMs": 626.8000000715256
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.2000000476837,
+          "endMs": 623
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 313.3000000715256,
+          "endMs": 621.3000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 313.3000000715256,
+          "endMs": 626.7000000476837
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 313.60000002384186,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 316.5,
+      "matchedAt": 1794818272025.1,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 323.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 7.799999952316284,
+          "endMs": 312.1999999284744
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 311.60000002384186,
+          "endMs": 625.7999999523163
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 311.7999999523163,
+          "endMs": 631.1999999284744
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 311.89999997615814,
+          "endMs": 626.1000000238419
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 311.89999997615814,
+          "endMs": 621.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 312.10000002384186,
+          "endMs": 631.1999999284744
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 312.1999999284744,
+          "endMs": 626
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 312.1999999284744,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 326.8000000715256,
+      "matchedAt": 1794818272985.2,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 333.60000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 8.399999976158142,
+          "endMs": 322.8000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 322,
+          "endMs": 637.1000000238419
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 322.3000000715256,
+          "endMs": 644.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 322.39999997615814,
+          "endMs": 637.2000000476837
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 322.5,
+          "endMs": 637.2000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 322.5,
+          "endMs": 644.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 322.60000002384186,
+          "endMs": 637.3000000715256
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 322.8000000715256,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 320.10000002384186,
+      "matchedAt": 1794818274031.1,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 328.10000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 4.799999952316284,
+          "endMs": 316.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 315.60000002384186,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 316,
+          "endMs": 632.5
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 316.10000002384186,
+          "endMs": 632.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 316.2000000476837,
+          "endMs": 628.1000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 316.2000000476837,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 316.2999999523163,
+          "endMs": 632.5
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 316.5,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 325.89999997615814,
+      "matchedAt": 1794818274974.9,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 332.7000000476837,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 9.399999976158142,
+          "endMs": 321.7999999523163
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 321.10000002384186,
+          "endMs": 635
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 321.39999997615814,
+          "endMs": 635
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.39999997615814,
+          "endMs": 634.2000000476837
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.60000002384186,
+          "endMs": 635
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 321.7000000476837,
+          "endMs": 633.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 321.7000000476837,
+          "endMs": 632
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 321.7999999523163,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 327.10000002384186,
+      "matchedAt": 1794818275918.9,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 335.3000000715256,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 8.200000047683716,
+          "endMs": 322.3000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 320.8000000715256,
+          "endMs": 636.9000000953674
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 321.2000000476837,
+          "endMs": 631
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.3000000715256,
+          "endMs": 637
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.40000009536743,
+          "endMs": 631.1000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 321.7000000476837,
+          "endMs": 636
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 322.10000002384186,
+          "endMs": 637
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 322.3000000715256,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.2999999523163,
+      "matchedAt": 1794818276872.8,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 330.10000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 6.899999976158142,
+          "endMs": 318.2999999523163
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 317.60000002384186,
+          "endMs": 630
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 317.7999999523163,
+          "endMs": 639.3999999761581
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 317.89999997615814,
+          "endMs": 638.3999999761581
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318,
+          "endMs": 630.1000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 318.10000002384186,
+          "endMs": 639.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 318.10000002384186,
+          "endMs": 638
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 318.2999999523163,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.10000002384186,
+      "matchedAt": 1794818277796,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 331.89999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 9.200000047683716,
+          "endMs": 319.3000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 318.8000000715256,
+          "endMs": 636
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 319,
+          "endMs": 636.1000000238419
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.10000002384186,
+          "endMs": 632.1000000238419
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.2000000476837,
+          "endMs": 632.1000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 319.3000000715256,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 319.3000000715256,
+          "endMs": 630.3000000715256
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 319.3000000715256,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 323.90000009536743,
+      "matchedAt": 1794818278731.2,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 331,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 9.100000023841858,
+          "endMs": 319.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 319,
+          "endMs": 635
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 319.3000000715256,
+          "endMs": 633.1000000238419
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.3000000715256,
+          "endMs": 641.6000000238419
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.40000009536743,
+          "endMs": 641.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 319.60000002384186,
+          "endMs": 641.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 319.60000002384186,
+          "endMs": 641.6000000238419
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 319.7000000476837,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.5,
+      "matchedAt": 1794818279681.3,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 330.10000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 6.700000047683716,
+          "endMs": 318.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 317.7000000476837,
+          "endMs": 632.4000000953674
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 317.90000009536743,
+          "endMs": 632.3000000715256
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318,
+          "endMs": 642.4000000953674
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318.10000002384186,
+          "endMs": 632.2000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 318.2000000476837,
+          "endMs": 642.4000000953674
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 318.3000000715256,
+          "endMs": 630.8000000715256
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 318.5,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 332.39999997615814,
+      "matchedAt": 1794818280738.5,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 341.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 10.600000023841858,
+          "endMs": 328
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 327.1999999284744,
+          "endMs": 640
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 327.5,
+          "endMs": 641.2999999523163
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 327.60000002384186,
+          "endMs": 649.7999999523163
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 327.7999999523163,
+          "endMs": 639.8999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 327.7999999523163,
+          "endMs": 639.7999999523163
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 327.89999997615814,
+          "endMs": 641.2999999523163
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 328,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.7999999523163,
+      "matchedAt": 1794818281689.5,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 330.59999990463257,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 7.299999952316284,
+          "endMs": 318.6999999284744
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 317.89999997615814,
+          "endMs": 632.7999999523163
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 318.1999999284744,
+          "endMs": 630.7999999523163
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318.2999999523163,
+          "endMs": 632.8999999761581
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318.39999997615814,
+          "endMs": 632.7999999523163
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 318.39999997615814,
+          "endMs": 632.7999999523163
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 318.5,
+          "endMs": 632.8999999761581
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 318.6999999284744,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.10000002384186,
+      "matchedAt": 1794818282647.6,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 329.60000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 6.899999976158142,
+          "endMs": 318.10000002384186
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 317.39999997615814,
+          "endMs": 636
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 317.60000002384186,
+          "endMs": 630.2999999523163
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 317.7999999523163,
+          "endMs": 632
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 317.89999997615814,
+          "endMs": 635.8999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 317.89999997615814,
+          "endMs": 636
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 318,
+          "endMs": 636
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 318.10000002384186,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 317.60000002384186,
+      "matchedAt": 1794818283684.5,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 324.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 7.100000023841858,
+          "endMs": 313.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 312.89999997615814,
+          "endMs": 625.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 313.2000000476837,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.3000000715256,
+          "endMs": 632.6000000238419
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.39999997615814,
+          "endMs": 636.3000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 313.39999997615814,
+          "endMs": 633.6000000238419
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 313.5,
+          "endMs": 636.3000000715256
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 313.7000000476837,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 324.5,
+      "matchedAt": 1794818284641.2,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 331.2999999523163,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 8.199999928474426,
+          "endMs": 320.39999997615814
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 319.59999990463257,
+          "endMs": 633.0999999046326
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 319.89999997615814,
+          "endMs": 633.0999999046326
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.89999997615814,
+          "endMs": 633.1999999284744
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 320,
+          "endMs": 633.0999999046326
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 320.09999990463257,
+          "endMs": 632
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 320.1999999284744,
+          "endMs": 630.5999999046326
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 320.39999997615814,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 325,
+      "matchedAt": 1794818285600.3,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 332.60000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 8.300000071525574,
+          "endMs": 320.3000000715256
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 319.5,
+          "endMs": 637.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 319.8000000715256,
+          "endMs": 643.7000000476837
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 319.90000009536743,
+          "endMs": 637.8000000715256
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 320,
+          "endMs": 632.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 320,
+          "endMs": 633
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 320.2000000476837,
+          "endMs": 632.9000000953674
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 320.3000000715256,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 317.7999999523163,
+      "matchedAt": 1794818286543.3,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 324.10000002384186,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 6.799999952316284,
+          "endMs": 313.7000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 313.10000002384186,
+          "endMs": 627.5
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 313.2999999523163,
+          "endMs": 627.6000000238419
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.39999997615814,
+          "endMs": 627.6000000238419
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 313.39999997615814,
+          "endMs": 637
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 313.60000002384186,
+          "endMs": 636.2000000476837
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 313.60000002384186,
+          "endMs": 627.6000000238419
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 313.7000000476837,
+      "serverValue": "todo"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 322.5,
+      "matchedAt": 1794818287497.7,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 330.39999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 5004,
+          "sqlCount": 9,
+          "startMs": 7.299999952316284,
+          "endMs": 318.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 317.6999999284744,
+          "endMs": 635.3999999761581
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 318,
+          "endMs": 635.3999999761581
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318,
+          "endMs": 635.3999999761581
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 318.09999990463257,
+          "endMs": 631
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 318.1999999284744,
+          "endMs": 635.3999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 318.2999999523163,
+          "endMs": 631.0999999046326
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 318.5,
+      "serverValue": "in_progress"
+    },
+    {
+      "schema": 2,
+      "scenario": "status-feedback",
+      "matchedMs": 325.89999997615814,
+      "matchedAt": 1794818288442,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 6,
+      "online": true,
+      "ms": 332.89999997615814,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 9.199999928474426,
+          "endMs": 321.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 216,
+          "sqlCount": 3,
+          "startMs": 320.60000002384186,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 3,
+          "startMs": 320.89999997615814,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321,
+          "endMs": 632.5
+        },
+        {
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 3,
+          "startMs": 321.10000002384186,
+          "endMs": 632.3999999761581
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 124,
+          "sqlCount": 4,
+          "startMs": 321.1999999284744,
+          "endMs": 632.5
+        },
+        {
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 321.2999999523163,
+          "endMs": 630.8999999761581
+        }
+      ],
+      "pendingAtVisible": 6,
+      "visibility": "visible",
+      "confirmedMs": 321.5,
+      "serverValue": "todo"
+    }
+  ]
+}

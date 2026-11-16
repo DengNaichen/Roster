@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "workspace": "perf-baseline-v2",
+  "identifier": "PERF-50",
+  "field": "priority",
+  "latencyMs": 300,
+  "count": 10,
+  "measuredAt": "2026-11-16T09:19:43.342Z",
+  "environment": {
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "origin": "http://127.0.0.1:5209",
+    "visibility": "visible",
+    "online": true
+  },
+  "method": "DOM feedback plus completed request window; Node readback outside measured window",
+  "sourceManifest": {
+    "head": "abd8df8c164658c4565e282aa5b97be12d6b0042",
+    "runtimeSha256": "b018992fdd50164ac6996ef8f5011c35a01a9c17c4556f5e5189ec411aa25b14",
+    "files": 99,
+    "scope": "web runtime, dependency lock and measurement scripts; excludes tests and reports"
+  },
+  "samples": [
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 5.100000023841858,
+      "matchedAt": 1794820777101.4001,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 13.799999952316284,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 5.100000023841858,
+          "endMs": 311.1999999284744
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 311.1999999284744,
+      "serverValue": 2
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 4.599999904632568,
+      "matchedAt": 1794820777725.5,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 14.199999928474426,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 4.599999904632568,
+          "endMs": 313.89999997615814
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 313.89999997615814,
+      "serverValue": 4
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 3.8000000715255737,
+      "matchedAt": 1794820778358.4001,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 13.800000071525574,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 3.899999976158142,
+          "endMs": 312.10000002384186
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 312.10000002384186,
+      "serverValue": 2
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 4,
+      "matchedAt": 1794820778982.6,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 14.899999976158142,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 4.100000023841858,
+          "endMs": 316.3000000715256
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 316.3000000715256,
+      "serverValue": 4
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 3.9000000953674316,
+      "matchedAt": 1794820779624.4001,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 14.600000023841858,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 3.9000000953674316,
+          "endMs": 314.8000000715256
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 314.8000000715256,
+      "serverValue": 2
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 3.8000000715255737,
+      "matchedAt": 1794820780267.8,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 12.700000047683716,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 3.8000000715255737,
+          "endMs": 313.90000009536743
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 313.90000009536743,
+      "serverValue": 4
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 4.100000023841858,
+      "matchedAt": 1794820780900.8,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 13.399999976158142,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 4.100000023841858,
+          "endMs": 314.60000002384186
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 314.60000002384186,
+      "serverValue": 2
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 3.8000000715255737,
+      "matchedAt": 1794820781525.4001,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 12.5,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 3.899999976158142,
+          "endMs": 314.3000000715256
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 314.3000000715256,
+      "serverValue": 4
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 4.100000023841858,
+      "matchedAt": 1794820782167.2,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 12.899999976158142,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 4.100000023841858,
+          "endMs": 311.3000000715256
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 311.3000000715256,
+      "serverValue": 2
+    },
+    {
+      "schema": 2,
+      "scenario": "priority-feedback",
+      "matchedMs": 3.600000023841858,
+      "matchedAt": 1794820782790.2,
+      "requestWindow": "arm-to-visible, including hover prefetch before input",
+      "pendingAtMatch": 0,
+      "online": true,
+      "ms": 15.200000047683716,
+      "requests": [
+        {
+          "resource": "issues",
+          "method": "PATCH",
+          "status": 200,
+          "bytes": 4997,
+          "sqlCount": 9,
+          "startMs": 3.600000023841858,
+          "endMs": 314.89999997615814
+        }
+      ],
+      "pendingAtVisible": 1,
+      "visibility": "visible",
+      "confirmedMs": 314.89999997615814,
+      "serverValue": 4
+    }
+  ]
+}

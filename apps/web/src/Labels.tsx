@@ -48,7 +48,7 @@ export function LabelPicker({
   identifiers: string[];
   current: Label[] | null;
   write?: (
-    save: () => Promise<unknown>,
+    save: (request: typeof api) => Promise<unknown>,
     success: (value: unknown) => void,
     failure: (cause: Error) => void,
   ) => Promise<boolean>;
@@ -75,7 +75,7 @@ export function LabelPicker({
     setError("");
     const path = apiPath("/issue-labels");
     await (write ?? ((save, success, failure) => requests.write("labels", save, success, failure)))(
-      () => api(path, "POST", { identifiers, add, remove }),
+      (api) => api(path, "POST", { identifiers, add, remove }),
       () => {
         void onChanged().then(
           () => {

@@ -593,3 +593,31 @@ it("edits only the summary and keeps sections an agent added meanwhile", async (
     document: { lead: "New summary", sections: [added], criteria: current.document.criteria },
   });
 });
+
+it("keeps a queued criterion optimistic while a property response and deferred focus read settle", async () => {
+  const priority = deferred<Response>();
+  const criterion = deferred<Response>();
+  let saves = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url, options) => {
+      if (options?.method === "PATCH") {
+        saves++;
+        return String(url).includes("/criteria/") ? criterion.promise : priority.promise;
+      }
+      return Promise.resolve(json(withCriteria()));
+    }),
+  );
+  render(<IssueDetail {...props} />);
+  await screen.findByRole("checkbox", { name: "第一条。" });
+  fireEvent.keyDown(priorityControl(), { key: "h" });
+  await waitFor(() => expect(saves).toBe(1));
+  fireEvent(window, new Event("focus"));
+  fireEvent.click(box("第一条。"));
+  expect(box("第一条。").checked).toBe(true);
+  await act(async () => priority.resolve(json({ ...withCriteria(), priority: 2 })));
+  await waitFor(() => expect(saves).toBe(2));
+  expect(box("第一条。").checked).toBe(true);
+  await act(async () => criterion.resolve(json({ ...withCriteria([true, false]), priority: 2 })));
+  expect(box("第一条。").checked).toBe(true);
+});

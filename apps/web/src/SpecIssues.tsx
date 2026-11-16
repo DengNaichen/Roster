@@ -74,7 +74,7 @@ export default function SpecIssues({
       issues: [],
     },
   );
-  const { issues, loading, loadError, loadIssues, savingPriorities, changePriority, moveIssue } =
+  const { issues, loading, loadError, loadIssues, pendingIssues, changePriority, moveIssue } =
     useIssues(
       { team: "", type, query, priority, labelFilter, assignee, specIdentifier: id },
       setError,
@@ -252,7 +252,7 @@ export default function SpecIssues({
                 ? current.filter((i) => i !== identifier)
                 : [...current, identifier],
             ),
-          savingPriorities,
+          pendingIssues,
           changePriority,
           moveIssue: async (identifier, status) => {
             await moveIssue(identifier, status);

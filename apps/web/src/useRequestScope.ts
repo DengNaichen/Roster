@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { apiPath } from "./shared";
+import { api, apiPath } from "./shared";
 import { useServerCache } from "./queryCache";
 
 // Writes retain per-entity ordering and disposal semantics. Shared Query owns all reads.
@@ -7,6 +7,8 @@ export function useRequestScope(key: string) {
   const { scope: cache } = useServerCache();
   const path = key.startsWith("/api/") ? key : apiPath("/");
   const scope = useMemo(() => {
+    const ownedApi: typeof api = (path, method, body, options) =>
+      api(path, method, body, { ...options, subject: cache.subject });
     let active = false;
     let generation = 0;
     const releases = new Set<() => void>();
@@ -28,7 +30,7 @@ export function useRequestScope(key: string) {
       },
       async write<T>(
         entity: string | string[],
-        request: () => Promise<T>,
+        request: (api: typeof ownedApi) => Promise<T>,
         success: (value: T) => void,
         failure: (cause: Error) => void,
       ) {
@@ -42,8 +44,9 @@ export function useRequestScope(key: string) {
           if (!current(started)) return false;
           sent = true;
           try {
-            const value = await request();
+            const value = await request(ownedApi);
             if (current(started)) success(value);
+            cache.confirm(path, value);
             return current(started);
           } catch (cause) {
             if (current(started))

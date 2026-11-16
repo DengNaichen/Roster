@@ -30,7 +30,7 @@ export type ViewMode = "board" | "list";
 type IssueActions = {
   selected: string[];
   toggle: (identifier: string) => void;
-  savingPriorities: string[];
+  pendingIssues: string[];
   changePriority: (identifier: string, priority: Priority) => Promise<void>;
   moveIssue: (identifier: string, status: Status) => Promise<void>;
 };
@@ -73,7 +73,7 @@ export function IssueViews({
     [],
   );
   const selected = useMemo(() => new Set(actions.selected), [actions.selected]);
-  const saving = useMemo(() => new Set(actions.savingPriorities), [actions.savingPriorities]);
+  const saving = useMemo(() => new Set(actions.pendingIssues), [actions.pendingIssues]);
   // Reserve each team's longest identifier, even when its row is offscreen.
   const identifiers = useMemo(() => {
     const samples = new Map<string, string>();
@@ -284,13 +284,14 @@ const IssueControls = memo(function IssueControls({
       priority={issue.priority}
       label={`Change priority for ${issue.identifier}`}
       compact
-      disabled={saving}
+      pending={saving}
       onChange={(next) => void handlers.changePriority(issue.identifier, next)}
     />
   );
   const status = (
     <StatusSelect
       issue={issue}
+      pending={saving}
       onChange={(next) => void handlers.moveIssue(issue.identifier, next)}
     />
   );
@@ -321,6 +322,7 @@ const IssueControls = memo(function IssueControls({
       <div className="card-meta">
         {priority}
         <IssueMeta issue={issue} />
+        {saving && <small role="status">Saving…</small>}
       </div>
     </>
   ) : (
@@ -335,6 +337,7 @@ const IssueControls = memo(function IssueControls({
         <NavLink onIntent={onIntent} to={href} className="list-title" title={issue.title}>
           {issue.title}
         </NavLink>
+        {saving && <small role="status">Saving…</small>}
         {extra}
         <IssueMeta issue={issue} layout="row" />
       </div>

@@ -285,10 +285,10 @@ export async function api<T>(
   path: string,
   method = "GET",
   body?: object,
-  options?: ReadOptions,
+  options?: ReadOptions & { cacheManaged?: boolean },
 ): Promise<T> {
   const write: WriteEvent | null =
-    method !== "GET" && method !== "HEAD" ? { path, id: Symbol() } : null;
+    !options?.cacheManaged && method !== "GET" && method !== "HEAD" ? { path, id: Symbol() } : null;
   if (write) window.dispatchEvent(new CustomEvent(writeStarted, { detail: write }));
   try {
     const result = await integrationApi<unknown>(path, method, body, options);
@@ -479,8 +479,10 @@ export function useLazySelect(
 export function StatusSelect({
   issue,
   onChange,
+  pending,
 }: {
   issue: { identifier: string; status: Status };
+  pending?: boolean;
   onChange: (status: Status) => void;
 }) {
   const { open, setOpen, trigger, container, onKeyDown } = useLazySelect(
@@ -500,6 +502,7 @@ export function StatusSelect({
         ref={trigger}
         onKeyDown={onKeyDown}
         className="status-control"
+        aria-busy={pending || undefined}
         aria-label={`Change status for ${issue.identifier}`}
         title={selected.label}
       >
@@ -746,6 +749,7 @@ export function PrioritySelect({
   compact = false,
   disabled = false,
   emptyLabel,
+  pending,
 }: {
   priority: Priority;
   onChange: (priority: Priority) => void;
@@ -753,6 +757,7 @@ export function PrioritySelect({
   compact?: boolean;
   disabled?: boolean;
   emptyLabel?: string;
+  pending?: boolean;
 }) {
   const { open, setOpen, trigger, container, onKeyDown } = useLazySelect(
     String(priority),
@@ -771,6 +776,7 @@ export function PrioritySelect({
       <Select.Trigger
         ref={trigger}
         onKeyDown={onKeyDown}
+        aria-busy={pending || undefined}
         className={`priority-control ${compact ? "priority-compact" : ""}`}
         aria-label={label}
         title={selected.label}

@@ -19,13 +19,19 @@
       start: performance.now(),
       end: null,
       status: null,
+      bytes: null,
+      sqlCount: null,
     };
     if (measured) requests.push(sample);
     try {
       const response = await original(input, init);
       sample.status = response.status;
+      sample.sqlCount = response.headers.has('x-roster-sql-count')
+        ? Number(response.headers.get('x-roster-sql-count'))
+        : null;
       if (measured) {
-        void response.clone().arrayBuffer().then(() => {
+        void response.clone().arrayBuffer().then((buffer) => {
+          sample.bytes = buffer.byteLength;
           sample.end = performance.now();
         }, () => {
           sample.end = performance.now();
@@ -77,6 +83,22 @@
       requestWindow = since;
     },
     stop,
+    capture() {
+      return requests.filter((r) => r.start >= requestWindow).map((r) => ({
+        resource: r.resource,
+        method: r.method,
+        status: r.status,
+        bytes: r.bytes,
+        sqlCount: r.sqlCount,
+        startMs: r.start - marker,
+        endMs: r.end === null ? null : r.end - marker,
+      }));
+    },
+    idleFor(ms) {
+      const current = requests.filter((r) => r.start >= requestWindow);
+      return current.length > 0 && current.every((r) => r.end !== null) &&
+        performance.now() - Math.max(...current.map((r) => r.end)) >= ms;
+    },
     watch(scenario, selector, text = '', fromNavigation = false) {
       cancel();
       probe.result = null;
