@@ -642,3 +642,127 @@
 .settings-page input[type="checkbox"] {
   accent-color: var(--r-color-link);
 }
+
+.settings-mcp-row {
+  flex-wrap: wrap;
+}
+.settings-copy-group {
+  display: flex;
+  flex: 1 1 20rem;
+  align-items: center;
+  gap: var(--r-space-8);
+  min-width: 0;
+}
+.settings-code-input {
+  flex: 1;
+  min-width: 0;
+  height: var(--r-size-control);
+  padding: 0 var(--r-space-8);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+  background: var(--r-color-bg-subtle);
+  color: var(--r-color-text-primary);
+  font: var(--r-type-code);
+}
+.settings-code-input:focus-visible {
+  outline: var(--r-focus-width) solid var(--r-color-focus-ring);
+  outline-offset: var(--r-focus-offset);
+}
+.settings-mcp-block,
+.settings-mcp-guide {
+  display: grid;
+  gap: var(--r-space-12);
+  padding: var(--r-space-16);
+  border-top: var(--r-border-width) solid var(--r-color-border-divider);
+}
+.settings-mcp-block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--r-space-12);
+}
+.settings-mcp-block-head > :first-child {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.settings-mcp-block-head > :first-child > span {
+  color: var(--r-color-text-primary);
+  font-weight: var(--r-weight-medium);
+}
+.settings-mcp-block-head p {
+  margin-top: var(--r-space-2);
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+.settings-mcp-block-head .button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--r-space-8);
+}
+.settings-code-panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--r-space-12);
+  padding: var(--r-space-12);
+  background: var(--r-color-bg-subtle);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-control);
+}
+.settings-code-panel pre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow-x: auto;
+  color: var(--r-color-text-primary);
+  font: var(--r-type-code);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.settings-code-panel .button,
+.settings-auth-command .button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--r-space-8);
+}
+.settings-auth-command {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--r-space-8);
+  color: var(--r-color-text-secondary);
+  font: var(--r-type-caption);
+}
+.settings-auth-command code,
+.settings-mcp-guide code,
+.settings-mcp-block p code,
+.settings-field p code,
+.settings-section-head p code {
+  padding: 1px var(--r-space-4);
+  background: var(--r-color-code-bg);
+  border-radius: var(--r-radius-small);
+  color: var(--r-color-text-primary);
+  font-family: var(--r-font-mono);
+}
+.settings-mcp-guide {
+  background: var(--r-color-bg-canvas);
+  border-radius: 0 0 var(--r-radius-panel) var(--r-radius-panel);
+}
+.settings-mcp-guide h3 {
+  color: var(--r-color-text-primary);
+  font: var(--r-type-label);
+}
+.settings-mcp-guide ul {
+  display: grid;
+  gap: var(--r-space-8);
+  margin: 0;
+  padding-left: var(--r-space-16);
+  color: var(--r-color-text-secondary);
+  font: var(--r-type-caption);
+}
+.settings-mcp-guide a {
+  color: var(--r-color-link);
+  text-decoration: underline;
+}

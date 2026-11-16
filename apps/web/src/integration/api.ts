@@ -12,6 +12,32 @@ export const supabase =
         auth: { flowType: "pkce", detectSessionInUrl: true },
       })
     : null;
+function safePreviewApiPort() {
+  const previewPort = Number(import.meta.env.VITE_PREVIEW_API_PORT || "18471");
+  return Number.isInteger(previewPort) && previewPort > 0 && previewPort <= 65535
+    ? previewPort
+    : 18471;
+}
+export function mcpServerUrl(slug: string): string {
+  const encoded = encodeURIComponent(slug);
+  if (localPreview) {
+    return `http://127.0.0.1:${safePreviewApiPort()}/w/${encoded}/mcp`;
+  }
+  const mcpBase = String(import.meta.env.VITE_MCP_BASE_URL ?? "")
+    .trim()
+    .replace(/\/$/, "");
+  if (mcpBase) return `${mcpBase}/w/${encoded}/mcp`;
+  const apiBase = String(import.meta.env.VITE_API_BASE_URL ?? "")
+    .trim()
+    .replace(/\/$/, "");
+  if (apiBase) {
+    const resolved = apiBase.endsWith("/functions/v1/api")
+      ? `${apiBase.slice(0, -"/functions/v1/api".length)}/functions/v1/mcp`
+      : apiBase;
+    return `${resolved}/w/${encoded}/mcp`;
+  }
+  return `${window.location.origin}/w/${encoded}/mcp`;
+}
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!path.startsWith("/api/") || path.includes("://")) {
     throw new Error("API path must start with /api/");
@@ -29,11 +55,8 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   if (!localPreview && session?.data.session) {
     headers.set("Authorization", `Bearer ${session.data.session.access_token}`);
   }
-  const previewPort = Number(import.meta.env.VITE_PREVIEW_API_PORT || "18471");
-  const safePreviewPort =
-    Number.isInteger(previewPort) && previewPort > 0 && previewPort <= 65535 ? previewPort : 18471;
   const base = localPreview
-    ? `http://127.0.0.1:${safePreviewPort}`
+    ? `http://127.0.0.1:${safePreviewApiPort()}`
     : import.meta.env.VITE_API_BASE_URL;
   const response = await fetch(`${base.replace(/\/$/, "")}${path}`, {
     ...init,
