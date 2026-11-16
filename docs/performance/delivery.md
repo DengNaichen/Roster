@@ -10,14 +10,14 @@
 | RST-4 | [46](https://github.com/DengNaichen/Roster/pull/46) | [缓存](rst-4.md)，roundtrip.mjs / ui-report.mjs | 20次列表详情往返请求406→5；热往返11/9→0/0；详情DOM P95 126.4→15.7ms |
 | RST-5 | [47](https://github.com/DengNaichen/Roster/pull/47) | [乐观写入](rst-5.md)，writes.mjs / write-report.mjs | 300ms网络条件：优先级DOM P95 328.1→4.6ms，状态332.4→4.3；请求7→1、SQL34→9/次交互 |
 | RST-6 | [48](https://github.com/DengNaichen/Roster/pull/48) | [SQL往返](rst-6.md)，probe.mjs / read-ab.ts / sql-plan.ts | 普通列表/详情/写入SQL5/20/9→3/9/8；富关联6/46/9→3/11/8；响应完全相同 |
-| RST-7 | 当前 remote-refresh-on-roundtrips 分支 | [远端刷新](rst-7.md)，remote-refresh.mjs / remote-lifecycle.mjs / remote-access.mjs / conditional.mjs / remote-report.mjs | 本地最坏轮询相位n=5：MCP→DOM P50/P95 14949/15049ms；任务详情页3请求/15秒；隐藏/离线0请求、正常304正文0bytes |
+| RST-7 | [49](https://github.com/DengNaichen/Roster/pull/49) | [远端刷新](rst-7.md)，remote-refresh.mjs / remote-lifecycle.mjs / remote-access.mjs / conditional.mjs / remote-report.mjs | 本地最坏轮询相位n=5：MCP→DOM P50/P95 14949/15049ms；任务详情页3请求/15秒；隐藏/离线0请求、正常304正文0bytes |
 
 ## 哪些结论已经得到证明
 
 - 独立合成Workspace、真实浏览器与业务REST/MCP请求；正式roster仅记录开发ticket。区域对比是真实已登录JWT调用托管业务接口，不是未登录401。后续代码在本地固定身份预览、真实受限PostgreSQL验证。
 - 最新堆叠保留main #40～#42的Onboarding、首条任务todo和query-wrapper适配；前四支对齐25065b4上的远端提交。RST-5原改动先正常提交87e5e77，再按指定旧父8584b4e rebase；未使用stash。历史测量仍保留当时SHA，不伪装为测量新SHA。
 - 用户/Workspace隔离、旧响应取消、同实体写序、失败回滚、权限清理、空态引导、筛选与Triage收敛有回归测试。真实浏览器验证了网络失败/恢复、成员停用、私有Team变化和本地删除fixture；各报告区分实际链路与测试替身。
-- 最终完整堆叠：format/check/build、155前端用例、35后端测试/6数据库步骤通过，无数据库测试跳过。前六个PR远端CI通过、生产部署步骤跳过；最后一个PR的CI在开PR后读回记录。
+- 最终完整堆叠：format/check/build、155前端用例、35后端测试/6数据库步骤通过，无数据库测试跳过。前六个PR远端CI通过、生产部署步骤跳过；最后PR49的最新CI以GitHub Checks为准，并在ticket最终工作日志记录读回结果。
 
 ## 不能外推的部分
 

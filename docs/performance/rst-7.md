@@ -72,4 +72,4 @@ node scripts/performance/remote-report.mjs docs/performance
 
 本轮只开PR，未合并或部署。构建时设0并发布对应前端可关闭定时轮询并恢复普通focus/reconnect行为，但仍保留缓存与条件读取。后端先发布可让新前端安全取得ETag；旧后端不广告ETag时，新前端不会发送条件header。
 
-回退后端时先移除 conditionalRead，**保留 If-None-Match 的 CORS allowlist**，让已缓存的新前端可成功读到无ETag的200并丢弃校验器；不要先移除CORS而让旧页面陷入预检失败。完整撤销按RST-7→6→5→4→3→2→1的依赖逆序；没有新增数据库迁移。生产验收未完成，因此状态为 In review。
+回退后端时先移除 conditionalRead，**保留 If-None-Match 的 CORS allowlist**，让已缓存的新前端可成功读到无ETag的200并丢弃校验器；不要先移除CORS而让旧页面陷入预检失败。完整撤销按RST-7→6→5→4→3→2→1的依赖逆序；没有新增数据库迁移。PR #49 已创建，当前待实际验收，状态为 In review。

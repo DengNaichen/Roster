@@ -26,12 +26,12 @@
  FAIL  src/queryCache.test.tsx > ignores a finished write that belongs to an already unmounted account
 AssertionError: expected undefined to deeply equal { title: 'new account content' }
 
-- Expected: 
+- Expected:
 {
   "title": "new account content",
 }
 
-+ Received: 
++ Received:
 undefined
 
  ❯ src/queryCache.test.tsx:448:35
