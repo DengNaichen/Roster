@@ -167,11 +167,11 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno 
 | Secret | `SUPABASE_ACCESS_TOKEN` | 有目标项目权限的 Supabase access token |
 | Secret | `SUPABASE_DB_PASSWORD` | 目标 Supabase 数据库密码，供 CLI 迁移使用 |
 | Secret | `VERCEL_TOKEN` | 有目标团队和项目部署权限的 Vercel token |
-| Variable | `SUPABASE_PROJECT_REF` | 当前项目 `qietzaqhmforixtpicjd` |
+| Variable | `SUPABASE_PROJECT_REF` | 东京项目 `jmmwgdyfcmonzqkurcly` |
 | Variable | `VERCEL_ORG_ID` | 当前团队 `team_cU33prMrSFgbhI1qNpC2fmnw` |
 | Variable | `VERCEL_PROJECT_ID` | 当前项目 `prj_GETdvx0784lNbGkn0MnLa6DOTMjy` |
 
-这些 ID 来自现有本地项目绑定，切换目标时需重新核对。缺少任一配置时发布在云端写入前失败。配置凭据后可在 Actions → CI and production deployment → Run workflow 选择 `main` 首次发布；也可等待下一次合并。建议把 `Check and test` 设为 main 分支保护的必需检查。
+这些 ID 来自已核对的项目配置，切换目标时需重新核对。东京切换使用 `production` environment 的 Supabase 覆盖值，仓库级巴黎配置保留用于回退；不要混用两层中的项目地址和密码。迁移步骤及回退边界见 [东京切换记录](migrations/tokyo-cutover.md)。缺少任一配置时发布在云端写入前失败。配置凭据后可在 Actions → CI and production deployment → Run workflow 选择 `main` 首次发布；也可等待下一次合并。建议把 `Check and test` 设为 main 分支保护的必需检查。
 
 Vercel 项目根保持仓库根，Production 中需已有 `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_API_BASE_URL`。工作流校验前端指向本次部署的 Supabase 项目，再开始构建。Supabase 的运行时 secrets（例如专用 `DATABASE_URL`、`ALLOWED_ORIGINS`、`MCP_PUBLIC_URL`）和 Auth provider/回调配置仍在 Supabase 管理，不从仓库覆盖。**自动发布代码不会自动开通 Google/GitHub 登录。**
 

@@ -53,9 +53,12 @@ describe("configured edge region", () => {
   });
 });
 
-it("defaults only the measured Roster project and leaves preview automatic", async () => {
+it("defaults known Roster projects to their database regions and leaves preview automatic", async () => {
   const { functionRegion } = await import("./region");
   expect(functionRegion(undefined, "https://qietzaqhmforixtpicjd.supabase.co")).toBe("eu-west-3");
+  expect(functionRegion(undefined, "https://jmmwgdyfcmonzqkurcly.supabase.co/")).toBe(
+    "ap-northeast-1",
+  );
   expect(functionRegion(undefined, "https://other.supabase.co")).toBeUndefined();
   vi.stubEnv("DEV", true);
   vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
