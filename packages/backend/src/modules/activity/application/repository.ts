@@ -62,23 +62,13 @@ export interface ActivityRepository {
   insertRelation(
     input: { workspaceId: unknown; from: string; kind: string; to: string },
   ): Promise<void>;
-  comments(input: { workspaceId: unknown; issueId: string }): Promise<Row[]>;
-  links(input: { workspaceId: unknown; issueId: string }): Promise<Row[]>;
-  delegations(input: { workspaceId: unknown; issueId: string }): Promise<Row[]>;
-  decisions(input: { workspaceId: unknown; issueId: string }): Promise<Row[]>;
-  workLogCount(input: { workspaceId: unknown; issueId: string }): Promise<Row>;
-  relatedIssues(
-    input: {
-      workspaceId: unknown;
-      subject: string;
-      incoming: boolean;
-      relationKind: string;
-      issueId: string;
-      symmetric: boolean;
-    },
-  ): Promise<Row[]>;
-  parentIdentifier(
-    input: { workspaceId: unknown; parent_id: unknown; subject: string },
-  ): Promise<Row[]>;
-  pullRequests(input: { workspaceId: unknown; identifier: string }): Promise<Row[]>;
+  summary(input: { workspaceId: unknown; issueId: string; identifier: string }): Promise<{
+    comments: Row[];
+    links: Row[];
+    delegations: Row[];
+    decisions: Row[];
+    workLogCount: number;
+    pullRequests: Row[];
+  }>;
+  relatedIssues(input: { workspaceId: unknown; subject: string; issueId: string }): Promise<Row[]>;
 }

@@ -24,6 +24,7 @@ function fixture(overrides: PartialSession) {
     ...overrides,
     access: {
       findWorkspace: async () => ({ id: 'w', slug: 'workspace' }),
+      workspaceWithRole: async () => ({ id: 'w', slug: 'workspace', role: 'admin' }),
       activeMembership: async () => [{ role: 'admin' }],
       ...overrides.access,
     },

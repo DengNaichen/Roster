@@ -6,6 +6,7 @@ export interface AccessRepository {
 
   saveIdentity(input: { subject: string; name: string; email: string }): Promise<void>;
   findWorkspace(input: { slug: string; lock: boolean }): Promise<Row>;
+  workspaceWithRole(input: { slug: string; subject: string }): Promise<Row>;
   activeMembership(input: { workspaceId: unknown; subject: string }): Promise<Row[]>;
   findTeam(input: { subject: string; workspaceId: unknown; key: string }): Promise<Row>;
   listWorkspaces(input: { subject: string }): Promise<Row[]>;

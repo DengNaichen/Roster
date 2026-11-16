@@ -1,0 +1,2567 @@
+{
+  "at": "2026-11-16T10:09:55.051Z",
+  "mode": "in-process real HTTP handlers, same restricted Postgres pool; excludes browser/TCP; alternates order, 3 warmups then40samples/version/scenario; exact payload equality required",
+  "baseline": "/Users/nd/Developer/roster-worktrees/optimistic-writes-on-cache",
+  "samples": [
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0746249999999975,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7589169999999967,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6043750000000045,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0125830000000065,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.060417000000001,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5025420000000054,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3717919999999992,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0167920000000095,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8291670000000124,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 3.8009169999999983,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.8484579999999937,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.1192089999999837,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0961659999999824,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6121249999999918,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4767089999999996,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0074999999999932,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.148791999999986,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7335840000000076,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.507916999999992,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.0708330000000217,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.1282500000000084,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5550420000000145,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3736670000000117,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9696659999999895,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8736250000000041,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4948339999999973,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2832919999999888,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9171249999999986,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8318749999999966,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4125840000000096,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6978750000000105,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9865419999999858,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8782500000000084,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3198329999999885,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4215839999999957,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9470420000000104,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9232920000000036,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3470839999999953,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6206669999999974,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9330410000000029,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8030000000000257,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2956250000000011,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3878750000000082,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9343749999999886,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9655410000000018,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5166670000000124,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3588749999999834,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9482089999999914,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.099250000000012,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7862079999999878,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5810419999999965,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8789580000000115,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9279999999999688,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4957919999999945,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2264160000000288,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.7992080000000215,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9839579999999728,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.517832999999996,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.360291000000018,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9774580000000128,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9102499999999623,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.494041999999979,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2048749999999586,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.7830000000000155,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.9921669999999949,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.8441249999999627,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.57487500000002,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8771669999999858,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8276250000000118,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2683329999999842,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.2379169999999817,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8107089999999744,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.8557919999999513,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5957500000000095,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.552833000000021,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.1946249999999736,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.025082999999995,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.182916999999975,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.174666000000002,
+      "sqlCount": 5,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 0.7433750000000146,
+      "sqlCount": 3,
+      "bytes": 17363
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7367080000000215,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.177792000000011,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.518374999999992,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.987874999999974,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.8457500000000095,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.453374999999994,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.7277500000000146,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.611208999999974,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.701208999999949,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.9226249999999823,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.773249999999962,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.571374999999989,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.3632499999999936,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.941750000000013,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.5187080000000037,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6438330000000292,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.996417000000008,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.800625000000025,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.112625000000037,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.5897079999999733,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.4508329999999887,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.3544579999999655,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.4474579999999833,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6780410000000074,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6637920000000008,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.3983329999999796,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.6051250000000437,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.4234579999999823,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.4021250000000123,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.1763329999999996,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.5229999999999677,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6147919999999658,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.554208000000017,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.2059580000000096,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.350708999999995,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7025840000000017,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6428750000000036,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.4787089999999807,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.4387500000000273,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.668124999999975,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.5731670000000122,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.8352499999999736,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.706457999999998,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.4336249999999495,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.3829999999999814,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.2351670000000468,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.404833999999994,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.4982500000000414,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.468999999999994,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 3.164208999999971,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.255875000000003,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7507499999999823,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.614041000000043,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.1927080000000387,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.1518330000000105,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.6614170000000286,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 2.128750000000025,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.975125000000048,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.993165999999974,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.5715840000000298,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.5779170000000136,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.6529160000000047,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.3393330000000105,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.5272090000000276,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7414590000000203,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.7233339999999657,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.606625000000008,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7515000000000214,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.440416999999968,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.2602919999999926,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.294832999999983,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.598875000000021,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.7070420000000013,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.6144160000000056,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.3253330000000005,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.3397089999999707,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.344083000000012,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.090750000000014,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 2.1392910000000143,
+      "sqlCount": 20,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-baseline-v2",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 1.8107090000000312,
+      "sqlCount": 9,
+      "bytes": 14767
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.376166000000012,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5957910000000197,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.425875000000019,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4057920000000195,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.463292000000024,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7432090000000358,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6083750000000236,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4248339999999757,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.504000000000019,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7309999999999945,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.664541999999983,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4365420000000313,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3682919999999967,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.497083000000032,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5057500000000346,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.6423750000000155,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.5103750000000673,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.8242079999999987,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.8008339999998952,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4380419999999958,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.6617080000000897,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5152080000000296,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4067919999999958,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3681249999999636,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3102079999999887,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 2.456457999999998,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.632082999999966,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.629542000000015,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.412417000000005,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.47625000000005,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6520829999999478,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.465082999999936,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.375583000000006,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4044999999999845,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.247665999999981,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.7837920000000622,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.5877500000000282,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 2.0985829999999623,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7512499999999136,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.8853749999999536,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.5885829999999714,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7784169999999904,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4614159999999856,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3282500000000255,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.2892499999999245,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4588340000000244,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3870829999999614,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4889160000000174,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.8975000000000364,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5734999999999673,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4903749999999718,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4988329999999905,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3646250000000464,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5406249999999773,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.3183749999999463,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.2716249999999718,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.3559170000000904,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.6956669999999576,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.59862499999997,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.8252499999999827,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.6247500000000628,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5512919999999895,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.8839169999999967,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.5957080000000587,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4904169999999795,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.469791999999984,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7546670000000404,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.5710000000000264,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.9212909999999965,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.7697500000000446,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.4027500000000828,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.555208000000107,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.4646250000000691,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5552089999999907,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5186250000000427,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.2983749999999645,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.491166000000021,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.5382499999999482,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "before",
+      "ms": 1.9864999999999782,
+      "sqlCount": 6,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "list",
+      "phase": "after",
+      "ms": 1.6739579999999705,
+      "sqlCount": 3,
+      "bytes": 28316
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.234125000000063,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.829958999999917,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 7.058250000000044,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 5.199334000000022,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.601292000000058,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.592667000000006,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.964749999999981,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.344290999999998,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.72687499999995,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.37541699999997,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.815000000000055,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.143334000000095,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.340458000000012,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.299167000000011,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.783041999999909,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.451541999999904,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.295792000000006,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.733665999999971,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 8.751833000000033,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.515292000000045,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.8358749999999873,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 10.497499999999945,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.44987500000002,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.090165999999954,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.135708000000022,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.6267500000000155,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.928792000000044,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.3716249999999945,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.302208000000064,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.408415999999988,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.053750000000036,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.98762499999998,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.9179579999999987,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.947625000000016,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.394084000000021,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.2871659999999565,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.418000000000006,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.2299580000000105,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.029125000000022,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.427791999999954,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.768374999999992,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.277207999999973,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.308582999999999,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.047584000000029,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.727749999999901,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.1708340000000135,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.973917000000029,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.113292000000001,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.387292000000002,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.992583999999965,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.655959000000053,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.377499999999941,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.819874999999911,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.4347080000000005,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.363915999999904,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.160750000000007,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.8713330000000497,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.067457999999988,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.637082999999961,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.154916000000071,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.8838750000001028,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.411791999999991,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.000250000000051,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.000249999999937,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.3459589999999935,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.336374999999975,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.071249999999964,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.798125000000027,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.9730420000000777,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.956957999999986,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.616917000000058,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.833291999999801,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.178042000000005,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.929708000000119,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 5.702624999999898,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 3.9168330000002243,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 4.321874999999864,
+      "sqlCount": 11,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.108999999999924,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "before",
+      "ms": 6.125875000000178,
+      "sqlCount": 46,
+      "bytes": 188672
+    },
+    {
+      "workspace": "perf-joined-v1",
+      "scenario": "detail",
+      "phase": "after",
+      "ms": 5.085916999999881,
+      "sqlCount": 11,
+      "bytes": 188672
+    }
+  ]
+}

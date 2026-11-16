@@ -20,7 +20,13 @@ export async function workspace(
   lock = false,
 ): Promise<Row> {
   const u = identity(ctx);
-  const w = await db.access.findWorkspace({ slug, lock: Boolean(lock) });
+  if (!lock) {
+    const w = await db.access.workspaceWithRole({ slug, subject: u.subject });
+    if (!w.role) fail('forbidden', 'Workspace access denied');
+    return w;
+  }
+  // Keep membership in a new statement after the workspace lock: a waiting writer must see revocations.
+  const w = await db.access.findWorkspace({ slug, lock: true });
   const m = (await db.access.activeMembership({ workspaceId: w.id, subject: u.subject }))[0];
   if (!m) fail('forbidden', 'Workspace access denied');
   return { ...w, role: m.role };

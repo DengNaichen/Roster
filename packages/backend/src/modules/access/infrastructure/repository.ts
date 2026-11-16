@@ -31,6 +31,12 @@ export function createAccessRepository(db: Executor): AccessRepository {
         sql`select * from roster.workspaces where slug=${slug}${lock ? sql` for update` : sql``}`,
       );
     },
+    async workspaceWithRole({ slug, subject }) {
+      return one(
+        db,
+        sql`select w.*,m.role from roster.workspaces w left join roster.workspace_members m on m.workspace_id=w.id and m.subject=${subject} and m.status='active' where w.slug=${slug}`,
+      );
+    },
     async activeMembership({ workspaceId, subject }) {
       return rows(
         db,

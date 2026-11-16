@@ -13,7 +13,7 @@ import { fail } from '../../../platform/errors/validation.ts';
 import { iso } from '../../../platform/time.ts';
 import { workspace } from '../../access/index.ts';
 import { visible } from '../../access/postgres.ts';
-import { hydrateIssueActivity } from '../../activity/index.ts';
+import { hydrateAuthorizedIssueActivity } from '../../activity/index.ts';
 import { buildLabelFilter } from '../../labels/postgres.ts';
 import { visibleProject } from '../../planning/postgres.ts';
 import { issueDTO, issueSummaryDTO } from '../domain/mapper.ts';
@@ -53,28 +53,6 @@ function publicAuditSnapshot(value: unknown) {
     return snapshot;
   }
   return value;
-}
-export async function hydrateCoreIssueRows(
-  db: Executor,
-  ctx: RequestContext,
-  w: Row,
-  items: Row[],
-): Promise<Row[]> {
-  const hydrated = await hydrateIssueCatalog(db, ctx, String(w.id), items);
-  const parentIds = [...new Set(items.filter((i) => i.parent_id).map((i) => String(i.parent_id)))];
-  const parents = parentIds.length
-    ? await rows(
-      db,
-      sql`select i.id,i.identifier from roster.issues i join roster.teams t on t.id=i.team_id where i.workspace_id=${w.id} and i.id in (${
-        sql.join(parentIds.map((id) => sql`${id}::uuid`), sql`,`)
-      }) and ${visible(ctx.identity.subject)}`,
-    )
-    : [];
-  const names = new Map(parents.map((p) => [String(p.id), String(p.identifier)]));
-  return hydrated.map((r) => ({
-    ...r,
-    parent: r.parent_id ? names.get(String(r.parent_id)) ?? null : null,
-  }));
 }
 export async function validateParent(
   db: Executor,
@@ -210,9 +188,10 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
         } ${all ? sql`` : sql`limit ${limit + 1}`}`,
       );
       return {
-        issues: (await hydrateCoreIssueRows(db, ctx, w, all ? rs : rs.slice(0, limit))).map(
-          issueSummaryDTO,
-        ),
+        issues: (await hydrateIssueCatalog(db, ctx, String(w.id), all ? rs : rs.slice(0, limit)))
+          .map(
+            issueSummaryDTO,
+          ),
         next_cursor: !all && rs.length > limit ? String(rs[limit - 1].id) : null,
       };
     },
@@ -230,8 +209,8 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
         } order by i.updated_at desc,i.id desc`,
       );
       const detail = {
-        ...issueDTO((await hydrateCoreIssueRows(db, ctx, w, [r]))[0]),
-        children: (await hydrateCoreIssueRows(db, ctx, w, children)).map(issueDTO),
+        ...issueDTO((await hydrateIssueCatalog(db, ctx, String(w.id), [r]))[0]),
+        children: (await hydrateIssueCatalog(db, ctx, String(w.id), children)).map(issueDTO),
         audit: events.map((e) => ({
           ...e,
           before: publicAuditSnapshot(e.before),
@@ -241,7 +220,7 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
           ReturnType<Service['getIssue']>
         >['audit'],
       };
-      return hydrateIssueActivity(session, ctx, w, detail);
+      return hydrateAuthorizedIssueActivity(session, ctx, w, detail);
     },
   };
 }

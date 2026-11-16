@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-16T10:16:38.150Z",
+  "mode": "actual local MCP with fixed preview identity; OAuth unverified",
+  "status": 200,
+  "identifier": "PERF-1",
+  "children": 6,
+  "blocks": 6,
+  "blocked_by": 4,
+  "related": 6,
+  "labels": [
+    "Measured alpha",
+    "Measured standalone"
+  ],
+  "parent": "PERF-2",
+  "comments": 1,
+  "work_log_count": 2,
+  "decisions": 1,
+  "delegations": 1
+}

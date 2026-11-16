@@ -4,11 +4,12 @@ import type { Service } from '../application/mod.ts';
 import { createDatabase } from '../platform/database/client.ts';
 import { createUnitOfWork } from '../platform/database/session.ts';
 import { createService } from '../service.ts';
+import { iso } from '../platform/time.ts';
 import { prepareTestDatabase } from '../test_support.ts';
 import { createHttpApp } from '../transport/http/app.ts';
 import { createMcpFetch } from '../transport/mcp/server.ts';
 import { workspace } from './access/index.ts';
-import { createActivityService, hydrateIssueActivity } from './activity/index.ts';
+import { createActivityService, hydrateAuthorizedIssueActivity } from './activity/index.ts';
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
 }
@@ -46,6 +47,27 @@ Deno.test({
       runtimeUrl.username = 'roster_activity_runtime';
       runtime = createDatabase(runtimeUrl.toString());
       const db = runtime.db;
+      const codecs = await runtime.pool.connect();
+      try {
+        await codecs.query('begin');
+        await codecs.query("set local time zone 'Asia/Shanghai'");
+        const result = await codecs.query(
+          "select value as direct,to_jsonb(value) as aggregated,9223372036854775807::bigint as direct_id,to_jsonb(9223372036854775807::bigint) as aggregated_id from (values('2026-02-03 04:05:06.123456+08'::timestamptz)) sample(value)",
+        );
+        const r = result.rows[0];
+        assert(
+          iso(r.direct) === iso(r.aggregated) && iso(r.aggregated) === '2026-02-02T20:05:06.123Z',
+          'JSON timestamps must retain DTO millisecond normalization across time zones',
+        );
+        assert(
+          Number(r.direct_id) === Number(r.aggregated_id),
+          'JSON bigint IDs must retain the existing numeric DTO conversion',
+        );
+      } finally {
+        await codecs.query('rollback');
+        codecs.release();
+      }
+
       const core = createService(db);
       const activity = createActivityService(createUnitOfWork(db));
       const service = { ...core, ...activity } as Service;
@@ -231,7 +253,7 @@ Deno.test({
         results.filter((r) => r.status === 'fulfilled').length === 1,
         'Concurrent DAG writers must reject one edge',
       );
-      const detail = await hydrateIssueActivity(
+      const detail = await hydrateAuthorizedIssueActivity(
         createUnitOfWork(db),
         member,
         await workspace(createUnitOfWork(db), member, slug),
@@ -245,7 +267,7 @@ Deno.test({
         detail.blocks.length === 0 && detail.related.length === 1,
         'Private relation targets must be hidden',
       );
-      const owned = await hydrateIssueActivity(
+      const owned = await hydrateAuthorizedIssueActivity(
         createUnitOfWork(db),
         owner,
         await workspace(createUnitOfWork(db), owner, slug),
