@@ -1,0 +1,611 @@
+{
+  "at": "2026-11-16T13:57:22.769Z",
+  "slug": "gzip-4d2a3b5a-4989-4f2a-9c6b-ccac5223a760",
+  "mode": "loopback TCP, actual MCP handler/service/Postgres, locally signed JWT; NOT hosted OAuth; 2 warmups +20 alternating samples per mode",
+  "automaticDecompression": true,
+  "exactPayloadEquality": true,
+  "summary": [
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "n": 20,
+      "p50": 2.874582999999973,
+      "p95": 3.5677499999999327,
+      "bytes": 2353,
+      "decodedBytes": 2353,
+      "requestsPerRead": 1
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "n": 20,
+      "p50": 3.097499999999968,
+      "p95": 5.413042000000019,
+      "bytes": 774,
+      "decodedBytes": 2353,
+      "requestsPerRead": 1
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "n": 20,
+      "p50": 24.96133299999974,
+      "p95": 34.761792000000014,
+      "bytes": 12919016,
+      "decodedBytes": 12919016,
+      "requestsPerRead": 1
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "n": 20,
+      "p50": 31.986417000000074,
+      "p95": 34.57720900000004,
+      "bytes": 197272,
+      "decodedBytes": 12919016,
+      "requestsPerRead": 1
+    }
+  ],
+  "samples": [
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 6.5440830000000005,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.571583999999973,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.0745000000000005,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.0927500000000236,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.240542000000005,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.162625000000048,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.7986250000000155,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.060792000000049,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 2.8592499999999745,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.332917000000009,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.542665999999997,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.76566600000001,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 4.995041999999955,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.89308299999999,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.6663750000000164,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.0372090000000185,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 2.7364580000000274,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.068583999999987,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.0116669999999885,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.77391700000004,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 2.9909999999999854,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.525374999999997,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.589207999999985,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 2.850332999999978,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 5.413042000000019,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.8262920000000236,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.702124999999967,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.397874999999999,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.5914580000000456,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.6079579999999964,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.856749999999977,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.097499999999968,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 2.740791999999999,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.874582999999973,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.796333000000004,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.8115829999999846,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 4.810125000000028,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 2.948750000000018,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "identity",
+      "ms": 3.5677499999999327,
+      "bytes": 2353,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "normal",
+      "encoding": "gzip",
+      "ms": 3.06412499999999,
+      "bytes": 774,
+      "decodedBytes": 2353
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 32.705332999999996,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 28.554540999999972,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.933875000000057,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 33.344875,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 33.49800000000005,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 23.159415999999965,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 27.02404200000001,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 32.99304200000006,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 34.57720900000004,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 34.761792000000014,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.831084000000146,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 30.062041000000136,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 29.50241600000004,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 25.9625410000001,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 22.193917000000056,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 30.08291599999984,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 31.986417000000074,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 26.12254099999973,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 31.01912500000003,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 30.001708000000008,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 28.542666999999938,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 28.58004099999971,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.930250000000115,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 30.264625000000024,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 32.6362079999999,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.96133299999974,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 27.05637499999989,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 34.678750000000036,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 33.266000000000076,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 40.859125000000176,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.010665999999674,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 28.952125000000024,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 29.36887499999989,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 28.62824999999998,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.40366700000004,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 30.762042000000292,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 32.98875000000044,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 23.28012499999977,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "identity",
+      "ms": 24.953915999999936,
+      "bytes": 12919016,
+      "decodedBytes": 12919016
+    },
+    {
+      "scenario": "stress",
+      "encoding": "gzip",
+      "ms": 33.00362499999983,
+      "bytes": 197272,
+      "decodedBytes": 12919016
+    }
+  ]
+}
