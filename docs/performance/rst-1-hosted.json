@@ -1,0 +1,910 @@
+{
+  "schema": 2,
+  "revision": "production dpl_2RjbUhzHdXGRckALkcBkM6BgGUf6; baseline 7cea735",
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "visibility": "visible",
+  "seed": false,
+  "seedCount": 50,
+  "startIndex": 0,
+  "environment": {
+    "apiOrigin": "https://qietzaqhmforixtpicjd.supabase.co",
+    "workspace": "perf-baseline-20261116",
+    "throttling": "record in report manifest"
+  },
+  "measuredAt": "2026-11-16T05:49:26.557Z",
+  "mode": "authenticated-rest",
+  "count": 20,
+  "requestedRegion": "auto",
+  "coldStart": "unobservable; first-observed is not proof of cold start",
+  "dataset": {
+    "issues": 50,
+    "fixture": "v2",
+    "sentinelDocumentSha256": "7e6cb65ac27bce1159f812e8f90d9c043912fb2ecb338f9c5f5f4752e1a30d36"
+  },
+  "samples": [
+    {
+      "scenario": "list-first-observed",
+      "status": 200,
+      "ms": 2113.7000000476837,
+      "bytes": 499805,
+      "parseMs": 0.7999999523162842,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-first-observed",
+      "status": 200,
+      "ms": 4706.700000047684,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-first-observed",
+      "status": 200,
+      "ms": 3006.5,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2293.2000000476837,
+      "bytes": 499805,
+      "parseMs": 0.19999992847442627,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4967.199999928474,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3140.2000000476837,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2317.1999999284744,
+      "bytes": 499805,
+      "parseMs": 0.5,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4697.600000023842,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3314.5,
+      "bytes": 4997,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 7204.199999928474,
+      "bytes": 499805,
+      "parseMs": 0.9000000953674316,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 9136.899999976158,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 5239.100000023842,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 4093.3000000715256,
+      "bytes": 499805,
+      "parseMs": 1.399999976158142,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4728.399999976158,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 4136.899999976158,
+      "bytes": 4997,
+      "parseMs": 0.20000004768371582,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2866.7999999523163,
+      "bytes": 499805,
+      "parseMs": 5.600000023841858,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4816.899999976158,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2897.399999976158,
+      "bytes": 4997,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 4733.300000071526,
+      "bytes": 499805,
+      "parseMs": 0.5999999046325684,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4752.100000023842,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2988.5,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2454.7999999523163,
+      "bytes": 499805,
+      "parseMs": 2.399999976158142,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4839.600000023842,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3166.6999999284744,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 3676.2000000476837,
+      "bytes": 499805,
+      "parseMs": 0.6000000238418579,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4908.199999928474,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3202.5999999046326,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2768.100000023842,
+      "bytes": 499805,
+      "parseMs": 1.3000000715255737,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4819,
+      "bytes": 14767,
+      "parseMs": 0.2999999523162842,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2978.2999999523163,
+      "bytes": 4997,
+      "parseMs": 0.20000004768371582,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2596.0999999046326,
+      "bytes": 499805,
+      "parseMs": 1.4000000953674316,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 6352.5,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 5090.799999952316,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 4374.5,
+      "bytes": 499805,
+      "parseMs": 0.8000000715255737,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4685.700000047684,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2988,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2210.2000000476837,
+      "bytes": 499805,
+      "parseMs": 0.2999999523162842,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 5011.700000047684,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 4371.799999952316,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 5485.299999952316,
+      "bytes": 499805,
+      "parseMs": 0.6000000238418579,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 5004.599999904633,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 5412.600000023842,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2754.7000000476837,
+      "bytes": 499805,
+      "parseMs": 0.5,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4688.899999976158,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2987.7999999523163,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2032.7000000476837,
+      "bytes": 499805,
+      "parseMs": 0.8999999761581421,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 5015.300000071526,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2978.399999976158,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2016.8999999761581,
+      "bytes": 499805,
+      "parseMs": 0.7999999523162842,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 5178.699999928474,
+      "bytes": 14767,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 4783.100000023842,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 3900.6999999284744,
+      "bytes": 499805,
+      "parseMs": 1,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4823.100000023842,
+      "bytes": 14767,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3728.2000000476837,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 3001.8000000715256,
+      "bytes": 499805,
+      "parseMs": 0.5,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4914.200000047684,
+      "bytes": 14767,
+      "parseMs": 0.09999990463256836,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 2920.5,
+      "bytes": 4997,
+      "parseMs": 0.10000002384185791,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "list-warm",
+      "status": 200,
+      "ms": 2866.2999999523163,
+      "bytes": 499805,
+      "parseMs": 0.6000000238418579,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "detail-warm",
+      "status": 200,
+      "ms": 4788.900000095367,
+      "bytes": 14767,
+      "parseMs": 0.09999990463256836,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    },
+    {
+      "scenario": "write-warm",
+      "status": 200,
+      "ms": 3165.600000023842,
+      "bytes": 4997,
+      "parseMs": 0,
+      "sqlCount": null,
+      "sqlMs": null,
+      "appMs": null,
+      "region": null
+    }
+  ],
+  "summary": {
+    "list-first-observed": {
+      "samples": 1,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 2113.7000000476837,
+        "p95": 2113.7000000476837
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 499805,
+        "p95": 499805
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0.7999999523162842,
+        "p95": 0.7999999523162842
+      },
+      "sqlCount": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      }
+    },
+    "detail-first-observed": {
+      "samples": 1,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 4706.700000047684,
+        "p95": 4706.700000047684
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 14767,
+        "p95": 14767
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0,
+        "p95": 0
+      },
+      "sqlCount": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      }
+    },
+    "write-first-observed": {
+      "samples": 1,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 3006.5,
+        "p95": 3006.5
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 4997,
+        "p95": 4997
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0,
+        "p95": 0
+      },
+      "sqlCount": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 1,
+        "p50": null,
+        "p95": null
+      }
+    },
+    "list-warm": {
+      "samples": 19,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 2866.2999999523163,
+        "p95": 7204.199999928474
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 499805,
+        "p95": 499805
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0.7999999523162842,
+        "p95": 5.600000023841858
+      },
+      "sqlCount": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      }
+    },
+    "detail-warm": {
+      "samples": 19,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 4839.600000023842,
+        "p95": 9136.899999976158
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 14767,
+        "p95": 14767
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0.09999990463256836,
+        "p95": 0.2999999523162842
+      },
+      "sqlCount": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      }
+    },
+    "write-warm": {
+      "samples": 19,
+      "failedHttpSamples": 0,
+      "regions": [
+        null
+      ],
+      "ms": {
+        "unknown": 0,
+        "p50": 3166.6999999284744,
+        "p95": 5412.600000023842
+      },
+      "bytes": {
+        "unknown": 0,
+        "p50": 4997,
+        "p95": 4997
+      },
+      "parseMs": {
+        "unknown": 0,
+        "p50": 0,
+        "p95": 0.20000004768371582
+      },
+      "sqlCount": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "sqlMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      },
+      "appMs": {
+        "unknown": 19,
+        "p50": null,
+        "p95": null
+      }
+    }
+  }
+}

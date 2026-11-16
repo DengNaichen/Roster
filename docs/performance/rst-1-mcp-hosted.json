@@ -1,0 +1,22 @@
+{
+  "workspace": "perf-baseline-20261116",
+  "issue": "PERF-50",
+  "property": "status",
+  "expected": "in_progress",
+  "transport": "hosted-MCP-with-real-browser-Supabase-session",
+  "visibleWithin30Seconds": false,
+  "ack": {
+    "name": "update_issue",
+    "status": 200,
+    "ms": 5321.799999952316,
+    "bytes": 10235,
+    "region": null,
+    "acknowledgedAt": 1794808307183
+  },
+  "match": null,
+  "observedAt": 1794808337204,
+  "visibility": "visible",
+  "online": true,
+  "postWindowRestConfirmed": null,
+  "limitation": "Combined post-window REST read and restore exceeded ego-lite 15s evaluation bound; returned verification was not retained. MCP acknowledgement and 30s visible-page observation are retained. Local equivalent includes successful post-window REST confirmation."
+}

@@ -5,7 +5,7 @@ import {
   issueDocumentText,
 } from '../../../../../contracts/mod.ts';
 import type { Database } from '../../../platform/database/client.ts';
-import { one, type Row } from '../../../platform/database/query.ts';
+import { measuredExecutor, one, type Row } from '../../../platform/database/query.ts';
 import { createSession } from '../../../platform/database/session.ts';
 import { allocateIssueNumber, team, workspace } from '../../access/index.ts';
 import { audit } from '../../audit/index.ts';
@@ -33,7 +33,8 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
   return {
     ...createIssueQueries(db),
     transaction: (run) =>
-      db.transaction((tx) => {
+      db.transaction((transaction) => {
+        const tx = measuredExecutor(transaction);
         const session = createSession(tx);
         return run({
           workspace: async (ctx, slug) =>

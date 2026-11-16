@@ -1,0 +1,16 @@
+{
+  "transport": "real-local-MCP-fixed-preview-identity",
+  "httpStatus": 200,
+  "sqlCount": null,
+  "ackMs": 53,
+  "visibleWithin30Seconds": false,
+  "observationMs": 30006,
+  "workspace": "perf-baseline-v2",
+  "issue": "PERF-50",
+  "property": "status",
+  "expected": "todo",
+  "observation": "ego-lite waitForFunction on detail status button, timeout 30000 ms",
+  "visibility": "visible",
+  "network": "online; unthrottled loopback",
+  "postWindowRestConfirmed": true
+}

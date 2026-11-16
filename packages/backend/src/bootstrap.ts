@@ -1,3 +1,4 @@
+import { measureRequest } from './platform/telemetry/performance.ts';
 import { createIdentityVerifier } from './platform/auth/jwt.ts';
 import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
@@ -29,7 +30,10 @@ export function bootstrap(env: Environment) {
     publicUrl: required(env, 'MCP_PUBLIC_URL'),
     authorizationServer: issuer,
   });
-  return { service, api: app.fetch, mcp, close: () => pool.end() };
+  const measured =
+    (run: (request: Request) => Response | Promise<Response>) => (request: Request) =>
+      env.ROSTER_PERFORMANCE === 'true' ? measureRequest(() => run(request)) : run(request);
+  return { service, api: measured(app.fetch), mcp: measured(mcp), close: () => pool.end() };
 }
 /** Edge gateways retain the function name in URL.pathname; adapters use clean paths. */
 export function stripFunctionPrefix(request: Request, functionName: string): Request {

@@ -1,3 +1,4 @@
+import { measureRequest } from '../../packages/backend/src/platform/telemetry/performance.ts';
 import { createUnitOfWork } from '../../packages/backend/src/platform/database/session.ts';
 // Local preview only: deliberately not imported by any deployed function.
 import { createDatabase } from '../../packages/backend/src/platform/database/client.ts';
@@ -188,9 +189,9 @@ const server = Deno.serve({ hostname: '127.0.0.1', port }, (request) => {
     if (origin || request.headers.has('sec-fetch-site')) {
       return new Response('Local MCP clients only', { status: 403 });
     }
-    return localMcp(request);
+    return measureRequest(() => localMcp(request));
   }
-  return app.fetch(request);
+  return measureRequest(() => app.fetch(request));
 });
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   Deno.addSignalListener(signal, async () => {

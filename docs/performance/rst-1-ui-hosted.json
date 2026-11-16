@@ -1,0 +1,71 @@
+{
+  "mode": "hosted-production-exploratory",
+  "revision": "dpl_2RjbUhzHdXGRckALkcBkM6BgGUf6",
+  "warning": "Early schema-1 observation; excludes automation lag but lacks DOM/paint separation; not acceptance evidence for cache/optimism",
+  "samples": [
+    {
+      "scenario": "first-list",
+      "ms": 5085.399999976158,
+      "requests": [
+        {
+          "method": "GET",
+          "ms": 1473.1000000238419,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 431.10000002384186,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 700.5,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 1564.5,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 2368.3000000715256,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 2283.7000000476837,
+          "status": 200
+        }
+      ],
+      "visibility": "visible"
+    },
+    {
+      "scenario": "repeat-detail",
+      "ms": 10058.399999976158,
+      "requests": [
+        {
+          "method": "GET",
+          "ms": 6259,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 6261.200000047684,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 6262.899999976158,
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "ms": 10037.899999976158,
+          "status": 200
+        }
+      ],
+      "visibility": "visible"
+    }
+  ]
+}

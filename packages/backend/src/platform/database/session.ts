@@ -9,9 +9,10 @@ import { createLabelsRepository } from '../../modules/labels/postgres.ts';
 import { createPlanningRepository } from '../../modules/planning/postgres.ts';
 import { createSpecsRepository } from '../../modules/specs/postgres.ts';
 import type { Database } from './client.ts';
-import type { Executor } from './query.ts';
+import { type Executor, measuredExecutor } from './query.ts';
 
-export function createSession(db: Executor): Session {
+export function createSession(executor: Executor): Session {
+  const db = measuredExecutor(executor);
   return {
     github: createGitHubRepository(db),
     access: createAccessRepository(db),
