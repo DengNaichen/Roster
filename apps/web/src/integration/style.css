@@ -73,6 +73,9 @@
   object-fit: contain;
   border-radius: 50%;
 }
+.roster-login button img.roster-login-github-mark {
+  background: #24292f;
+}
 .roster-login button + button {
   margin-top: 16px;
 }
@@ -105,4 +108,73 @@
 .roster-login p[role="alert"] {
   margin-top: 16px;
   color: var(--r-color-danger-fg);
+}
+
+.roster-consent-card {
+  display: grid;
+  gap: var(--r-space-16);
+  padding: var(--r-inset-dialog);
+  background: var(--r-color-bg-surface);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-dialog);
+}
+.roster-consent-mark {
+  width: var(--r-space-32);
+  height: var(--r-space-32);
+}
+.roster-consent-card h1 {
+  font: var(--r-type-heading-md);
+  letter-spacing: var(--r-tracking-heading);
+}
+.roster-consent-account {
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+.roster-consent-details {
+  display: grid;
+  gap: var(--r-space-8);
+  padding: var(--r-space-12) var(--r-space-16);
+  background: var(--r-color-bg-canvas);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-panel);
+  color: var(--r-color-text-secondary);
+}
+.roster-consent-details h2 {
+  color: var(--r-color-text-primary);
+  font: var(--r-type-heading-sm);
+}
+.roster-consent-uri,
+.roster-consent-scope-label,
+.roster-consent-loading {
+  color: var(--r-color-text-muted);
+  font: var(--r-type-caption);
+}
+.roster-consent-scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--r-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.roster-consent-scopes code {
+  padding: var(--r-space-2) var(--r-space-8);
+  background: var(--r-color-code-bg);
+  border: var(--r-border-width) solid var(--r-color-border-divider);
+  border-radius: var(--r-radius-small);
+  font: var(--r-type-code);
+}
+.roster-consent-error {
+  display: grid;
+  gap: var(--r-space-12);
+}
+.roster-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--r-space-8);
+}
+.roster-consent-actions a.button {
+  display: inline-flex;
+  align-items: center;
 }
