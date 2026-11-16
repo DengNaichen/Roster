@@ -49,4 +49,30 @@ describe("API integration boundary", () => {
     await expect(api("/api/workspaces")).rejects.toThrow("Sign in to continue");
     expect(fetch).not.toHaveBeenCalled();
   });
+  it("resolves workspace MCP URLs across Edge Functions, local server, and preview", async () => {
+    vi.stubEnv("DEV", false);
+    vi.stubEnv("VITE_API_BASE_URL", "https://proj.supabase.co/functions/v1/api/");
+    vi.stubGlobal("window", {
+      location: { hostname: "roster.example", origin: "https://roster.example" },
+    });
+    const hosted = await import("./api");
+    expect(hosted.mcpServerUrl("acme-dev")).toBe(
+      "https://proj.supabase.co/functions/v1/mcp/w/acme-dev/mcp",
+    );
+
+    vi.resetModules();
+    vi.stubEnv("VITE_API_BASE_URL", "http://127.0.0.1:18471");
+    const localDev = await import("./api");
+    expect(localDev.mcpServerUrl("acme-dev")).toBe("http://127.0.0.1:18471/w/acme-dev/mcp");
+
+    vi.resetModules();
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
+    vi.stubEnv("VITE_PREVIEW_API_PORT", "18510");
+    vi.stubGlobal("window", {
+      location: { hostname: "127.0.0.1", origin: "http://127.0.0.1:5217" },
+    });
+    const preview = await import("./api");
+    expect(preview.mcpServerUrl("acme-dev")).toBe("http://127.0.0.1:18510/w/acme-dev/mcp");
+  });
 });

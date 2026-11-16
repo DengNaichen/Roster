@@ -88,6 +88,7 @@ function Login({ error: initial }: { error?: unknown }) {
             >
               <img
                 src={provider === "google" ? googleMark : githubMark}
+                className={provider === "github" ? "roster-login-github-mark" : undefined}
                 width="20"
                 height="20"
                 alt=""
@@ -108,7 +109,7 @@ function ReturnAfterLogin() {
   }, []);
   return <main className="integration-auth">Opening workspace…</main>;
 }
-function Consent() {
+function Consent({ identity }: { identity: Identity | null }) {
   const id = new URLSearchParams(window.location.search).get("authorization_id");
   const current = useRef(id);
   current.current = id;
@@ -161,49 +162,106 @@ function Consent() {
       if (current.current === id) setPending(false);
     }
   }
+  const accountLabel = identity
+    ? identity.name && identity.email && identity.name !== identity.email
+      ? `${identity.name} (${identity.email})`
+      : identity.email || identity.name || identity.subject
+    : "";
   return (
     <main className="integration-auth">
-      <h1>Authorize Roster access</h1>
-      {!id ? (
-        <p role="alert">Missing authorization_id.</p>
-      ) : localPreview ? (
-        <p>OAuth authorization requires a configured Supabase account.</p>
-      ) : (
-        <>
-          {currentDetails ? (
-            <>
-              <h2>{currentDetails.client.name}</h2>
-              <p>{currentDetails.client.uri}</p>
-              <p>
-                This application can act with your Roster workspace permissions. The following
-                scopes control profile information:
-              </p>
-              <ul>
-                {currentDetails.scope
-                  .split(" ")
-                  .filter(Boolean)
-                  .map((scope) => (
-                    <li key={scope}>{scope}</li>
-                  ))}
-              </ul>
-            </>
-          ) : (
-            !error && <p>Loading authorization…</p>
-          )}
-          {Boolean(error) && (
-            <>
-              <p role="alert">{message(error)}</p>
-              <button onClick={() => setAttempt((n) => n + 1)}>Retry</button>
-            </>
-          )}
-          <button disabled={!currentDetails || pending} onClick={() => void decide(true)}>
-            Approve
-          </button>
-          <button disabled={!currentDetails || pending} onClick={() => void decide(false)}>
-            Deny
-          </button>
-        </>
-      )}
+      <section className="roster-consent-card" aria-labelledby="consent-title">
+        <RosterLogo className="roster-consent-mark" />
+        <h1 id="consent-title">Authorize Roster access</h1>
+        {accountLabel && <p className="roster-consent-account">Signed in as {accountLabel}</p>}
+        {!id ? (
+          <>
+            <p role="alert">
+              Missing authorization_id. Start the MCP login flow from your coding agent again.
+            </p>
+            <div className="roster-consent-actions">
+              <a className="button" href="/">
+                Back to Roster
+              </a>
+            </div>
+          </>
+        ) : localPreview ? (
+          <>
+            <p>
+              Local preview connects coding agents directly over loopback without OAuth. Copy the
+              preview MCP URL from Settings → Integrations.
+            </p>
+            <div className="roster-consent-actions">
+              <a className="button" href="/">
+                Back to Roster
+              </a>
+            </div>
+          </>
+        ) : (
+          <>
+            {currentDetails ? (
+              <div className="roster-consent-details">
+                <h2>{currentDetails.client.name}</h2>
+                {currentDetails.client.uri && (
+                  <p className="roster-consent-uri">{currentDetails.client.uri}</p>
+                )}
+                <p>
+                  This MCP client or application can read and update issues, specs, and projects
+                  across the Roster workspaces and teams your account can access. Approving does not
+                  grant access to your GitHub repositories.
+                </p>
+                {currentDetails.scope.trim() && (
+                  <>
+                    <p className="roster-consent-scope-label">Requested profile scopes:</p>
+                    <ul className="roster-consent-scopes">
+                      {currentDetails.scope
+                        .split(" ")
+                        .filter(Boolean)
+                        .map((scope) => (
+                          <li key={scope}>
+                            <code>{scope}</code>
+                          </li>
+                        ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            ) : (
+              !error && <p className="roster-consent-loading">Loading authorization…</p>
+            )}
+            {Boolean(error) && (
+              <div className="roster-consent-error">
+                <p role="alert">{message(error)}</p>
+                <div className="roster-consent-actions">
+                  <button className="button" type="button" onClick={() => setAttempt((n) => n + 1)}>
+                    Retry
+                  </button>
+                  <a className="button" href="/">
+                    Back to Roster
+                  </a>
+                </div>
+              </div>
+            )}
+            <div className="roster-consent-actions">
+              <button
+                className="button primary"
+                type="button"
+                disabled={!currentDetails || pending}
+                onClick={() => void decide(true)}
+              >
+                {pending ? "Authorizing…" : "Approve"}
+              </button>
+              <button
+                className="button"
+                type="button"
+                disabled={!currentDetails || pending}
+                onClick={() => void decide(false)}
+              >
+                Deny
+              </button>
+            </div>
+          </>
+        )}
+      </section>
     </main>
   );
 }
@@ -301,7 +359,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     );
   } else if (path === "/auth/login" || path === "/auth/callback") {
     content = <ReturnAfterLogin />;
-  } else if (path === "/oauth/consent") content = <Consent />;
+  } else if (path === "/oauth/consent") content = <Consent identity={identity} />;
   else if (path === "/join") {
     window.history.replaceState({}, "", `/auth/join${window.location.search}`);
     content = appContent;

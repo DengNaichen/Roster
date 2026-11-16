@@ -180,7 +180,11 @@ const server = Deno.serve({ hostname: '127.0.0.1', port }, (request) => {
   if (request.headers.get('sec-fetch-site') === 'cross-site') {
     return new Response('Origin denied', { status: 403 });
   }
-  if (url.pathname === `/w/${slug}/mcp`) {
+  if (
+    /^(\/\.well-known\/oauth-protected-resource)?\/w\/[a-z0-9][a-z0-9-]{0,62}\/mcp$/.test(
+      url.pathname,
+    )
+  ) {
     if (origin || request.headers.has('sec-fetch-site')) {
       return new Response('Local MCP clients only', { status: 403 });
     }
