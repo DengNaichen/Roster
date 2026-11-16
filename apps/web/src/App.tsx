@@ -3,6 +3,7 @@ import { Component, lazy, ReactNode, Suspense, useEffect, useMemo, useState } fr
 import { CreateTeamDialog } from "./Dialogs";
 import type { ViewMode } from "./IssueViews";
 import { Sidebar } from "./Sidebar";
+import { RosterLogo } from "./RosterLogo";
 import { JoinWorkspace } from "./WorkspaceAccess";
 import { WorkspaceDialog } from "./WorkspaceMenu";
 import { Session } from "./Session";
@@ -56,9 +57,11 @@ function FirstWorkspace() {
   const [empty, setEmpty] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setError("");
     api<{ workspaces: Workspace[] }>("/api/workspaces").then(
       ({ workspaces }) => {
         if (!active) return;
@@ -76,26 +79,53 @@ function FirstWorkspace() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
 
   return (
     <main className="panel first-workspace">
-      {error ? (
-        <RequestError message={error} />
-      ) : empty ? (
-        <>
-          <h1>Your workspaces</h1>
-          <p>
-            You haven’t joined a workspace yet. Open an invitation from an administrator, or create
-            your own.
-          </p>
-          <button className="button primary" onClick={() => setCreating(true)}>
-            Create workspace
-          </button>
-        </>
-      ) : (
-        <p className="empty">Loading…</p>
-      )}
+      <div className="first-workspace-body">
+        <RosterLogo className="first-workspace-mark" />
+        {error ? (
+          <>
+            <h1>Could not load workspaces</h1>
+            <RequestError message={error} />
+            <div className="onboarding-actions">
+              <button className="button primary" onClick={() => setAttempt((n) => n + 1)}>
+                Retry
+              </button>
+            </div>
+          </>
+        ) : empty ? (
+          <>
+            <h1>Welcome to Roster</h1>
+            <p>
+              You haven’t joined a workspace yet. Create one for your organization or personal work,
+              or open an invitation link from an administrator.
+            </p>
+            <ul className="onboarding-steps" aria-label="How Roster is organized">
+              <li>
+                <strong>Workspace</strong> — shared container for members, projects, and your MCP
+                endpoint.
+              </li>
+              <li>
+                <strong>Team</strong> — issue queue (<code>KEY-1</code>, <code>KEY-2</code>), specs,
+                and cycles for a product or repository.
+              </li>
+              <li>
+                <strong>Coding agent</strong> — connect Codex, Claude Code, or Cursor via MCP from
+                any repository once a team is ready.
+              </li>
+            </ul>
+            <div className="onboarding-actions">
+              <button className="button primary" onClick={() => setCreating(true)}>
+                Create workspace
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="empty">Loading…</p>
+        )}
+      </div>
       {creating && (
         <WorkspaceDialog
           onClose={() => setCreating(false)}
@@ -202,7 +232,12 @@ function WorkspaceContent() {
             ) : route.kind === "cycles" ? (
               <CyclesPage team={route.team} teams={teams.data.teams} />
             ) : route.kind === "projects" ? (
-              <ProjectsPage team={route.team} teams={teams.data.teams} />
+              <ProjectsPage
+                team={route.team}
+                teams={teams.data.teams}
+                teamsLoading={teams.loading}
+                onCreateTeam={() => setCreatingTeam(true)}
+              />
             ) : route.kind === "initiatives" || route.kind === "initiative" ? (
               <InitiativesPage
                 id={route.kind === "initiative" ? route.id : undefined}

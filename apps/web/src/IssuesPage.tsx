@@ -7,6 +7,7 @@ import { NewIssueDialog } from "./Dialogs";
 import { EmojiPicker, EntityEmoji } from "./EmojiPicker";
 import { IssueFilters } from "./IssueFilters";
 import { IssueViews, ViewMode } from "./IssueViews";
+import { defaultIssueStatus } from "./onboarding";
 import { emptyLabelFilter, LabelFilterValue, useLabels } from "./useLabels";
 import { PageHeader } from "./PageHeader";
 import { ProjectDialog, ProjectOverview } from "./ProjectManagement";
@@ -166,6 +167,7 @@ export default function IssuesPage({
     loadError ||
     (!teamsLoading && scopeTeam && !activeTeam ? "Team not found." : "");
   const canCreate =
+    teams.length > 0 &&
     (route.kind !== "cycle" ||
       (cycle.data?.state !== "completed" &&
         cycleTeam.data.settings.enabled &&
@@ -177,6 +179,16 @@ export default function IssuesPage({
     !projects.error &&
     !activeProject?.archived &&
     (activeProject === null || activeProject.teams.length > 0);
+  const unfiltered =
+    filter === "all" &&
+    !query &&
+    priority === "" &&
+    !type &&
+    !assignee &&
+    labelFilter.mode === "any" &&
+    labelFilter.labels.length === 0 &&
+    labelFilter.groups.length === 0;
+  const triageHiddenCount = triage ? 0 : issues.filter((issue) => issue.status === "triage").length;
   const visibleIdentifiers = new Set(
     issues.filter((issue) => visibleStatuses.has(issue.status)).map((issue) => issue.identifier),
   );
@@ -400,33 +412,120 @@ export default function IssuesPage({
       {!scopeError &&
         !showOverview &&
         (!loading && teams.length === 0 ? (
-          <div className="scope-message">
-            <p>No teams yet. Create a team to start adding issues.</p>
-            <button className="button" onClick={onCreateTeam}>
-              Create team
-            </button>
+          <div className="onboarding-empty" role="region" aria-label="Workspace setup">
+            <h2>Create your first team</h2>
+            <p>
+              Teams own issue queues (<code>ENG-1</code>, <code>ENG-2</code>), specs, and cycles.
+              Create one per product or code repository to start working.
+            </p>
+            <ul className="onboarding-steps" aria-label="Next steps">
+              <li>
+                <strong>1. Create a team</strong> — sets the identifier prefix and visibility for
+                its issues.
+              </li>
+              <li>
+                <strong>2. Group work</strong> — add issues directly, or group multi-issue outcomes
+                under Projects and structured Specs.
+              </li>
+              <li>
+                <strong>3. Connect a coding agent</strong> — link another repository’s Codex, Claude
+                Code, or Cursor client to this team over MCP.
+              </li>
+            </ul>
+            <div className="onboarding-actions">
+              <button type="button" className="button primary" onClick={onCreateTeam}>
+                Create team
+              </button>
+              <NavLink className="button" to={pagePath("/settings/integrations")}>
+                MCP &amp; agent setup
+              </NavLink>
+            </div>
+          </div>
+        ) : !loading && scopeTeam && !triage && unfiltered && issues.length === 0 ? (
+          <div
+            className="onboarding-empty"
+            role="region"
+            aria-label={`${activeTeam?.name ?? scopeTeam} setup`}
+          >
+            <h2>{activeTeam?.name ?? scopeTeam} is ready</h2>
+            <p>
+              Issues in this team are numbered <code>{scopeTeam}-1</code>,{" "}
+              <code>{scopeTeam}-2</code>, and so on. Add your first issue here, organize work with
+              projects and specs, or connect a coding agent from another repository via MCP.
+            </p>
+            <div className="onboarding-actions">
+              <button
+                type="button"
+                className="button primary"
+                disabled={!canCreate}
+                onClick={() => setCreating(true)}
+              >
+                Create first issue
+              </button>
+              <NavLink
+                className="button"
+                to={pagePath(`/settings/integrations?team=${encodeURIComponent(scopeTeam)}`)}
+              >
+                Connect coding agent (MCP)
+              </NavLink>
+              {capabilities.projects && (
+                <NavLink
+                  className="button"
+                  to={pagePath(`/team/${encodeURIComponent(scopeTeam)}/projects`)}
+                >
+                  Projects
+                </NavLink>
+              )}
+              <NavLink
+                className="button"
+                to={pagePath(`/team/${encodeURIComponent(scopeTeam)}/specs`)}
+              >
+                Specs
+              </NavLink>
+            </div>
           </div>
         ) : (
-          <IssueViews
-            view={view}
-            visibleColumns={visibleColumns}
-            grouped={grouped}
-            loading={loading}
-            isCollapsed={isCollapsed}
-            toggleGroup={(status) =>
-              setCollapsed((current) => ({
-                ...current,
-                [status]: !(current[status] ?? defaultCollapsed(status)),
-              }))
-            }
-            actions={{
-              selected: selectedVisible,
-              toggle: toggleIssue,
-              savingPriorities,
-              changePriority,
-              moveIssue,
-            }}
-          />
+          <>
+            {!loading && visibleCount === 0 && unfiltered && triageHiddenCount > 0 && (
+              <p className="scope-description" role="status">
+                {triageHiddenCount} {triageHiddenCount === 1 ? "issue is" : "issues are"} waiting in
+                Triage.{" "}
+                {scopeTeam ? (
+                  <NavLink to={pagePath(`/team/${encodeURIComponent(scopeTeam)}/triage`)}>
+                    Open Triage
+                  </NavLink>
+                ) : (
+                  <button
+                    type="button"
+                    className="ghost"
+                    onClick={() => changeStatusFilter("triage")}
+                  >
+                    Show Triage
+                  </button>
+                )}
+              </p>
+            )}
+            <IssueViews
+              view={view}
+              visibleColumns={visibleColumns}
+              grouped={grouped}
+              loading={loading}
+              isCollapsed={isCollapsed}
+              toggleGroup={(status) =>
+                setCollapsed((current) => ({
+                  ...current,
+                  [status]: !(current[status] ?? defaultCollapsed(status)),
+                }))
+              }
+              actions={{
+                selected: selectedVisible,
+                toggle: toggleIssue,
+                savingPriorities,
+                changePriority,
+                moveIssue,
+              }}
+            />
+          </>
         ))}
       {projectDialog && activeProject && (
         <ProjectDialog
@@ -442,7 +541,7 @@ export default function IssuesPage({
           teams={teams}
           team={scopeTeam}
           projects={projects.data.projects}
-          status={filter === "all" ? "triage" : filter}
+          status={defaultIssueStatus(triage, filter, scope)}
           project={activeProject}
           onClose={() => setCreating(false)}
           onCreate={addIssue}

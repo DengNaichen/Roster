@@ -7,7 +7,17 @@ import { ProjectTimeline } from "./ProjectTimeline";
 import { apiPath, NavLink, pagePath, Project, RequestError, Team } from "./shared";
 import { useResource } from "./useResource";
 
-export default function ProjectsPage({ team, teams }: { team: string; teams: Team[] }) {
+export default function ProjectsPage({
+  team,
+  teams,
+  teamsLoading = false,
+  onCreateTeam,
+}: {
+  team: string;
+  teams: Team[];
+  teamsLoading?: boolean;
+  onCreateTeam?: () => void;
+}) {
   const [archived, setArchived] = useState(false);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<Project | null>(null);
@@ -21,13 +31,14 @@ export default function ProjectsPage({ team, teams }: { team: string; teams: Tea
   const visible = projects.data.projects.filter(
     (item) => item.archived === archived && (!team || item.teams.includes(team)),
   );
+  const noTeams = !teamsLoading && teams.length === 0;
   return (
     <>
       <PageHeader
         actions={
           <button
             className="button primary"
-            disabled={projects.loading || !!projects.error}
+            disabled={projects.loading || teamsLoading || !!projects.error || noTeams}
             onClick={() => setCreating(true)}
           >
             New project
@@ -67,6 +78,21 @@ export default function ProjectsPage({ team, teams }: { team: string; teams: Tea
           <button className="button" onClick={() => void projects.reload()}>
             Retry
           </button>
+        </div>
+      ) : noTeams && visible.length === 0 && !projects.loading ? (
+        <div className="onboarding-empty" role="region" aria-label="Create a team first">
+          <h2>Create a team before adding projects</h2>
+          <p>
+            Every project in Roster is assigned to at least one team so its issues have a team queue
+            and numbering prefix.
+          </p>
+          {onCreateTeam && (
+            <div className="onboarding-actions">
+              <button type="button" className="button primary" onClick={onCreateTeam}>
+                Create team
+              </button>
+            </div>
+          )}
         </div>
       ) : timeline && !projects.loading ? (
         <ProjectTimeline projects={visible} onEdit={setEditing} />
