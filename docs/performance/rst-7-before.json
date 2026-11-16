@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "method": "real local MCP acknowledgement to DOM MutationObserver; no navigation/focus between samples",
+  "measuredAt": "2026-11-16T10:56:22.331Z",
+  "workspace": "perf-baseline-v2",
+  "samples": [
+    {
+      "status": 200,
+      "ms": 10.437999999994645,
+      "acknowledgedAt": 1794826552296,
+      "priority": 2,
+      "timeout": true,
+      "seenAt": null,
+      "observedAt": 1794826582307,
+      "visibility": "visible",
+      "online": true,
+      "requests": [],
+      "visibilityMs": null
+    }
+  ]
+}

@@ -1,0 +1,611 @@
+{
+  "schema": 1,
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+    "files": 236,
+    "scope": "web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports"
+  },
+  "measuredAt": "2026-11-16T11:48:04.247Z",
+  "mode": "real ego-lite local preview; MCP writes through normal transport",
+  "observations": [
+    {
+      "name": "unchanged-visible-32s",
+      "at": 1794829716250,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14658.100000023842,
+          "endMs": 14666.200000047684
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14658.5,
+          "endMs": 14670.200000047684
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 14658.700000047684,
+          "endMs": 14673.600000023842
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 29675.600000023842,
+          "endMs": 29689.300000071526
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 29676.200000047684,
+          "endMs": 29693.300000071526
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 29676.400000095367,
+          "endMs": 29696.700000047684
+        }
+      ]
+    },
+    {
+      "name": "hidden-32s",
+      "acknowledgedAt": 1794829716397,
+      "hiddenAt": 1794829716277,
+      "visibleAt": 1794829748407,
+      "requests": []
+    },
+    {
+      "name": "focus-catch-up",
+      "focusedAt": 1794829748401,
+      "observedDelayMs": 222,
+      "at": 1794829748624,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 4,
+          "resource": "labels",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 32130.100000023842,
+          "endMs": 32140.600000023842
+        },
+        {
+          "queryId": 5,
+          "resource": "other",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 32130.400000095367,
+          "endMs": 32143.100000023842
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 3,
+          "startMs": 32130.5,
+          "endMs": 32143.200000047684
+        },
+        {
+          "queryId": 7,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 32130.600000023842,
+          "endMs": 32145.800000071526
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 32233,
+          "endMs": 32243.900000095367
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 32233.200000047684,
+          "endMs": 32248.5
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 896654,
+          "sqlCount": 9,
+          "startMs": 32233.400000095367,
+          "endMs": 32253.800000071526
+        }
+      ]
+    },
+    {
+      "name": "offline-17s",
+      "acknowledgedAt": 1794829748648,
+      "at": 1794829765652,
+      "visibility": "visible",
+      "online": false,
+      "requests": []
+    },
+    {
+      "name": "reconnect-catch-up",
+      "onlineAt": 1794829765653,
+      "observedDelayMs": 211,
+      "at": 1794829765865,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 17122.600000023842,
+          "endMs": 17132
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 17122.700000047684,
+          "endMs": 17136.5
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 915826,
+          "sqlCount": 9,
+          "startMs": 17122.800000071526,
+          "endMs": 17142.200000047684
+        }
+      ]
+    },
+    {
+      "name": "blocked-url-error",
+      "at": 1794829781803,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.200000047684,
+          "endMs": 14911.5
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.299999952316,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.399999976158,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.700000047684,
+          "endMs": 15913.100000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.5
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.600000023842
+        }
+      ]
+    },
+    {
+      "name": "blocked-url-backoff",
+      "at": 1794829812876,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.200000047684,
+          "endMs": 14911.5
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.299999952316,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.399999976158,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.700000047684,
+          "endMs": 15913.100000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.5
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.600000023842
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.299999952316,
+          "endMs": 45916.799999952316
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.60000002384,
+          "endMs": 45916.89999997616
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.60000002384,
+          "endMs": 45916.89999997616
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46918.5,
+          "endMs": 46920
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46919,
+          "endMs": 46920.299999952316
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46919.89999997616,
+          "endMs": 46920.299999952316
+        }
+      ]
+    },
+    {
+      "name": "network-failure-recovered",
+      "observedDelayMs": 219,
+      "at": 1794829813126,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.200000047684,
+          "endMs": 14911.5
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.299999952316,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14911.399999976158,
+          "endMs": 14911.700000047684
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.700000047684,
+          "endMs": 15913.100000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.5
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 15912.899999976158,
+          "endMs": 15913.600000023842
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.299999952316,
+          "endMs": 45916.799999952316
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.60000002384,
+          "endMs": 45916.89999997616
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 45916.60000002384,
+          "endMs": 45916.89999997616
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46918.5,
+          "endMs": 46920
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46919,
+          "endMs": 46920.299999952316
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 46919.89999997616,
+          "endMs": 46920.299999952316
+        },
+        {
+          "queryId": 4,
+          "resource": "labels",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 47042.89999997616,
+          "endMs": 47053.10000002384
+        },
+        {
+          "queryId": 5,
+          "resource": "other",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 47043.60000002384,
+          "endMs": 47056.700000047684
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 3,
+          "startMs": 47043.700000047684,
+          "endMs": 47059.10000002384
+        },
+        {
+          "queryId": 7,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 47043.700000047684,
+          "endMs": 47064.700000047684
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 47145.89999997616,
+          "endMs": 47151.10000002384
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 47146.10000002384,
+          "endMs": 47154.60000002384
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 47146.10000002384,
+          "endMs": 47160.39999997616
+        }
+      ]
+    }
+  ]
+}

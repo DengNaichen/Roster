@@ -1,0 +1,653 @@
+{
+  "schema": 1,
+  "measuredAt": "2026-11-16T11:29:35.617Z",
+  "method": "alternating order; 20 full and 20 conditional GETs per resource; exact body and validator equality; local ego-lite",
+  "rows": [
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 7.899999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 15.199999928474426,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.899999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.700000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 4.399999976158142,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 4.399999976158142,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.200000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.3000000715255737,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.200000047683716,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.100000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.600000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.399999976158142,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.700000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.1999999284744263,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.100000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.4000000953674316,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.799999952316284,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.5,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.299999952316284,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.4000000953674316,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.299999952316284,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.200000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.5999999046325684,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.600000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.299999952316284,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.100000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.700000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.1999999284744263,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 3.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 3.3000000715255737,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 15.400000095367432,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 9.199999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 9.200000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 9.200000047683716,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 8.600000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 7,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 7.699999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 11.700000047683716,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.899999976158142,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 7.100000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 7.5,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.900000095367432,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.099999904632568,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.5,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.5,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.100000023841858,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.5,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 7.100000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.200000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 7.399999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.600000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.800000071525574,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.699999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.100000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.700000047683716,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 10.199999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.900000095367432,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 4.899999976158142,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.599999904632568,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 4.700000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.700000047683716,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.799999952316284,
+      "bytes": 743278,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.699999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.100000023841858,
+      "bytes": 743278,
+      "sqlCount": 9
+    }
+  ],
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d4a69f631ee456264861665a39d0517748c4b26169624a9d5c87f9edf908b6f9",
+    "files": 101,
+    "scope": "web runtime, dependency lock and measurement scripts; excludes tests and reports"
+  }
+}

@@ -542,7 +542,9 @@ export function IssueDetail({
                   aria-labelledby="tab-work-logs"
                   hidden={activityTab !== "work-logs"}
                 >
-                  {activityTab === "work-logs" && <WorkLogList key={identifier} path={path} />}
+                  {activityTab === "work-logs" && (
+                    <WorkLogList key={identifier} path={path} total={issue.work_log_count} />
+                  )}
                 </div>
               </>
             )}

@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor, createQueryWrapper } from "./test/query-wrapper";
 import { beforeEach, expect, it, vi } from "vitest";
-import { onlineManager } from "@tanstack/react-query";
+import { onlineManager, QueryObserver } from "@tanstack/react-query";
 import {
   createQueryClient,
   resourceKey,
@@ -313,4 +313,170 @@ it("retains readable parent data when a sub-resource write is rejected", async (
   });
   expect(result.current.data).toBe("readable parent");
   expect(result.current.error).toBe("");
+});
+
+it("removes a missing issue from cached collections, relationships and work logs only in its owner/workspace", async () => {
+  const client = createQueryClient(true);
+  const key = resourceKey("owner", "/api/w/alpha/issues/AL-1");
+  const list = resourceKey("owner", "/api/w/alpha/issues");
+  const related = resourceKey("owner", "/api/w/alpha/issues/AL-2");
+  const logs = [...resourceKey("owner", "/api/w/alpha/issues/AL-1/work-logs"), "pages"];
+  const other = resourceKey("other", "/api/w/alpha/issues");
+  const graph = resourceKey("owner", "/api/w/alpha/specs/SP-1/dependencies");
+  client.setQueryData(graph, {
+    nodes: [
+      { id: "one", identifier: "AL-1" },
+      { id: "two", identifier: "AL-2" },
+    ],
+    edges: [{ from: "one", to: "two" }],
+  });
+  const rows = { issues: [{ identifier: "AL-1" }, { identifier: "AL-2" }] };
+  client.setQueryData(key, { identifier: "AL-1", title: "deleted" });
+  client.setQueryData(list, rows);
+  client.setQueryData(related, {
+    identifier: "AL-2",
+    related: [{ identifier: "AL-1" }],
+    parent: { identifier: "AL-1" },
+  });
+  client.setQueryData(logs, { pages: [{ work_logs: [{ body: "private" }] }] });
+  client.setQueryData(other, rows);
+  await expect(
+    client.fetchQuery({
+      queryKey: key,
+      queryFn: async () => {
+        throw Object.assign(new Error("Not found"), { status: 404 });
+      },
+    }),
+  ).rejects.toThrow();
+  expect(client.getQueryData(key)).toBeUndefined();
+  expect(client.getQueryData(logs)).toBeUndefined();
+  expect(client.getQueryData(list)).toEqual({ issues: [{ identifier: "AL-2" }] });
+  expect(client.getQueryData(related)).toEqual({ identifier: "AL-2", related: [], parent: null });
+  expect(client.getQueryData(other)).toEqual(rows);
+  expect(client.getQueryData(graph)).toEqual({
+    nodes: [{ id: "two", identifier: "AL-2" }],
+    edges: [],
+  });
+  client.clear();
+});
+it("discards inactive bodies when accessible teams shrink without touching another workspace", async () => {
+  const client = createQueryClient(true);
+  const teams = resourceKey("owner", "/api/w/alpha/teams");
+  await client.fetchQuery({
+    queryKey: teams,
+    queryFn: async () => ({ teams: [{ key: "AL" }, { key: "PR" }] }),
+  });
+  const issue = resourceKey("owner", "/api/w/alpha/issues/PR-1");
+  const spec = resourceKey("owner", "/api/w/alpha/specs/9");
+  const other = resourceKey("owner", "/api/w/beta/issues/PR-1");
+  client.setQueryData(issue, { title: "private" });
+  client.setQueryData(spec, { body: "private" });
+  client.setQueryData(other, { title: "other workspace" });
+  await client.fetchQuery({ queryKey: teams, queryFn: async () => ({ teams: [{ key: "AL" }] }) });
+  expect(client.getQueryData(issue)).toBeUndefined();
+  expect(client.getQueryData(spec)).toBeUndefined();
+  expect(client.getQueryData(other)).toEqual({ title: "other workspace" });
+  client.clear();
+});
+
+it("keeps an unaffected mounted task and its optimistic value when another team is lost", async () => {
+  const client = createQueryClient(true);
+  const teams = resourceKey("owner", "/api/w/alpha/teams");
+  await client.fetchQuery({
+    queryKey: teams,
+    queryFn: async () => ({ teams: [{ key: "AL" }, { key: "PR" }] }),
+  });
+  const key = resourceKey("owner", "/api/w/alpha/issues/AL-1");
+  const next = deferred<unknown>();
+  const initial = {
+    identifier: "AL-1",
+    title: "active draft context",
+    priority: 1,
+    related: [{ identifier: "PR-1" }, { identifier: "AL-2" }],
+  };
+  client.setQueryData(key, initial);
+  const observer = new QueryObserver(client, {
+    queryKey: key,
+    queryFn: () => next.promise,
+    staleTime: Infinity,
+  });
+  const unmount = observer.subscribe(() => {});
+  await client.fetchQuery({ queryKey: teams, queryFn: async () => ({ teams: [{ key: "AL" }] }) });
+  expect(client.getQueryData(key)).toEqual({ ...initial, related: [{ identifier: "AL-2" }] });
+  expect(observer.getCurrentResult().isError).toBe(false);
+  next.resolve({ ...initial, related: [{ identifier: "AL-2" }] });
+  unmount();
+  client.clear();
+});
+
+it("clears an active private spec by its explicit team before a failing refresh can retain it", async () => {
+  const client = createQueryClient(true);
+  const teams = resourceKey("owner", "/api/w/alpha/teams");
+  await client.fetchQuery({
+    queryKey: teams,
+    queryFn: async () => ({ teams: [{ key: "AL" }, { key: "PR" }] }),
+  });
+  const key = resourceKey("owner", "/api/w/alpha/specs/SPEC-9");
+  client.setQueryData(key, {
+    identifier: "SPEC-9",
+    team: "PR",
+    content: { title: "private spec" },
+  });
+  const observer = new QueryObserver(client, {
+    queryKey: key,
+    staleTime: Infinity,
+    queryFn: async () => {
+      throw new Error("network unavailable");
+    },
+  });
+  const unmount = observer.subscribe(() => {});
+  await client.fetchQuery({ queryKey: teams, queryFn: async () => ({ teams: [{ key: "AL" }] }) });
+  expect(client.getQueryData(key)).toBeUndefined();
+  await waitFor(() => expect(observer.getCurrentResult().isFetching).toBe(false));
+  expect(client.getQueryData(key)).toBeUndefined();
+  unmount();
+  client.clear();
+});
+
+it("ignores a finished write that belongs to an already unmounted account", async () => {
+  const client = createQueryClient(true);
+  const key = resourceKey("new-account", "/api/w/alpha/issues/AL-1");
+  client.setQueryData(key, { title: "new account content" });
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <ServerCacheProvider client={client} subject="new-account">
+      {children}
+    </ServerCacheProvider>
+  );
+  const current = renderHook(() => useServerCache(), { wrapper });
+  const { writeStarted, writeFinished } = await import("./integration/cache-events");
+  act(() =>
+    window.dispatchEvent(
+      new CustomEvent(writeFinished, {
+        detail: {
+          id: Symbol("old-account-write"),
+          path: "/api/w/alpha/issues/AL-1",
+          error: Object.assign(new Error("Workspace access denied"), { status: 403 }),
+        },
+      }),
+    ),
+  );
+  expect(client.getQueryData(key)).toEqual({ title: "new account content" });
+  const id = Symbol("owned-write");
+  act(() => {
+    window.dispatchEvent(
+      new CustomEvent(writeStarted, { detail: { id, path: "/api/w/alpha/issues/AL-1" } }),
+    );
+    window.dispatchEvent(
+      new CustomEvent(writeFinished, {
+        detail: {
+          id,
+          path: "/api/w/alpha/issues/AL-1",
+          error: Object.assign(new Error("Workspace access denied"), { status: 403 }),
+        },
+      }),
+    );
+  });
+  expect(client.getQueryData(key)).toBeUndefined();
+  current.unmount();
+  client.clear();
 });

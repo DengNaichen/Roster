@@ -1,5 +1,6 @@
 import { Hono } from 'npm:hono@4.11.4';
 import { cors } from 'npm:hono@4.11.4/cors';
+import { conditionalRead } from './conditional.ts';
 import { z } from 'npm:zod@4.6.7';
 import * as activity from '../../../../contracts/activity.ts';
 import * as catalog from '../../../../contracts/catalog.ts';
@@ -50,8 +51,8 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     cors({
       origin: (origin) => allowedOrigins.includes(origin) ? origin : undefined,
       allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-      allowHeaders: ['Authorization', 'Content-Type', 'x-region'],
-      exposeHeaders: ['x-sb-edge-region'],
+      allowHeaders: ['Authorization', 'Content-Type', 'x-region', 'If-None-Match'],
+      exposeHeaders: ['x-sb-edge-region', 'ETag'],
       maxAge: 600,
     }),
   );
@@ -77,6 +78,7 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     c.set('requestContext', await verify(c.req.raw));
     await next();
   });
+  app.use('/api/w/*', conditionalRead);
   const body = async <T>(
     c: { req: { json: () => Promise<unknown>; header: (name: string) => string | undefined } },
     schema: z.ZodType<T>,

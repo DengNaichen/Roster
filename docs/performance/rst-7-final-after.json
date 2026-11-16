@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+    "files": 236,
+    "scope": "web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports"
+  },
+  "method": "real local MCP acknowledgement to DOM MutationObserver; no navigation/focus between samples",
+  "measuredAt": "2026-11-16T11:48:03.507Z",
+  "workspace": "perf-baseline-v2",
+  "samples": [
+    {
+      "status": 200,
+      "ms": 13.015916999895126,
+      "acknowledgedAt": 1794829608582,
+      "priority": 2,
+      "timeout": false,
+      "seenAt": 1794829623239,
+      "observedAt": 1794829623292,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14649.400000095367,
+          "endMs": 14657.400000095367
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14649.700000047684,
+          "endMs": 14661.900000095367
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 781622,
+          "sqlCount": 9,
+          "startMs": 14650,
+          "endMs": 14666.600000023842
+        }
+      ],
+      "visibilityMs": 14657
+    },
+    {
+      "status": 200,
+      "ms": 7.020707999821752,
+      "acknowledgedAt": 1794829623300,
+      "priority": 3,
+      "timeout": false,
+      "seenAt": 1794829638283,
+      "observedAt": 1794829638303,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14943.5,
+          "endMs": 14956.300000071526
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14943.800000071526,
+          "endMs": 14973.600000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 800794,
+          "sqlCount": 9,
+          "startMs": 14943.900000095367,
+          "endMs": 14987.600000023842
+        }
+      ],
+      "visibilityMs": 14983
+    },
+    {
+      "status": 200,
+      "ms": 14.194292000029236,
+      "acknowledgedAt": 1794829638318,
+      "priority": 2,
+      "timeout": false,
+      "seenAt": 1794829653367,
+      "observedAt": 1794829653456,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14983.900000095367,
+          "endMs": 15049.400000095367
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14991.800000071526,
+          "endMs": 15054.100000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 819966,
+          "sqlCount": 9,
+          "startMs": 14991.900000095367,
+          "endMs": 15058.600000023842
+        }
+      ],
+      "visibilityMs": 15049
+    },
+    {
+      "status": 200,
+      "ms": 13.97716600028798,
+      "acknowledgedAt": 1794829653473,
+      "priority": 3,
+      "timeout": false,
+      "seenAt": 1794829668399,
+      "observedAt": 1794829668464,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14905,
+          "endMs": 14914.600000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14905.399999976158,
+          "endMs": 14918.600000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 839138,
+          "sqlCount": 9,
+          "startMs": 14905.800000071526,
+          "endMs": 14938.399999976158
+        }
+      ],
+      "visibilityMs": 14926
+    },
+    {
+      "status": 200,
+      "ms": 9.478792000096291,
+      "acknowledgedAt": 1794829668475,
+      "priority": 2,
+      "timeout": false,
+      "seenAt": 1794829683424,
+      "observedAt": 1794829683491,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14933.799999952316,
+          "endMs": 14945.699999928474
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14934.600000023842,
+          "endMs": 14950.100000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 858310,
+          "sqlCount": 9,
+          "startMs": 14934.799999952316,
+          "endMs": 14956.399999976158
+        }
+      ],
+      "visibilityMs": 14949
+    }
+  ]
+}

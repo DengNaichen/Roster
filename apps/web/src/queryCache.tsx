@@ -1,4 +1,6 @@
 import { writeFilter } from "./issueCache";
+import { remoteResource, startRemoteRefresh } from "./remoteRefresh";
+import { remoteRefreshInterval } from "./integration/refresh";
 import { writeStarted, writeFinished } from "./integration/cache-events";
 import {
   QueryCache,
@@ -45,6 +47,66 @@ const belongs = (query: Query, subject: string, workspace: string | null) =>
   query.queryKey[1] === subject &&
   query.queryKey[2] === workspace;
 
+const refreshInterval = remoteRefreshInterval(import.meta.env.VITE_REMOTE_REFRESH_MS);
+const validators = new WeakMap<object, { tag: string; data: unknown }>();
+const pendingValidators = new WeakMap<object, { tag: string | null; signal: AbortSignal }>();
+const visibleTeams = new WeakMap<object, Set<string>>();
+
+function clearRejected(query: Query, error: unknown) {
+  void query.cancel({ silent: true });
+  validators.delete(query);
+  pendingValidators.delete(query);
+  query.setState({
+    data: undefined,
+    dataUpdatedAt: 0,
+    status: "error",
+    error: error instanceof Error ? error : new Error("Access denied"),
+    fetchStatus: "idle",
+    isInvalidated: true,
+  });
+}
+const record = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object";
+
+function removeMissingReferences(data: unknown, missing: (identifier: string) => boolean) {
+  if (!record(data)) return data;
+  const result = { ...data };
+  let changed = false;
+  for (const field of ["issues", "children", "blocks", "blocked_by", "related", "nodes"]) {
+    const items = data[field];
+    if (!Array.isArray(items)) continue;
+    const kept = items.filter(
+      (item: unknown) =>
+        !record(item) || typeof item.identifier !== "string" || !missing(item.identifier),
+    );
+    if (kept.length !== items.length) {
+      result[field] = kept;
+      changed = true;
+    }
+  }
+  if (Array.isArray(data.nodes) && Array.isArray(result.nodes) && Array.isArray(data.edges)) {
+    const remaining = new Set(
+      result.nodes.flatMap((node: unknown) => (record(node) ? [node.id] : [])),
+    );
+    const edges = data.edges.filter(
+      (edge: unknown) => !record(edge) || (remaining.has(edge.from) && remaining.has(edge.to)),
+    );
+    if (edges.length !== data.edges.length) {
+      result.edges = edges;
+      changed = true;
+    }
+  }
+  if (
+    record(data.parent) &&
+    typeof data.parent.identifier === "string" &&
+    missing(data.parent.identifier)
+  ) {
+    result.parent = null;
+    changed = true;
+  }
+  return changed ? result : data;
+}
+
 function purgeRejected(cache: QueryCache, key: QueryKey, error: unknown) {
   const status = statusOf(error);
   if (status !== 403 && status !== 404) return;
@@ -52,6 +114,10 @@ function purgeRejected(cache: QueryCache, key: QueryKey, error: unknown) {
     status === 403 &&
     error instanceof Error &&
     error.message.toLowerCase() === "workspace access denied";
+  const missingIssue =
+    status === 404 && typeof key[3] === "string"
+      ? /^\/api\/w\/[^/]+\/issues\/([^/?]+)$/.exec(key[3])?.[1]
+      : undefined;
   for (const query of cache.getAll()) {
     if (
       query.queryKey[0] !== "resource" ||
@@ -59,24 +125,88 @@ function purgeRejected(cache: QueryCache, key: QueryKey, error: unknown) {
       query.queryKey[2] !== key[2]
     )
       continue;
-    if (!workspaceDenied && query.queryKey[3] !== key[3]) continue;
-    void query.cancel({ silent: true });
-    query.setState({
-      data: undefined,
-      dataUpdatedAt: 0,
-      status: "error",
-      error: error instanceof Error ? error : new Error("Access denied"),
-      fetchStatus: "idle",
-      isInvalidated: true,
-    });
+    const subresource =
+      missingIssue &&
+      typeof query.queryKey[3] === "string" &&
+      query.queryKey[3].startsWith(`${key[3]}/`);
+    if (workspaceDenied || query.queryKey[3] === key[3] || subresource) clearRejected(query, error);
+    else if (missingIssue) {
+      const data = removeMissingReferences(
+        query.state.data,
+        (identifier) => identifier === missingIssue,
+      );
+      if (data !== query.state.data) {
+        void query.cancel({ silent: true });
+        validators.delete(query);
+        query.setState({ data, isInvalidated: true, fetchStatus: "idle" });
+      }
+    }
   }
 }
 
 export function createQueryClient(test = false) {
   const cache = new QueryCache({
-    onError: (error, query) => purgeRejected(cache, query.queryKey, error),
+    onError: (error, query) => {
+      pendingValidators.delete(query);
+      purgeRejected(cache, query.queryKey, error);
+    },
+    onSuccess: (_data, query) => {
+      const pending = pendingValidators.get(query);
+      pendingValidators.delete(query);
+      if (pending && !pending.signal.aborted && pending.tag)
+        validators.set(query, { tag: pending.tag, data: query.state.data });
+      else validators.delete(query);
+      if (
+        typeof query.queryKey[3] === "string" &&
+        /\/teams$/.test(query.queryKey[3]) &&
+        record(_data) &&
+        Array.isArray(_data.teams)
+      ) {
+        const teams = new Set(
+          _data.teams.flatMap((team: unknown) =>
+            record(team) && typeof team.key === "string" ? [team.key] : [],
+          ),
+        );
+        const previous = visibleTeams.get(query);
+        visibleTeams.set(query, teams);
+        if (previous && [...previous].some((key) => !teams.has(key))) {
+          const lost = new Set([...previous].filter((key) => !teams.has(key)));
+          const missing = (identifier: string) =>
+            lost.has(identifier.slice(0, identifier.lastIndexOf("-")));
+          const affected = (other: Query) =>
+            other !== query && belongs(other, String(query.queryKey[1]), String(query.queryKey[2]));
+          for (const other of cache.getAll().filter(affected)) {
+            const data = other.state.data;
+            // Preserve an unaffected mounted detail (including optimism/drafts), or remove only
+            // denied rows from a mounted collection. Discard inactive/unknown bodies conservatively.
+            const readable =
+              other.getObserversCount() > 0 &&
+              record(data) &&
+              (typeof data.team !== "string" || !lost.has(data.team)) &&
+              (Array.isArray(data.issues) ||
+                (/\/issues\/[^/?]+$/.test(String(other.queryKey[3])) &&
+                  typeof data.identifier === "string" &&
+                  !missing(data.identifier)) ||
+                typeof data.team === "string");
+            if (readable) {
+              void other.cancel({ silent: true });
+              validators.delete(other);
+              other.setState({
+                data: removeMissingReferences(data, missing),
+                isInvalidated: true,
+                fetchStatus: "idle",
+              });
+            } else clearRejected(other, new Error("Team access changed"));
+          }
+          void client.refetchQueries(
+            { predicate: affected, type: "active" },
+            { cancelRefetch: false },
+          );
+        }
+      }
+    },
   });
-  return new QueryClient({
+  const client = new QueryClient({
     queryCache: cache,
     defaultOptions: {
       queries: {
@@ -87,12 +217,13 @@ export function createQueryClient(test = false) {
           count < 1 &&
           error.name !== "AbortError" &&
           ![401, 403, 404].includes(statusOf(error) ?? 0),
-        refetchOnWindowFocus: true,
-        refetchOnReconnect: true,
+        refetchOnWindowFocus: (q) => test || !refreshInterval || !remoteResource(q),
+        refetchOnReconnect: (q) => test || !refreshInterval || !remoteResource(q),
       },
       mutations: { retry: false, networkMode: "always" },
     },
   });
+  return client;
 }
 
 // Keep the existing focus event behavior as well as the browser visibility lifecycle.
@@ -256,9 +387,12 @@ export function ServerCacheProvider({
     };
     const finished = (event: Event) => {
       if (event instanceof CustomEvent && typeof event.detail?.id === "symbol") {
+        const release = releases.get(event.detail.id);
+        // A previous account can finish after this provider mounts. Only handle writes we own.
+        if (!release) return;
         if (typeof event.detail.path === "string" && event.detail.error)
           scope.reject(event.detail.path, event.detail.error);
-        releases.get(event.detail.id)?.();
+        release();
         releases.delete(event.detail.id);
       }
     };
@@ -285,6 +419,9 @@ export function ServerCacheBoundary({ children }: { children: ReactNode }) {
   // AuthBoundary keys this subtree by subject, including after a different user signs in.
   const [client] = useState(() => createQueryClient());
   const mounted = useRef(false);
+  useEffect(() => {
+    if (!needsLogin) return startRemoteRefresh(client, subject, refreshInterval);
+  }, [client, subject, needsLogin]);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -351,15 +488,33 @@ export async function fetchResource<T>(
   scope: CacheScope,
   path: string,
   signal: AbortSignal,
+  queryKey?: QueryKey,
 ): Promise<T> {
   if (scope.hasPending(path)) await scope.wait(path, signal);
   signal.throwIfAborted();
-  return api<T>(path, "GET", undefined, { signal, subject: scope.subject });
+  const query = queryKey ? scope.client.getQueryCache().find({ queryKey, exact: true }) : undefined;
+  const validator = query && validators.get(query);
+  // Optimistic/local changes replace the data identity. Its old validator must never certify that data.
+  const conditional =
+    validator && validator.data === query?.state.data
+      ? { tag: validator.tag, value: validator.data }
+      : undefined;
+  return api<T>(path, "GET", undefined, {
+    signal,
+    subject: scope.subject,
+    conditional,
+    onValidator: query
+      ? (tag) => {
+          if (!signal.aborted) pendingValidators.set(query, { tag, signal });
+        }
+      : undefined,
+  });
 }
 export function resourceOptions<T>(scope: CacheScope, path: string) {
   return {
     queryKey: resourceKey(scope.subject, path),
-    queryFn: ({ signal }: { signal: AbortSignal }) => fetchResource<T>(scope, path, signal),
+    queryFn: ({ signal, queryKey }: { signal: AbortSignal; queryKey: QueryKey }) =>
+      fetchResource<T>(scope, path, signal, queryKey),
   };
 }
 export function usePrefetchIssue() {

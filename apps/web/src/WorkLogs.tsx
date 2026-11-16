@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchResource, resourceKey, useServerCache } from "./queryCache";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, GitBranch, MessageSquare, ScrollText } from "lucide-react";
 import { personName, RequestError, WorkLog, WorkLogPage, WorkLogSummary } from "./shared";
 import { MarkdownText } from "./MarkdownText";
@@ -110,7 +110,7 @@ function WorkLogBody({ path }: { path: string }) {
   );
 }
 
-export function WorkLogList({ path }: { path: string }) {
+export function WorkLogList({ path, total }: { path: string; total: number }) {
   const { scope, enabled } = useServerCache();
   const query = useInfiniteQuery({
     queryKey: [...resourceKey(scope.subject, `${path}/work-logs`), "pages"],
@@ -120,6 +120,13 @@ export function WorkLogList({ path }: { path: string }) {
       fetchResource<WorkLogPage>(scope, `${path}/work-logs?before=${pageParam}`, signal),
     getNextPageParam: (last) => (last.next_before > 0 ? last.next_before : undefined),
   });
+  const { refetch } = query;
+  const previousTotal = useRef(total);
+  useEffect(() => {
+    const changed = previousTotal.current !== total;
+    previousTotal.current = total;
+    if (enabled) void refetch({ cancelRefetch: changed });
+  }, [total, refetch, enabled]);
   const page = {
     work_logs: query.data?.pages.flatMap((p) => p.work_logs) ?? [],
     next_before: query.data?.pages.at(-1)?.next_before ?? 0,

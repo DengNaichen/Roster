@@ -1,0 +1,653 @@
+{
+  "schema": 1,
+  "measuredAt": "2026-11-16T11:51:30.688Z",
+  "method": "alternating order; 20 full and 20 conditional GETs per resource; exact body and validator equality; local ego-lite",
+  "rows": [
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.4000000953674316,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.100000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.899999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.899999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.7000000476837158,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.1999999284744263,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.100000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.100000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.7999999523162842,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.8000000715255737,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.799999952316284,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.100000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.899999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.3000000715255737,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.299999952316284,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.600000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.6999999284744263,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.5,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.399999976158142,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.600000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.5,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 1.7000000476837158,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.100000023841858,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.399999976158142,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.600000023841858,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.5999999046325684,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.200000047683716,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.7999999523162842,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 2.4000000953674316,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2.0999999046325684,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.8000000715255737,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": true,
+      "status": 304,
+      "ms": 1.899999976158142,
+      "bytes": 0,
+      "sqlCount": 3
+    },
+    {
+      "resource": "list",
+      "conditional": false,
+      "status": 200,
+      "ms": 2,
+      "bytes": 17363,
+      "sqlCount": 3
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 10.100000023841858,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.700000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 9.899999976158142,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.100000023841858,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 9.5,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.799999952316284,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.699999928474426,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 9.200000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.899999976158142,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.299999952316284,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.5,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.300000071525574,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.199999928474426,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.299999952316284,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.300000071525574,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.799999952316284,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 7,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 12.399999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.799999952316284,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.399999976158142,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.899999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.199999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.800000071525574,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.399999976158142,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.799999952316284,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 5.800000071525574,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.5,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 7,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 7,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.399999976158142,
+      "bytes": 915826,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 6.700000047683716,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": true,
+      "status": 304,
+      "ms": 5.699999928474426,
+      "bytes": 0,
+      "sqlCount": 9
+    },
+    {
+      "resource": "detail",
+      "conditional": false,
+      "status": 200,
+      "ms": 6.399999976158142,
+      "bytes": 915826,
+      "sqlCount": 9
+    }
+  ],
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+    "files": 236,
+    "scope": "web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports"
+  }
+}

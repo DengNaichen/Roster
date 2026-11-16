@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d4a69f631ee456264861665a39d0517748c4b26169624a9d5c87f9edf908b6f9",
+    "files": 101,
+    "scope": "web runtime, dependency lock and measurement scripts; excludes tests and reports"
+  },
+  "measuredAt": "2026-11-16T11:28:18.090Z",
+  "observations": [
+    {
+      "name": "private-team-hidden",
+      "mutation": {
+        "action": "private",
+        "workspace": "perf-access",
+        "mode": "local application services; restricted database role; fixed test identities",
+        "at": "2026-11-16T11:28:19.082Z"
+      },
+      "at": 1794828513612,
+      "titlePresent": false,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 12,
+          "sqlCount": 2,
+          "startMs": 14550.699999928474,
+          "endMs": 14569.799999952316
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14551,
+          "endMs": 14569.600000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "labels",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 2,
+          "startMs": 14569.100000023842,
+          "endMs": 14577.299999952316
+        },
+        {
+          "queryId": 4,
+          "resource": "other",
+          "method": "GET",
+          "status": 200,
+          "bytes": 13,
+          "sqlCount": 2,
+          "startMs": 14569.299999952316,
+          "endMs": 14577.299999952316
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 404,
+          "bytes": 61,
+          "sqlCount": null,
+          "startMs": 14569.399999976158,
+          "endMs": 14582.199999928474
+        },
+        {
+          "queryId": 5,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14569.5,
+          "endMs": 14573.199999928474
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14569.600000023842,
+          "endMs": 14573.199999928474
+        }
+      ],
+      "observedDelayMs": 14530
+    },
+    {
+      "name": "team-visibility-restored",
+      "mutation": {
+        "action": "public",
+        "workspace": "perf-access",
+        "mode": "local application services; restricted database role; fixed test identities",
+        "at": "2026-11-16T11:28:33.757Z"
+      },
+      "at": 1794828528608,
+      "titlePresent": true,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 219,
+          "sqlCount": 2,
+          "startMs": 14907.899999976158,
+          "endMs": 14916.399999976158
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 1172,
+          "sqlCount": 9,
+          "startMs": 14908.399999976158,
+          "endMs": 14935.799999952316
+        },
+        {
+          "queryId": 5,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14939.899999976158,
+          "endMs": 14942.099999904633
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14940.099999904633,
+          "endMs": 14942.099999904633
+        },
+        {
+          "queryId": 5,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 259,
+          "sqlCount": 3,
+          "startMs": 14940.799999952316,
+          "endMs": 14952
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 14941,
+          "endMs": 14959.199999928474
+        }
+      ],
+      "observedDelayMs": 14851
+    },
+    {
+      "name": "membership-suspended",
+      "mutation": {
+        "action": "suspend",
+        "workspace": "perf-access",
+        "mode": "local application services; restricted database role; fixed test identities",
+        "at": "2026-11-16T11:28:48.743Z"
+      },
+      "at": 1794828543671,
+      "titlePresent": false,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14943.399999976158,
+          "endMs": 14961.799999952316
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 403,
+          "bytes": 66,
+          "sqlCount": null,
+          "startMs": 14943.799999952316,
+          "endMs": 14961.799999952316
+        }
+      ],
+      "observedDelayMs": 14928
+    },
+    {
+      "name": "membership-restored",
+      "mutation": {
+        "action": "restore",
+        "workspace": "perf-access",
+        "mode": "local application services; restricted database role; fixed test identities",
+        "at": "2026-11-16T11:29:03.858Z"
+      },
+      "at": 1794828558689,
+      "titlePresent": true,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 219,
+          "sqlCount": 2,
+          "startMs": 14900.600000023842,
+          "endMs": 14920.100000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 1172,
+          "sqlCount": 9,
+          "startMs": 14900.899999976158,
+          "endMs": 14932.100000023842
+        },
+        {
+          "queryId": 5,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14934.5,
+          "endMs": 14935.899999976158
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 0,
+          "bytes": null,
+          "sqlCount": null,
+          "startMs": 14934.699999928474,
+          "endMs": 14935.899999976158
+        },
+        {
+          "queryId": 5,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 259,
+          "sqlCount": 3,
+          "startMs": 14935,
+          "endMs": 14946.399999976158
+        },
+        {
+          "queryId": 6,
+          "resource": "teams",
+          "method": "GET",
+          "status": 200,
+          "bytes": 843,
+          "sqlCount": 9,
+          "startMs": 14935,
+          "endMs": 14954
+        }
+      ],
+      "observedDelayMs": 14831
+    },
+    {
+      "name": "deleted-fixture-disappeared",
+      "mutation": {
+        "action": "delete-fixture",
+        "workspace": "perf-deletion-1794828559038",
+        "mode": "local fixture deletion via restricted role after service owner authorization; no deleteIssue API",
+        "at": "2026-11-16T11:29:19.552Z"
+      },
+      "at": 1794828574379,
+      "titlePresent": false,
+      "visibility": "visible",
+      "online": true,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14864.5,
+          "endMs": 14882.600000023842
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 404,
+          "bytes": 61,
+          "sqlCount": null,
+          "startMs": 14864.800000071526,
+          "endMs": 14888.300000071526
+        }
+      ],
+      "observedDelayMs": 14827
+    }
+  ]
+}

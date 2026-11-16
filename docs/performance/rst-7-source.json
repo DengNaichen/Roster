@@ -1,0 +1,6 @@
+{
+  "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+  "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+  "files": 236,
+  "scope": "web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports"
+}

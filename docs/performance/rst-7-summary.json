@@ -1,0 +1,110 @@
+{
+  "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+  "mcpVisibilityMs": {
+    "n": 5,
+    "p50": 14949,
+    "p95": 15049
+  },
+  "idle": {
+    "windowMs": 32000,
+    "requests": 6,
+    "sql": 26,
+    "bodyBytes": 0,
+    "maxInFlightPerQuery": 1
+  },
+  "hiddenMs": 32130,
+  "focusMs": 222,
+  "reconnectMs": 211,
+  "backoffGapMs": 30003.599999904633,
+  "focusTriggeredFailureRecoveryMs": 219,
+  "access": [
+    {
+      "scenario": "private-team-hidden",
+      "ms": 14593
+    },
+    {
+      "scenario": "team-visibility-restored",
+      "ms": 14788
+    },
+    {
+      "scenario": "membership-suspended",
+      "ms": 14886
+    },
+    {
+      "scenario": "membership-restored",
+      "ms": 14903
+    },
+    {
+      "scenario": "deleted-fixture-disappeared",
+      "ms": 14594
+    }
+  ],
+  "content": [
+    {
+      "scenario": "new-mcp-log-in-open-panel",
+      "ms": 15123
+    },
+    {
+      "scenario": "mcp-task-enters-triage",
+      "ms": 14699
+    },
+    {
+      "scenario": "mcp-task-leaves-triage",
+      "ms": 15010
+    }
+  ],
+  "api": {
+    "list-full": {
+      "ms": {
+        "n": 20,
+        "p50": 2,
+        "p95": 2.8
+      },
+      "bytes": [
+        17363
+      ],
+      "sql": [
+        3
+      ]
+    },
+    "list-conditional": {
+      "ms": {
+        "n": 20,
+        "p50": 2,
+        "p95": 2.5
+      },
+      "bytes": [
+        0
+      ],
+      "sql": [
+        3
+      ]
+    },
+    "detail-full": {
+      "ms": {
+        "n": 20,
+        "p50": 6.3,
+        "p95": 9.9
+      },
+      "bytes": [
+        915826
+      ],
+      "sql": [
+        9
+      ]
+    },
+    "detail-conditional": {
+      "ms": {
+        "n": 20,
+        "p50": 5.9,
+        "p95": 9.5
+      },
+      "bytes": [
+        0
+      ],
+      "sql": [
+        9
+      ]
+    }
+  }
+}
