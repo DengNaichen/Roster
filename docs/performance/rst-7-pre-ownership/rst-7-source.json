@@ -1,0 +1,6 @@
+{
+  "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+  "runtimeSha256": "d4a69f631ee456264861665a39d0517748c4b26169624a9d5c87f9edf908b6f9",
+  "files": 101,
+  "scope": "web runtime, dependency lock and measurement scripts; excludes tests and reports"
+}

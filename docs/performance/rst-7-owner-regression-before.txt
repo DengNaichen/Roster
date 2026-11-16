@@ -1,0 +1,50 @@
+
+ RUN  v3.2.7 /Users/nd/Developer/roster-worktrees/remote-refresh-on-roundtrips/apps/web
+
+ ❯ src/queryCache.test.tsx (17 tests | 1 failed) 1009ms
+   ✓ shares canonical keys, deduplicates in-flight reads, and reuses fresh data across remounts 75ms
+   ✓ keeps content during background validation and cancels an old response before a local update 109ms
+   ✓ keeps failed background content, purges forbidden/not-found data, and isolates other workspaces 166ms
+   ✓ never shows another subject or workspace's cached result 107ms
+   ✓ reports offline cold reads, retains warm data, and fetches after reconnect 105ms
+   ✓ pauses reads during same-user session recovery without discarding cached content 55ms
+   ✓ survives StrictMode effect replay and clears the client on real unmount 108ms
+   ✓ restarts an initial read canceled by a write instead of leaving it pending forever 60ms
+   ✓ orders one entity across distinct mounted scopes and leaves unrelated entities independent 2ms
+   ✓ discards unconfirmed cached edits on disposal, even when the sent write later fails 106ms
+   ✓ never invents a partial cached object when an update races a permission purge 1ms
+   ✓ retains readable parent data when a sub-resource write is rejected 54ms
+   ✓ removes a missing issue from cached collections, relationships and work logs only in its owner/workspace 1ms
+   ✓ discards inactive bodies when accessible teams shrink without touching another workspace 0ms
+   ✓ keeps an unaffected mounted task and its optimistic value when another team is lost 0ms
+   ✓ clears an active private spec by its explicit team before a failing refresh can retain it 53ms
+   × ignores a finished write that belongs to an already unmounted account 4ms
+     → expected undefined to deeply equal { title: 'new account content' }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/queryCache.test.tsx > ignores a finished write that belongs to an already unmounted account
+AssertionError: expected undefined to deeply equal { title: 'new account content' }
+
+- Expected:
+{
+  "title": "new account content",
+}
+
++ Received:
+undefined
+
+ ❯ src/queryCache.test.tsx:448:35
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  19:43:21
+   Duration  1.91s (transform 106ms, setup 86ms, collect 232ms, tests 1.01s, environment 403ms, prepare 36ms)
+
+undefined
+/Users/nd/Developer/roster-worktrees/remote-refresh-on-roundtrips/apps/web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/queryCache.test.tsx

@@ -22,7 +22,10 @@ export async function measureRequest(run: () => Response | Promise<Response>): P
   const start = performance.now();
   const response = await measurements.run(measurement, run);
   // SSE response headers are sent before streamed tools finish. Never publish partial counters.
-  if (!response.ok || response.headers.get('Content-Type')?.includes('text/event-stream')) {
+  if (
+    (!response.ok && response.status !== 304) ||
+    response.headers.get('Content-Type')?.includes('text/event-stream')
+  ) {
     return response;
   }
   const headers = new Headers(response.headers);

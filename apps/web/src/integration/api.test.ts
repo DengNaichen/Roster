@@ -96,3 +96,56 @@ it("bounds a stalled write including its body and never retries an uncertain res
     vi.useRealTimers();
   }
 });
+
+it("handles conditional 304 without parsing JSON and preserves normal permission errors", async () => {
+  vi.stubEnv("DEV", true);
+  vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
+  vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } });
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(new Response(null, { status: 304, headers: { ETag: 'W/"same"' } }));
+  vi.stubGlobal("fetch", fetcher);
+  const { api } = await import("./api");
+  const value = { issues: [] };
+  const validator = vi.fn();
+  expect(
+    await api("/api/w/test/issues", "GET", undefined, {
+      conditional: { tag: 'W/"same"', value },
+      onValidator: validator,
+    }),
+  ).toBe(value);
+  expect(fetcher.mock.calls[0][1].headers.get("If-None-Match")).toBe('W/"same"');
+  expect(validator).toHaveBeenCalledWith('W/"same"');
+  await expect(api("/api/w/test/issues")).rejects.toThrow("304 without cached data");
+  validator.mockClear();
+  fetcher.mockResolvedValue(
+    new Response(JSON.stringify({ error: { message: "Workspace access denied" } }), {
+      status: 403,
+    }),
+  );
+  await expect(
+    api("/api/w/test/issues", "GET", undefined, {
+      conditional: { tag: 'W/"same"', value },
+      onValidator: validator,
+    }),
+  ).rejects.toMatchObject({ status: 403 });
+  expect(validator).not.toHaveBeenCalled();
+});
+it("bounds stalled reads so the remote refresh loop can back off", async () => {
+  vi.useFakeTimers();
+  try {
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
+    vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } });
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: () => new Promise(() => {}) });
+    vi.stubGlobal("fetch", fetcher);
+    const { api } = await import("./api");
+    const reading = api("/api/w/test/issues");
+    const rejection = expect(reading).rejects.toThrow("Request timed out");
+    await vi.advanceTimersByTimeAsync(30000);
+    await rejection;
+    expect(fetcher.mock.calls[0][1].signal.aborted).toBe(true);
+  } finally {
+    vi.useRealTimers();
+  }
+});

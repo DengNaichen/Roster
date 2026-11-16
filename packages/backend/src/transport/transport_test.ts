@@ -346,3 +346,56 @@ Deno.test('MCP get_issue validates real bigint audit IDs without treating them a
   assert(response.status === 200 && !text.includes('isError":true'), text);
   assert(text.includes('123456789012345'), text);
 });
+
+Deno.test('conditional reads still authorize and query; only unchanged successful bodies become 304', async () => {
+  let calls = 0;
+  let denied = false;
+  let missing = false;
+  let cursor: string | null = null;
+  const service = {
+    listIssues: async () => {
+      calls++;
+      if (denied) throw new AppError('forbidden', 'Workspace access denied');
+      if (missing) throw new AppError('not_found', 'Not found');
+      return { issues: [], next_cursor: cursor };
+    },
+  } as unknown as Service;
+  const app = createHttpApp({ service, verify, allowedOrigins: ['https://ui.example'] });
+  const bearer = await token();
+  const url = 'https://app/api/w/default/issues';
+  const first = await app.request(request(url, bearer));
+  const tag = first.headers.get('ETag');
+  assert(first.status === 200 && tag?.startsWith('W/"'));
+  const conditional = () =>
+    app.request(request(url, bearer, {
+      headers: { 'If-None-Match': `"other", ${tag?.slice(2)}`, Origin: 'https://ui.example' },
+    }));
+  const unchanged = await conditional();
+  assert(unchanged.status === 304 && await unchanged.text() === '' && calls === 2);
+  assert(unchanged.headers.get('Access-Control-Allow-Origin') === 'https://ui.example');
+  assert(unchanged.headers.get('Access-Control-Expose-Headers')?.includes('ETag'));
+  cursor = 'changed';
+  assert((await conditional()).status === 200);
+  denied = true;
+  const forbidden = await conditional();
+  assert(forbidden.status === 403 && !forbidden.headers.has('ETag'));
+  denied = false;
+  missing = true;
+  assert((await conditional()).status === 404);
+  assert(
+    (await app.request(request(url, undefined, { headers: { 'If-None-Match': tag! } }))).status ===
+      401,
+  );
+  assert(Number(calls) === 5, '401 must not invoke the service');
+  const preflight = await app.request(request(url, undefined, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://ui.example',
+      'Access-Control-Request-Method': 'GET',
+      'Access-Control-Request-Headers': 'if-none-match',
+    },
+  }));
+  assert(
+    preflight.headers.get('Access-Control-Allow-Headers')?.toLowerCase().includes('if-none-match'),
+  );
+});

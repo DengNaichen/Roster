@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "source": {
+    "head": "ca99a3153692bd589ebe353c9792755115d51aba",
+    "runtimeSha256": "d34d1fbd98964669d93032651967af1a8334b79e5797ed68a68a3808ffa15594",
+    "files": 236,
+    "scope": "web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports"
+  },
+  "measuredAt": "2026-11-16T11:51:30.904Z",
+  "observations": [
+    {
+      "name": "new-mcp-log-in-open-panel",
+      "status": 200,
+      "acknowledgedAt": 1794829891662,
+      "observedAt": 1794829906785,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 8,
+          "endMs": 16.200000047683716
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 8.200000047683716,
+          "endMs": 22.300000071525574
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 9,
+          "startMs": 8.200000047683716,
+          "endMs": 27.100000023841858
+        },
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 15028.200000047684,
+          "endMs": 15047.5
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 15028.600000023842,
+          "endMs": 15052.100000023842
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 915826,
+          "sqlCount": 9,
+          "startMs": 15028.800000071526,
+          "endMs": 15069
+        },
+        {
+          "queryId": 4,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 712,
+          "sqlCount": 3,
+          "startMs": 15074.200000047684,
+          "endMs": 15080.300000071526
+        }
+      ],
+      "visibility": "visible",
+      "online": true,
+      "observedDelayMs": 15123
+    },
+    {
+      "name": "mcp-task-enters-triage",
+      "status": 200,
+      "acknowledgedAt": 1794829907243,
+      "observedAt": 1794829921942,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14658.099999904633,
+          "endMs": 14670.399999976158
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 380,
+          "sqlCount": 3,
+          "startMs": 14659.099999904633,
+          "endMs": 14675.899999976158
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 17365,
+          "sqlCount": 3,
+          "startMs": 14659.299999952316,
+          "endMs": 14676
+        }
+      ],
+      "visibility": "visible",
+      "online": true,
+      "observedDelayMs": 14699
+    },
+    {
+      "name": "mcp-task-leaves-triage",
+      "status": 200,
+      "acknowledgedAt": 1794829921951,
+      "observedAt": 1794829936961,
+      "requests": [
+        {
+          "queryId": 1,
+          "resource": "teams",
+          "method": "GET",
+          "status": 304,
+          "bytes": 0,
+          "sqlCount": 2,
+          "startMs": 14972.100000023842,
+          "endMs": 14981
+        },
+        {
+          "queryId": 2,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 32,
+          "sqlCount": 2,
+          "startMs": 14972.5,
+          "endMs": 14988.200000047684
+        },
+        {
+          "queryId": 3,
+          "resource": "issues",
+          "method": "GET",
+          "status": 200,
+          "bytes": 17363,
+          "sqlCount": 3,
+          "startMs": 14972.600000023842,
+          "endMs": 14990.600000023842
+        }
+      ],
+      "visibility": "visible",
+      "online": true,
+      "observedDelayMs": 15010
+    }
+  ],
+  "draftPreserved": true
+}

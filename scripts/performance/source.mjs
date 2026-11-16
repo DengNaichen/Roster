@@ -14,12 +14,16 @@ export async function sourceManifest() {
         '--',
         'apps/web/src',
         'apps/web/package.json',
+        'apps/web/vite.config.ts',
+        'apps/server',
+        'packages/backend/src',
+        'packages/contracts',
         'pnpm-lock.yaml',
-        'scripts/performance/source.mjs',
-        'scripts/performance/writes.mjs',
-        'scripts/performance/ui-probe.mjs',
+        'deno.json',
+        'deno.lock',
+        'scripts/performance',
       ], { encoding: 'utf8' }).split('\0').filter((path) =>
-        path && !path.includes('.test.') && !path.includes('/test/')
+        path && !path.includes('.test.') && !path.endsWith('_test.ts') && !path.includes('/test/')
       ),
     ),
   ].sort();
@@ -31,7 +35,8 @@ export async function sourceManifest() {
     head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     runtimeSha256: hash.digest('hex'),
     files: files.length,
-    scope: 'web runtime, dependency lock and measurement scripts; excludes tests and reports',
+    scope:
+      'web/server/backend/contracts sources, Vite config, dependency locks and all performance scripts; excludes tests and reports',
   };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

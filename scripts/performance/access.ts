@@ -1,4 +1,7 @@
-// Local synthetic permission fixture. Every change goes through normal application authorization.
+// Local synthetic permission fixture. Permission changes use normal application authorization.
+// delete-fixture simulates external deletion only in a disposable perf-deletion-* workspace;
+// there is no public deleteIssue API. It uses the restricted preview role after owner authorization.
+import { sql } from 'npm:drizzle-orm@0.45.4';
 import { createDatabase } from '../../packages/backend/src/platform/database/client.ts';
 import { createService } from '../../packages/backend/src/service.ts';
 import type { RequestContext } from '../../packages/contracts/mod.ts';
@@ -70,12 +73,31 @@ try {
     });
   } else if (action === 'private' || action === 'public') {
     await app.updateTeam(owner, slug, 'PERF', { private: action === 'private' });
-  } else throw new Error('Use setup, suspend, restore, private or public');
+  } else if (action === 'delete-fixture' && slug.startsWith('perf-deletion-')) {
+    const issues = (await app.listIssues(owner, slug, { team: 'PERF' })).issues;
+    if (issues.length !== 1 || issues[0].title !== 'Permission fixture issue') {
+      throw new Error('Expected the sole synthetic permission fixture issue');
+    }
+    const issue = await app.getIssue(owner, slug, issues[0].identifier);
+    if (issue.document.lead !== 'Isolated permission recovery fixture') {
+      throw new Error('Wrong fixture');
+    }
+    await db.transaction(async (tx) => {
+      await tx.execute(
+        sql`delete from roster.audit_events where issue_id=${issue.id} and workspace_id in (select id from roster.workspaces where slug=${slug})`,
+      );
+      await tx.execute(
+        sql`delete from roster.issues where id=${issue.id} and workspace_id in (select id from roster.workspaces where slug=${slug})`,
+      );
+    });
+  } else throw new Error('Use setup, suspend, restore, private, public or delete-fixture');
   console.log(
     JSON.stringify({
       action,
       workspace: slug,
-      mode: 'local application services; restricted database role; fixed test identities',
+      mode: action === 'delete-fixture'
+        ? 'local fixture deletion via restricted role after service owner authorization; no deleteIssue API'
+        : 'local application services; restricted database role; fixed test identities',
       at: new Date().toISOString(),
     }),
   );

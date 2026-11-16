@@ -2,6 +2,7 @@
 (() => {
   globalThis.rosterUiProbe?.dispose();
   const requests = [];
+  const queryIds = new Map();
   const original = globalThis.fetch.bind(globalThis);
   const origin = performance.now();
   globalThis.fetch = async (input, init) => {
@@ -13,7 +14,9 @@
     const resource =
       /\/(issues|teams|projects|labels|specs|capabilities|workspaces|access|session|cycles|members)(?:\/|$)/
         .exec(url.pathname)?.[1] ?? 'other';
+    if (!queryIds.has(url.href)) queryIds.set(url.href, queryIds.size + 1);
     const sample = {
+      queryId: queryIds.get(url.href),
       resource,
       method: init?.method ?? (input instanceof Request ? input.method : 'GET'),
       start: performance.now(),
@@ -85,6 +88,7 @@
     stop,
     capture() {
       return requests.filter((r) => r.start >= requestWindow).map((r) => ({
+        queryId: r.queryId,
         resource: r.resource,
         method: r.method,
         status: r.status,

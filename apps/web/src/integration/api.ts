@@ -80,7 +80,12 @@ export async function apiFetch(
   }
   return response;
 }
-export type ReadOptions = { signal?: AbortSignal; subject?: string };
+export type ReadOptions = {
+  signal?: AbortSignal;
+  subject?: string;
+  conditional?: { tag: string; value: unknown };
+  onValidator?: (tag: string | null) => void;
+};
 async function requestApi<T>(
   path: string,
   method = "GET",
@@ -92,11 +97,20 @@ async function requestApi<T>(
     {
       signal: options.signal,
       method,
+      cache: method === "GET" ? "no-store" : undefined,
+      headers: options.conditional ? { "If-None-Match": options.conditional.tag } : undefined,
       body: body === undefined ? undefined : JSON.stringify(body),
     },
     options.subject,
   );
+  if (response.status === 304) {
+    options.signal?.throwIfAborted();
+    if (!options.conditional) throw new Error("Received 304 without cached data");
+    options.onValidator?.(response.headers.get("ETag") ?? options.conditional.tag);
+    return options.conditional.value as T;
+  }
   const data = await response.json();
+  options.signal?.throwIfAborted();
   if (!response.ok) {
     throw Object.assign(
       new Error(
@@ -110,6 +124,7 @@ async function requestApi<T>(
       },
     );
   }
+  options.onValidator?.(response.headers.get("ETag"));
   return data as T;
 }
 
@@ -119,8 +134,8 @@ export async function api<T>(
   body?: object,
   options: ReadOptions = {},
 ): Promise<T> {
-  if (method === "GET" || method === "HEAD") return requestApi<T>(path, method, body, options);
-  // Cover session refresh, response headers and body. Never automatically retry an uncertain write.
+  // Bound session refresh, headers and body, including a stalled polling read.
+  // Never automatically retry an uncertain write.
   const controller = new AbortController();
   const forwardAbort = () => controller.abort(options.signal?.reason);
   let rejectAbort: (reason: unknown) => void = () => {};
@@ -132,7 +147,14 @@ export async function api<T>(
   if (options.signal?.aborted) forwardAbort();
   else options.signal?.addEventListener("abort", forwardAbort, { once: true });
   const timeout = setTimeout(
-    () => controller.abort(new Error("Save not confirmed. Refreshing to check the result.")),
+    () =>
+      controller.abort(
+        new Error(
+          method === "GET" || method === "HEAD"
+            ? "Request timed out. Try again."
+            : "Save not confirmed. Refreshing to check the result.",
+        ),
+      ),
     30_000,
   );
   try {
