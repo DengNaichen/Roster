@@ -50,7 +50,8 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     cors({
       origin: (origin) => allowedOrigins.includes(origin) ? origin : undefined,
       allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-      allowHeaders: ['Authorization', 'Content-Type'],
+      allowHeaders: ['Authorization', 'Content-Type', 'x-region'],
+      exposeHeaders: ['x-sb-edge-region'],
       maxAge: 600,
     }),
   );

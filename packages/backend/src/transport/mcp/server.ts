@@ -680,7 +680,10 @@ export function createMcpFetch(options: McpOptions) {
     if (origin && options.allowedOrigins.includes(origin)) {
       headers.set('Access-Control-Allow-Origin', origin);
       headers.set('Vary', 'Origin');
-      headers.set('Access-Control-Expose-Headers', 'WWW-Authenticate, Mcp-Protocol-Version');
+      headers.set(
+        'Access-Control-Expose-Headers',
+        'WWW-Authenticate, Mcp-Protocol-Version, x-sb-edge-region',
+      );
     }
     if (origin && !options.allowedOrigins.includes(origin)) {
       return Response.json({ error: 'Origin not allowed' }, { status: 403, headers });
@@ -689,7 +692,7 @@ export function createMcpFetch(options: McpOptions) {
       headers.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
       headers.set(
         'Access-Control-Allow-Headers',
-        'Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id',
+        'Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, x-region',
       );
       return new Response(null, { status: 204, headers });
     }
