@@ -11,6 +11,7 @@ import {
   Workspace,
   workspaceSlug,
 } from "./shared";
+import { deriveWorkspaceSlug } from "./onboarding";
 import { RosterLogo } from "./RosterLogo";
 import { WorkspaceAccess } from "./WorkspaceAccess";
 
@@ -185,6 +186,7 @@ export function WorkspaceDialog({
   onSaved: (workspace: Workspace) => void;
 }) {
   const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
   const [name, setName] = useState(workspace?.name ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -196,6 +198,19 @@ export function WorkspaceDialog({
       mounted.current = false;
     };
   }, []);
+
+  function changeName(next: string) {
+    setName(next);
+    if (!workspace && !slugEdited) {
+      setSlug(deriveWorkspaceSlug(next));
+    }
+  }
+
+  function changeSlug(raw: string) {
+    const cleaned = raw.toLowerCase().replace(/\s+/g, "-");
+    setSlug(cleaned);
+    setSlugEdited(cleaned.length > 0);
+  }
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -212,6 +227,8 @@ export function WorkspaceDialog({
       if (mounted.current) setSaving(false);
     }
   }
+
+  const previewSlug = slug || "my-workspace";
 
   return (
     <ModalDialog
@@ -236,11 +253,27 @@ export function WorkspaceDialog({
           </button>
         </header>
         {!workspace && (
+          <p className="dialog-hint">
+            A workspace holds your organization’s teams, projects, and MCP endpoint. Most developers
+            use one workspace and create a team per product or repository.
+          </p>
+        )}
+        <label>
+          Name
+          <input
+            value={name}
+            onChange={(event) => changeName(event.target.value)}
+            placeholder="Workspace name"
+            required
+            disabled={saving}
+          />
+        </label>
+        {!workspace && (
           <label>
             Slug
             <input
               value={slug}
-              onChange={(event) => setSlug(event.target.value)}
+              onChange={(event) => changeSlug(event.target.value)}
               placeholder="my-workspace"
               pattern="[a-z][a-z0-9\-]{1,31}"
               minLength={2}
@@ -253,20 +286,11 @@ export function WorkspaceDialog({
         )}
         {!workspace && (
           <p id="workspace-slug-hint" className="dialog-hint">
-            Used in the URL and cannot be changed. Use 2–32 lowercase letters, digits or hyphens,
-            starting with a letter.
+            Used in the URL (<code>/{previewSlug}</code>) and MCP endpoint (
+            <code>/w/{previewSlug}/mcp</code>). Cannot be changed later; use 2–32 lowercase letters,
+            digits, or hyphens, starting with a letter.
           </p>
         )}
-        <label>
-          Name
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Workspace name"
-            required
-            disabled={saving}
-          />
-        </label>
         {error && <RequestError message={error} />}
         <footer>
           <button type="button" className="button" disabled={saving} onClick={onClose}>
