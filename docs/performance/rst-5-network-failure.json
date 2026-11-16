@@ -45,5 +45,13 @@
       "startMs": 39.60000002384186,
       "endMs": null
     }
-  ]
+  ],
+  "recoveredViaUi": {
+    "sequence": [
+      "Low",
+      "Medium"
+    ],
+    "finalPriority": 3,
+    "readbackConfirmed": true
+  }
 }

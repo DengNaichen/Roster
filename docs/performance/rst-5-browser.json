@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-16T09:22:00.681Z",
+  "mode": "rebased local preview; real UI actions and API",
+  "filterRace": {
+    "visible49": true,
+    "visible50": false,
+    "query": "Performance fixture 49"
+  },
+  "confirmedPriority": "High",
+  "triageCount": "Triage1",
+  "clearedCount": "Triage",
+  "crossPagePriority": "High",
+  "restored": {
+    "priority": 3,
+    "status": "todo"
+  }
+}
