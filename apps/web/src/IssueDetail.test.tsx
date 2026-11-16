@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "./test/query-wrapper";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IssueDetail } from "./IssueDetail";
 import { fixtureIssue, deferred, json } from "./test/fixtures";

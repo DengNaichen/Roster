@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "./test/query-wrapper";
 import { beforeEach, expect, it, vi } from "vitest";
 import { ProjectTimeline } from "./ProjectTimeline";
 import { ProjectDialog } from "./ProjectManagement";

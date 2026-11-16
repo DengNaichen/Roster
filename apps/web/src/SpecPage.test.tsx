@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "./test/query-wrapper";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { Spec, SpecContent } from "../../../packages/contracts/spec";
 import SpecPage from "./SpecPage";

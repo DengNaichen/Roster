@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "./test/query-wrapper";
 import { expect, it, vi } from "vitest";
 import { AssigneeFilter, AssigneeSelect } from "./Assignee";
 import { deferred, json } from "./test/fixtures";

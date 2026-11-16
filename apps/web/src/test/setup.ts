@@ -27,8 +27,14 @@ vi.mock("../integration", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../integration")>();
   return {
     ...actual,
-    api: async (path: string, method = "GET", body?: object) => {
+    api: async (
+      path: string,
+      method = "GET",
+      body?: object,
+      options?: { signal?: AbortSignal },
+    ) => {
       const response = await fetch(path, {
+        signal: options?.signal,
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -37,7 +43,10 @@ vi.mock("../integration", async (importOriginal) => {
       if (response.ok) window.dispatchEvent(new Event("session-active"));
       const result = await response.json();
       if (!response.ok)
-        throw new Error(typeof result.error === "string" ? result.error : result.error.message);
+        throw Object.assign(
+          new Error(typeof result.error === "string" ? result.error : result.error.message),
+          { status: response.status, code: result.error?.code },
+        );
       return result;
     },
   };

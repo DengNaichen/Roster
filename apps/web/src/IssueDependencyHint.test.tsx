@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "./test/query-wrapper";
 import { expect, it } from "vitest";
 import { IssueDependencyHint, indexDependencies } from "./IssueDependencyHint";
 import type { SpecDependencies } from "../../../packages/contracts/spec";

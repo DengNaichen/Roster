@@ -39,15 +39,22 @@ export function mcpServerUrl(slug: string): string {
   }
   return `${window.location.origin}/w/${encoded}/mcp`;
 }
-export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+export async function apiFetch(
+  path: string,
+  init: RequestInit = {},
+  subject?: string,
+): Promise<Response> {
   if (!path.startsWith("/api/") || path.includes("://")) {
     throw new Error("API path must start with /api/");
   }
   const session = localPreview ? null : await supabase?.auth.getSession();
+  if (init.signal?.aborted) throw init.signal.reason;
   if (!localPreview && !session?.data.session) {
     window.dispatchEvent(new Event("session-expired"));
     throw new Error("Sign in to continue. Your draft has been kept.");
   }
+  if (!localPreview && subject && session?.data.session?.user.id !== subject)
+    throw new DOMException("Request identity changed", "AbortError");
   const headers = new Headers(init.headers);
   if (localPreview) headers.delete("Authorization");
   // Region is only a routing hint; it never changes authorization or retries a mutation.
@@ -73,11 +80,22 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   }
   return response;
 }
-export async function api<T>(path: string, method = "GET", body?: object): Promise<T> {
-  const response = await apiFetch(path, {
-    method,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+export type ReadOptions = { signal?: AbortSignal; subject?: string };
+async function requestApi<T>(
+  path: string,
+  method = "GET",
+  body?: object,
+  options: ReadOptions = {},
+): Promise<T> {
+  const response = await apiFetch(
+    path,
+    {
+      signal: options.signal,
+      method,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+    options.subject,
+  );
   const data = await response.json();
   if (!response.ok) {
     throw Object.assign(
@@ -93,4 +111,38 @@ export async function api<T>(path: string, method = "GET", body?: object): Promi
     );
   }
   return data as T;
+}
+
+export async function api<T>(
+  path: string,
+  method = "GET",
+  body?: object,
+  options: ReadOptions = {},
+): Promise<T> {
+  if (method === "GET" || method === "HEAD") return requestApi<T>(path, method, body, options);
+  // Cover session refresh, response headers and body. Never automatically retry an uncertain write.
+  const controller = new AbortController();
+  const forwardAbort = () => controller.abort(options.signal?.reason);
+  let rejectAbort: (reason: unknown) => void = () => {};
+  const interrupted = new Promise<never>((_resolve, reject) => {
+    rejectAbort = reject;
+  });
+  const abort = () => rejectAbort(controller.signal.reason);
+  controller.signal.addEventListener("abort", abort, { once: true });
+  if (options.signal?.aborted) forwardAbort();
+  else options.signal?.addEventListener("abort", forwardAbort, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(new Error("Save not confirmed. Refreshing to check the result.")),
+    30_000,
+  );
+  try {
+    return await Promise.race([
+      requestApi<T>(path, method, body, { ...options, signal: controller.signal }),
+      interrupted,
+    ]);
+  } finally {
+    clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", forwardAbort);
+    controller.signal.removeEventListener("abort", abort);
+  }
 }

@@ -76,3 +76,23 @@ describe("API integration boundary", () => {
     expect(preview.mcpServerUrl("acme-dev")).toBe("http://127.0.0.1:18510/w/acme-dev/mcp");
   });
 });
+
+it("bounds a stalled write including its body and never retries an uncertain result", async () => {
+  vi.useFakeTimers();
+  try {
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_LOCAL_PREVIEW", "true");
+    vi.stubGlobal("window", { location: { hostname: "127.0.0.1" } });
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: () => new Promise(() => {}) });
+    vi.stubGlobal("fetch", fetcher);
+    const { api } = await import("./api");
+    const saving = api("/api/w/perf-test/issues/AL-1", "PATCH", { priority: 1 });
+    const rejection = expect(saving).rejects.toThrow("Save not confirmed");
+    await vi.advanceTimersByTimeAsync(30_000);
+    await rejection;
+    expect(fetcher).toHaveBeenCalledOnce();
+    expect(fetcher.mock.calls[0][1].signal.aborted).toBe(true);
+  } finally {
+    vi.useRealTimers();
+  }
+});
