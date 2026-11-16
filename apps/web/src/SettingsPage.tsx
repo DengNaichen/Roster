@@ -52,7 +52,10 @@ export function SettingsPage({
     members: ["Members", "People who can access this workspace."],
     personal: ["Personal", "Your profile and how Roster looks on this device."],
     workspace: ["Workspace", "The name and address everyone in this workspace sees."],
-    integrations: ["Integrations", "Services connected to this workspace."],
+    integrations: [
+      "Integrations",
+      "Connect coding agents via MCP and manage external repository services.",
+    ],
   }[section];
   return (
     <>
@@ -90,7 +93,9 @@ export function SettingsPage({
         </header>
         {section === "personal" && <PersonalSettings />}
         {section === "workspace" && <WorkspaceSettings />}
-        {section === "integrations" && <IntegrationSettings />}
+        {section === "integrations" && (
+          <IntegrationSettings teams={entries} loading={loading} onCreateTeam={onCreateTeam} />
+        )}
         {section === "members" && <MembersSettings />}
         {section === "teams" && (
           <>
@@ -335,6 +340,18 @@ function TeamSettings({ team, onSaved }: { team: Team; onSaved: (team: Team) => 
             <span className="settings-identifier" title="Cannot be changed">
               <Lock className="icon" /> {team.key}
             </span>
+          </div>
+          <div className="settings-field">
+            <div>
+              <span>Coding agents (MCP)</span>
+              <p>Connect another repository’s agent to read and create {team.key} issues.</p>
+            </div>
+            <NavLink
+              className="button"
+              to={pagePath(`/settings/integrations?team=${encodeURIComponent(team.key)}`)}
+            >
+              MCP setup
+            </NavLink>
           </div>
           {error && <RequestError message={error} />}
           <footer>
