@@ -5,6 +5,7 @@ import { AssigneeSelect } from "./Assignee";
 import { Box, Users, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
+import { deriveTeamKey } from "./onboarding";
 import { SummaryField } from "./SummaryField";
 import {
   RequestError,
@@ -48,6 +49,7 @@ export function NewIssueDialog({
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [priority, setPriority] = useState<Priority>(0);
+  const [issueStatus, setIssueStatus] = useState<Status>(status);
   const [cycleID, setCycleID] = useState(initialCycleID);
   const [assignee, setAssignee] = useState("");
   const [saving, setSaving] = useState(false);
@@ -74,7 +76,7 @@ export function NewIssueDialog({
         team,
         title,
         ...(summary.trim() && { document: { lead: summary, sections: [], criteria: [] } }),
-        status,
+        status: issueStatus,
         project_id: projectID,
         priority,
         assignee,
@@ -195,10 +197,20 @@ export function NewIssueDialog({
               disabled={saving}
             />
           </div>
-          <span className="composer-property composer-status" title="Status">
-            <StatusIcon status={status} />
-            {columns.find((column) => column.status === status)!.label}
-          </span>
+          <label className="composer-property composer-status">
+            <StatusIcon status={issueStatus} />
+            <Dropdown
+              variant="ghost"
+              aria-label="Status"
+              value={issueStatus}
+              disabled={saving}
+              onChange={(next) => setIssueStatus(next as Status)}
+              options={columns.map((column) => ({
+                value: column.status,
+                label: column.label,
+              }))}
+            />
+          </label>
         </div>
         {!team && (
           <p className="dialog-hint">
@@ -289,6 +301,7 @@ export function CreateTeamDialog({
 }) {
   const [privateTeam, setPrivateTeam] = useState(false);
   const [key, setKey] = useState("");
+  const [keyEdited, setKeyEdited] = useState(false);
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
   const [startNumber, setStartNumber] = useState("");
@@ -302,6 +315,22 @@ export function CreateTeamDialog({
       mounted.current = false;
     };
   }, []);
+
+  function changeName(next: string) {
+    setName(next);
+    if (!keyEdited) {
+      setKey(deriveTeamKey(next));
+    }
+  }
+
+  function changeKey(raw: string) {
+    const cleaned = raw
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
+    setKey(cleaned);
+    setKeyEdited(cleaned.length > 0);
+  }
 
   async function create(event: FormEvent) {
     event.preventDefault();
@@ -322,6 +351,8 @@ export function CreateTeamDialog({
       setSaving(false);
     }
   }
+
+  const previewKey = key || "ENG";
 
   return (
     <ModalDialog
@@ -344,64 +375,89 @@ export function CreateTeamDialog({
             <X className="icon" />
           </button>
         </header>
-        <label>
-          Key
-          <input
-            disabled={saving}
-            value={key}
-            onChange={(event) => setKey(event.target.value.toUpperCase())}
-            placeholder="TOK"
-            pattern="[A-Z][A-Z0-9]{1,5}"
-            maxLength={6}
-            required
-          />
-        </label>
-        <div className="dialog-priority">
-          <span>Emoji</span>
-          <EmojiPicker
-            value={emoji}
-            teamKey={key || "TE"}
-            label="New team emoji"
-            onChange={setEmoji}
-            disabled={saving}
-          />
-        </div>
+        <p className="dialog-hint">
+          Teams own issue queues, specs, and cycles (for example, per product or repository).
+          Projects can later group related issues across one or more teams.
+        </p>
         <label>
           Name
           <input
             disabled={saving}
             value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Team name"
+            onChange={(event) => changeName(event.target.value)}
+            placeholder="Engineering or repository name"
             required
           />
         </label>
-        <label>
-          Start number
-          <input
-            disabled={saving}
-            type="number"
-            min={1}
-            step={1}
-            value={startNumber}
-            onChange={(event) => setStartNumber(event.target.value)}
-            placeholder="1"
-          />
-        </label>
+        <div className="dialog-team-identity">
+          <label>
+            Identifier (Key)
+            <input
+              disabled={saving}
+              value={key}
+              onChange={(event) => changeKey(event.target.value)}
+              placeholder="ENG"
+              pattern="[A-Z][A-Z0-9]{1,5}"
+              maxLength={6}
+              required
+            />
+          </label>
+          <div className="dialog-emoji-field">
+            <span>Icon</span>
+            <EmojiPicker
+              value={emoji}
+              teamKey={previewKey}
+              label="New team emoji"
+              onChange={setEmoji}
+              disabled={saving}
+            />
+          </div>
+        </div>
         <p className="dialog-hint">
-          Issues are numbered {key || "KEY"}-{startNumber || "1"}, {key || "KEY"}-
-          {startNumber ? Number(startNumber) + 1 : "2"}, and so on. Set a start number above numbers
-          the team already used elsewhere. The key cannot be changed later.
+          Issues are numbered{" "}
+          <code>
+            {previewKey}-{startNumber || "1"}
+          </code>
+          ,{" "}
+          <code>
+            {previewKey}-{startNumber ? Number(startNumber) + 1 : "2"}
+          </code>
+          , and so on. Use 2–6 uppercase letters or digits starting with a letter; the key cannot be
+          changed later.
         </p>
-        <label>
-          <input
-            type="checkbox"
-            checked={privateTeam}
-            onChange={(event) => setPrivateTeam(event.target.checked)}
-            disabled={saving}
-          />
-          Make team private
-        </label>
+        <div className="dialog-checkbox-group">
+          <label className="dialog-checkbox">
+            <input
+              type="checkbox"
+              checked={privateTeam}
+              onChange={(event) => setPrivateTeam(event.target.checked)}
+              disabled={saving}
+            />
+            <span>Make team private</span>
+          </label>
+          <p className="dialog-hint">
+            Only invited team members—and coding agents authorized by them—can view or create issues
+            in a private team.
+          </p>
+        </div>
+        <details className="dialog-disclosure">
+          <summary>Import options (custom starting issue number)</summary>
+          <label>
+            Start number
+            <input
+              disabled={saving}
+              type="number"
+              min={1}
+              step={1}
+              value={startNumber}
+              onChange={(event) => setStartNumber(event.target.value)}
+              placeholder="1"
+            />
+          </label>
+          <p className="dialog-hint">
+            Set above numbers already used in another tracker before importing historical issues.
+          </p>
+        </details>
         {error && <RequestError message={error} />}
         <footer>
           <button type="button" className="button" disabled={saving} onClick={onClose}>
