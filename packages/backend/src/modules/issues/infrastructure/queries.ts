@@ -1,5 +1,5 @@
 import { sql } from 'npm:drizzle-orm@0.45.4';
-import { type Issue, type RequestContext, statuses } from '../../../../../contracts/mod.ts';
+import { type RequestContext, statuses } from '../../../../../contracts/mod.ts';
 import type { Service } from '../../../application/mod.ts';
 import {
   type Executor,
@@ -16,10 +16,10 @@ import { visible } from '../../access/postgres.ts';
 import { hydrateIssueActivity } from '../../activity/index.ts';
 import { buildLabelFilter } from '../../labels/postgres.ts';
 import { visibleProject } from '../../planning/postgres.ts';
-import { issueDTO } from '../domain/mapper.ts';
+import { issueDTO, issueSummaryDTO } from '../domain/mapper.ts';
 import { readSpec } from '../../specs/index.ts';
 import { hydrateIssueCatalog } from './catalog-query.ts';
-import { issueSelect, readIssue } from './read-model.ts';
+import { issueSelect, issueSummarySelect, readIssue } from './read-model.ts';
 
 export async function assignee(
   db: Executor,
@@ -54,12 +54,12 @@ function publicAuditSnapshot(value: unknown) {
   }
   return value;
 }
-export async function hydrateCoreIssues(
+export async function hydrateCoreIssueRows(
   db: Executor,
   ctx: RequestContext,
   w: Row,
   items: Row[],
-): Promise<Issue[]> {
+): Promise<Row[]> {
   const hydrated = await hydrateIssueCatalog(db, ctx, String(w.id), items);
   const parentIds = [...new Set(items.filter((i) => i.parent_id).map((i) => String(i.parent_id)))];
   const parents = parentIds.length
@@ -71,9 +71,10 @@ export async function hydrateCoreIssues(
     )
     : [];
   const names = new Map(parents.map((p) => [String(p.id), String(p.identifier)]));
-  return hydrated.map((r) =>
-    issueDTO({ ...r, parent: r.parent_id ? names.get(String(r.parent_id)) ?? null : null })
-  );
+  return hydrated.map((r) => ({
+    ...r,
+    parent: r.parent_id ? names.get(String(r.parent_id)) ?? null : null,
+  }));
 }
 export async function validateParent(
   db: Executor,
@@ -146,7 +147,7 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
         );
       }
       if (input.parent) {
-        const parent = await readIssue(db, ctx, w, input.parent);
+        const parent = await readIssue(db, ctx, w, input.parent, issueSummarySelect);
         predicates.push(sql`i.parent_id=${parent.id}`);
       }
       if (input.project_id || input.project !== undefined) {
@@ -182,7 +183,7 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
       if (input.cursor) {
         const boundary = (await rows(
           db,
-          sql`${issueSelect} where ${
+          sql`${issueSummarySelect} where ${
             sql.join(predicates, sql` and `)
           } and i.id=${input.cursor}::uuid`,
         ))[0];
@@ -200,7 +201,7 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
       }
       const rs = await rows(
         db,
-        sql`${issueSelect} where ${sql.join(predicates, sql` and `)} order by ${
+        sql`${issueSummarySelect} where ${sql.join(predicates, sql` and `)} order by ${
           sort === 'updated'
             ? sql`i.updated_at desc,i.id desc`
             : sort === 'priority'
@@ -209,7 +210,9 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
         } ${all ? sql`` : sql`limit ${limit + 1}`}`,
       );
       return {
-        items: await hydrateCoreIssues(db, ctx, w, all ? rs : rs.slice(0, limit)),
+        issues: (await hydrateCoreIssueRows(db, ctx, w, all ? rs : rs.slice(0, limit))).map(
+          issueSummaryDTO,
+        ),
         next_cursor: !all && rs.length > limit ? String(rs[limit - 1].id) : null,
       };
     },
@@ -227,8 +230,8 @@ export function createIssueQueries(executor: Executor): Pick<Service, 'listIssue
         } order by i.updated_at desc,i.id desc`,
       );
       const detail = {
-        ...(await hydrateCoreIssues(db, ctx, w, [r]))[0],
-        children: await hydrateCoreIssues(db, ctx, w, children),
+        ...issueDTO((await hydrateCoreIssueRows(db, ctx, w, [r]))[0]),
+        children: (await hydrateCoreIssueRows(db, ctx, w, children)).map(issueDTO),
         audit: events.map((e) => ({
           ...e,
           before: publicAuditSnapshot(e.before),

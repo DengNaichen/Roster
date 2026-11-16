@@ -68,6 +68,8 @@ export type Issue = {
   created_at: string;
   updated_at: string;
 };
+/** Collection reads never include document or activity; getIssue loads the full record. */
+export type IssueSummary = Omit<Issue, 'document'>;
 export type AuditEvent = {
   id: string;
   kind: string;
@@ -112,7 +114,7 @@ export type ListIssuesInput = {
   /** Last issue UUID in this query. Default order is updated DESC; agent_ready defaults to priority (0 last). Zero limit defaults to 50, negative returns all. */
   cursor?: string;
 };
-export type IssuePage = { items: Issue[]; next_cursor: string | null };
+export type IssuePage = { issues: IssueSummary[]; next_cursor: string | null };
 export type CreateTeamInput = {
   key: string;
   name: string;

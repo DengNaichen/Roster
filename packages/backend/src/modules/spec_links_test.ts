@@ -69,7 +69,7 @@ Deno.test({
       });
       const change = { identifier: spec.identifier, issues: [issue.identifier] };
       await Promise.all(Array.from({ length: 5 }, () => s.linkSpecIssues(owner, w.slug, change)));
-      assert((await s.listIssues(owner, w.slug, { spec: spec.identifier })).items.length === 1);
+      assert((await s.listIssues(owner, w.slug, { spec: spec.identifier })).issues.length === 1);
       assert((await s.listIssueSpecs(owner, w.slug, { issue: issue.identifier })).length === 1);
       const counts = await admin.query(
         'select count(*) as count from roster.spec_issues where workspace_id=$1',
@@ -89,10 +89,10 @@ Deno.test({
         issues: [privateIssue.identifier],
       });
       assert(
-        (await s.listIssues(owner, w.slug, { spec: spec.identifier })).items.length === 1,
+        (await s.listIssues(owner, w.slug, { spec: spec.identifier })).issues.length === 1,
         'Private issue leaked',
       );
-      assert((await s.listIssues(member, w.slug, { spec: spec.identifier })).items.length === 2);
+      assert((await s.listIssues(member, w.slug, { spec: spec.identifier })).issues.length === 2);
       assert(
         (await s.listIssueSpecs(owner, w.slug, { issue: issue.identifier })).length === 2,
         'Private spec leaked',
@@ -201,7 +201,7 @@ Deno.test({
       });
       await s.updateTeam(owner, w.slug, 'ALT', { private: true });
       assert(
-        !(await s.listIssues(member, w.slug, { spec: second.identifier })).items.some((i) =>
+        !(await s.listIssues(member, w.slug, { spec: second.identifier })).issues.some((i) =>
           i.identifier === later.identifier
         ),
       );
@@ -223,16 +223,17 @@ Deno.test({
       }
       await s.linkSpecIssues(owner, w.slug, { identifier: spec.identifier, issues: identifiers });
       const all = await s.listIssues(owner, w.slug, { spec: spec.identifier, limit: -1 });
-      assert(all.items.length === 51 && all.next_cursor === null);
+      assert(all.issues.length === 51 && all.next_cursor === null);
       const first = await s.listIssues(owner, w.slug, { spec: spec.identifier, limit: 10 });
-      assert(first.items.length === 10 && first.next_cursor);
+      assert(first.issues.length === 10 && first.next_cursor);
       const next = await s.listIssues(owner, w.slug, {
         spec: spec.identifier,
         limit: 10,
         cursor: first.next_cursor,
       });
       assert(
-        next.items.length === 10 && !next.items.some((i) => first.items.some((j) => j.id === i.id)),
+        next.issues.length === 10 &&
+          !next.issues.some((i) => first.issues.some((j) => j.id === i.id)),
       );
       await s.updateMember(owner, w.slug, {
         subject: member.identity.subject,

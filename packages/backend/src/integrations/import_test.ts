@@ -475,7 +475,7 @@ Deno.test({
         'Linear descriptions convert like the migration backfill',
       );
       assert(
-        (await service.listIssues(ctx, 'import-fixture', { query: 'Preserved' })).items
+        (await service.listIssues(ctx, 'import-fixture', { query: 'Preserved' })).issues
           .some((i) => i.identifier === 'AA-10'),
         'Imported documents are searchable',
       );

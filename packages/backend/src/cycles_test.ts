@@ -136,7 +136,7 @@ Deno.test({
           }),
         );
       }
-      assert((await s.listIssues(owner, w.slug, { cycle_id: first.id })).items.length === 8);
+      assert((await s.listIssues(owner, w.slug, { cycle_id: first.id })).issues.length === 8);
       const renamed = await s.updateCycle(member, w.slug, first.id, {
         name: 'Sprint one',
         description: 'Description',
@@ -267,11 +267,11 @@ Deno.test({
       });
       assert((await s.getIssue(owner, w.slug, child.identifier)).labels[0].id === label.id);
       assert(
-        (await s.listIssues(owner, w.slug, { label_ids: [label.id], label_mode: 'all' })).items
+        (await s.listIssues(owner, w.slug, { label_ids: [label.id], label_mode: 'all' })).issues
           .length === 1,
       );
       assert(
-        (await s.listIssues(owner, w.slug, { project_id: project.id })).items.some((i) =>
+        (await s.listIssues(owner, w.slug, { project_id: project.id })).issues.some((i) =>
           i.identifier === parent.identifier
         ),
       );

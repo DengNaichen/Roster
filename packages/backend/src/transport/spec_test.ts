@@ -153,10 +153,10 @@ export async function exerciseSpecTransports(
   await rest(linksPath, 'POST', { identifier: 'SPEC-999', issues: [issue.identifier] }, 400);
   await rest(linksPath + '?spec=SPEC-999', 'GET', undefined, 400);
   await rest(`/issues/${issue.identifier}/specs`);
-  const mcpLinked = await call<{ items: { identifier: string }[] }>('list_spec_issues', {
+  const mcpLinked = await call<{ issues: { identifier: string }[] }>('list_spec_issues', {
     identifier: created.identifier,
   });
-  assert(mcpLinked.items.some((item) => item.identifier === issue.identifier));
+  assert(mcpLinked.issues.some((item) => item.identifier === issue.identifier));
   await call('unlink_spec_issue', { identifier: created.identifier, issue: issue.identifier });
   assert((await rest(linksPath) as { issues: unknown[] }).issues.length === 0);
   await call('unlink_spec_issue', { identifier: created.identifier, issue: issue.identifier });

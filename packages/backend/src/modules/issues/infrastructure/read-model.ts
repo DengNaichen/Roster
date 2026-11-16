@@ -4,15 +4,18 @@ import { type Executor, one, type Row } from '../../../platform/database/query.t
 import { visible } from '../../access/postgres.ts';
 export const issueSelect =
   sql`select i.*,t.key as team,u.subject as user_subject,u.name as user_name,u.email as user_email from roster.issues i join roster.teams t on t.id=i.team_id left join roster.users u on u.subject=i.assignee_subject`;
+export const issueSummarySelect =
+  sql`select i.id,i.identifier,i.title,i.status,i.type,i.priority,i.project_id,i.cycle_id,i.parent_id,i.created_at,i.updated_at,t.key as team,u.subject as user_subject,u.name as user_name,u.email as user_email from roster.issues i join roster.teams t on t.id=i.team_id left join roster.users u on u.subject=i.assignee_subject`;
 export async function readIssue(
   db: Executor,
   ctx: RequestContext,
   w: Row,
   id: string,
+  projection = issueSelect,
 ) {
   return one(
     db,
-    sql`${issueSelect} where i.workspace_id=${w.id} and ${
+    sql`${projection} where i.workspace_id=${w.id} and ${
       /^[0-9a-f-]{36}$/i.test(id) ? sql`i.id=${id}::uuid` : sql`i.identifier=${id}`
     } and ${visible(ctx.identity.subject)}`,
   );

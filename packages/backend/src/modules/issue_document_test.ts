@@ -5,6 +5,7 @@ import {
   type IssueDetail,
   type IssueDocument,
   issueDocumentText,
+  type IssuePage,
   type RequestContext,
 } from '../../../contracts/mod.ts';
 import { createDatabase } from '../platform/database/client.ts';
@@ -116,7 +117,7 @@ Deno.test({
         publicUrl: 'https://app',
         authorizationServer: 'https://auth.example/auth/v1',
       });
-      const call = async (as: string, name: string, args: unknown) => {
+      const call = async <T = Issue>(as: string, name: string, args: unknown) => {
         const response = await mcp(
           new Request(`https://app/w/${w.slug}/mcp`, {
             method: 'POST',
@@ -141,7 +142,7 @@ Deno.test({
         return document.result as {
           isError?: boolean;
           content: { text: string }[];
-          structuredContent?: { result: Issue };
+          structuredContent?: { result: T };
         };
       };
       const mcpOk = async (as: string, name: string, args: unknown) => {
@@ -158,6 +159,22 @@ Deno.test({
       assert(isDeepStrictEqual(created.document, full), JSON.stringify(created.document));
       const read = await rest<IssueDetail>('member', `/issues/${created.identifier}`);
       assert(isDeepStrictEqual(read.document, full), 'Members read the stored document');
+      const page = await rest<IssuePage>('member', '/issues?team=DOC');
+      assert(!('items' in page), 'REST has one canonical issues array');
+      assert(page.issues[0].identifier === created.identifier && page.next_cursor === null);
+      for (
+        const field of ['document', 'document_text', 'audit', 'comments', 'workspace_id', 'team_id']
+      ) assert(!(field in page.issues[0]), `List exposed ${field}`);
+      const mcpPage = await call<IssuePage>('member', 'list_issues', { team: 'DOC' });
+      assert(
+        !mcpPage.isError &&
+          mcpPage.structuredContent?.result.issues[0].identifier === created.identifier,
+      );
+      assert(
+        !('document' in mcpPage.structuredContent!.result.issues[0]),
+        'MCP list is summary-only',
+      );
+
       const stored = await admin.query('select document_text from roster.issues where id=$1', [
         created.id,
       ]);
@@ -374,7 +391,7 @@ Deno.test({
       );
 
       const search = async (query: string) =>
-        (await service.listIssues(owner, w.slug, { query, limit: -1 })).items.map((i) =>
+        (await service.listIssues(owner, w.slug, { query, limit: -1 })).issues.map((i) =>
           i.identifier
         );
       assert(

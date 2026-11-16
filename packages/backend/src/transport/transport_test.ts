@@ -69,7 +69,7 @@ Deno.test('REST and MCP invoke the same service with verified actor and strict i
   const service = {
     listIssues: async (ctx: unknown, slug: unknown, input: unknown) => {
       calls.push({ ctx, slug, input });
-      return { items: [], next_cursor: null };
+      return { issues: [], next_cursor: null };
     },
   } as unknown as Service;
   const bearer = await token();

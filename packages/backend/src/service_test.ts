@@ -107,7 +107,7 @@ Deno.test({
       );
       await rejects(() => s.getIssue(other, w.slug, hidden.identifier), 'not_found');
       await rejects(() => s.getIssue(member, w.slug, hidden.identifier), 'not_found');
-      assert(!(await s.listIssues(member, w.slug)).items.length);
+      assert(!(await s.listIssues(member, w.slug)).issues.length);
       assert((await s.listAssignees(member, w.slug, 'AA')).length === 3);
       await rejects(() => s.listAssignees(member, w.slug, 'PR'), 'not_found');
       assert((await s.listAssignees(owner, w.slug, 'PR')).length === 1);
@@ -236,10 +236,10 @@ Deno.test({
       );
       assert(BigInt(detail.audit[0].id) < BigInt(detail.audit[1].id), 'Audit IDs sort numerically');
       assert(
-        (await s.listIssues(member, w.slug, { priority: 2, type: 'bug', assignee: null })).items
+        (await s.listIssues(member, w.slug, { priority: 2, type: 'bug', assignee: null })).issues
           .length === 1,
       );
-      assert((await s.listIssues(member, w.slug, { assigned_to_me: true })).items.length === 11);
+      assert((await s.listIssues(member, w.slug, { assigned_to_me: true })).issues.length === 11);
       await rejects(
         () => s.listIssues(member, w.slug, { assigned_to_me: true, assignee: null }),
         'invalid_input',
@@ -289,9 +289,9 @@ Deno.test({
         'Audit timestamps must be ISO UTC',
       );
       const first = await s.listIssues(member, w.slug, { limit: 5 });
-      assert(first.items.length === 5 && first.next_cursor);
+      assert(first.issues.length === 5 && first.next_cursor);
       const second = await s.listIssues(member, w.slug, { limit: 5, cursor: first.next_cursor });
-      const both = [...first.items, ...second.items];
+      const both = [...first.issues, ...second.issues];
       assert(
         both.every((issue) => isISO(issue.created_at) && isISO(issue.updated_at)),
         'List timestamps must be ISO UTC',
@@ -306,7 +306,7 @@ Deno.test({
         'invalid_input',
       );
       assert(
-        !second.items.some((i) => first.items.some((j) => i.id === j.id)),
+        !second.issues.some((i) => first.issues.some((j) => i.id === j.id)),
         'Pages must not overlap',
       );
       await s.updateMember(owner, w.slug, {
@@ -370,12 +370,12 @@ Deno.test({
         limit: -1,
       });
       assert(
-        priorityPage.items.map((i) => i.priority).join(',') === '1,4,0' &&
+        priorityPage.issues.map((i) => i.priority).join(',') === '1,4,0' &&
           priorityPage.next_cursor === null,
         'Agent-ready defaults to priority, with no priority last, and negative limit returns all',
       );
       assert(
-        (await s.listIssues(owner, w.slug, { query: 'Priority semantics', limit: 0 })).items
+        (await s.listIssues(owner, w.slug, { query: 'Priority semantics', limit: 0 })).issues
           .length === 3,
         'Zero limit uses the default instead of returning nothing',
       );
@@ -391,7 +391,7 @@ Deno.test({
         cursor: priorityFirst.next_cursor!,
       });
       assert(
-        priorityFirst.items[0].priority === 1 && priorityNext.items[0].priority === 4,
+        priorityFirst.issues[0].priority === 1 && priorityNext.issues[0].priority === 4,
         'Priority cursor must use the priority/update/id ordering',
       );
       const demotions = await Promise.allSettled([

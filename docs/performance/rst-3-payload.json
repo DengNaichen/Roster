@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "mode": "local-preview-fixed-identity",
+  "workspace": "perf-baseline-v2",
+  "rows": 50,
+  "totalBytes": 17363,
+  "duplicatedItemsEqual": false,
+  "itemsBytes": 17333,
+  "documentBytes": 0,
+  "listHasDocuments": false
+}

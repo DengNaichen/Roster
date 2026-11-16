@@ -1,13 +1,12 @@
-import type { Issue } from '../../../../../contracts/mod.ts';
+import type { Issue, IssueSummary } from '../../../../../contracts/mod.ts';
 import type { Row } from '../../../application/records.ts';
 import { iso } from '../../../platform/time.ts';
-export function issueDTO(r: Row): Issue {
+export function issueSummaryDTO(r: Row): IssueSummary {
   return {
     id: String(r.id),
     identifier: String(r.identifier),
     team: String(r.team),
     title: String(r.title),
-    document: r.document as Issue['document'],
     status: r.status as Issue['status'],
     type: r.type as Issue['type'],
     priority: Number(r.priority),
@@ -27,4 +26,7 @@ export function issueDTO(r: Row): Issue {
     created_at: iso(r.created_at),
     updated_at: iso(r.updated_at),
   };
+}
+export function issueDTO(r: Row): Issue {
+  return { ...issueSummaryDTO(r), document: r.document as Issue['document'] };
 }
