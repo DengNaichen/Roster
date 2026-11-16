@@ -1,0 +1,6 @@
+{
+  "status": 200,
+  "type": "cors",
+  "issues": 7,
+  "origin": "http://127.0.0.1:5219"
+}

@@ -1,3 +1,4 @@
+import { functionRegion } from "./region";
 import { createClient } from "@supabase/supabase-js";
 import { localPreview } from "./preview";
 export { localPreview } from "./preview";
@@ -49,6 +50,11 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   }
   const headers = new Headers(init.headers);
   if (localPreview) headers.delete("Authorization");
+  // Region is only a routing hint; it never changes authorization or retries a mutation.
+  const region = localPreview
+    ? undefined
+    : functionRegion(import.meta.env.VITE_API_REGION, import.meta.env.VITE_SUPABASE_URL);
+  if (region) headers.set("x-region", region);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }

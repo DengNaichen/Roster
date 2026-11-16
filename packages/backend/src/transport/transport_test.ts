@@ -142,6 +142,27 @@ Deno.test('MCP discovery is public, unauthorized responses advertise it, CORS is
   );
   assert(preflight.status === 204);
   assert(preflight.headers.get('Access-Control-Allow-Origin') === 'https://ui.example');
+  assert(preflight.headers.get('Access-Control-Allow-Headers')?.includes('x-region'));
+  assert(preflight.headers.get('Access-Control-Expose-Headers')?.includes('x-sb-edge-region'));
+  const api = createHttpApp({
+    service: {} as Service,
+    verify,
+    allowedOrigins: ['https://ui.example'],
+  });
+  const regionalPreflight = await api.request('/api/w/default/issues', {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://ui.example',
+      'Access-Control-Request-Headers': 'authorization,x-region',
+      'Access-Control-Request-Method': 'GET',
+    },
+  });
+  assert(regionalPreflight.status === 204);
+  assert(regionalPreflight.headers.get('Access-Control-Allow-Headers')?.includes('x-region'));
+  const stillUnauthorized = await api.request('/api/w/default/issues', {
+    headers: { 'x-region': 'eu-west-3' },
+  });
+  assert(stillUnauthorized.status === 401);
 });
 
 Deno.test('MCP tool errors hide internal exceptions and advertise structured output', async () => {
