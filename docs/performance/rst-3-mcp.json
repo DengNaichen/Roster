@@ -1,0 +1,13 @@
+{
+  "mode": "real-local-MCP-fixed-preview-identity",
+  "workspace": "perf-baseline-v2",
+  "listKeys": [
+    "issues",
+    "next_cursor"
+  ],
+  "listCount": 10,
+  "hasFullDetailDocument": true,
+  "pagesDisjoint": true,
+  "bodySearchCount": 50,
+  "bodySearchResponseBytes": 37271
+}

@@ -47,7 +47,7 @@ Agent 通过工作区 MCP 调用 `get_spec_design`（参数为 `identifier`）�
 
 `GET /api/w/:workspace/capabilities` 在页面挂载前声明已实现能力，当前全部启用；获取失败会阻断并提供重试。原组件读取的项目、标签、周期、评论、工作记录、关系和 PR 均来自真实存储；独立 Specs 的文档与修订同样来自真实服务。
 
-`packages/backend/src/transport/http/compat.ts` 负责 REST 兼容：列表提供原 `{issues}`，详情/状态更新按原形状返回，处理原表单的清空字段，并保留真实负责人筛选和历史。MCP 保留旧工具名称/输入语义；`list_issues` 的零 limit 使用默认值，负 limit 返回全部，支持优先级和更新时间排序。
+`packages/backend/src/transport/http/compat.ts` 负责 REST 兼容：列表统一返回 `{issues, next_cursor}`（MCP 同形），每项为不含 document 的概要；详情/状态更新返回完整正文与原有形状，处理原表单的清空字段，并保留真实负责人筛选和历史。MCP 保留旧工具名称/输入语义；`list_issues` 的零 limit 使用默认值，负 limit 返回全部，支持优先级和更新时间排序。
 
 `roster` schema 不加入 Supabase Data API 的暴露名单。迁移撤销 `public`、`anon`、`authenticated` 的访问，并创建 `roster_app` NOLOGIN 权限角色。业务权限由 Service 每次读取成员关系后执行；数据库客户端并不自动传递用户 JWT。应用连接不能使用 `postgres` 超级用户。
 

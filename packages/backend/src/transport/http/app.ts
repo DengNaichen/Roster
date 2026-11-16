@@ -276,8 +276,7 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
   app.get('/api/w/:workspace/issues', async (c) => {
     const input = restListInput(c.req.queries());
     const page = await s.listIssues(c.get('requestContext'), c.req.param('workspace'), input);
-    const issues = page.items.map(restIssue);
-    return c.json({ ...page, items: issues, issues });
+    return c.json(page);
   });
   app.post(
     '/api/w/:workspace/issues',
@@ -699,8 +698,7 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
       ...input,
       spec: specs.getSpecSchema.parse({ identifier: c.req.param('identifier') }).identifier,
     });
-    const issues = page.items.map(restIssue);
-    return c.json({ ...page, items: issues, issues });
+    return c.json(page);
   });
   app.post('/api/w/:workspace/specs/:identifier/issues', async (c) => {
     const input = await body(c, specs.changeSpecIssuesSchema.omit({ identifier: true }));

@@ -140,7 +140,10 @@ const specOutput = z.object({
   content: specContentOutput,
 }).passthrough();
 const resultSchemas: Record<string, z.ZodType> = {
-  list_spec_issues: z.object({ items: z.array(issueOutput), next_cursor: z.string().nullable() }),
+  list_spec_issues: z.object({
+    issues: z.array(issueOutput.omit({ document: true })),
+    next_cursor: z.string().nullable(),
+  }),
   list_issue_specs: z.array(specSummaryOutput),
   link_spec_issue: z.object({
     identifier: specIdentifierOutput,
@@ -164,7 +167,10 @@ const resultSchemas: Record<string, z.ZodType> = {
   update_spec: specOutput,
   list_spec_revisions: z.array(specRevisionOutput),
   get_spec_revision: specRevisionOutput.extend({ content: specContentOutput }),
-  list_issues: z.object({ items: z.array(issueOutput), next_cursor: z.string().uuid().nullable() })
+  list_issues: z.object({
+    issues: z.array(issueOutput.omit({ document: true })),
+    next_cursor: z.string().uuid().nullable(),
+  })
     .passthrough(),
   get_issue: issueOutput.extend({
     audit: z.array(
