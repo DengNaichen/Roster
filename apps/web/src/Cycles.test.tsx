@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "./test/query-wrapper";
 import { beforeEach, expect, it, vi } from "vitest";
 import { CycleSelect, emptyCycles } from "./Cycles";
 import { CycleSettingsSection, mondayOf } from "./CycleSettings";

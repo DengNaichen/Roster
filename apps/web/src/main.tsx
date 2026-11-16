@@ -1,3 +1,4 @@
+import { ServerCacheBoundary } from "./queryCache";
 import { AuthBoundary } from "./integration";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -16,7 +17,9 @@ applyAppearance(readAppearance());
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthBoundary>
-      <App />
+      <ServerCacheBoundary>
+        <App />
+      </ServerCacheBoundary>
     </AuthBoundary>
   </StrictMode>,
 );

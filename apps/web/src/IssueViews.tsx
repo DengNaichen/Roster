@@ -1,3 +1,4 @@
+import { usePrefetchIssue } from "./queryCache";
 import { ChevronDown } from "lucide-react";
 import {
   type ReactNode,
@@ -12,6 +13,7 @@ import {
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import {
   IssueMeta,
+  apiPath,
   IssueSummary,
   issueTeamKey,
   NavLink,
@@ -301,16 +303,18 @@ const IssueControls = memo(function IssueControls({
     };
   }, [issue.created_at]);
   const href = pagePath(`/issue/${issue.identifier}`);
+  const prefetch = usePrefetchIssue();
+  const onIntent = () => prefetch(apiPath(`/issues/${issue.identifier}`));
 
   return view === "board" ? (
     <>
       {selection}
-      <NavLink to={href} className="identifier card-identifier">
+      <NavLink onIntent={onIntent} to={href} className="identifier card-identifier">
         {issue.identifier}
       </NavLink>
       <div className="card-heading">
         {status}
-        <NavLink to={href} className="card-open card-title">
+        <NavLink onIntent={onIntent} to={href} className="card-open card-title">
           {issue.title}
         </NavLink>
       </div>
@@ -323,12 +327,12 @@ const IssueControls = memo(function IssueControls({
     <>
       {selection}
       {priority}
-      <NavLink to={href} className="identifier">
+      <NavLink onIntent={onIntent} to={href} className="identifier">
         {issue.identifier}
       </NavLink>
       {status}
       <div className="row-content">
-        <NavLink to={href} className="list-title" title={issue.title}>
+        <NavLink onIntent={onIntent} to={href} className="list-title" title={issue.title}>
           {issue.title}
         </NavLink>
         {extra}

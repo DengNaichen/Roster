@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchResource, resourceKey, useServerCache } from "./queryCache";
+import { useRef, useState } from "react";
 import { ChevronDown, GitBranch, MessageSquare, ScrollText } from "lucide-react";
-import { api, personName, RequestError, WorkLog, WorkLogPage, WorkLogSummary } from "./shared";
+import { personName, RequestError, WorkLog, WorkLogPage, WorkLogSummary } from "./shared";
 import { MarkdownText } from "./MarkdownText";
 import { useResource } from "./useResource";
-import { useRequestScope } from "./useRequestScope";
 
 const timestamp = (value: string) =>
   new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -110,43 +111,25 @@ function WorkLogBody({ path }: { path: string }) {
 }
 
 export function WorkLogList({ path }: { path: string }) {
-  const [page, setPage] = useState<WorkLogPage>({ work_logs: [], next_before: 0 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [retryBefore, setRetryBefore] = useState(0);
-  const requests = useRequestScope(path);
-  const load = useCallback(
-    async (before = 0) => {
-      setLoading(true);
-      setError("");
-      await requests.read(
-        () => api<WorkLogPage>(`${path}/work-logs?before=${before}`),
-        (next) => {
-          setPage((previous) => ({
-            work_logs: before ? [...previous.work_logs, ...next.work_logs] : next.work_logs,
-            next_before: next.next_before,
-          }));
-          setLoading(false);
-        },
-        (cause) => {
-          setError(cause.message);
-          setRetryBefore(before);
-          setLoading(false);
-          if (cause.message === "issue not found" || cause.message === "workspace access denied")
-            setPage({ work_logs: [], next_before: 0 });
-        },
-      );
-    },
-    [path, requests],
-  );
-  useEffect(() => {
-    void load();
-    const focus = () => {
-      void load();
-    };
-    window.addEventListener("focus", focus);
-    return () => window.removeEventListener("focus", focus);
-  }, [load]);
+  const { scope, enabled } = useServerCache();
+  const query = useInfiniteQuery({
+    queryKey: [...resourceKey(scope.subject, `${path}/work-logs`), "pages"],
+    enabled,
+    initialPageParam: 0,
+    queryFn: ({ pageParam, signal }) =>
+      fetchResource<WorkLogPage>(scope, `${path}/work-logs?before=${pageParam}`, signal),
+    getNextPageParam: (last) => (last.next_before > 0 ? last.next_before : undefined),
+  });
+  const page = {
+    work_logs: query.data?.pages.flatMap((p) => p.work_logs) ?? [],
+    next_before: query.data?.pages.at(-1)?.next_before ?? 0,
+  };
+  const loading = query.isFetching;
+  const error =
+    query.error?.message ??
+    (query.fetchStatus === "paused" ? "Offline. Reconnect to load work logs." : "");
+  const load = () =>
+    query.isFetchNextPageError ? query.fetchNextPage() : query.refetch({ cancelRefetch: false });
   return (
     <div className="work-log-list">
       <p className="activity-hint">
@@ -163,7 +146,7 @@ export function WorkLogList({ path }: { path: string }) {
       {error && (
         <div className="work-log-error">
           <RequestError message={error} />
-          <button className="button" disabled={loading} onClick={() => void load(retryBefore)}>
+          <button className="button" disabled={loading} onClick={() => void load()}>
             Retry work logs
           </button>
         </div>
@@ -172,7 +155,7 @@ export function WorkLogList({ path }: { path: string }) {
         <p className="empty">No agent work logs yet.</p>
       )}
       {!error && page.next_before > 0 && (
-        <button className="button" disabled={loading} onClick={() => void load(page.next_before)}>
+        <button className="button" disabled={loading} onClick={() => void query.fetchNextPage()}>
           Load older records
         </button>
       )}

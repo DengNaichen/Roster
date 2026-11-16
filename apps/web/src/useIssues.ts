@@ -1,3 +1,4 @@
+import { useResource } from "./useResource";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LabelFilterValue } from "./useLabels";
 import { api, apiPath, Issue, IssueSummary, Priority, Status } from "./shared";
@@ -32,9 +33,8 @@ export function useIssues(
   setError: (message: string) => void,
 ) {
   const confirmedStatuses = useRef(new Map<string, Status>());
-  const [issues, setIssues] = useState<IssueSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
+  const pendingStatuses = useRef(new Map<string, { status: Status; revision: number }>());
+  const revision = useRef(0);
   const [savingPriorities, setSavingPriorities] = useState<string[]>([]);
   const params = new URLSearchParams({ query, label_mode: labelFilter.mode });
   if (assignee === "me") params.set("assigned_to_me", "true");
@@ -54,44 +54,45 @@ export function useIssues(
   );
   // The write queue belongs to the mounted page, across changes to its filters.
   const requests = useRequestScope(apiPath("/issues"));
-  const queryScope = useRequestScope(path);
-
-  const loadIssues = useCallback(async () => {
-    if (!queryScope.isActive()) return;
-    setLoading(true);
-    await requests.read(
-      () => api<IssueList>(path),
-      (data) => {
-        if (!queryScope.isActive()) return;
-        data.issues.forEach((issue) =>
-          confirmedStatuses.current.set(issue.identifier, issue.status),
-        );
-        setIssues(data.issues);
-        setLoadError("");
-        setLoading(false);
-      },
-      (cause) => {
-        if (!queryScope.isActive()) return;
-        setLoadError(cause.message);
-        setLoading(false);
-      },
-    );
-  }, [path, queryScope, requests]);
+  const resource = useResource<IssueList>(path, { issues: [] });
+  const currentPath = useRef(path);
+  currentPath.current = path;
+  const [local, setLocal] = useState<{
+    path: string;
+    base: IssueList;
+    issues: IssueSummary[];
+  } | null>(null);
+  const baseIssues =
+    local?.path === path && local.base === resource.data ? local.issues : resource.data.issues;
+  const issues = baseIssues.map((issue) =>
+    pendingStatuses.current.has(issue.identifier)
+      ? { ...issue, status: pendingStatuses.current.get(issue.identifier)!.status }
+      : issue,
+  );
+  const setIssues = useCallback(
+    (change: (items: IssueSummary[]) => IssueSummary[]) => {
+      setLocal((previous) => ({
+        path,
+        base: resource.data,
+        issues: change(
+          previous?.path === path && previous.base === resource.data
+            ? previous.issues
+            : resource.data.issues,
+        ),
+      }));
+    },
+    [path, resource.data],
+  );
   useEffect(() => {
-    // Changing a filter invalidates reads for the previous query as well.
-    requests.invalidate();
-    void loadIssues();
-    const load = () => {
-      void loadIssues();
-    };
-    window.addEventListener("focus", load);
-    return () => {
-      requests.invalidate();
-      window.removeEventListener("focus", load);
-    };
-  }, [loadIssues, requests]);
+    resource.data.issues.forEach((issue) =>
+      confirmedStatuses.current.set(issue.identifier, issue.status),
+    );
+  }, [resource.data]);
+  const { reload: loadIssues, loading, error: loadError } = resource;
 
   async function moveIssue(identifier: string, status: Status) {
+    const started = ++revision.current;
+    pendingStatuses.current.set(identifier, { status, revision: started });
     const previous = issues.find((issue) => issue.identifier === identifier)?.status;
     setIssues((items) =>
       items.map((issue) => (issue.identifier === identifier ? { ...issue, status } : issue)),
@@ -101,14 +102,25 @@ export function useIssues(
       identifier,
       () => api<Issue>(url, "PATCH", { status }),
       (updated) => {
+        if (pendingStatuses.current.get(identifier)?.revision === started)
+          pendingStatuses.current.delete(identifier);
+        const { document: _document, ...summary } = updated;
         confirmedStatuses.current.set(identifier, updated.status);
-        if (queryScope.isActive())
+        resource.update((current) => ({
+          ...current,
+          issues: current.issues.map((issue) =>
+            issue.identifier === identifier ? summary : issue,
+          ),
+        }));
+        if (currentPath.current === path)
           setIssues((items) =>
-            items.map((issue) => (issue.identifier === identifier ? updated : issue)),
+            items.map((issue) => (issue.identifier === identifier ? summary : issue)),
           );
       },
       (cause) => {
-        if (!queryScope.isActive()) return;
+        if (pendingStatuses.current.get(identifier)?.revision !== started) return;
+        pendingStatuses.current.delete(identifier);
+        if (currentPath.current !== path) return;
         const restored = confirmedStatuses.current.get(identifier) ?? previous;
         if (restored)
           setIssues((items) =>
@@ -130,14 +142,21 @@ export function useIssues(
       identifier,
       () => api<Issue>(url, "PATCH", { priority: next }),
       (updated) => {
+        const { document: _document, ...summary } = updated;
         confirmedStatuses.current.set(identifier, updated.status);
-        if (queryScope.isActive())
+        resource.update((current) => ({
+          ...current,
+          issues: current.issues.map((issue) =>
+            issue.identifier === identifier ? summary : issue,
+          ),
+        }));
+        if (currentPath.current === path)
           setIssues((items) =>
-            items.map((issue) => (issue.identifier === identifier ? updated : issue)),
+            items.map((issue) => (issue.identifier === identifier ? summary : issue)),
           );
       },
       (cause) => {
-        if (queryScope.isActive()) setError(cause.message);
+        if (currentPath.current === path) setError(cause.message);
       },
     );
     setSavingPriorities((items) => items.filter((id) => id !== identifier));

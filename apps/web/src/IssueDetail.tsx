@@ -5,7 +5,7 @@ import "./cycles.css";
 import { AssigneeSelect } from "./Assignee";
 import { codingAgentName, personName } from "./shared";
 import { ArrowUpRight, Box, CornerUpLeft, Orbit, Plus, Users, X } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { MarkdownText } from "./MarkdownText";
 import { IssueDocument } from "./IssueDocument";
 import { SummaryField } from "./SummaryField";
@@ -63,7 +63,6 @@ export function IssueDetail({
   editing: boolean;
   closeEditor: () => void;
 }) {
-  const [issue, setIssue] = useState<IssueDetails | null>(null);
   const capabilities = useCapabilities();
   const [activityTab, setActivityTab] = useState<"comments" | "work-logs">("comments");
   const [comment, setComment] = useState("");
@@ -73,35 +72,16 @@ export function IssueDetail({
   const [savingAssignee, setSavingAssignee] = useState(false);
   const pendingCriteria = useRef(0);
   const [posting, setPosting] = useState(false);
-  const requests = useRequestScope(identifier);
   const path = apiPath(`/issues/${identifier}`);
-  const [loadError, setLoadError] = useState("");
+  const requests = useRequestScope(path);
+  const {
+    data: issue,
+    update: setIssue,
+    error: loadError,
+    reload: loadIssue,
+  } = useResource<IssueDetails | null>(path, null);
   const commentRevision = useRef(0);
   const delegationHistory = useRef<HTMLElement>(null);
-
-  const loadIssue = useCallback(async () => {
-    await requests.read(
-      () => api<IssueDetails>(path),
-      (loaded) => {
-        setIssue(loaded);
-        setLoadError("");
-      },
-      (cause) => {
-        setLoadError(cause.message);
-        if (cause.message === "issue not found" || cause.message === "workspace access denied")
-          setIssue(null);
-      },
-    );
-  }, [path, requests]);
-
-  useEffect(() => {
-    void loadIssue();
-    const load = () => {
-      void loadIssue();
-    };
-    window.addEventListener("focus", load);
-    return () => window.removeEventListener("focus", load);
-  }, [loadIssue]);
 
   async function changeStatus(status: Status) {
     await requests.write(

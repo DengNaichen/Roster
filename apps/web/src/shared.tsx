@@ -1,3 +1,5 @@
+import { writeStarted, writeFinished, type WriteEvent } from "./integration/cache-events";
+import type { ReadOptions } from "./integration/api";
 import type { IssueDocument } from "../../../packages/contracts/issue-document";
 import { api as integrationApi } from "./integration";
 import { normalizeIssueResponse } from "./issueCompatibility";
@@ -279,9 +281,24 @@ export const pagePath = (path: string) => `/${workspaceSlug()}${path}`;
 
 export const apiPath = (path: string) => `/api/w/${workspaceSlug()}${path}`;
 
-export async function api<T>(path: string, method = "GET", body?: object): Promise<T> {
-  const result = await integrationApi<unknown>(path, method, body);
-  return normalizeIssueResponse(path, method, result) as T;
+export async function api<T>(
+  path: string,
+  method = "GET",
+  body?: object,
+  options?: ReadOptions,
+): Promise<T> {
+  const write: WriteEvent | null =
+    method !== "GET" && method !== "HEAD" ? { path, id: Symbol() } : null;
+  if (write) window.dispatchEvent(new CustomEvent(writeStarted, { detail: write }));
+  try {
+    const result = await integrationApi<unknown>(path, method, body, options);
+    return normalizeIssueResponse(path, method, result) as T;
+  } catch (error) {
+    if (write) write.error = error;
+    throw error;
+  } finally {
+    if (write) window.dispatchEvent(new CustomEvent(writeFinished, { detail: write }));
+  }
 }
 
 export function navigate(path: string) {
@@ -297,6 +314,7 @@ export function NavLink({
   title,
   "aria-label": ariaLabel,
   "aria-current": ariaCurrent,
+  onIntent,
 }: {
   to: string;
   className?: string;
@@ -305,7 +323,11 @@ export function NavLink({
   title?: string;
   "aria-label"?: string;
   "aria-current"?: "page";
+  onIntent?: () => void;
 }) {
+  const intentTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const cancelIntent = () => clearTimeout(intentTimer.current);
+  useEffect(() => () => clearTimeout(intentTimer.current), [to]);
   function open(event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) return;
     event.preventDefault();
@@ -316,6 +338,12 @@ export function NavLink({
       className={className}
       href={to}
       onClick={open}
+      onPointerEnter={() => {
+        cancelIntent();
+        if (onIntent && !unavailable) intentTimer.current = setTimeout(onIntent, 150);
+      }}
+      onPointerLeave={cancelIntent}
+      onFocus={unavailable ? undefined : onIntent}
       aria-label={ariaLabel}
       aria-current={ariaCurrent}
       aria-disabled={unavailable || undefined}

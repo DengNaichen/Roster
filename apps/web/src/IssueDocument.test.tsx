@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "./test/query-wrapper";
 import { expect, it, vi } from "vitest";
 import { IssueDocument } from "./IssueDocument";
 import { sampleDocument } from "./test/fixtures/issueDocument";

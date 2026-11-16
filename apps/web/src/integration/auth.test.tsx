@@ -139,3 +139,34 @@ it.each([
   });
   expect((button as HTMLButtonElement).disabled).toBe(false);
 });
+
+it("clears the old query client when identity changes while retaining it on temporary expiry", async () => {
+  const { ServerCacheBoundary, useServerCache, resourceKey } = await import("../queryCache");
+  const clients = new Map<string, ReturnType<typeof useServerCache>["scope"]["client"]>();
+  function App() {
+    const { scope } = useServerCache();
+    clients.set(scope.subject, scope.client);
+    return <span>{scope.subject}</span>;
+  }
+  render(
+    <AuthBoundary>
+      <ServerCacheBoundary>
+        <App />
+      </ServerCacheBoundary>
+    </AuthBoundary>,
+  );
+  await screen.findByText("test-user");
+  const first = clients.get("test-user")!;
+  const key = resourceKey("test-user", "/api/w/alpha/issues");
+  first.setQueryData(key, "private cache");
+  await act(async () => {
+    auth.callback?.("SIGNED_OUT", null);
+  });
+  expect(first.getQueryData(key)).toBe("private cache");
+  await act(async () => {
+    auth.callback?.("SIGNED_IN", { user: { ...session.user, id: "different-user" } });
+  });
+  await screen.findByText("different-user");
+  await waitFor(() => expect(first.getQueryCache().getAll()).toHaveLength(0));
+  expect(clients.get("different-user")!.getQueryCache().getAll()).toHaveLength(0);
+});

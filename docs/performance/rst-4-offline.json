@@ -1,0 +1,7 @@
+{
+  "at": "2026-11-16T08:16:41.611Z",
+  "url": "http://127.0.0.1:5275/perf-baseline-v2/issue/PERF-50",
+  "online": false,
+  "title": "Performance fixture 50",
+  "alert": "Offline. Cached content is available; reconnect to refresh."
+}

@@ -40,14 +40,16 @@
     }
   };
   let marker = origin;
+  let requestWindow = origin;
   let cancel = () => {};
   const stop = async (scenario, matched = performance.now()) => {
     const pendingAtMatch =
-      requests.filter((r) => r.start >= marker && (r.end === null || r.end > matched)).length;
+      requests.filter((r) => r.start >= requestWindow && (r.end === null || r.end > matched))
+        .length;
     const matchedAt = performance.timeOrigin + matched;
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const visible = performance.now();
-    const samples = requests.filter((r) => r.start >= marker).map((r) => ({
+    const samples = requests.filter((r) => r.start >= requestWindow).map((r) => ({
       resource: r.resource,
       method: r.method,
       status: r.status,
@@ -59,6 +61,7 @@
       scenario,
       matchedMs: matched - marker,
       matchedAt,
+      requestWindow: 'arm-to-visible, including hover prefetch before input',
       pendingAtMatch,
       online: navigator.onLine,
       ms: visible - marker,
@@ -69,14 +72,16 @@
   };
   const probe = {
     result: null,
-    start() {
+    start(since = performance.now()) {
       marker = performance.now();
+      requestWindow = since;
     },
     stop,
     watch(scenario, selector, text = '', fromNavigation = false) {
       cancel();
       probe.result = null;
       marker = fromNavigation ? 0 : performance.now();
+      requestWindow = marker;
       const observer = new MutationObserver(check);
       function check() {
         if (![...document.querySelectorAll(selector)].some((e) => e.textContent.includes(text))) {
@@ -101,6 +106,7 @@
     arm(scenario, selector, text = '', trigger = 'a,button,[role="option"]') {
       cancel();
       probe.result = null;
+      const armedAt = performance.now();
       const matches = () => {
         const el = document.querySelector(selector);
         return el && el.textContent.includes(text);
@@ -124,7 +130,7 @@
       function start(event) {
         if (!(event.target instanceof Element) || !event.target.closest(trigger)) return;
         events.forEach((event) => document.removeEventListener(event, start, true));
-        probe.start();
+        probe.start(armedAt);
         timer = setTimeout(() => {
           cleanup();
           probe.result = { scenario, error: 'visible result timed out' };

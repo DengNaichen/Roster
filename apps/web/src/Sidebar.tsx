@@ -17,7 +17,7 @@ import {
   Plus,
   Telescope,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { EntityEmoji } from "./EmojiPicker";
 import { Session } from "./Session";
 import { WorkspaceMenu } from "./WorkspaceMenu";
@@ -150,18 +150,12 @@ export function Sidebar({
 }
 
 // Issues waiting for a decision; refreshed on navigation and when issues move in or out.
-function useTriageCount(team: string, visit: number) {
+function useTriageCount(team: string, _visit: number) {
   const resource = useResource<{ issues: unknown[] }>(
     apiPath(`/issues?team=${encodeURIComponent(team)}&status=triage&limit=-1`),
     { issues: [] },
   );
   const { reload } = resource;
-  const seen = useRef(visit);
-  useEffect(() => {
-    if (seen.current === visit) return;
-    seen.current = visit;
-    void reload();
-  }, [visit, reload]);
   useEffect(() => {
     const refresh = () => void reload();
     window.addEventListener(triageChanged, refresh);
