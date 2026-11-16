@@ -28,6 +28,7 @@
     async run(
       {
         revision = 'unspecified',
+        fixture: fixtureVariant = 'v2',
         throttling = 'none',
         base,
         workspace,
@@ -39,6 +40,10 @@
         startIndex = 0,
       },
     ) {
+      if (
+        !['v2', 'v2-linked'].includes(fixtureVariant) ||
+        (fixtureVariant === 'v2-linked' && !preview)
+      ) throw new Error('Linked fixture is local preview only');
       if (!/^perf-[a-z0-9-]+$/.test(workspace)) throw new Error('Use a dedicated perf-* workspace');
       const url = new URL(base);
       if (
@@ -154,6 +159,7 @@
       const fixture = await request(`${path}/issues?team=PERF&limit=100`);
       const issues = fixture.issues ?? fixture.items;
       let fingerprint = null;
+      let metadataSha256;
       if (count) {
         await request(`${path}/issues/PERF-50`, 'PATCH', { priority: 3, status: 'todo' });
         if (
@@ -177,10 +183,38 @@
           if (JSON.stringify(canonical(document)) !== JSON.stringify(canonical(fixtureDocument))) {
             throw new Error('Document differs from fixture v2');
           }
-          if (
-            row.project !== null || row.parent !== null || row.labels.length ||
-            (row.identifier !== 'PERF-50' && (row.status !== 'todo' || row.priority !== 3))
-          ) throw new Error('Fixture metadata differs');
+          if (fixtureVariant === 'v2') {
+            if (
+              row.project !== null || row.parent !== null || row.labels.length ||
+              (row.identifier !== 'PERF-50' && (row.status !== 'todo' || row.priority !== 3))
+            ) throw new Error('Fixture metadata differs');
+          } else {
+            const number = Number(row.identifier.slice(5));
+            const parent = number === 1 || (number >= 9 && number <= 24)
+              ? 'PERF-2'
+              : number >= 3 && number <= 8
+              ? 'PERF-1'
+              : null;
+            if (
+              row.project !== 'Measured project' || row.parent !== parent ||
+              row.status !== (number === 1 ? 'in_progress' : 'todo') || row.priority !== 3 ||
+              JSON.stringify(row.labels.map((label) => label.name)) !==
+                JSON.stringify(['Measured alpha', 'Measured standalone'])
+            ) throw new Error('Linked fixture metadata differs');
+          }
+        }
+        if (fixtureVariant === 'v2-linked') {
+          const stable = issues.map((
+            { identifier, project, parent, labels, assignee, cycle_id, status, priority },
+          ) => ({ identifier, project, parent, labels, assignee, cycle_id, status, priority }))
+            .sort((a, b) => a.identifier.localeCompare(b.identifier));
+          const hash = await crypto.subtle.digest(
+            'SHA-256',
+            new TextEncoder().encode(JSON.stringify(canonical(stable))),
+          );
+          metadataSha256 = [...new Uint8Array(hash)].map((byte) =>
+            byte.toString(16).padStart(2, '0')
+          ).join('');
         }
         const hash = await crypto.subtle.digest(
           'SHA-256',
@@ -215,7 +249,12 @@
         count,
         requestedRegion: region ?? 'auto',
         coldStart: 'unobservable; first-observed is not proof of cold start',
-        dataset: { issues: issues.length, fixture: 'v2', documentSha256: fingerprint },
+        dataset: {
+          issues: issues.length,
+          fixture: fixtureVariant,
+          documentSha256: fingerprint,
+          ...(metadataSha256 ? { metadataSha256 } : {}),
+        },
         samples,
         summary: summarize(samples),
       };

@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-16T10:18:22.349Z",
+  "mode": "ego-lite actual local preview; task rows exclude the external link row",
+  "title": "Performance fixture 1",
+  "linkedIssueRows": 22,
+  "labels": true,
+  "project": true,
+  "status": "In progress",
+  "workLogTab": [
+    "Comments1",
+    "Agent work logs2"
+  ]
+}

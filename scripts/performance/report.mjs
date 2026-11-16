@@ -14,6 +14,7 @@ if (reports.length === 2) {
       report.dataset.issues,
       report.dataset.fixture,
       report.dataset.documentSha256 ?? report.dataset.sentinelDocumentSha256,
+      report.dataset.metadataSha256,
     ]);
   if (
     before.schema !== after.schema || before.count !== after.count ||

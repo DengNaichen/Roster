@@ -188,6 +188,11 @@ Deno.test({
           await db.execute(
             sql`update roster.issues set project_id=${sharedId} where id=${issueIds['PUB-1']}`,
           );
+          const fromId = await hydrateIssueCatalog(createUnitOfWork(db), member, wid, [{
+            id: issueIds['PUB-1'],
+          }]);
+          equal(fromId[0].project_id, sharedId);
+          equal(fromId[0].project, 'Shared');
           await rejects(
             () =>
               catalog.updateProject(member, slug, {
@@ -390,6 +395,51 @@ Deno.test({
             (hydrated[0].labels as { id: number }[]).map((l) => l.id).sort((a, b) => a - b),
             [second, loose].sort((a, b) => a - b),
           );
+          const complete = await rows(
+            db,
+            sql`select * from roster.issues where id in(${issueIds['PUB-1']}::uuid,${
+              issueIds['PUB-2']
+            }::uuid) order by identifier`,
+          );
+          const metadata = (items: Record<string, unknown>[]) =>
+            items.map(({ project_id, project, project_emoji, parent, labels }) => ({
+              project_id,
+              project,
+              project_emoji,
+              parent,
+              labels,
+            }));
+          const fast = await hydrateIssueCatalog(createUnitOfWork(db), member, wid, complete);
+          const joined = await hydrateIssueCatalog(
+            createUnitOfWork(db),
+            member,
+            wid,
+            complete.map(({ id }) => ({ id })),
+          );
+          equal(metadata(fast), metadata(joined));
+          try {
+            await db.execute(
+              sql`update roster.issues set project_id=${publicId} where workspace_id=${wid} and id=${
+                issueIds['PUB-2']
+              }`,
+            );
+            const mixedRows = await rows(
+              db,
+              sql`select * from roster.issues where id in(${issueIds['PUB-1']}::uuid,${
+                issueIds['PUB-2']
+              }::uuid) order by identifier`,
+            );
+            const mixed = await hydrateIssueCatalog(createUnitOfWork(db), member, wid, mixedRows);
+            equal(metadata(mixed)[0], metadata(fast)[0]);
+            equal(mixed[1].project_id, publicId);
+            equal(mixed[1].labels, fast[1].labels);
+          } finally {
+            await db.execute(
+              sql`update roster.issues set project_id=null where workspace_id=${wid} and id=${
+                issueIds['PUB-2']
+              }`,
+            );
+          }
           await rejects(
             () =>
               catalog.changeIssueLabels(member, slug, {

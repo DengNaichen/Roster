@@ -4,6 +4,7 @@ import { createDatabase } from './platform/database/client.ts';
 import { createService } from './service.ts';
 import { cleanupWorkspace, prepareTestDatabase } from './test_support.ts';
 import { createHttpApp } from './transport/http/app.ts';
+import { measureRequest } from './platform/telemetry/performance.ts';
 
 function assert(value: unknown, message = 'Assertion failed'): asserts value {
   if (!value) throw new Error(message);
@@ -227,9 +228,20 @@ Deno.test({
         detail.audit.every((event) =>
           [event.before, event.after].every((snapshot) =>
             !snapshot || typeof snapshot !== 'object' ||
-            !['parent_id', 'project_id', 'cycle_id', 'workspace_id', 'team_id'].some((key) =>
-              key in snapshot
-            )
+            ![
+              'parent_id',
+              'project_id',
+              'cycle_id',
+              'workspace_id',
+              'team_id',
+              'role',
+              'joined',
+              'owner',
+              'labels',
+              'project',
+              'parent',
+              'direction',
+            ].some((key) => key in snapshot)
           )
         ),
         'Public audit snapshots do not leak internal or historical reference IDs',
@@ -246,11 +258,13 @@ Deno.test({
       );
       const http = createHttpApp({ service: s, verify: async () => member, allowedOrigins: [] });
       const request = async (path: string, method = 'GET', body?: unknown) =>
-        await http.request('https://local/api/w/' + w.slug + path, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          ...(body ? { body: JSON.stringify(body) } : {}),
-        });
+        await measureRequest(() =>
+          http.request('https://local/api/w/' + w.slug + path, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            ...(body ? { body: JSON.stringify(body) } : {}),
+          })
+        );
       const createdResponse = await request('/issues', 'POST', {
         team: 'AA',
         title: 'Original frontend HTTP',
@@ -267,11 +281,25 @@ Deno.test({
         { status: 'done' },
       );
       assert(statusResponse.status === 200 && (await statusResponse.json()).status === 'done');
-      const httpList = await (await request('/issues?label_mode=any&query=Original')).json();
+      assert(
+        statusResponse.headers.get('X-Roster-Sql-Count') === '8',
+        'Property write budget is eight SQL statements',
+      );
+      const httpListResponse = await request('/issues?label_mode=any&query=Original');
+      assert(
+        httpListResponse.headers.get('X-Roster-Sql-Count') === '3',
+        'List read budget is three SQL statements',
+      );
+      const httpList = await httpListResponse.json();
       assert(
         httpList.issues.length === 1 && httpList.issues[0].identifier === createdHTTP.identifier,
       );
-      const httpDetail = await (await request('/issues/' + createdHTTP.identifier)).json();
+      const detailResponse = await request('/issues/' + createdHTTP.identifier);
+      assert(
+        detailResponse.headers.get('X-Roster-Sql-Count') === '9',
+        'Empty-relation REST detail budget is nine SQL statements',
+      );
+      const httpDetail = await detailResponse.json();
       assert(httpDetail.audit.length === 2 && Array.isArray(httpDetail.comments));
       assert((await request('/projects')).status === 200);
 
@@ -317,6 +345,54 @@ Deno.test({
       await rejects(() => s.getIssue(member, w.slug, edited.identifier), 'forbidden');
       await rejects(() => s.joinWorkspace(member, newInvite), 'forbidden');
       assert(!(await s.listWorkspaces(member)).length);
+      // Restore the member for a genuine update waiting behind a revocation transaction.
+      await s.updateMember(owner, w.slug, {
+        subject: member.identity.subject,
+        role: 'member',
+        status: 'active',
+      });
+      const revocation = await runtime.pool.connect();
+      let racingUpdate: Promise<unknown> | undefined;
+      const originalPriority = (await s.getIssue(owner, w.slug, edited.identifier)).priority;
+      try {
+        await revocation.query('begin');
+        await revocation.query('select id from roster.workspaces where id=$1 for update', [w.id]);
+        racingUpdate = s.updateIssue(member, w.slug, edited.identifier, { priority: 4 });
+        // Attach an error handler now; the assertion below still observes the same result.
+        void racingUpdate.catch(() => {});
+        let blocked = false;
+        for (let i = 0; i < 100 && !blocked; i++) {
+          const locks = await runtime.pool.query(
+            "select 1 from pg_stat_activity where datname=current_database() and usename=current_user and wait_event_type='Lock' and query like '%roster.workspaces%for update%'",
+          );
+          blocked = locks.rows.length > 0;
+          if (!blocked) await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        assert(blocked, 'Update must be blocked on the workspace lock');
+        // Fixture transition only, on the restricted runtime role and isolated *_test DB.
+        await revocation.query(
+          "update roster.workspace_members set status='suspended' where workspace_id=$1 and subject=$2",
+          [w.id, member.identity.subject],
+        );
+        await revocation.query('commit');
+        await rejects(() => racingUpdate!, 'forbidden');
+        assert(
+          (await s.getIssue(owner, w.slug, edited.identifier)).priority === originalPriority,
+          'A waiting writer must not commit after membership revocation',
+        );
+        await rejects(() => s.listIssues(member, w.slug), 'forbidden');
+        await rejects(() => s.getIssue(member, w.slug, edited.identifier), 'forbidden');
+        await rejects(() => s.listIssues(member, `missing-${crypto.randomUUID()}`), 'not_found');
+      } finally {
+        await revocation.query('rollback');
+        revocation.release();
+        await racingUpdate?.catch(() => {});
+        await s.updateMember(owner, w.slug, {
+          subject: member.identity.subject,
+          role: 'member',
+          status: 'active',
+        });
+      }
       const locker = await setup.connect();
       let racingJoin: Promise<unknown> | undefined;
       try {

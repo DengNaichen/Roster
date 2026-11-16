@@ -206,72 +206,43 @@ export function createActivityService(db: UnitOfWork): ActivityService {
     },
   };
 }
-/** Caller passes workspace and issue already checked by readIssue, never user input IDs. */
-export async function hydrateIssueActivity<T extends Issue>(
+/** Internal composition: caller must pass an issue authorized in this request by readIssue. */
+export async function hydrateAuthorizedIssueActivity<T extends Issue>(
   db: Session,
   ctx: RequestContext,
   w: Row,
   issue: T,
 ): Promise<T & IssueActivity> {
-  await readIssue(db, ctx, w, issue.identifier);
-  const comments = (await db.activity.comments({ workspaceId: w.id, issueId: issue.id })).map(
-    commentDTO,
-  );
-  const links = (await db.activity.links({ workspaceId: w.id, issueId: issue.id })).map((r) => ({
-    title: String(r.title),
-    url: String(r.url),
-  }));
-  const delegations = (await db.activity.delegations({ workspaceId: w.id, issueId: issue.id })).map(
-    delegationDTO,
-  );
-  const decisions = (await db.activity.decisions({ workspaceId: w.id, issueId: issue.id })).map(
-    logDTO,
-  );
-  const count = await db.activity.workLogCount({ workspaceId: w.id, issueId: issue.id });
-  const relationIssues = async (kind: 'blocks' | 'blocked_by' | 'related') => {
-    const rs = await db.activity.relatedIssues({
-      workspaceId: w.id,
-      subject: ctx.identity.subject,
-      incoming: Boolean(kind === 'blocked_by'),
-      relationKind: kind === 'related' ? 'related' : 'blocks',
-      issueId: issue.id,
-      symmetric: Boolean(kind === 'related'),
-    });
-    const hydrated = await hydrateIssueCatalog(db, ctx, String(w.id), rs);
-    return await Promise.all(hydrated.map(async (row) => {
-      let parent: string | null = null;
-      if (row.parent_id) {
-        const p = (await db.activity.parentIdentifier({
-          workspaceId: w.id,
-          parent_id: row.parent_id,
-          subject: ctx.identity.subject,
-        }))[0];
-        parent = p ? String(p.identifier) : null;
-      }
-      return issueDTO({ ...row, parent });
-    }));
-  };
-  const pull_requests =
-    (await db.activity.pullRequests({ workspaceId: w.id, identifier: issue.identifier })).map((
-      r,
-    ) => ({
-      repo: String(r.repo),
-      number: Number(r.number),
-      title: String(r.title),
-      url: String(r.url),
-      state: String(r.state),
-      updated_at: iso(r.updated_at),
-    }));
+  const activity = await db.activity.summary({
+    workspaceId: w.id,
+    issueId: issue.id,
+    identifier: issue.identifier,
+  });
+  const related = await db.activity.relatedIssues({
+    workspaceId: w.id,
+    subject: ctx.identity.subject,
+    issueId: issue.id,
+  });
+  const hydrated = await hydrateIssueCatalog(db, ctx, String(w.id), related);
+  const relations = (direction: string) =>
+    hydrated.filter((row) => row.direction === direction).map(issueDTO);
   return {
     ...issue,
-    comments,
-    links,
-    delegations,
-    decisions,
-    work_log_count: Number(count.count),
-    blocks: await relationIssues('blocks'),
-    blocked_by: await relationIssues('blocked_by'),
-    related: await relationIssues('related'),
-    pull_requests,
+    comments: activity.comments.map(commentDTO),
+    links: activity.links.map((row) => ({ title: String(row.title), url: String(row.url) })),
+    delegations: activity.delegations.map(delegationDTO),
+    decisions: activity.decisions.map(logDTO),
+    work_log_count: activity.workLogCount,
+    blocks: relations('blocks'),
+    blocked_by: relations('blocked_by'),
+    related: relations('related'),
+    pull_requests: activity.pullRequests.map((row) => ({
+      repo: String(row.repo),
+      number: Number(row.number),
+      title: String(row.title),
+      url: String(row.url),
+      state: String(row.state),
+      updated_at: iso(row.updated_at),
+    })),
   };
 }

@@ -12,9 +12,10 @@ import { audit } from '../../audit/index.ts';
 import { validateIssueCycle } from '../../cycles/index.ts';
 import { resolveIssueProject } from '../../planning/index.ts';
 import type { IssueDependencies, IssueSnapshot, StoredIssue } from '../application/ports.ts';
-import { assignee, createIssueQueries, hydrateCoreIssueRows, validateParent } from './queries.ts';
+import { assignee, createIssueQueries, validateParent } from './queries.ts';
 import { issueDTO } from '../domain/mapper.ts';
 import { readIssue } from './read-model.ts';
+import { hydrateIssueCatalog } from './catalog-query.ts';
 
 const documentColumns = (document: IssueDocument) =>
   sql`${JSON.stringify(document)}::jsonb,${issueDocumentText(document)}`;
@@ -95,7 +96,8 @@ export function createPostgresIssueDependencies(db: Database): IssueDependencies
           },
           audit: (ctx, w, kind, issueId, before, after) =>
             audit(session, ctx, w, kind, before, after, issueId),
-          output: async (ctx, w, r) => issueDTO((await hydrateCoreIssueRows(tx, ctx, w, [r]))[0]),
+          output: async (ctx, w, r) =>
+            issueDTO((await hydrateIssueCatalog(tx, ctx, String(w.id), [r]))[0]),
         });
       }),
   };
