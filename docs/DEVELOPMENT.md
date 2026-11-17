@@ -163,7 +163,7 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno 
 
 迁移先以 `supabase db push --remote="$SUPABASE_PROJECT_REF" --include-all --dry-run --yes` 输出计划，再以相同参数去掉 `--dry-run` 执行。`--include-all` 补执行历史表中缺失的版本，包含并行 PR 后合入但时间戳较早的迁移，已应用版本仍跳过；不重命名、修改已提交迁移或伪造 applied 记录来绕过。参考 [CLI db push](https://supabase.com/docs/reference/cli/supabase-db-push)。CI 的 `scripts/test-migration-upgrade.ts` 使用固定 CLI 与独立本地数据库，覆盖固定的 OAuth 已上线/GitHub inbox 后补场景，并从 PR base（main push 使用 before SHA）应用既有迁移后再补入本次迁移；拒绝修改或删除既有迁移，对比列、约束、索引、表授权、函数与触发器，验证重试和全新库一致性。手工运行需提供本地管理连接 ROSTER_MIGRATION_TEST_ADMIN_URL，可提供完整提交 SHA 的 ROSTER_MIGRATION_BASE_REF。
 
-PR #52 的失败发生在补执行 `20261117042051_github_webhook_inbox.sql` 前，旧命令因时间戳早于生产现有版本而退出。dry-run 只是审计输出，并非人工确认门禁，后续步骤会自动执行。合并本修复前，运维须确认旧 GitHub Cron/worker 未启用或已停止，并用生产只读 dry-run 核对计划仅包含预期缺失版本，再通过修正后的 main 工作流部署；不直接重跑仍含旧命令的历史失败 job。已核对 #59 的调用链：`requested_at` 的写入仅由 jobs 内的 sync/notify 使用，API/MCP 不调用；该破坏性字段删除仅在旧 jobs/webhook 已停用的前提下可应用。迁移删除了旧 worker 使用的 `requested_at`，新 GitHub worker 启用仍遵循下文专门流程。生产迁移失败不能通过只发布前端绕过。
+PR #52 的失败发生在补执行 `20261117042051_github_webhook_inbox.sql` 前，旧命令因时间戳早于生产现有版本而退出。dry-run 只是审计输出，并非人工确认门禁，后续步骤会自动执行。合并本修复前，运维须确认旧 GitHub Cron、jobs 与 github-webhook 入口均未启用或已停止，并用生产只读 dry-run 核对计划仅包含预期缺失版本，再通过修正后的 main 工作流部署；不直接重跑仍含旧命令的历史失败 job。已核对 #59 的调用链：`requested_at` 的写入仅由 jobs 内的 sync/notify 使用，API/MCP 不调用；该破坏性字段删除仅在旧 jobs/webhook 已停用的前提下可应用。迁移删除了旧 worker 使用的 `requested_at`，新 GitHub worker 启用仍遵循下文专门流程。生产迁移失败不能通过只发布前端绕过。
 
 正式版本的规划、验收和 GitHub Release 操作见 [release skill](../.agents/skills/release/SKILL.md)；本节的日常生产部署不自动创建 Release。
 
