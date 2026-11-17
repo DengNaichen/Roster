@@ -1,4 +1,5 @@
 import { AmbiguousReference, resolveMcpReferences } from './references.ts';
+import { searchSchema } from '../../../../contracts/search.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@2.4.0';
 import { z } from 'npm:zod@4.6.7';
 import * as activity from '../../../../contracts/activity.ts';
@@ -276,6 +277,29 @@ export function createMcpServer(
           access: connection?.readonly ? 'read' : 'read_write',
         },
       };
+    },
+  );
+  tool(
+    'search',
+    'Search visible issues, current specs and non-archived projects by a literal text fragment. Results rank exact identifier/title matches first, then title prefix, title substring and body matches; ties use newest update and a stable key. A cursor continues the same query and type. No hidden counts are returned.',
+    searchSchema.shape,
+    true,
+    (i) => service.search(ctx, workspace, i),
+  );
+  tool(
+    'fetch',
+    'Read an entity reference returned by search, such as issue:RST-1, spec:SPEC-1 or project:42. Current workspace and visibility rules apply.',
+    {
+      reference: z.string().regex(
+        /^(issue:[A-Z][A-Z0-9]*-[1-9][0-9]*|spec:SPEC-[1-9][0-9]*|project:[1-9][0-9]*)$/,
+      ),
+    },
+    true,
+    (i) => {
+      const [kind, id] = i.reference.split(':');
+      if (kind === 'issue') return service.getIssue(ctx, workspace, id);
+      if (kind === 'spec') return service.getSpec(ctx, workspace, id);
+      return service.getProject(ctx, workspace, { id: Number(id) });
     },
   );
   tool(

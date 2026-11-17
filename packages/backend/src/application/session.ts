@@ -1,3 +1,4 @@
+import type { SearchRepository } from '../modules/search/index.ts';
 import type { GitHubRepository } from '../integrations/github/index.ts';
 import type { AccessRepository } from '../modules/access/index.ts';
 import type { ActivityRepository } from '../modules/activity/index.ts';
@@ -9,6 +10,7 @@ import type { PlanningRepository } from '../modules/planning/index.ts';
 import type { SpecsRepository } from '../modules/specs/index.ts';
 
 export interface Session {
+  search: SearchRepository;
   github: GitHubRepository;
   access: AccessRepository;
   planning: PlanningRepository;
