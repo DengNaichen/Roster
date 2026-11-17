@@ -1,0 +1,3 @@
+interface:
+  display_name: "Roster Release"
+  short_description: "准备与发布 Roster 版本，核对生产部署、验收、迁移与版本说明"
