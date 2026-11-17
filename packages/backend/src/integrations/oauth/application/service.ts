@@ -1,3 +1,4 @@
+import { authorizationIdSchema } from '../../../../../contracts/oauth.ts';
 import { AppError, type RequestContext, type Workspace } from '../../../../../contracts/mod.ts';
 import type { VerifyIdentity } from '../../../platform/auth/jwt.ts';
 import type { Access, Grant, OAuthRepository, OAuthService, OAuthUpstream } from '../index.ts';
@@ -68,7 +69,7 @@ export function createOAuthService(options: {
       const target = new URL(location);
       const consent = new URL(options.consentUrl);
       if (target.origin !== consent.origin || target.pathname !== consent.pathname) return response;
-      const id = target.searchParams.get('authorization_id');
+      const id = authorizationIdSchema.parse(target.searchParams.get('authorization_id'));
       if (!id || !params.get('client_id') || !params.get('redirect_uri')) {
         fail('Invalid upstream authorization');
       }
