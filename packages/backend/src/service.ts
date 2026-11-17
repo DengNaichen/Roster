@@ -3,6 +3,7 @@ import type { Service } from './application/mod.ts';
 import { createUnitOfWork } from './platform/database/session.ts';
 
 import { guardService } from './application/guard.ts';
+import { saveIssue } from './application/save-issue.ts';
 import { createAccessService } from './modules/access/index.ts';
 import { createActivityService } from './modules/activity/index.ts';
 import { createCycleService } from './modules/cycles/index.ts';
@@ -16,6 +17,20 @@ import type { Database } from './platform/database/client.ts';
 export function createService(db: Database, options: { now?: () => Date } = {}): Service {
   const data = createUnitOfWork(db);
   return guardService({
+    saveIssue: (ctx, slug, input) =>
+      db.transaction((tx) => {
+        const data = createUnitOfWork(tx);
+        return saveIssue(
+          {
+            ...createIssueService(createPostgresIssueDependencies(tx), options),
+            ...createLabelService(data),
+            ...createActivityService(data),
+          },
+          ctx,
+          slug,
+          input,
+        );
+      }),
     ...createAccessService(data),
     ...createSearchService(data),
     ...createIssueService(createPostgresIssueDependencies(db), options),

@@ -57,22 +57,22 @@ Deno.test('References resolve keys, names, email and me; stable subjects and omi
   assert(resolveUser('ALEX@EXAMPLE.TEST', people) === person);
   assert(resolveUser('Alex K', people) === people[1].subject);
   const noDirectory = {} as Service;
-  const cleared = await resolveMcpReferences(noDirectory, ctx, 'studio', 'update_issue', {
+  const cleared = await resolveMcpReferences(noDirectory, ctx, 'studio', 'save_issue', {
     identifier: 'CORE-1',
     assignee: '',
   });
   assert(cleared.assignee === null);
-  const me = await resolveMcpReferences(noDirectory, ctx, 'studio', 'update_issue', {
+  const me = await resolveMcpReferences(noDirectory, ctx, 'studio', 'save_issue', {
     identifier: 'CORE-1',
     assignee: 'me',
   });
   assert(me.assignee === person);
-  const unchanged = await resolveMcpReferences(noDirectory, ctx, 'studio', 'update_issue', {
+  const unchanged = await resolveMcpReferences(noDirectory, ctx, 'studio', 'save_issue', {
     identifier: 'CORE-1',
   });
   assert(!Object.hasOwn(unchanged, 'assignee'));
   assert(
-    (await resolveMcpReferences(noDirectory, ctx, 'studio', 'update_issue', { assignee: person }))
+    (await resolveMcpReferences(noDirectory, ctx, 'studio', 'save_issue', { assignee: person }))
       .assignee === person,
   );
   try {
@@ -110,7 +110,7 @@ Deno.test('MCP validates natural references, forwards canonical values, and pres
     listTeams: async () => teams,
     teamDirectory: async () => teams,
     listMembers: async () => people,
-    createIssue: async (_ctx: unknown, _slug: unknown, input: Record<string, unknown>) => {
+    saveIssue: async (_ctx: unknown, _slug: unknown, input: Record<string, unknown>) => {
       calls.push(input);
       return {
         id: crypto.randomUUID(),
@@ -158,7 +158,7 @@ Deno.test('MCP validates natural references, forwards canonical values, and pres
     const line = text.split('\n').find((l) => l.startsWith('data: '));
     return JSON.parse(line ? line.slice(6) : text);
   };
-  const created = await rpc('create_issue', {
+  const created = await rpc('save_issue', {
     team: 'Core Platform',
     title: 'Task',
     assignee: 'alex@example.test',
@@ -173,7 +173,7 @@ Deno.test('MCP validates natural references, forwards canonical values, and pres
   assert(!Object.hasOwn(calls[3], 'assignee'));
   people.push({ ...people[1], subject: crypto.randomUUID(), email: 'other@example.test' });
   try {
-    const ambiguous = await rpc('create_issue', {
+    const ambiguous = await rpc('save_issue', {
       team: 'Core Platform',
       title: 'No guess',
       assignee: 'Alex Kim',
@@ -184,7 +184,7 @@ Deno.test('MCP validates natural references, forwards canonical values, and pres
   } finally {
     people.pop();
   }
-  const hidden = await rpc('create_issue', { team: 'Private Secret Team', title: 'No leak' });
+  const hidden = await rpc('save_issue', { team: 'Private Secret Team', title: 'No leak' });
   assert(hidden.result.isError && calls.length === 4);
   const removed = await rpc('team_directory', {});
   assert(Boolean(removed.error) || removed.result?.isError);

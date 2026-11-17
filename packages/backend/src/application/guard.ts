@@ -1,5 +1,6 @@
 import type { RequestContext } from '../../../contracts/mod.ts';
 import { checkIssueCriterionSchema } from '../../../contracts/issue-document.ts';
+import { saveIssueSchema } from '../../../contracts/issue-save.ts';
 import * as schemas from '../../../contracts/schemas.ts';
 import { identity } from '../modules/access/index.ts';
 import { describeIssues, fail } from '../platform/errors/validation.ts';
@@ -27,6 +28,7 @@ export function guardService(service: Service): Service {
     joinTeam: schemas.joinTeamSchema,
     listIssues: schemas.listIssuesSchema,
     createIssue: schemas.createIssueSchema,
+    saveIssue: saveIssueSchema,
     updateIssue: schemas.updateIssueSchema,
     checkIssueCriterion: checkIssueCriterionSchema,
   };

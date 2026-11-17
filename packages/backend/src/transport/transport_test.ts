@@ -199,8 +199,8 @@ Deno.test('MCP tool errors hide internal exceptions and advertise structured out
   assert(!failed.includes('password'), failed);
 });
 
-// Original Go MCP production tool names, excluding tests and server metadata.
-export const originalMcpTools = [
+// Core MCP tools after consolidating issue writes into save_issue.
+export const coreMcpTools = [
   'list_specs',
   'get_spec',
   'create_spec',
@@ -209,15 +209,11 @@ export const originalMcpTools = [
   'get_spec_revision',
   'list_issues',
   'get_issue',
-  'create_issue',
-  'update_issue',
+  'save_issue',
   'add_comment',
   'add_work_log',
   'list_work_logs',
   'get_work_log',
-  'add_relation',
-  'remove_relation',
-  'add_link',
   'list_teams',
   'create_team',
   'update_team',
@@ -240,17 +236,16 @@ export const originalMcpTools = [
   'save_label_group',
   'create_label',
   'update_label',
-  'change_issue_labels',
   'merge_labels',
   'list_cycles',
   'configure_cycles',
   'get_cycle',
   'update_cycle',
 ];
-Deno.test('All original MCP tools are genuinely registered with input and output contracts', async () => {
+Deno.test('MCP tool inventory exposes save_issue and removes the six former write tools', async () => {
   assert(
-    originalMcpTools.length === 45,
-    'The migrated Go tool inventory must contain all 45 production tools',
+    coreMcpTools.length === 40,
+    'The core inventory must contain 40 tools after removing six and adding one',
   );
   const fetch = createMcpFetch({
     service: {} as Service,
@@ -280,7 +275,19 @@ Deno.test('All original MCP tools are genuinely registered with input and output
   }[];
   for (
     const name of [
-      ...originalMcpTools,
+      'create_issue',
+      'update_issue',
+      'change_issue_labels',
+      'add_relation',
+      'remove_relation',
+      'add_link',
+    ]
+  ) {
+    assert(!tools.some((tool) => tool.name === name), `Retired tool remains: ${name}`);
+  }
+  for (
+    const name of [
+      ...coreMcpTools,
       'list_spec_issues',
       'list_issue_specs',
       'get_spec_dependencies',
