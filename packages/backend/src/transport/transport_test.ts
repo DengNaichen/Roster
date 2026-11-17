@@ -67,6 +67,7 @@ Deno.test('JWT validates issuer, audience, expiry, role and requires signed user
 Deno.test('REST and MCP invoke the same service with verified actor and strict input', async () => {
   const calls: unknown[] = [];
   const service = {
+    listTeams: async () => [{ id: subject, key: 'AL', name: 'Alpha' }],
     listIssues: async (ctx: unknown, slug: unknown, input: unknown) => {
       calls.push({ ctx, slug, input });
       return { issues: [], next_cursor: null };

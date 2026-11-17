@@ -1,3 +1,4 @@
+import { AmbiguousReference, resolveMcpReferences } from './references.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@2.4.0';
 import { z } from 'npm:zod@4.6.7';
 import * as activity from '../../../../contracts/activity.ts';
@@ -26,9 +27,13 @@ import type { Grant } from '../../integrations/oauth/index.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
 import { restCreateIssueSchema, restUpdateIssueSchema } from '../http/compat.ts';
 import { compressMcpResponse } from './compression.ts';
+const reference = z.string().trim().min(1).max(200);
+const userReference = z.string().max(200).nullable().optional().describe(
+  'User ID, name, email or me. Omit to keep unchanged; null (or legacy empty string) clears the assignee.',
+);
 const compatibleIssueFields = {
   type: z.union([createIssueSchema.shape.type, z.literal('')]),
-  assignee: z.union([createIssueSchema.shape.assignee, z.literal('')]),
+  assignee: userReference,
 };
 export interface McpOptions {
   service: Service;
@@ -197,7 +202,10 @@ export function createMcpServer(
   workspace: string,
   connection?: { grant: Grant; readonly: boolean },
 ) {
-  const server = new McpServer({ name: 'roster', version: '0.1.0' });
+  const server = new McpServer({ name: 'roster', version: '0.1.0' }, {
+    instructions:
+      'Call whoami to confirm the connected workspace and access. Team references accept a key, exact name or ID. Users accept an ID, name, email or me. Ambiguous references return candidates: ask which one, never guess. Omit update fields to keep them; assignee null clears assignment. Use list_team_directory for discoverable team metadata; list_teams lists accessible content.',
+  });
   function tool<T extends z.ZodRawShape>(
     name: string,
     description: string,
@@ -220,7 +228,8 @@ export function createMcpServer(
         if (connection?.readonly && !readOnly) {
           throw new AppError('forbidden', 'Read-only connection');
         }
-        const result = (await run(input)) ?? { updated: true };
+        const resolved = await resolveMcpReferences(service, ctx, workspace, name, input);
+        const result = (await run(resolved)) ?? { updated: true };
         return {
           structuredContent: { result },
           content: [{ type: 'text' as const, text: JSON.stringify({ result }) }],
@@ -231,7 +240,13 @@ export function createMcpServer(
             isError: true,
             content: [{
               type: 'text' as const,
-              text: JSON.stringify({ error: { code: error.code, message: error.message } }),
+              text: JSON.stringify({
+                error: {
+                  code: error.code,
+                  message: error.message,
+                  ...(error instanceof AmbiguousReference ? { candidates: error.candidates } : {}),
+                },
+              }),
             }],
           };
         }
@@ -294,7 +309,7 @@ export function createMcpServer(
   tool(
     'update_member',
     'Change workspace membership (administrator only).',
-    updateMemberSchema.shape,
+    { ...updateMemberSchema.shape, subject: reference },
     false,
     (i) => service.updateMember(ctx, workspace, i),
   );
@@ -320,13 +335,6 @@ export function createMcpServer(
     () => service.listTeams(ctx, workspace),
   );
   tool(
-    'team_directory',
-    'List team directory, including discoverable private team metadata.',
-    {},
-    true,
-    () => service.teamDirectory(ctx, workspace),
-  );
-  tool(
     'create_team',
     'Create a team; the caller becomes its owner.',
     createTeamSchema.shape,
@@ -350,7 +358,7 @@ export function createMcpServer(
   tool(
     'change_team_member',
     'Manage team members as an authorized manager.',
-    { key: z.string(), ...changeTeamMemberSchema.shape },
+    { key: reference, ...changeTeamMemberSchema.shape, subject: reference },
     false,
     ({ key, ...i }) => service.changeTeamMember(ctx, workspace, key, i),
   );
@@ -364,7 +372,7 @@ export function createMcpServer(
   tool(
     'list_issues',
     'List visible workspace issues with cursor pagination.',
-    listIssuesSchema.shape,
+    { ...listIssuesSchema.shape, assignee: userReference, team: reference.optional() },
     true,
     (i) => service.listIssues(ctx, workspace, i),
   );
@@ -380,7 +388,10 @@ export function createMcpServer(
     'Create an issue in an accessible team. The body is `document`: structured JSON with a lead, ' +
       'titled sections of typed blocks, and acceptance criteria with IDs AC-1, AC-2, and so on. ' +
       'Every text field is plain text; Markdown and HTML are shown literally.',
-    createIssueSchema.extend(compatibleIssueFields).shape,
+    createIssueSchema.extend({
+      ...compatibleIssueFields,
+      team: reference.describe('Team key, exact name or ID'),
+    }).shape,
     false,
     (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
   );
@@ -490,14 +501,14 @@ export function createMcpServer(
   tool(
     'create_project',
     'Create a project attached to existing teams.',
-    catalog.createProjectSchema.shape,
+    { ...catalog.createProjectSchema.shape, teams: z.array(reference).min(1).max(100) },
     false,
     (i) => service.createProject(ctx, workspace, i),
   );
   tool(
     'update_project',
     'Update project metadata or team links; omitted fields are unchanged.',
-    catalog.updateProjectSchema.shape,
+    { ...catalog.updateProjectSchema.shape, teams: z.array(reference).min(1).max(100).optional() },
     false,
     (i) => service.updateProject(ctx, workspace, i),
   );
@@ -609,7 +620,11 @@ export function createMcpServer(
   tool(
     'list_spec_issues',
     'List issues linked to a readable spec. Supports the same filters and pagination as list_issues; private issues remain hidden.',
-    { ...listIssuesSchema.omit({ spec: true }).shape, ...specs.getSpecSchema.shape },
+    {
+      ...listIssuesSchema.omit({ spec: true }).shape,
+      assignee: userReference,
+      ...specs.getSpecSchema.shape,
+    },
     true,
     ({ identifier, ...input }) =>
       service.listIssues(ctx, workspace, { ...input, spec: identifier }),
@@ -640,7 +655,7 @@ export function createMcpServer(
   tool(
     'list_specs',
     'List readable team spec summaries, newest updated first.',
-    specs.listSpecsSchema.shape,
+    { ...specs.listSpecsSchema.shape, team: reference.optional() },
     true,
     (i) => service.listSpecs(ctx, workspace, i),
   );
@@ -675,7 +690,7 @@ export function createMcpServer(
   tool(
     'create_spec',
     'Create a team spec as revision 1. Content is structured JSON with stable US/FR/SC ids.',
-    specs.createSpecSchema.shape,
+    { ...specs.createSpecSchema.shape, team: reference },
     false,
     (i) => service.createSpec(ctx, workspace, i),
   );
