@@ -40,6 +40,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
@@ -63,6 +64,14 @@ jobs:
           done
       - name: Backend tests including Postgres integration
         run: node scripts/toolchain.mjs deno task test
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+        with:
+          version: 3.0.0
+      - name: Verify late-merged migrations with the production CLI
+        env:
+          ROSTER_MIGRATION_TEST_ADMIN_URL: postgresql://postgres@127.0.0.1:5432/postgres
+          ROSTER_MIGRATION_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read --allow-write --allow-run scripts/test-migration-upgrade.ts
 
   deploy:
     name: Deploy production
@@ -117,8 +126,12 @@ jobs:
           JS
       - name: Build frontend before changing the backend
         run: vercel build --prod --token="$VERCEL_TOKEN"
+      # Parallel PRs can merge a migration older than the latest production version.
+      # Keep committed migration identities; apply only versions missing from history.
+      - name: Preview pending production database migrations
+        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --include-all --dry-run --yes
       - name: Apply production database migrations
-        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --yes
+        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --include-all --yes
       - name: Deploy API and MCP
         run: supabase functions deploy api mcp --remote="$SUPABASE_PROJECT_REF" --use-api --yes
       - name: Publish prebuilt frontend

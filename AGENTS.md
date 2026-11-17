@@ -4,6 +4,8 @@
 
 Git、worktree、提交和 PR 操作遵循 `.agents/skills/git-workflow/SKILL.md`。
 
+版本规划、发布验收、tag 和 GitHub Release 遵循 `.agents/skills/release/SKILL.md`。
+
 ## 使用 Roster 管理自身开发
 
 - 正式 Workspace：`roster`；Team：`Roster`，key 为 `RST`。
