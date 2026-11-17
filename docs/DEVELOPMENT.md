@@ -199,13 +199,33 @@ Vercel 项目根保持仓库根，Production 中需已有 `VITE_SUPABASE_URL`、
 
 ## 后台任务与 GitHub
 
-`jobs` Edge Function 的 POST 用独立 `JOBS_TOKEN`（`Authorization: Bearer ...`）认证，先补算周期，再同步配置的 GitHub 仓库。`github-webhook` 仅验证 GitHub HMAC、限制 1 MiB 请求体，并将已配置 repository 的同步请求持久化；payload 不能直接改变任务。用 `supabase functions deploy jobs` 和 `supabase functions deploy github-webhook` 手动部署。
+GitHub 集成使用 GitHub App。当前由服务端运维配置绑定，设置页尚不支持自助安装。GitHub 登录与仓库授权独立。自动发布仍只部署 api/mcp；生产启用需要另外完成以下配置和真实 App 验收。
 
-配置 `GITHUB_BINDINGS` 为 JSON，例如 `[{"workspace":"default","repo":"owner/repository"}]`，并提供仅能访问所需仓库的 `GITHUB_TOKEN`。`GITHUB_WEBHOOK_SECRET` 与 GitHub webhook 配置一致，URL 为 `https://PROJECT.supabase.co/functions/v1/github-webhook`。默认 `GITHUB_LINKBACK=false`；设为 true 会向 GitHub 回写任务内容，私有 Team 只回写编号。
+1. 创建 GitHub App，仓库权限只选 Metadata read 和 Pull requests read，订阅 Pull request 事件。安装时只选择要同步的仓库。不需要 OAuth 回调或 Setup URL：Roster 不接受 installation_id 回调作为 Workspace 授权。
+2. 在服务端 Secrets 配置 GITHUB_APP_ID、GITHUB_APP_PRIVATE_KEY（GitHub 下载的 PEM，支持 PKCS#1/PKCS#8）、GITHUB_WEBHOOK_SECRET、独立随机 JOBS_TOKEN。已有 DATABASE_URL 继续使用仅获 roster_app 权限的运行时账户。私钥和 token 不进入前端、Git 或日志。
+3. 配置 GITHUB_BINDINGS JSON。例如：
 
-在 Supabase Cron 中每分钟 POST `https://PROJECT.supabase.co/functions/v1/jobs`，从 Vault 取 `JOBS_TOKEN` 作为 Bearer header。URL 与 secret 必须按部署环境配置，不在迁移 SQL 中硬编码。本地普通开发入口等价路径是 `/jobs/run` 与 `/webhooks/github`。免登录 preview 不开放这些系统入口，只用本机定时器推进周期。
+   ```json
+   [{"workspace":"roster","repo":"owner/repository","installationId":123,"repositoryId":456,"completion":"manual"}]
+   ```
 
-GitHub 同步通过数据库租约防止并行 worker 重复执行；只有完整读取成功才推进游标。回写包含稳定标记，重试先核对远端评论。请求有超时，失败返回可重试结果；重复 webhook 会合并，定时拉取补漏。周期按团队事务处理，单次最多补算 5000 期，超限整体回滚并报告错误。
+   Workspace 是 slug；installationId 和 repositoryId 是正整数，分别取自 App 安装信息和 GitHub 仓库 API。绑定是运维对 Workspace 的授权决定；后台还会用限定到 repositoryId 的 installation token 验证仓库 ID 和名称。每个仓库只允许绑定一个 Workspace，重名或重复 ID 启动即报错。仓库改名需更新绑定；不匹配时停止处理，不按同名仓库猜测权限。
+4. 先应用迁移，再部署 jobs、github-webhook 两个 Edge Function（仓库 supabase/config.toml 已关闭平台 JWT 校验，入口分别使用 JOBS_TOKEN 和 GitHub HMAC）。App webhook URL 为 https://PROJECT.supabase.co/functions/v1/github-webhook，Content type 为 application/json，Secret 与 GITHUB_WEBHOOK_SECRET 一致，开启 SSL 验证。
+5. 在 Supabase Cron 中每分钟 POST https://PROJECT.supabase.co/functions/v1/jobs，从 Vault 读取 JOBS_TOKEN 并设置 Authorization: Bearer 请求头。Cron 消费持久化事件；正常空闲时不查询 GitHub。每轮最多处理每仓库 20 个不同 PR 的事件组、一个新的对账页，重复上一页以覆盖分页移动。并发执行由仓库租约隔离。事件处理通常等待下一个分钟调度，积压或退避会延长延迟。
+
+Webhook 限制 1 MiB，校验原始字节的 HMAC SHA-256、事件 action、installation/repository ID 和 X-GitHub-Delivery UUID。只保存 PR 编号、路由和投递元数据，不保存 payload 或 PR 正文；额外保存已验签原始字节的 SHA-256 摘要，防止重放时替换未签名的 delivery header；成功持久化后返回 202。同一 PR 已排队事件按处理开始前的数据库时间合并，读取期间新到的事件保留到下一轮。重复 delivery 或相同正文摘要是 no-op，DB 失败返回 503，未绑定仓库/无关事件返回 204。worker 在数据库事务外重新读取该 PR 的当前事实，防止乱序 payload 回退状态。PR 展示合同不变；标题、分支名中的任务编号及正文中的显式 Fixes/Closes/Resolves 编号可建立关联，编辑后删除的关联会移除。
+
+首次绑定会分页导入全部历史 PR，仅建立关联，绝不修改任务状态；页进度持久化，跨 jobs 续跑。初始导入期间的实时事件保持 pending，导入完成后再消费；已导入的相同事实也能在第一次实时消费时推进一次状态。完成导入后每 6 小时增量对账，以扫描开始时间为游标并向前重叠 5 分钟；只有完整扫描成功才推进完成游标。扫描中变化在下一次对账再次读取。失败保留当前页，15 分钟后重试。
+
+completion 默认 manual：实时 PR 事实变化可将待处理/进行中任务推进 In review，合并仍等待人工验收。显式选择 closing_reference 时，只有连接后发生的合并、存在 Fixes/Closes/Resolves KEY-n 完成声明、且任务所有已知关联 PR 中没有 open/draft，才可自动 Done。普通 closed 不完成任务；done/canceled 永不回退；重复未变化的事实不覆盖人工状态修改。已知关联无法证明所有必需 PR 或验收已完成，需要人工验收的团队保持 manual。
+
+失败事件按 30 秒起、指数退避至 1 小时重试，尊重 GitHub Retry-After / rate-limit reset，限制绑定整体请求直至解禁，最多 8 次（含领取后崩溃，同组投递合并计次）；之后记录 dead，并安排一次提前对账。新 worker 可接手过期租约，旧 worker 无法再提交或释放新租约。cycle 计算失败不阻止 GitHub worker，jobs 的响应会分别报告结果；重试或 dead 会返回 503。事件元数据作为去重凭据保留，不存凭据或正文。
+
+运维排查读取 jobs 的 github 结果、github_deliveries 的 attempts/available_at/outcome/last_error，以及 github_sync 的 scan/reconcile_after/last_error。错误码不含远端响应或 token。GitHub 不自动重投失败 webhook：服务恢复后在 GitHub Deliveries 手动重投；重复已完成/已 dead 的投递不会复活。dead 事件修复原因后由受信运维明确重置 attempts=0、completed_at/outcome/last_error=null、available_at=now()；不要删除 delivery 记录规避去重。也可等待低频对账恢复 PR 的当前状态。
+
+旧 PAT/评论回写配置须在启用前移除 GITHUB_TOKEN；GITHUB_LINKBACK=true 会启动报错，集成不再向 GitHub 复制任何任务内容。停止旧 jobs 并行运行后再应用本迁移、部署新代码和修改绑定；新旧 worker 不能混跑。已有绑定的 installation、仓库或 completion 策略不一致时，worker 报错并跳过，不覆盖存储身份。更换配置须停旧 Cron/worker，由受信运维明确将对应 github_sync 行的 binding_key、lease_token、lease_until 设为 null，再部署新配置；首次采用新身份会重置导入进度和 connected_at，旧绑定事件被忽略。更名应先移除旧名称对应的绑定状态后启用新名称。移除配置后该绑定不再消费；历史 PR 展示数据保留。回退先停 Cron 和新 webhook，再回退代码与数据库备份，不能只运行旧代码读取已移除 requested_at 的 schema。
+
+本地普通入口是 /jobs/run 与 /webhooks/github。免登录 preview 不开放系统入口。验证用独立测试 Workspace/仓库绑定：签名事件入库、worker 更新 PR 与 In review、重复投递无重复审计、合并后 manual 保持等待验收。单元和数据库测试使用模拟 GitHub 响应，不替代真实 App、远端 Cron、撤销安装和生产部署验收。
 
 ## 本地追加迁移
 
@@ -226,3 +246,5 @@ ROSTER_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55439/roster_spec_links
 ```
 
 覆盖双端与跨 Team 权限、跨 Workspace 外键、成员停用、并发重复关联、批量回滚、解除关联的幂等性、状态与修订独立、超过 50 条数据的完整查询和分页，以及 REST/MCP 交叉读写。部署前须应用 `20261103000100_spec_issues.sql`；前端需要同版本后端。
+
+协议依据：[GitHub webhook 最佳实践](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)、[失败投递处理](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)、[GitHub App installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)、[支持的 REST API 版本](https://docs.github.com/en/rest/about-the-rest-api/api-versions)。HTTP 适配器固定使用 2026-03-10。

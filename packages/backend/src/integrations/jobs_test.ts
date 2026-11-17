@@ -16,6 +16,7 @@ Deno.test({
       DATABASE_URL: u.toString(),
       JOBS_TOKEN: 'test-job-secret',
       GITHUB_BINDINGS: '[]',
+      GITHUB_TOKEN: 'unrelated-shell-token',
     });
     const assert = (v: unknown) => {
       if (!v) throw new Error('Unexpected job response');

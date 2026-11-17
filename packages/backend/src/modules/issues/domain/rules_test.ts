@@ -1,20 +1,33 @@
-import { statusFromPullRequest } from './pull-request.ts';
 import { validateIssue } from './rules.ts';
-Deno.test('Pull request transitions preserve terminal task states and closed PRs do not cancel tasks', () => {
-  for (const terminal of ['done', 'canceled']) {
-    for (const state of ['open', 'merged', 'closed', 'draft']) {
-      if (statusFromPullRequest(terminal, state) !== terminal) {
-        throw new Error('Terminal status changed');
-      }
-    }
-  }
-  const cases = [['todo', 'open', 'in_review'], ['in_review', 'merged', 'done'], [
-    'in_progress',
-    'closed',
-    'in_progress',
-  ]];
-  for (const [current, pull, expected] of cases) {
-    if (statusFromPullRequest(current, pull) !== expected) throw new Error(`${current}/${pull}`);
+import { statusFromPullRequests } from './pull-request.ts';
+Deno.test('PR status policy aggregates eligible closing merges and preserves terminal tasks', () => {
+  const closing = { state: 'merged', closes: true, completionEligible: true };
+  const cases = [
+    { current: 'done', pulls: [closing], expected: 'done' },
+    { current: 'canceled', pulls: [closing], expected: 'canceled' },
+    { current: 'todo', pulls: [{ ...closing, state: 'draft' }], expected: 'todo' },
+    { current: 'todo', pulls: [{ ...closing, state: 'closed' }], expected: 'todo' },
+    { current: 'todo', pulls: [{ ...closing, state: 'open' }], expected: 'in_review' },
+    {
+      current: 'in_review',
+      pulls: [{ ...closing, completionEligible: false }],
+      expected: 'in_review',
+    },
+    { current: 'in_review', pulls: [{ ...closing, closes: false }], expected: 'in_review' },
+    {
+      current: 'in_review',
+      pulls: [closing, { ...closing, state: 'draft' }],
+      expected: 'in_review',
+    },
+    { current: 'in_review', pulls: [closing], expected: 'done' },
+    {
+      current: 'in_review',
+      pulls: [closing, { ...closing, state: 'closed', closes: false }],
+      expected: 'done',
+    },
+  ];
+  for (const c of cases) {
+    if (statusFromPullRequests(c.current, c.pulls) !== c.expected) throw new Error(c.expected);
   }
 });
 Deno.test('Issue field rules are usable without a database and reject malformed values', () => {

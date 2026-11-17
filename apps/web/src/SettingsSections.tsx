@@ -444,7 +444,10 @@ export function IntegrationSettings({
       <section className="settings-section" aria-labelledby="settings-github-section">
         <div className="settings-section-head">
           <h2 id="settings-github-section">Repository sync</h2>
-          <p>Optional server-side webhook integration. Not required for MCP coding agents.</p>
+          <p>
+            GitHub App sync is configured by the server operator. Not required for MCP coding
+            agents.
+          </p>
         </div>
         <div className="settings-card" aria-label="GitHub integration">
           <div className="settings-field">
@@ -458,7 +461,7 @@ export function IntegrationSettings({
               />
               <div>
                 <h2>GitHub</h2>
-                <p>Pull requests and issue links. Managed outside Roster for now.</p>
+                <p>Pull requests via GitHub App. Task completion requires acceptance by default.</p>
               </div>
             </div>
             <button className="button" disabled>

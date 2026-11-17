@@ -13,7 +13,7 @@
 - Labels、互斥分组、归档、批量变更、合并与筛选。
 - Cycles 配置、时区/DST 日历边界、缺期补算、结转与历史快照。
 - 评论、Agent 工作记录/决策分页、接票登记、父子任务、依赖 DAG、关联与链接。
-- GitHub PR 同步、状态推进、HMAC webhook 与可选隐私过滤回写；独立认证的后台任务。
+- GitHub App PR 同步、持久化 HMAC webhook、失败重试与低频对账；默认人工验收，独立认证的后台任务。
 - SQLite 全量快照迁入、Linear 导入、Postgres 备份与恢复工具。
 - REST、MCP、Supabase JWT 校验、网页登录与 OAuth 授权界面。
 

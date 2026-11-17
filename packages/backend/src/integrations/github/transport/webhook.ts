@@ -1,6 +1,7 @@
 import type { createGitHubSync } from '../application/sync.ts';
+import { deliverySchema } from '../application/model.ts';
 export function githubWebhook(
-  sync: Pick<ReturnType<typeof createGitHubSync>, 'notify'>,
+  sync: Pick<ReturnType<typeof createGitHubSync>, 'accept'>,
   secret: string,
 ) {
   return async (request: Request) => {
@@ -50,11 +51,34 @@ export function githubWebhook(
     } catch {
       return new Response('Invalid payload', { status: 400 });
     }
-    if (typeof payload?.repository?.full_name !== 'string') {
-      return new Response('Invalid repository', { status: 400 });
+    const actions = [
+      'opened',
+      'edited',
+      'closed',
+      'reopened',
+      'synchronize',
+      'ready_for_review',
+      'converted_to_draft',
+    ];
+    if (typeof payload?.action === 'string' && !actions.includes(payload.action)) {
+      return new Response(null, { status: 204 });
     }
-    return new Response(null, {
-      status: await sync.notify(payload.repository.full_name) ? 202 : 204,
+    const delivery = deliverySchema.safeParse({
+      deliveryId: request.headers.get('x-github-delivery'),
+      bodyHash: Array.from(
+        new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
+        (n) => n.toString(16).padStart(2, '0'),
+      ).join(''),
+      installationId: payload?.installation?.id,
+      repositoryId: payload?.repository?.id,
+      number: payload?.pull_request?.number,
+      action: payload?.action,
     });
+    if (!delivery.success) return new Response('Invalid delivery', { status: 400 });
+    try {
+      return new Response(null, { status: await sync.accept(delivery.data) ? 202 : 204 });
+    } catch {
+      return new Response('Delivery could not be persisted', { status: 503 });
+    }
   };
 }

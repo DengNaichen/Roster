@@ -34,6 +34,7 @@ const tableOwners: Record<string, string> = {
   audit_events: 'audit',
   pull_requests: 'github',
   github_sync: 'github',
+  github_deliveries: 'github',
 };
 function violations(path: string, source: string): string[] {
   const errors: string[] = [];
