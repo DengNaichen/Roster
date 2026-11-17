@@ -3,6 +3,7 @@ import type { OAuthUpstream } from '../index.ts';
 export function createOAuthUpstream(
   issuer: string,
   origin: string,
+  apiKey: string,
   fetcher: typeof fetch = fetch,
 ): OAuthUpstream {
   const call = (path: string, init: RequestInit = {}) =>
@@ -27,7 +28,12 @@ export function createOAuthUpstream(
     register: (request) => relay('/oauth/clients/register', request),
     token: (request) => relay('/oauth/token', request),
     async code(bearer, id) {
-      const headers = { Authorization: bearer, Origin: origin, 'Content-Type': 'application/json' };
+      const headers = {
+        Authorization: bearer,
+        Origin: origin,
+        apikey: apiKey,
+        'Content-Type': 'application/json',
+      };
       const details = await call(`/oauth/authorizations/${encodeURIComponent(id)}`, { headers });
       if (!details.ok) {
         throw new AppError(

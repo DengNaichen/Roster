@@ -130,6 +130,7 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno 
 | --- | --- | --- |
 | 后端 | `DATABASE_URL` | 专用数据库 login 的连接串 |
 | 后端 | `SUPABASE_URL` | 固定 Auth 项目 URL |
+| 后端 | `SUPABASE_PUBLISHABLE_KEY` 或 `SUPABASE_ANON_KEY` | OAuth 用户授权接口所需的项目公钥；托管函数自动提供 anon key，不能使用 service role key |
 | 后端 | `AUTH_AUDIENCE` | 验证的 audience，默认 `authenticated` |
 | 后端 | `ALLOWED_ORIGINS` | 逗号分隔的前端精确 Origin |
 | 后端 | `MCP_PUBLIC_URL` | MCP 函数公开基址，不含 `/w/<slug>/mcp` |

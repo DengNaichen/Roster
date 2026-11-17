@@ -10,10 +10,11 @@ export function createOAuthIntegration(
   verify: VerifyIdentity,
   issuer: string,
   consentUrl: string,
+  apiKey: string,
 ) {
   return createOAuthService({
     repository: createOAuthRepository(db),
-    upstream: createOAuthUpstream(issuer, new URL(consentUrl).origin),
+    upstream: createOAuthUpstream(issuer, new URL(consentUrl).origin, apiKey),
     verify,
     consentUrl,
     workspaces: (ctx) => service.listWorkspaces(ctx),
