@@ -22,7 +22,26 @@ export function createIdentityVerifier(config: AuthConfig): VerifyIdentity {
       if (!payload.sub || payload.role !== 'authenticated' || payload.is_anonymous === true) {
         throw new Error('User access token required');
       }
+      const oauth = Object.hasOwn(payload, 'client_id');
+      if (
+        oauth && (typeof payload.client_id !== 'string' || typeof payload.session_id !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            payload.client_id,
+          ) ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            payload.session_id,
+          ))
+      ) {
+        throw new Error('Invalid OAuth identity');
+      }
       return {
+        authentication: oauth
+          ? {
+            kind: 'oauth',
+            clientId: payload.client_id as string,
+            sessionId: payload.session_id as string,
+          }
+          : { kind: 'user' },
         identity: {
           subject: payload.sub,
           email: typeof payload.email === 'string' ? payload.email : '',

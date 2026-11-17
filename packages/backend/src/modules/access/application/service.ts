@@ -1,3 +1,4 @@
+import { defaultTeamKey } from '../../../../../contracts/workspace.ts';
 import { type Identity } from '../../../../../contracts/mod.ts';
 import type { Service } from '../../../application/mod.ts';
 import type { UnitOfWork } from '../../../application/session.ts';
@@ -50,7 +51,22 @@ export function createAccessService(db: UnitOfWork): AccessService {
         const w = await tx.access.insertWorkspace({ slug: input.slug, name });
         await tx.access.insertAdministrator({ workspaceId: w.id, subject: ctx.identity.subject });
         await audit(tx, ctx, w, 'workspace.created', null, w);
-        return { ...w, role: 'admin' } as unknown as Awaited<
+        const key = input.team_key ?? defaultTeamKey(name, input.slug);
+        const t = await tx.access.insertTeam({
+          workspaceId: w.id,
+          key,
+          name,
+          emoji: '',
+          isPrivate: false,
+          start_number: 1,
+        });
+        await tx.access.insertOwner({
+          workspaceId: w.id,
+          teamId: t.id,
+          subject: ctx.identity.subject,
+        });
+        await audit(tx, ctx, w, 'team.created', null, t);
+        return { ...w, role: 'admin', default_team_key: key } as unknown as Awaited<
           ReturnType<Service['createWorkspace']>
         >;
       });

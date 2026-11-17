@@ -47,8 +47,7 @@ const timer = setInterval(async () => {
 }, 60000);
 const slug = 'roster';
 if (!(await service.listWorkspaces(ctx)).some((w) => w.slug === slug)) {
-  await service.createWorkspace(ctx, { slug, name: 'Roster Playground' });
-  await service.createTeam(ctx, slug, { key: 'RO', name: 'Roster', emoji: '🗂️' });
+  await service.createWorkspace(ctx, { slug, name: 'Roster Playground', team_key: 'RO' });
   await service.createTeam(ctx, slug, { key: 'LAB', name: 'Experiments', private: true });
   const lead = (text: string): IssueDocument => ({ lead: text, sections: [], criteria: [] });
   const welcome: IssueDocument = {

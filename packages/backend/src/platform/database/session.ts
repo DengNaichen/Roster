@@ -1,3 +1,4 @@
+import { createSearchRepository } from '../../modules/search/postgres.ts';
 import type { Session, UnitOfWork } from '../../application/session.ts';
 import { createGitHubRepository } from '../../integrations/github/postgres.ts';
 import { createAccessRepository } from '../../modules/access/postgres.ts';
@@ -14,6 +15,7 @@ import { type Executor, measuredExecutor } from './query.ts';
 export function createSession(executor: Executor): Session {
   const db = measuredExecutor(executor);
   return {
+    search: createSearchRepository(db),
     github: createGitHubRepository(db),
     access: createAccessRepository(db),
     planning: createPlanningRepository(db),

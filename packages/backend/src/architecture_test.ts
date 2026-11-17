@@ -4,6 +4,7 @@ const composition = new Set([
   'bootstrap.ts',
   'jobs.ts',
   'integrations/github/factory.ts',
+  'integrations/oauth/factory.ts',
 ]);
 const tableOwners: Record<string, string> = {
   users: 'access',
@@ -35,6 +36,8 @@ const tableOwners: Record<string, string> = {
   pull_requests: 'github',
   github_sync: 'github',
   github_deliveries: 'github',
+  oauth_authorizations: 'oauth',
+  oauth_grants: 'oauth',
 };
 function violations(path: string, source: string): string[] {
   const errors: string[] = [];
@@ -72,7 +75,7 @@ function violations(path: string, source: string): string[] {
   if (pure && owner) {
     for (
       const match of source.matchAll(
-        /\b(?:db|data|tx)\.(access|issues|planning|labels|cycles|specs|activity|audit|github)\./g,
+        /\b(?:db|data|tx)\.(access|issues|planning|labels|cycles|specs|activity|audit|github|search)\./g,
       )
     ) {
       if (match[1] !== owner) {

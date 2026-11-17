@@ -1,8 +1,12 @@
+import type { SearchInput, SearchPage } from '../../../contracts/search.ts';
+import type { SaveIssueInput } from '../../../contracts/issue-save.ts';
 import type {
   ChangeTeamMemberInput,
   CheckIssueCriterionInput,
+  CreatedWorkspace,
   CreateIssueInput,
   CreateTeamInput,
+  CreateWorkspaceInput,
   Identity,
   Issue,
   IssueDetail,
@@ -23,11 +27,13 @@ import type { CatalogService } from './catalog.ts';
 import type { CycleService } from './cycles.ts';
 import type { SpecService } from './spec.ts';
 export interface Service extends CatalogService, CycleService, ActivityService, SpecService {
+  saveIssue(ctx: RequestContext, slug: string, input: SaveIssueInput): Promise<IssueDetail>;
+  search(ctx: RequestContext, slug: string, input: SearchInput): Promise<SearchPage>;
   listWorkspaces(ctx: RequestContext): Promise<Workspace[]>;
   createWorkspace(
     ctx: RequestContext,
-    input: { slug: string; name: string },
-  ): Promise<Workspace>;
+    input: CreateWorkspaceInput,
+  ): Promise<CreatedWorkspace>;
   updateWorkspace(
     ctx: RequestContext,
     slug: string,

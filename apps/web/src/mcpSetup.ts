@@ -68,14 +68,14 @@ export function buildAgentVerificationPrompt({
   if (!team) {
     return [
       `Use the \`${server}\` MCP server (workspace \`${slug}\`).`,
-      `1. Call \`list_teams\` to verify you are connected to workspace \`${slug}\` and list the accessible teams.`,
+      `1. Call \`whoami\` and confirm the authorized workspace is \`${slug}\`; reconnect if it differs.`,
       `2. Stop and report the exact error if authentication fails or no teams are returned.`,
     ].join("\n");
   }
   return [
     `Use the \`${server}\` MCP server (workspace \`${slug}\`).`,
-    `1. Call \`list_teams\` and confirm team \`${team.key}\` (${JSON.stringify(team.name)}) is accessible. If \`${team.key}\` is missing, stop and report which workspace or error you received.`,
+    `1. Call \`whoami\` and confirm workspace \`${slug}\`, then \`list_teams\` to confirm team \`${team.key}\` (${JSON.stringify(team.name)}) is accessible. Stop if the workspace or team differs.`,
     `2. Call \`list_issues\` with \`team: ${JSON.stringify(team.key)}\` to inspect current issues.`,
-    `3. If an issue already exists, call \`get_issue\` on the latest \`${team.key}-*\` issue and summarize it; otherwise call \`create_issue\` in team \`${team.key}\` with \`status: "todo"\` and \`title: "Verify MCP connection from coding agent"\`, then report the created identifier.`,
+    `3. If an issue already exists, call \`get_issue\` on the latest \`${team.key}-*\` issue and summarize it; otherwise call \`save_issue\` in team \`${team.key}\` with \`status: "todo"\` and \`title: "Verify MCP connection from coding agent"\`, then report the created identifier.`,
   ].join("\n");
 }

@@ -19,7 +19,7 @@ VITE_LOCAL_PREVIEW=true node scripts/toolchain.mjs --filter @roster/web dev --po
 
 Issue 正文是结构化 JSON `document`，契约见 `packages/contracts/issue-document.ts`：导语 `lead`、带标题的 `sections`（段落、列表、对比、表格、提示、代码块）和验收条件 `criteria`（稳定 ID `AC-n`）。所有文本字段按纯文本显示，不解释 Markdown 或 HTML。REST 与 MCP 在边界用同一个 zod schema 校验，错误信息带字段路径，例如 `document.criteria.1.id: Duplicate criterion ID AC-1`。
 
-`create_issue` 与 `update_issue` 的 `document` 整体替换正文；不传则保持不变。勾选单条验收条件使用 `PATCH /api/w/:workspace/issues/:identifier/criteria/:criterion`（正文 `{"done": true}`）或 MCP `check_issue_criterion`（参数 `identifier`、`criterion`、`done`）。服务端在锁住任务行的事务内只改这一条，审计事件 `issue.criterion_updated` 只记录 `{criterion, done}` 的前后值；状态未变时不写入。未知 ID 返回 `not_found`，权限与修改任务相同。
+`save_issue` 的 `document` 整体替换正文；不传则保持不变。勾选单条验收条件使用 `PATCH /api/w/:workspace/issues/:identifier/criteria/:criterion`（正文 `{"done": true}`）或 MCP `check_issue_criterion`（参数 `identifier`、`criterion`、`done`）。服务端在锁住任务行的事务内只改这一条，审计事件 `issue.criterion_updated` 只记录 `{criterion, done}` 的前后值；状态未变时不写入。未知 ID 返回 `not_found`，权限与修改任务相同。
 
 搜索匹配标题和 `document_text`，即 `issueDocumentText` 生成的纯文本，不匹配 JSON 键名。迁移 `20261105000200_issue_documents.sql` 把旧 `description` 转为一个名为 Description 的段落（超过 5000 字符截断），空正文转为空文档，然后删除该列。Linear 与 SQLite 导入用同一规则转换。
 
@@ -130,6 +130,7 @@ ROSTER_TEST_DATABASE_URL=postgresql://USER@127.0.0.1:PORT/roster_spec_test deno 
 | --- | --- | --- |
 | 后端 | `DATABASE_URL` | 专用数据库 login 的连接串 |
 | 后端 | `SUPABASE_URL` | 固定 Auth 项目 URL |
+| 后端 | `SUPABASE_PUBLISHABLE_KEY` 或 `SUPABASE_ANON_KEY` | OAuth 用户授权接口所需的项目公钥；托管函数自动提供 anon key，不能使用 service role key |
 | 后端 | `AUTH_AUDIENCE` | 验证的 audience，默认 `authenticated` |
 | 后端 | `ALLOWED_ORIGINS` | 逗号分隔的前端精确 Origin |
 | 后端 | `MCP_PUBLIC_URL` | MCP 函数公开基址，不含 `/w/<slug>/mcp` |
@@ -181,13 +182,15 @@ Vercel 项目根保持仓库根，Production 中需已有 `VITE_SUPABASE_URL`、
 
 ## MCP
 
-本地：`http://127.0.0.1:18471/w/WORKSPACE/mcp`。
+真实登录本地服务：`http://127.0.0.1:18471/mcp`。免登录 preview 仍为 `/w/WORKSPACE/mcp`，不得用于验证真实 OAuth。
 
-托管：`https://PROJECT.supabase.co/functions/v1/mcp/w/WORKSPACE/mcp`。
+托管统一入口：`https://PROJECT.supabase.co/functions/v1/mcp/mcp`；只读目录为 `/mcp/readonly`。Workspace 由授权记录确定。旧 `/w/WORKSPACE/mcp` 仅在 URL 与既有授权一致时可用，旧凭据需要重新授权。
 
-未认证请求返回 401，`WWW-Authenticate` 指向同基址下的资源 metadata。OAuth 授权服务器是 Supabase Auth，授权 UI 是 Roster 前端；客户端不能使用 Supabase service-role key 代表用户。
+资源 metadata 指向 Roster OAuth broker。`OAUTH_PUBLIC_URL` 默认为授权页所在 origin，`OAUTH_CONSENT_URL` 默认为第一个 `ALLOWED_ORIGINS` 加 `/oauth/consent`。多域部署需明确设置二者，并与 Supabase 的 Site URL/授权页一致。根目录 vercel.json 将公开 AS discovery 与 authorize/token/register 路由代理到当前托管 MCP Function；更换 Supabase 项目时同步更新这些公开目标。真实本地 OAuth 使用后端 origin 设置 `OAUTH_PUBLIC_URL`，无需前端代理。
 
-当前验证了 JWT 签名、issuer、audience、过期时间和用户角色，以及 discovery、结构化工具输出。Supabase 默认 audience 是 `authenticated`，不是某一个 MCP URL；因此当前不提供资源专属 Token 隔离保证。真实 OAuth 登录、刷新、撤销和客户端兼容性尚须托管端到端验证。
+未认证请求返回 401，`WWW-Authenticate` 指向同基址下的资源 metadata。OAuth broker 由 Roster 提供，Supabase Auth 负责身份签发、PKCE 与刷新，授权 UI 是 Roster 前端；客户端不能使用 Supabase service-role key 代表用户。
+
+当前验证了 JWT 签名、issuer、audience、过期时间和用户角色，以及 discovery、结构化工具输出。Supabase 默认 audience 是 `authenticated`，不是某一个 MCP URL；Roster 不把 audience 当作工作区边界：第三方 OAuth token 必须有通过 code exchange 精确绑定的 session grant；普通 REST 拒绝第三方 OAuth token。只读授权的写工具不注册，手工调用也无法执行。read/write scope 由 broker 映射成应用权限，上游只使用标准 OIDC scope。详细边界见 [授权设计](auth/mcp-authorization.md)。真实托管 OAuth 登录、刷新和各客户端兼容性仍须部署后端到端验收；本地签名 JWT、数据库和模拟上游的测试不等同于托管验收。
 
 ## 已保留的权限语义
 
@@ -227,6 +230,8 @@ completion 默认 manual：实时 PR 事实变化可将待处理/进行中任务
 
 本地普通入口是 /jobs/run 与 /webhooks/github。免登录 preview 不开放系统入口。验证用独立测试 Workspace/仓库绑定：签名事件入库、worker 更新 PR 与 In review、重复投递无重复审计、合并后 manual 保持等待验收。单元和数据库测试使用模拟 GitHub 响应，不替代真实 App、远端 Cron、撤销安装和生产部署验收。
 
+协议依据：[GitHub webhook 最佳实践](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)、[失败投递处理](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)、[GitHub App installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)、[支持的 REST API 版本](https://docs.github.com/en/rest/about-the-rest-api/api-versions)。HTTP 适配器固定使用 2026-03-10。
+
 ## 本地追加迁移
 
 使用管理员连接运行 `DATABASE_URL=... node scripts/toolchain.mjs deno run --allow-env --allow-net --allow-read scripts/migrate.ts`。此脚本只接受 loopback 数据库并保存迁移校验和，拒绝修改已经应用的迁移。仅当数据库原来手动应用了首个迁移时，首次加 `--baseline-initial`；它不会跳过后续迁移。托管环境仍统一使用 Supabase CLI。
@@ -247,4 +252,19 @@ ROSTER_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55439/roster_spec_links
 
 覆盖双端与跨 Team 权限、跨 Workspace 外键、成员停用、并发重复关联、批量回滚、解除关联的幂等性、状态与修订独立、超过 50 条数据的完整查询和分页，以及 REST/MCP 交叉读写。部署前须应用 `20261103000100_spec_issues.sql`；前端需要同版本后端。
 
-协议依据：[GitHub webhook 最佳实践](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)、[失败投递处理](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)、[GitHub App installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)、[支持的 REST API 版本](https://docs.github.com/en/rest/about-the-rest-api/api-versions)。HTTP 适配器固定使用 2026-03-10。
+
+### MCP 统一任务写入
+
+`save_issue` 是任务创建和编辑的统一 MCP 入口。不传 `identifier` 时创建，必填 `team` 与 `title`；传入 `identifier` 时更新，禁止传 `team`。省略字段保留原值，`assignee: null` 清空负责人。
+
+`add_labels` / `remove_labels` 接受精确标签名称或数字 ID；`blocks` / `blocked_by` / `related_to` 增加关系，`remove_blocks` / `remove_blocked_by` / `remove_related_to` 删除关系。`links` 追加 `{title, url}`，已有相同标题和 URL 的链接不重复添加。标签和关系的增删不能包含同一个目标；标签分组互斥、私有任务可见性和依赖无环校验照常生效。
+
+基础字段、标签、关系与链接在一个数据库事务中提交，任一操作失败时全部回滚。重试同一更新不会重复增加关系、标签或相同链接；创建请求没有客户端幂等键，网络结果不明时先查找任务，避免重复创建。
+
+原先多任务标签修改改为逐任务调用 `save_issue`，每个任务单独保证原子性。
+
+旧 MCP `create_issue`、`update_issue`、`change_issue_labels`、`add_relation`、`remove_relation`、`add_link` 已移除，客户端需要刷新工具清单。网页所用 REST 资源接口仍独立提供。
+
+```json
+{"team":"Roster","title":"修复 OAuth 回调","assignee":"me","add_labels":["auth"],"blocks":["RST-17"],"links":[{"title":"PR","url":"https://github.com/DengNaichen/Roster/pull/58"}]}
+```

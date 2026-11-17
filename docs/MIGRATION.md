@@ -32,15 +32,15 @@ Spec 是按工作区编号的 `SPEC-n` 文档，属于一个 Team，按同一公
 | `GET /specs/:identifier/revisions` | `{revisions}`，最新在前 |
 | `GET /specs/:identifier/revisions/:number` | 只读历史内容 |
 
-原生产 MCP 的完整 45 工具清单由 `transport/transport_test.ts` 固定并与真实 SDK 注册结果核对；Specs 使用具体结构化输出 schema，允许输出追加字段。
+MCP 核心工具清单由 `transport/transport_test.ts` 固定并与真实 SDK 注册结果核对；Specs 使用具体结构化输出 schema，允许输出追加字段。
 
 | 领域 | 工具 |
 | --- | --- |
-| 任务（4） | `list_issues`, `get_issue`, `create_issue`, `update_issue` |
-| 活动与关系（8） | `add_comment`, `add_work_log`, `list_work_logs`, `get_work_log`, `delegate_issue`, `add_relation`, `remove_relation`, `add_link` |
+| 任务（3） | `list_issues`, `get_issue`, `save_issue` |
+| 活动记录（5） | `add_comment`, `add_work_log`, `list_work_logs`, `get_work_log`, `delegate_issue` |
 | Team（8） | `list_teams`, `create_team`, `update_team`, `list_team_directory`, `join_team`, `list_team_members`, `change_team_member`, `list_assignees` |
 | Project / Initiative（8） | `list_projects`, `get_project`, `create_project`, `update_project`, `list_initiatives`, `get_initiative`, `create_initiative`, `update_initiative` |
-| 标签（7） | `list_labels`, `list_label_groups`, `save_label_group`, `create_label`, `update_label`, `change_issue_labels`, `merge_labels` |
+| 标签（6） | `list_labels`, `list_label_groups`, `save_label_group`, `create_label`, `update_label`, `merge_labels` |
 | 周期（4） | `list_cycles`, `configure_cycles`, `get_cycle`, `update_cycle` |
 | Spec（6） | `list_specs`, `get_spec`, `create_spec`, `update_spec`, `list_spec_revisions`, `get_spec_revision` |
 

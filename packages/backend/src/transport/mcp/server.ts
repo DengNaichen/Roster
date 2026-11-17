@@ -1,3 +1,7 @@
+import { parse } from '../../platform/errors/parse.ts';
+import { saveIssueSchema } from '../../../../contracts/issue-save.ts';
+import { AmbiguousReference, resolveMcpReferences } from './references.ts';
+import { searchSchema } from '../../../../contracts/search.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@2.4.0';
 import { z } from 'npm:zod@4.6.7';
 import * as activity from '../../../../contracts/activity.ts';
@@ -14,7 +18,6 @@ import {
   joinWorkspaceSchema,
   listIssuesSchema,
   type RequestContext,
-  updateIssueSchema,
   updateMemberSchema,
   updateTeamSchema,
   updateWorkspaceSchema,
@@ -22,12 +25,16 @@ import {
 import { specStatuses } from '../../../../contracts/spec-status.ts';
 import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
+import type { Grant } from '../../integrations/oauth/index.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
-import { restCreateIssueSchema, restUpdateIssueSchema } from '../http/compat.ts';
 import { compressMcpResponse } from './compression.ts';
+const reference = z.string().trim().min(1).max(200);
+const userReference = z.string().max(200).nullable().optional().describe(
+  'User ID, name, email or me. Omit to keep unchanged; null (or legacy empty string) clears the assignee.',
+);
 const compatibleIssueFields = {
   type: z.union([createIssueSchema.shape.type, z.literal('')]),
-  assignee: z.union([createIssueSchema.shape.assignee, z.literal('')]),
+  assignee: userReference,
 };
 export interface McpOptions {
   service: Service;
@@ -35,6 +42,7 @@ export interface McpOptions {
   publicUrl: string;
   authorizationServer: string;
   allowedOrigins: string[];
+  authorize?: (ctx: RequestContext) => Promise<Grant>;
 }
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/);
 // Outputs permit additive fields while exposing stable core issue contracts.
@@ -185,12 +193,19 @@ const resultSchemas: Record<string, z.ZodType> = {
       }).passthrough(),
     ),
   }),
-  create_issue: issueOutput,
-  update_issue: issueOutput,
+  save_issue: issueOutput,
   check_issue_criterion: issueOutput,
 };
-export function createMcpServer(service: Service, ctx: RequestContext, workspace: string) {
-  const server = new McpServer({ name: 'roster', version: '0.1.0' });
+export function createMcpServer(
+  service: Service,
+  ctx: RequestContext,
+  workspace: string,
+  connection?: { grant: Grant; readonly: boolean },
+) {
+  const server = new McpServer({ name: 'roster', version: '0.1.0' }, {
+    instructions:
+      'Call whoami to confirm the connected workspace and access. Team references accept a key, exact name or ID. Users accept an ID, name, email or me. Ambiguous references return candidates: ask which one, never guess. Omit update fields to keep them; assignee null clears assignment. Use list_team_directory for discoverable team metadata; list_teams lists accessible content.',
+  });
   function tool<T extends z.ZodRawShape>(
     name: string,
     description: string,
@@ -198,6 +213,11 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     readOnly: boolean,
     run: (input: z.infer<z.ZodObject<T>>) => Promise<unknown>,
   ) {
+    if (
+      connection &&
+      (['list_workspaces', 'create_workspace', 'join_workspace'].includes(name) ||
+        (connection.readonly && !readOnly))
+    ) return;
     server.registerTool(name, {
       description,
       inputSchema: z.strictObject(shape),
@@ -205,7 +225,11 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
       annotations: { readOnlyHint: readOnly, destructiveHint: !readOnly, openWorldHint: false },
     }, async (input) => {
       try {
-        const result = (await run(input)) ?? { updated: true };
+        if (connection?.readonly && !readOnly) {
+          throw new AppError('forbidden', 'Read-only connection');
+        }
+        const resolved = await resolveMcpReferences(service, ctx, workspace, name, input);
+        const result = (await run(resolved)) ?? { updated: true };
         return {
           structuredContent: { result },
           content: [{ type: 'text' as const, text: JSON.stringify({ result }) }],
@@ -216,7 +240,13 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
             isError: true,
             content: [{
               type: 'text' as const,
-              text: JSON.stringify({ error: { code: error.code, message: error.message } }),
+              text: JSON.stringify({
+                error: {
+                  code: error.code,
+                  message: error.message,
+                  ...(error instanceof AmbiguousReference ? { candidates: error.candidates } : {}),
+                },
+              }),
             }],
           };
         }
@@ -230,6 +260,47 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
       }
     });
   }
+  tool(
+    'whoami',
+    'Read the authenticated user, connected workspace and effective access. The workspace is fixed by this authorization; reconnect to choose a different workspace.',
+    {},
+    true,
+    async () => {
+      const w = (await service.listWorkspaces(ctx)).find((w) => w.slug === workspace);
+      if (!w) throw new AppError('forbidden', 'Workspace access denied');
+      return {
+        user: ctx.identity,
+        workspace: w,
+        connection: {
+          client_id: connection?.grant.clientId ?? 'local-preview',
+          access: connection?.readonly ? 'read' : 'read_write',
+        },
+      };
+    },
+  );
+  tool(
+    'search',
+    'Search visible issues, current specs and non-archived projects by a literal text fragment. Results rank exact identifier/title matches first, then title prefix, title substring and body matches; ties use newest update and a stable key. A cursor continues the same query and type. No hidden counts are returned.',
+    searchSchema.shape,
+    true,
+    (i) => service.search(ctx, workspace, i),
+  );
+  tool(
+    'fetch',
+    'Read an entity reference returned by search, such as issue:RST-1, spec:SPEC-1 or project:42. Current workspace and visibility rules apply.',
+    {
+      reference: z.string().regex(
+        /^(issue:[A-Z][A-Z0-9]*-[1-9][0-9]*|spec:SPEC-[1-9][0-9]*|project:[1-9][0-9]*)$/,
+      ),
+    },
+    true,
+    (i) => {
+      const [kind, id] = i.reference.split(':');
+      if (kind === 'issue') return service.getIssue(ctx, workspace, id);
+      if (kind === 'spec') return service.getSpec(ctx, workspace, id);
+      return service.getProject(ctx, workspace, { id: Number(id) });
+    },
+  );
   tool(
     'list_workspaces',
     'List the current user’s active workspaces.',
@@ -261,7 +332,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'update_member',
     'Change workspace membership (administrator only).',
-    updateMemberSchema.shape,
+    { ...updateMemberSchema.shape, subject: reference },
     false,
     (i) => service.updateMember(ctx, workspace, i),
   );
@@ -287,13 +358,6 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     () => service.listTeams(ctx, workspace),
   );
   tool(
-    'team_directory',
-    'List team directory, including discoverable private team metadata.',
-    {},
-    true,
-    () => service.teamDirectory(ctx, workspace),
-  );
-  tool(
     'create_team',
     'Create a team; the caller becomes its owner.',
     createTeamSchema.shape,
@@ -317,7 +381,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'change_team_member',
     'Manage team members as an authorized manager.',
-    { key: z.string(), ...changeTeamMemberSchema.shape },
+    { key: reference, ...changeTeamMemberSchema.shape, subject: reference },
     false,
     ({ key, ...i }) => service.changeTeamMember(ctx, workspace, key, i),
   );
@@ -331,7 +395,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'list_issues',
     'List visible workspace issues with cursor pagination.',
-    listIssuesSchema.shape,
+    { ...listIssuesSchema.shape, assignee: userReference, team: reference.optional() },
     true,
     (i) => service.listIssues(ctx, workspace, i),
   );
@@ -343,24 +407,23 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     (i) => service.getIssue(ctx, workspace, i.identifier),
   );
   tool(
-    'create_issue',
-    'Create an issue in an accessible team. The body is `document`: structured JSON with a lead, ' +
-      'titled sections of typed blocks, and acceptance criteria with IDs AC-1, AC-2, and so on. ' +
-      'Every text field is plain text; Markdown and HTML are shown literally.',
-    createIssueSchema.extend(compatibleIssueFields).shape,
+    'save_issue',
+    'Create or update an issue atomically with labels, relations and links. Omit identifier to create (team and title required); provide identifier to update (team cannot change). Omitted fields stay unchanged; assignee null clears assignment. Labels accept exact names or numeric IDs. Relation arrays add edges; remove_* arrays remove edges. Links append without duplicating an existing title/URL pair. document replaces the whole body: read it first and preserve existing criterion IDs; use check_issue_criterion to tick one criterion.',
+    {
+      ...saveIssueSchema.shape,
+      ...compatibleIssueFields,
+      type: compatibleIssueFields.type.optional(),
+      team: reference.optional(),
+      add_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
+      remove_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
+    },
     false,
-    (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
-  );
-  tool(
-    'update_issue',
-    'Update a visible issue; omitted properties remain unchanged. `document` replaces the whole ' +
-      'body: read it with get_issue, edit it, and send it back complete. Keep existing criterion ' +
-      'IDs and give new criteria the next unused number. To tick one criterion after verifying ' +
-      'it, call check_issue_criterion instead of rewriting the document.',
-    { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
-    false,
-    ({ identifier, ...i }) =>
-      service.updateIssue(ctx, workspace, identifier, restUpdateIssueSchema.parse(i)),
+    (i) =>
+      service.saveIssue(
+        ctx,
+        workspace,
+        parse(saveIssueSchema, { ...i, type: i.type === '' ? null : i.type }),
+      ),
   );
   tool(
     'check_issue_criterion',
@@ -420,27 +483,6 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     (i) => service.delegateIssue(ctx, workspace, i),
   );
   tool(
-    'add_relation',
-    'Add blocks, blocked_by or undirected related relation. Blocking dependencies must remain acyclic.',
-    activity.addRelationSchema.omit({ remove: true }).shape,
-    false,
-    (i) => service.addRelation(ctx, workspace, { ...i, remove: false }),
-  );
-  tool(
-    'remove_relation',
-    'Remove a relation; absent relations succeed.',
-    activity.addRelationSchema.omit({ remove: true }).shape,
-    false,
-    (i) => service.addRelation(ctx, workspace, { ...i, remove: true }),
-  );
-  tool(
-    'add_link',
-    'Attach a titled HTTP(S) URL without credentials.',
-    activity.addLinkSchema.shape,
-    false,
-    (i) => service.addLink(ctx, workspace, i),
-  );
-  tool(
     'list_projects',
     'List visible projects; archived projects are opt-in.',
     catalog.listProjectsSchema.shape,
@@ -457,14 +499,14 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'create_project',
     'Create a project attached to existing teams.',
-    catalog.createProjectSchema.shape,
+    { ...catalog.createProjectSchema.shape, teams: z.array(reference).min(1).max(100) },
     false,
     (i) => service.createProject(ctx, workspace, i),
   );
   tool(
     'update_project',
     'Update project metadata or team links; omitted fields are unchanged.',
-    catalog.updateProjectSchema.shape,
+    { ...catalog.updateProjectSchema.shape, teams: z.array(reference).min(1).max(100).optional() },
     false,
     (i) => service.updateProject(ctx, workspace, i),
   );
@@ -532,13 +574,6 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     (i) => service.updateLabel(ctx, workspace, i),
   );
   tool(
-    'change_issue_labels',
-    'Atomically add and remove labels on visible issues.',
-    catalog.changeIssueLabelsSchema.shape,
-    false,
-    (i) => service.changeIssueLabels(ctx, workspace, i),
-  );
-  tool(
     'merge_labels',
     'Merge a source label into a distinct target label.',
     catalog.mergeLabelsSchema.shape,
@@ -576,7 +611,11 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'list_spec_issues',
     'List issues linked to a readable spec. Supports the same filters and pagination as list_issues; private issues remain hidden.',
-    { ...listIssuesSchema.omit({ spec: true }).shape, ...specs.getSpecSchema.shape },
+    {
+      ...listIssuesSchema.omit({ spec: true }).shape,
+      assignee: userReference,
+      ...specs.getSpecSchema.shape,
+    },
     true,
     ({ identifier, ...input }) =>
       service.listIssues(ctx, workspace, { ...input, spec: identifier }),
@@ -607,7 +646,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'list_specs',
     'List readable team spec summaries, newest updated first.',
-    specs.listSpecsSchema.shape,
+    { ...specs.listSpecsSchema.shape, team: reference.optional() },
     true,
     (i) => service.listSpecs(ctx, workspace, i),
   );
@@ -642,7 +681,7 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
   tool(
     'create_spec',
     'Create a team spec as revision 1. Content is structured JSON with stable US/FR/SC ids.',
-    specs.createSpecSchema.shape,
+    { ...specs.createSpecSchema.shape, team: reference },
     false,
     (i) => service.createSpec(ctx, workspace, i),
   );
@@ -677,7 +716,8 @@ export function createMcpFetch(options: McpOptions) {
     const discovery = url.pathname.startsWith(metadataPrefix);
     const path = discovery ? url.pathname.slice(metadataPrefix.length) : url.pathname;
     const match = /^\/w\/([^/]+)\/mcp$/.exec(path);
-    if (!match || !slugSchema.safeParse(match[1]).success) {
+    const unified = path === '/mcp' || path === '/mcp/readonly';
+    if (!unified && (!match || !slugSchema.safeParse(match[1]).success)) {
       return Response.json({ error: 'not_found' }, { status: 404 });
     }
     const resource = `${base}${path}`;
@@ -708,6 +748,7 @@ export function createMcpFetch(options: McpOptions) {
       return Response.json({
         resource,
         authorization_servers: [options.authorizationServer],
+        scopes_supported: ['read', 'write'],
         bearer_methods_supported: ['header'],
       }, { headers });
     }
@@ -722,7 +763,36 @@ export function createMcpFetch(options: McpOptions) {
         headers,
       });
     }
-    const handler = createMcpHandler(() => createMcpServer(options.service, ctx, match[1]));
+    let grant: Grant | undefined;
+    if (options.authorize) {
+      try {
+        grant = await options.authorize(ctx);
+        if (match && match[1] !== grant.workspace) {
+          throw new AppError('forbidden', 'This connection is authorized for another workspace');
+        }
+      } catch (error) {
+        if (!(error instanceof AppError)) throw error;
+        return Response.json({ error: { code: error.code, message: error.message } }, {
+          status: 403,
+          headers,
+        });
+      }
+    } else if (unified) {
+      return Response.json({ error: 'Connection authorization required' }, {
+        status: 403,
+        headers,
+      });
+    }
+    const handler = createMcpHandler(() =>
+      createMcpServer(
+        options.service,
+        ctx,
+        grant?.workspace ?? match![1],
+        grant
+          ? { grant, readonly: grant.access === 'read' || path === '/mcp/readonly' }
+          : undefined,
+      )
+    );
     const response = await handler.fetch(request);
     for (const [key, value] of headers) response.headers.set(key, value);
     return compressMcpResponse(request, response);

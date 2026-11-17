@@ -5,6 +5,14 @@
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "https://jmmwgdyfcmonzqkurcly.supabase.co/functions/v1/mcp/.well-known/oauth-authorization-server"
+    },
+    {
+      "source": "/oauth/:action(authorize|token|register)",
+      "destination": "https://jmmwgdyfcmonzqkurcly.supabase.co/functions/v1/mcp/oauth/:action"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

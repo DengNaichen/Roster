@@ -33,5 +33,7 @@ describe("MCP setup helpers", () => {
     expect(prompt).toContain('"Onboarding Team"');
     expect(prompt).toContain("`list_teams`");
     expect(prompt).toContain("`list_issues`");
+    expect(prompt).toContain("`save_issue`");
+    expect(prompt).not.toContain("`create_issue`");
   });
 });

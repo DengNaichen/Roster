@@ -3,7 +3,10 @@ import type { Label } from './catalog.ts';
 
 import type { ActivityIssueDetails } from './activity.ts';
 export type Identity = { subject: string; name: string; email: string };
-export type RequestContext = { identity: Identity };
+export type RequestContext = {
+  identity: Identity;
+  authentication?: { kind: 'user' } | { kind: 'oauth'; clientId: string; sessionId: string };
+};
 export const statuses = [
   'triage',
   'backlog',
@@ -29,6 +32,7 @@ export type Workspace = {
   name: string;
   role: 'admin' | 'member';
 };
+export type CreatedWorkspace = Workspace & { default_team_key: string };
 export type Member = Identity & {
   role: 'admin' | 'member';
   status: 'active' | 'suspended';
@@ -159,3 +163,5 @@ export * from './cycles.ts';
 
 export * from './spec.ts';
 export * from './issue-document.ts';
+
+export * from './search.ts';

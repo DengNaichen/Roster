@@ -56,14 +56,12 @@ describe("API integration boundary", () => {
       location: { hostname: "roster.example", origin: "https://roster.example" },
     });
     const hosted = await import("./api");
-    expect(hosted.mcpServerUrl("acme-dev")).toBe(
-      "https://proj.supabase.co/functions/v1/mcp/w/acme-dev/mcp",
-    );
+    expect(hosted.mcpServerUrl("acme-dev")).toBe("https://proj.supabase.co/functions/v1/mcp/mcp");
 
     vi.resetModules();
     vi.stubEnv("VITE_API_BASE_URL", "http://127.0.0.1:18471");
     const localDev = await import("./api");
-    expect(localDev.mcpServerUrl("acme-dev")).toBe("http://127.0.0.1:18471/w/acme-dev/mcp");
+    expect(localDev.mcpServerUrl("acme-dev")).toBe("http://127.0.0.1:18471/mcp");
 
     vi.resetModules();
     vi.stubEnv("DEV", true);

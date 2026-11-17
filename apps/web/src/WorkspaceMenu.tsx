@@ -10,7 +10,9 @@ import {
   RequestError,
   Workspace,
   workspaceSlug,
+  workspaceHome,
 } from "./shared";
+import { defaultTeamKey } from "../../../packages/contracts/workspace.ts";
 import { deriveWorkspaceSlug } from "./onboarding";
 import { RosterLogo } from "./RosterLogo";
 import { WorkspaceAccess } from "./WorkspaceAccess";
@@ -164,7 +166,7 @@ export function WorkspaceMenu() {
           onClose={() => setDialog(null)}
           onSaved={(workspace) => {
             setDialog(null);
-            if (dialog === "create") navigate(`/${workspace.slug}/`);
+            if (dialog === "create") navigate(workspaceHome(workspace));
             else
               setWorkspaces((items) =>
                 items.map((item) => (item.slug === workspace.slug ? workspace : item)),
@@ -187,6 +189,8 @@ export function WorkspaceDialog({
 }) {
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
+  const [teamKey, setTeamKey] = useState("");
+  const [teamKeyEdited, setTeamKeyEdited] = useState(false);
   const [name, setName] = useState(workspace?.name ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -201,6 +205,8 @@ export function WorkspaceDialog({
 
   function changeName(next: string) {
     setName(next);
+    if (!teamKeyEdited)
+      setTeamKey(defaultTeamKey(next, slugEdited ? slug : deriveWorkspaceSlug(next)));
     if (!workspace && !slugEdited) {
       setSlug(deriveWorkspaceSlug(next));
     }
@@ -209,6 +215,7 @@ export function WorkspaceDialog({
   function changeSlug(raw: string) {
     const cleaned = raw.toLowerCase().replace(/\s+/g, "-");
     setSlug(cleaned);
+    if (!teamKeyEdited) setTeamKey(defaultTeamKey(name, cleaned));
     setSlugEdited(cleaned.length > 0);
   }
 
@@ -219,7 +226,7 @@ export function WorkspaceDialog({
     try {
       const saved = workspace
         ? await api<Workspace>(`/api/workspaces/${workspace.slug}`, "PATCH", { name })
-        : await api<Workspace>("/api/workspaces", "POST", { slug, name });
+        : await api<Workspace>("/api/workspaces", "POST", { slug, name, team_key: teamKey });
       if (mounted.current) onSaved(saved);
     } catch (cause) {
       if (mounted.current) setError((cause as Error).message);
@@ -254,8 +261,8 @@ export function WorkspaceDialog({
         </header>
         {!workspace && (
           <p className="dialog-hint">
-            A workspace holds your organization’s teams, projects, and MCP endpoint. Most developers
-            use one workspace and create a team per product or repository.
+            Create a workspace for your work. We’ll add a public team with the same name so you can
+            start creating tasks immediately.
           </p>
         )}
         <label>
@@ -286,10 +293,32 @@ export function WorkspaceDialog({
         )}
         {!workspace && (
           <p id="workspace-slug-hint" className="dialog-hint">
-            Used in the URL (<code>/{previewSlug}</code>) and MCP endpoint (
-            <code>/w/{previewSlug}/mcp</code>). Cannot be changed later; use 2–32 lowercase letters,
-            digits, or hyphens, starting with a letter.
+            Used in the URL (<code>/{previewSlug}</code>). Cannot be changed later; use 2–32
+            lowercase letters, digits, or hyphens, starting with a letter.
           </p>
+        )}
+        {!workspace && (
+          <label>
+            Team key
+            <input
+              aria-label="Team key"
+              value={teamKey}
+              onChange={(event) => {
+                const value = event.target.value.toUpperCase();
+                setTeamKey(value);
+                setTeamKeyEdited(value.length > 0);
+              }}
+              pattern="[A-Z][A-Z0-9]{1,5}"
+              minLength={2}
+              maxLength={6}
+              required
+              disabled={saving}
+              aria-describedby="default-team-hint"
+            />
+            <small id="default-team-hint">
+              Your team’s task identifiers will start with {teamKey || "TEAM"}-1.
+            </small>
+          </label>
         )}
         {error && <RequestError message={error} />}
         <footer>
