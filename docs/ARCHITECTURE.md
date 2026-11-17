@@ -98,11 +98,11 @@ HTTP / MCP / Jobs
 | Specs | specs、spec_revisions、spec_issues |
 | Activity | comments、work_logs、issue_delegations、links、relations |
 | Audit | audit_events |
-| GitHub | pull_requests、github_sync |
+| GitHub | pull_requests、github_sync、github_deliveries |
 
 查询投影允许受控跨表 JOIN；普通业务写入由表的归属模块负责。
 
-GitHub 同步用例依赖注入的 `GitHubClient` 和 repository。HTTP 认证、超时与请求发送留在 HTTP 适配器；HMAC webhook 只请求后续同步。保留原有租约、游标和外部回写时序，不在结构调整中改变行为。
+GitHub 同步用例依赖注入的 `GitHubClient` 和 repository。HTTP 适配器负责 App JWT、按仓库限制权限的 installation token、超时和协议解析。HMAC webhook 验证原始字节，按 delivery ID 持久化事件路由键；worker 重新读取具体 PR 的当前状态。每个仓库租约保护投影写入，租约与绑定身份在事务内核对，PR 投影和事件确认原子提交。首次分页导入只建关联；后续默认等待人工验收，显式 closing_reference 才允许受限自动完成。没有 GitHub 评论回写或 PR 正文存档。
 
 离线导入是明确的跨模块存储边界：SQLite/Linear 用例负责来源校验、身份/引用映射、历史和业务规则；专用存储适配器负责 SQL、事务、元数据与序列推进。它们不挂载为在线业务接口。SQLite 仍要求空目标库，失败全部回滚；Linear 仍在单一事务中保留原编号与作者语义。
 

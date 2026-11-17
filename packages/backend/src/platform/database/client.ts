@@ -2,7 +2,10 @@ import { drizzle, type NodePgDatabase } from 'npm:drizzle-orm@0.45.4/node-postgr
 import { Pool } from 'npm:pg@8.23.1';
 // Both the root database and a transaction can compose application services.
 export type Database = Pick<NodePgDatabase, 'execute' | 'transaction'>;
-export function createDatabase(connectionString: string) {
-  const pool = new Pool({ connectionString, max: 5 });
+export function createDatabase(
+  connectionString: string,
+  timeouts?: { connectionTimeoutMillis: number; query_timeout: number },
+) {
+  const pool = new Pool({ connectionString, max: 5, ...timeouts });
   return { db: drizzle(pool), pool };
 }

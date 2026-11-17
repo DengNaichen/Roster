@@ -2,17 +2,17 @@ import type { Row } from '../../../application/records.ts';
 import type { Session } from '../../../application/session.ts';
 import { ensureGitHubIdentity } from '../../access/index.ts';
 import { audit } from '../../audit/index.ts';
-import { statusFromPullRequest } from '../domain/pull-request.ts';
+import { type LinkedPull, statusFromPullRequests } from '../domain/pull-request.ts';
 /** Internal system command. Caller holds the configured repository lease and Workspace lock. */
 export async function applyPullRequestStatus(
   data: Session,
   workspaceId: string,
   issue: Row,
-  pullState: string,
+  pulls: readonly LinkedPull[],
   source: string,
 ) {
   if (String(issue.workspace_id) !== workspaceId) throw new Error('Issue workspace mismatch');
-  const status = statusFromPullRequest(String(issue.status), pullState);
+  const status = statusFromPullRequests(String(issue.status), pulls);
   if (status === issue.status) return;
   await ensureGitHubIdentity(data);
   await data.issues.setPullRequestStatus(workspaceId, issue.id, status);

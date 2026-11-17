@@ -10,11 +10,17 @@ function equal(a: string, b: string) {
 }
 export function createJobs(env: Record<string, string | undefined>) {
   if (!env.DATABASE_URL) throw new Error('DATABASE_URL is required');
-  const { db, pool } = createDatabase(env.DATABASE_URL);
+  const { db, pool } = createDatabase(env.DATABASE_URL, {
+    connectionTimeoutMillis: 2000,
+    query_timeout: 2500,
+  });
+  const bindings = parseBindings(env.GITHUB_BINDINGS);
+  if ((bindings.length > 0 && env.GITHUB_TOKEN) || env.GITHUB_LINKBACK === 'true') {
+    throw new Error('PAT and linkback are no longer supported; configure a read-only GitHub App');
+  }
   const github = createGitHubIntegration(db, {
-    bindings: parseBindings(env.GITHUB_BINDINGS),
-    token: env.GITHUB_TOKEN ?? '',
-    linkback: env.GITHUB_LINKBACK === 'true',
+    bindings,
+    app: { appId: env.GITHUB_APP_ID ?? '', privateKey: env.GITHUB_APP_PRIVATE_KEY ?? '' },
   });
   return {
     webhook: githubWebhook(github, env.GITHUB_WEBHOOK_SECRET ?? ''),
@@ -25,10 +31,22 @@ export function createJobs(env: Record<string, string | undefined>) {
         !equal(request.headers.get('authorization') ?? '', `Bearer ${env.JOBS_TOKEN}`)
       ) return new Response('Unauthorized', { status: 401 });
       try {
-        await advanceAllCycles(createUnitOfWork(db));
-        const githubResults = await github.run();
-        return Response.json({ cycles: 'advanced', github: githubResults }, {
-          status: githubResults.some((r) => 'error' in r) ? 503 : 200,
+        const [cycles, integration] = await Promise.allSettled([
+          advanceAllCycles(createUnitOfWork(db)),
+          github.run(),
+        ]);
+        const githubResults = integration.status === 'fulfilled'
+          ? integration.value
+          : [{ repo: '', error: 'worker_failed' }];
+        return Response.json({
+          cycles: cycles.status === 'fulfilled' ? 'advanced' : 'failed',
+          github: githubResults,
+        }, {
+          status: cycles.status === 'rejected' || githubResults.some((r) =>
+              'error' in r || (r.retried ?? 0) > 0 || (r.dead ?? 0) > 0
+            )
+            ? 503
+            : 200,
         });
       } catch {
         return Response.json({ error: 'Background job failed; retry is safe' }, { status: 503 });

@@ -35,6 +35,7 @@ const tableOwners: Record<string, string> = {
   audit_events: 'audit',
   pull_requests: 'github',
   github_sync: 'github',
+  github_deliveries: 'github',
   oauth_authorizations: 'oauth',
   oauth_grants: 'oauth',
 };
