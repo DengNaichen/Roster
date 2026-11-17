@@ -27,7 +27,8 @@ export function bootstrap(env: Environment) {
   const publicUrl = required(env, 'MCP_PUBLIC_URL').replace(/\/$/, '');
   const consentUrl = env.OAUTH_CONSENT_URL ?? `${allowedOrigins[0]}/oauth/consent`;
   const oauthPublicUrl = env.OAUTH_PUBLIC_URL ?? new URL(consentUrl).origin;
-  const oauth = createOAuthIntegration(db, service, verify, issuer, consentUrl);
+  const apiKey = env.SUPABASE_PUBLISHABLE_KEY?.trim() || required(env, 'SUPABASE_ANON_KEY');
+  const oauth = createOAuthIntegration(db, service, verify, issuer, consentUrl, apiKey);
   const oauthFetch = createOAuthTransport({
     oauth,
     verify,

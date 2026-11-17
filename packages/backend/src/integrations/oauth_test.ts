@@ -350,6 +350,10 @@ Deno.test('Supabase adapter handles first consent and auto-approval without foll
     const headers = new Headers(init?.headers);
     calls.push({ path, method: init?.method ?? 'GET', origin: headers.get('Origin') });
     assert(init?.redirect === 'manual');
+    if (path.includes('/authorizations/')) {
+      assert(headers.get('apikey') === 'public-project-key');
+      assert(headers.get('Authorization') === 'Bearer web');
+    }
     if (path.endsWith('/consent')) {
       assert(JSON.parse(String(init?.body)).action === 'approve');
       return Response.json({ redirect_url: 'http://localhost/callback?code=first' });
@@ -374,6 +378,7 @@ Deno.test('Supabase adapter handles first consent and auto-approval without foll
   const upstream = createOAuthUpstream(
     'https://project.supabase.co/auth/v1',
     'https://ui.example',
+    'public-project-key',
     fetcher,
   );
   assert((await upstream.code('Bearer web', 'first')).includes('code=first'));
