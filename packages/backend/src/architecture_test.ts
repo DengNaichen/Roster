@@ -74,7 +74,7 @@ function violations(path: string, source: string): string[] {
   if (pure && owner) {
     for (
       const match of source.matchAll(
-        /\b(?:db|data|tx)\.(access|issues|planning|labels|cycles|specs|activity|audit|github)\./g,
+        /\b(?:db|data|tx)\.(access|issues|planning|labels|cycles|specs|activity|audit|github|search)\./g,
       )
     ) {
       if (match[1] !== owner) {

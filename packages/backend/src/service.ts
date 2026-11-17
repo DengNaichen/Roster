@@ -1,3 +1,4 @@
+import { createSearchService } from './modules/search/index.ts';
 import type { Service } from './application/mod.ts';
 import { createUnitOfWork } from './platform/database/session.ts';
 
@@ -16,6 +17,7 @@ export function createService(db: Database, options: { now?: () => Date } = {}):
   const data = createUnitOfWork(db);
   return guardService({
     ...createAccessService(data),
+    ...createSearchService(data),
     ...createIssueService(createPostgresIssueDependencies(db), options),
     ...createPlanningService(data),
     ...createLabelService(data),

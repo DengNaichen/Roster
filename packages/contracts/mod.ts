@@ -162,3 +162,5 @@ export * from './cycles.ts';
 
 export * from './spec.ts';
 export * from './issue-document.ts';
+
+export * from './search.ts';
