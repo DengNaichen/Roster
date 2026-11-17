@@ -1,3 +1,3 @@
 [mcp_servers.roster-self]
-url = "https://jmmwgdyfcmonzqkurcly.supabase.co/functions/v1/mcp/w/roster/mcp"
+url = "https://jmmwgdyfcmonzqkurcly.supabase.co/functions/v1/mcp/mcp"
 http_headers = { "x-region" = "ap-northeast-1" }

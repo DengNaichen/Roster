@@ -75,7 +75,14 @@ export function createHttpApp({ service: s, verify, allowedOrigins }: TransportO
     return c.json({ error: { code: 'internal', message: 'Internal server error' } }, 500);
   });
   app.use('*', async (c, next) => {
-    c.set('requestContext', await verify(c.req.raw));
+    const ctx = await verify(c.req.raw);
+    if (ctx.authentication?.kind === 'oauth') {
+      throw new AppError(
+        'forbidden',
+        'OAuth connections must use MCP within their authorized workspace',
+      );
+    }
+    c.set('requestContext', ctx);
     await next();
   });
   app.use('/api/w/*', conditionalRead);

@@ -27,7 +27,7 @@ export function mcpServerUrl(slug: string): string {
   const mcpBase = String(import.meta.env.VITE_MCP_BASE_URL ?? "")
     .trim()
     .replace(/\/$/, "");
-  if (mcpBase) return `${mcpBase}/w/${encoded}/mcp`;
+  if (mcpBase) return `${mcpBase}/mcp`;
   const apiBase = String(import.meta.env.VITE_API_BASE_URL ?? "")
     .trim()
     .replace(/\/$/, "");
@@ -35,9 +35,9 @@ export function mcpServerUrl(slug: string): string {
     const resolved = apiBase.endsWith("/functions/v1/api")
       ? `${apiBase.slice(0, -"/functions/v1/api".length)}/functions/v1/mcp`
       : apiBase;
-    return `${resolved}/w/${encoded}/mcp`;
+    return `${resolved}/mcp`;
   }
-  return `${window.location.origin}/w/${encoded}/mcp`;
+  return `${window.location.origin}/mcp`;
 }
 export async function apiFetch(
   path: string,

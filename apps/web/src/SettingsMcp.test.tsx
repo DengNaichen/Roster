@@ -3,7 +3,7 @@ import { expect, it, vi } from "vitest";
 import App from "./App";
 import { json } from "./test/fixtures";
 
-it("renders workspace-scoped MCP URL, preselects requested team, and copies agent verification prompt", async () => {
+it("renders the unified MCP URL, preselects requested team, and copies agent verification prompt", async () => {
   Object.assign(navigator, {
     clipboard: {
       writeText: vi.fn().mockResolvedValue(undefined),
@@ -57,8 +57,8 @@ it("renders workspace-scoped MCP URL, preselects requested team, and copies agen
   render(<App />);
 
   expect(await screen.findByRole("heading", { name: "Coding agents (MCP)" })).toBeTruthy();
-  const urlField = screen.getByLabelText("Workspace MCP URL") as HTMLInputElement;
-  expect(urlField.value).toContain("/w/studio-sandbox/mcp");
+  const urlField = screen.getByLabelText("MCP server URL") as HTMLInputElement;
+  expect(new URL(urlField.value).pathname).toBe("/mcp");
 
   const promptBlock = screen.getByLabelText("Agent verification prompt");
   await waitFor(() => expect(promptBlock.textContent).toContain("`AP`"));

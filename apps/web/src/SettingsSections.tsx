@@ -255,10 +255,12 @@ export function IntegrationSettings({
         <div className="settings-card">
           <div className="settings-field settings-mcp-row">
             <div>
-              <label htmlFor="workspace-mcp-url">Workspace MCP URL</label>
+              <label htmlFor="workspace-mcp-url">MCP server URL</label>
               <p>
-                Scoped to workspace <code>{slug}</code>. Use server name <code>{serverName}</code>{" "}
-                so multiple Roster workspaces do not collide.
+                {preview
+                  ? "Local preview uses the workspace in this URL."
+                  : "Choose the workspace and read-only or read-write access when you authorize."}{" "}
+                Use <code>{serverName}</code> for a separate client authentication context.
               </p>
             </div>
             <div className="settings-copy-group">
@@ -431,10 +433,10 @@ export function IntegrationSettings({
               </li>
               <li>
                 <strong>404 Not Found, tools not loaded, or wrong workspace:</strong> Confirm the
-                endpoint ends with <code>/w/{slug}/mcp</code>, use server name{" "}
-                <code>{serverName}</code> so another workspace’s global server doesn’t shadow it,
-                and in Codex either run <code>codex mcp add</code> or trust the target repository so
-                its <code>.codex/config.toml</code> is loaded.
+                connection’s <code>whoami</code> result names <code>{slug}</code>. Reauthorize if it
+                differs. Use server name <code>{serverName}</code> so another workspace’s global
+                server doesn’t shadow it, and in Codex either run <code>codex mcp add</code> or
+                trust the target repository so its <code>.codex/config.toml</code> is loaded.
               </li>
             </ul>
           </div>
