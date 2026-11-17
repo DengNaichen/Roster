@@ -19,7 +19,7 @@ VITE_LOCAL_PREVIEW=true node scripts/toolchain.mjs --filter @roster/web dev --po
 
 Issue 正文是结构化 JSON `document`，契约见 `packages/contracts/issue-document.ts`：导语 `lead`、带标题的 `sections`（段落、列表、对比、表格、提示、代码块）和验收条件 `criteria`（稳定 ID `AC-n`）。所有文本字段按纯文本显示，不解释 Markdown 或 HTML。REST 与 MCP 在边界用同一个 zod schema 校验，错误信息带字段路径，例如 `document.criteria.1.id: Duplicate criterion ID AC-1`。
 
-`create_issue` 与 `update_issue` 的 `document` 整体替换正文；不传则保持不变。勾选单条验收条件使用 `PATCH /api/w/:workspace/issues/:identifier/criteria/:criterion`（正文 `{"done": true}`）或 MCP `check_issue_criterion`（参数 `identifier`、`criterion`、`done`）。服务端在锁住任务行的事务内只改这一条，审计事件 `issue.criterion_updated` 只记录 `{criterion, done}` 的前后值；状态未变时不写入。未知 ID 返回 `not_found`，权限与修改任务相同。
+`save_issue` 的 `document` 整体替换正文；不传则保持不变。勾选单条验收条件使用 `PATCH /api/w/:workspace/issues/:identifier/criteria/:criterion`（正文 `{"done": true}`）或 MCP `check_issue_criterion`（参数 `identifier`、`criterion`、`done`）。服务端在锁住任务行的事务内只改这一条，审计事件 `issue.criterion_updated` 只记录 `{criterion, done}` 的前后值；状态未变时不写入。未知 ID 返回 `not_found`，权限与修改任务相同。
 
 搜索匹配标题和 `document_text`，即 `issueDocumentText` 生成的纯文本，不匹配 JSON 键名。迁移 `20261105000200_issue_documents.sql` 把旧 `description` 转为一个名为 Description 的段落（超过 5000 字符截断），空正文转为空文档，然后删除该列。Linear 与 SQLite 导入用同一规则转换。
 
@@ -229,3 +229,20 @@ ROSTER_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55439/roster_spec_links
 ```
 
 覆盖双端与跨 Team 权限、跨 Workspace 外键、成员停用、并发重复关联、批量回滚、解除关联的幂等性、状态与修订独立、超过 50 条数据的完整查询和分页，以及 REST/MCP 交叉读写。部署前须应用 `20261103000100_spec_issues.sql`；前端需要同版本后端。
+
+
+### MCP 统一任务写入
+
+`save_issue` 是任务创建和编辑的统一 MCP 入口。不传 `identifier` 时创建，必填 `team` 与 `title`；传入 `identifier` 时更新，禁止传 `team`。省略字段保留原值，`assignee: null` 清空负责人。
+
+`add_labels` / `remove_labels` 接受精确标签名称或数字 ID；`blocks` / `blocked_by` / `related_to` 增加关系，`remove_blocks` / `remove_blocked_by` / `remove_related_to` 删除关系。`links` 追加 `{title, url}`，已有相同标题和 URL 的链接不重复添加。标签和关系的增删不能包含同一个目标；标签分组互斥、私有任务可见性和依赖无环校验照常生效。
+
+基础字段、标签、关系与链接在一个数据库事务中提交，任一操作失败时全部回滚。重试同一更新不会重复增加关系、标签或相同链接；创建请求没有客户端幂等键，网络结果不明时先查找任务，避免重复创建。
+
+原先多任务标签修改改为逐任务调用 `save_issue`，每个任务单独保证原子性。
+
+旧 MCP `create_issue`、`update_issue`、`change_issue_labels`、`add_relation`、`remove_relation`、`add_link` 已移除，客户端需要刷新工具清单。网页所用 REST 资源接口仍独立提供。
+
+```json
+{"team":"Roster","title":"修复 OAuth 回调","assignee":"me","add_labels":["auth"],"blocks":["RST-17"],"links":[{"title":"PR","url":"https://github.com/DengNaichen/Roster/pull/58"}]}
+```

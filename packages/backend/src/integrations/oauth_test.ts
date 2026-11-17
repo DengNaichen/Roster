@@ -261,7 +261,7 @@ Deno.test({
       const tools = await rpc(aTokens.access_token, '/mcp', 'tools/list');
       const names = tools.data.result.tools.map((t: { name: string }) => t.name);
       assert(
-        names.includes('whoami') && !names.includes('create_issue') &&
+        names.includes('whoami') && !names.includes('save_issue') &&
           !names.includes('list_workspaces'),
       );
       const who = await rpc(aTokens.access_token, '/mcp', 'tools/call', {
@@ -270,16 +270,16 @@ Deno.test({
       });
       assert(who.data.result.structuredContent.result.workspace.slug === a.slug);
       const blocked = await rpc(aTokens.access_token, '/mcp', 'tools/call', {
-        name: 'create_issue',
+        name: 'save_issue',
         arguments: { team: 'TE', title: 'Forbidden' },
       });
       assert(blocked.data.error || blocked.data.result?.isError);
       assert((await service.listIssues(user, a.slug)).issues.length === 0);
       assert((await rpc(aTokens.access_token, `/w/${b.slug}/mcp`, 'tools/list')).status === 403);
       const readonly = await rpc(bTokens.access_token, '/mcp/readonly', 'tools/list');
-      assert(!readonly.data.result.tools.some((t: { name: string }) => t.name === 'create_issue'));
+      assert(!readonly.data.result.tools.some((t: { name: string }) => t.name === 'save_issue'));
       const write = await rpc(bTokens.access_token, '/mcp', 'tools/call', {
-        name: 'create_issue',
+        name: 'save_issue',
         arguments: { team: 'TE', title: 'Authorized' },
       });
       assert(!write.data.result.isError, JSON.stringify(write));

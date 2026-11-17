@@ -1,3 +1,5 @@
+import { parse } from '../../platform/errors/parse.ts';
+import { saveIssueSchema } from '../../../../contracts/issue-save.ts';
 import { AmbiguousReference, resolveMcpReferences } from './references.ts';
 import { searchSchema } from '../../../../contracts/search.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@2.4.0';
@@ -16,7 +18,6 @@ import {
   joinWorkspaceSchema,
   listIssuesSchema,
   type RequestContext,
-  updateIssueSchema,
   updateMemberSchema,
   updateTeamSchema,
   updateWorkspaceSchema,
@@ -26,7 +27,6 @@ import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
 import type { Grant } from '../../integrations/oauth/index.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
-import { restCreateIssueSchema, restUpdateIssueSchema } from '../http/compat.ts';
 import { compressMcpResponse } from './compression.ts';
 const reference = z.string().trim().min(1).max(200);
 const userReference = z.string().max(200).nullable().optional().describe(
@@ -193,8 +193,7 @@ const resultSchemas: Record<string, z.ZodType> = {
       }).passthrough(),
     ),
   }),
-  create_issue: issueOutput,
-  update_issue: issueOutput,
+  save_issue: issueOutput,
   check_issue_criterion: issueOutput,
 };
 export function createMcpServer(
@@ -408,27 +407,23 @@ export function createMcpServer(
     (i) => service.getIssue(ctx, workspace, i.identifier),
   );
   tool(
-    'create_issue',
-    'Create an issue in an accessible team. The body is `document`: structured JSON with a lead, ' +
-      'titled sections of typed blocks, and acceptance criteria with IDs AC-1, AC-2, and so on. ' +
-      'Every text field is plain text; Markdown and HTML are shown literally.',
-    createIssueSchema.extend({
+    'save_issue',
+    'Create or update an issue atomically with labels, relations and links. Omit identifier to create (team and title required); provide identifier to update (team cannot change). Omitted fields stay unchanged; assignee null clears assignment. Labels accept exact names or numeric IDs. Relation arrays add edges; remove_* arrays remove edges. Links append without duplicating an existing title/URL pair. document replaces the whole body: read it first and preserve existing criterion IDs; use check_issue_criterion to tick one criterion.',
+    {
+      ...saveIssueSchema.shape,
       ...compatibleIssueFields,
-      team: reference.describe('Team key, exact name or ID'),
-    }).shape,
+      type: compatibleIssueFields.type.optional(),
+      team: reference.optional(),
+      add_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
+      remove_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
+    },
     false,
-    (i) => service.createIssue(ctx, workspace, restCreateIssueSchema.parse(i)),
-  );
-  tool(
-    'update_issue',
-    'Update a visible issue; omitted properties remain unchanged. `document` replaces the whole ' +
-      'body: read it with get_issue, edit it, and send it back complete. Keep existing criterion ' +
-      'IDs and give new criteria the next unused number. To tick one criterion after verifying ' +
-      'it, call check_issue_criterion instead of rewriting the document.',
-    { identifier: z.string(), ...updateIssueSchema.extend(compatibleIssueFields).shape },
-    false,
-    ({ identifier, ...i }) =>
-      service.updateIssue(ctx, workspace, identifier, restUpdateIssueSchema.parse(i)),
+    (i) =>
+      service.saveIssue(
+        ctx,
+        workspace,
+        parse(saveIssueSchema, { ...i, type: i.type === '' ? null : i.type }),
+      ),
   );
   tool(
     'check_issue_criterion',
@@ -486,27 +481,6 @@ export function createMcpServer(
     activity.delegateIssueSchema.shape,
     false,
     (i) => service.delegateIssue(ctx, workspace, i),
-  );
-  tool(
-    'add_relation',
-    'Add blocks, blocked_by or undirected related relation. Blocking dependencies must remain acyclic.',
-    activity.addRelationSchema.omit({ remove: true }).shape,
-    false,
-    (i) => service.addRelation(ctx, workspace, { ...i, remove: false }),
-  );
-  tool(
-    'remove_relation',
-    'Remove a relation; absent relations succeed.',
-    activity.addRelationSchema.omit({ remove: true }).shape,
-    false,
-    (i) => service.addRelation(ctx, workspace, { ...i, remove: true }),
-  );
-  tool(
-    'add_link',
-    'Attach a titled HTTP(S) URL without credentials.',
-    activity.addLinkSchema.shape,
-    false,
-    (i) => service.addLink(ctx, workspace, i),
   );
   tool(
     'list_projects',
@@ -598,13 +572,6 @@ export function createMcpServer(
     catalog.updateLabelSchema.shape,
     false,
     (i) => service.updateLabel(ctx, workspace, i),
-  );
-  tool(
-    'change_issue_labels',
-    'Atomically add and remove labels on visible issues.',
-    catalog.changeIssueLabelsSchema.shape,
-    false,
-    (i) => service.changeIssueLabels(ctx, workspace, i),
   );
   tool(
     'merge_labels',

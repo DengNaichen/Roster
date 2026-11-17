@@ -233,7 +233,7 @@ Deno.test({
           400,
         );
         assert(error.error.message.includes(path), `REST: ${error.error.message}`);
-        const failed = await call('owner', 'create_issue', body);
+        const failed = await call('owner', 'save_issue', body);
         assert(
           failed.isError && failed.content[0].text.includes(path),
           `MCP: ${failed.content[0].text}`,
@@ -248,7 +248,7 @@ Deno.test({
         legacy.error.message.includes('Unrecognized key: "description"'),
         legacy.error.message,
       );
-      const mcpLegacy = await call('owner', 'update_issue', {
+      const mcpLegacy = await call('owner', 'save_issue', {
         identifier: created.identifier,
         description: 'old body',
       });
@@ -266,19 +266,19 @@ Deno.test({
         sections: [],
         criteria: [{ id: 'AC-1', title: 'Only criterion', detail: '', done: false }],
       };
-      const mcpCreated = await mcpOk('member', 'create_issue', {
+      const mcpCreated = await mcpOk('member', 'save_issue', {
         team: 'DOC',
         title: 'Agent issue',
         document: full,
       });
       assert(isDeepStrictEqual(mcpCreated.document, full), 'MCP create stores the document');
-      const replaced = await mcpOk('member', 'update_issue', {
+      const replaced = await mcpOk('member', 'save_issue', {
         identifier: mcpCreated.identifier,
         document: replacement,
       });
       assert(
         isDeepStrictEqual(replaced.document, replacement),
-        'update_issue replaces the whole body',
+        'save_issue replaces the whole body',
       );
       const retitled = await rest<Issue>('owner', `/issues/${mcpCreated.identifier}`, 'PATCH', {
         title: 'Agent issue renamed',

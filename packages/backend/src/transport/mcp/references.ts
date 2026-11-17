@@ -75,6 +75,30 @@ export async function resolveMcpReferences<T extends Record<string, unknown>>(
   if (teamKeys.has(name) && typeof input.key === 'string') {
     Object.assign(result, { key: await team(input.key) });
   }
+  if (
+    name === 'save_issue' && (Array.isArray(input.add_labels) || Array.isArray(input.remove_labels))
+  ) {
+    const labels = await service.listLabels(ctx, workspace, { include_archived: true });
+    for (const field of ['add_labels', 'remove_labels'] as const) {
+      if (!Array.isArray(input[field])) continue;
+      const resolved = input[field].map((ref: string | number) => {
+        if (typeof ref === 'number') return ref;
+        const matches = labels.filter((label) => canonical(label.name) === canonical(ref));
+        if (!matches.length) {
+          throw new AppError('not_found', `No label matches ${JSON.stringify(ref)}`);
+        }
+        if (matches.length > 1) {
+          throw new AmbiguousReference(
+            'labels',
+            ref,
+            matches.map((l) => ({ id: String(l.id), name: l.name })),
+          );
+        }
+        return matches[0].id;
+      });
+      Object.assign(result, { [field]: resolved });
+    }
+  }
   for (const field of ['assignee', 'subject'] as const) {
     const reference = input[field];
     if (typeof reference !== 'string') continue;
