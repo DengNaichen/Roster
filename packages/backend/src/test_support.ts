@@ -12,8 +12,8 @@ export async function prepareTestDatabase(pool: Pool) {
     await connection.query(
       "do $$ begin if not exists(select 1 from pg_roles where rolname='anon') then create role anon nologin; end if; if not exists(select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if; end $$",
     );
-    // A migration is skipped once the table, or the column, it adds exists.
-    const markers: Record<string, [table: string, column?: string]> = {
+    // Skip a migration only when its expected table, column and optional type are present.
+    const markers: Record<string, [table: string, column?: string, dataType?: string]> = {
       '20261101000000_initial.sql': ['workspaces'],
       '20261102000100_catalog.sql': ['projects'],
       '20261102000200_cycles_issues.sql': ['cycles'],
@@ -24,11 +24,12 @@ export async function prepareTestDatabase(pool: Pool) {
       '20261105000100_spec_designs.sql': ['spec_designs'],
       '20261105000200_issue_documents.sql': ['issues', 'document'],
       '20261117080722_mcp_authorizations.sql': ['oauth_grants'],
+      '20261117090655_oauth_authorization_opaque_ids.sql': ['oauth_authorizations', 'id', 'text'],
     };
-    for (const [file, [table, column]] of Object.entries(markers)) {
+    for (const [file, [table, column, dataType]] of Object.entries(markers)) {
       const exists = await connection.query(
-        "select 1 from information_schema.columns where table_schema='roster' and table_name=$1 and ($2::text is null or column_name=$2)",
-        [table, column ?? null],
+        "select 1 from information_schema.columns where table_schema='roster' and table_name=$1 and ($2::text is null or column_name=$2) and ($3::text is null or data_type=$3)",
+        [table, column ?? null, dataType ?? null],
       );
       if (!exists.rows.length) {
         await connection.query(

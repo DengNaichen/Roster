@@ -1,3 +1,4 @@
+import { authorizationIdSchema } from '../../../../contracts/oauth.ts';
 import { Hono } from 'npm:hono@4.11.4';
 import { bodyLimit } from 'npm:hono@4.11.4/body-limit';
 import { cors } from 'npm:hono@4.11.4/cors';
@@ -92,7 +93,10 @@ export function createOAuthTransport(options: {
     '/api/oauth/authorizations/:id',
     async (c) =>
       c.json(
-        await oauth.details(await verify(c.req.raw), z.string().uuid().parse(c.req.param('id'))),
+        await oauth.details(
+          await verify(c.req.raw),
+          authorizationIdSchema.parse(c.req.param('id')),
+        ),
       ),
   );
   app.post('/api/oauth/authorizations/:id', async (c) => {
@@ -102,7 +106,7 @@ export function createOAuthTransport(options: {
       return c.json({ error: 'invalid_request' }, 400);
     }
     const ctx = await verify(c.req.raw);
-    const id = z.string().uuid().parse(c.req.param('id'));
+    const id = authorizationIdSchema.parse(c.req.param('id'));
     const body = await c.req.json();
     if (body?.action === 'deny') {
       z.strictObject({ action: z.literal('deny') }).parse(body);

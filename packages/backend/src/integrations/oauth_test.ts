@@ -72,7 +72,7 @@ Deno.test({
       },
       authorize: async (params) => {
         assert(!params.get('scope')?.includes('read'), 'Business scopes must not reach Supabase');
-        const id = crypto.randomUUID();
+        const id = 'upstream' + crypto.randomUUID().replaceAll('-', '').slice(0, 24);
         requests.set(id, { code: crypto.randomUUID(), session: crypto.randomUUID() });
         return new Response(null, {
           status: 302,
@@ -156,11 +156,37 @@ Deno.test({
       );
       assert(registration.status === 201 && (await registration.json()).scope === 'read write');
       const aid = await authorize('read'), bid = await authorize('read write');
+      assert(aid.length === 32 && !aid.includes('-'));
+      const browserToken = await new SignJWT({ role: 'authenticated', email: identity.email })
+        .setProtectedHeader({ alg: 'ES256', kid: 'test' }).setIssuer(issuer).setAudience(
+          'authenticated',
+        )
+        .setSubject(identity.subject).setIssuedAt().setExpirationTime('5m').sign(privateKey);
+      const detailsResponse = await transport(
+        new Request(`https://ui.example/api/oauth/authorizations/${aid}`, {
+          headers: { Authorization: `Bearer ${browserToken}` },
+        }),
+      );
+      assert(detailsResponse.status === 200, await detailsResponse.clone().text());
+      assert((await detailsResponse.json()).id === aid);
+
       assert((await oauth.details(user, aid)).access === 'read');
       await rejects(() => oauth.approve(user, 'Bearer web', aid, a.slug, 'read_write'));
       // Approve and exchange in the opposite order; neither chooses a "latest" grant.
       await oauth.approve(user, 'Bearer web', bid, b.slug, 'read_write');
-      await oauth.approve(user, 'Bearer web', aid, a.slug, 'read');
+      const approvalResponse = await transport(
+        new Request(`https://ui.example/api/oauth/authorizations/${aid}`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${browserToken}`,
+            Origin: 'https://ui.example',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ workspace: a.slug, access: 'read' }),
+        }),
+      );
+      assert(approvalResponse.status === 200, await approvalResponse.clone().text());
+
       await rejects(() => oauth.approve(user, 'Bearer web', aid, b.slug, 'read'));
       const bTokens = await (await oauth.token(
         tokenRequest({ grant_type: 'authorization_code', code: requests.get(bid)!.code }),
@@ -371,4 +397,45 @@ Deno.test('Supabase adapter handles first consent and auto-approval without foll
     new Request('https://ui.example/oauth/register', { method: 'POST', body: '{}' }),
   );
   assert(calls.at(-1)?.path === '/auth/v1/oauth/clients/register');
+});
+
+Deno.test({
+  name: 'Opaque authorization ID migration preserves earlier UUID-shaped broker requests',
+  ignore: !url,
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    assert(url && new URL(url).pathname.endsWith('_test'));
+    const pool = new Pool({ connectionString: url });
+    await prepareTestDatabase(pool);
+    const client = await pool.connect();
+    try {
+      await client.query('begin');
+      await client.query(
+        'alter table roster.oauth_authorizations alter column id type uuid using id::uuid',
+      );
+      const id = crypto.randomUUID();
+      await client.query(
+        "insert into roster.oauth_authorizations(id,client_id,redirect_uri,access) values($1,$2,'http://localhost/callback','read')",
+        [id, crypto.randomUUID()],
+      );
+      await client.query(
+        await Deno.readTextFile(
+          new URL(
+            '../../../../supabase/migrations/20261117090655_oauth_authorization_opaque_ids.sql',
+            import.meta.url,
+          ),
+        ),
+      );
+      const row = await client.query(
+        'select id,pg_typeof(id)::text as type from roster.oauth_authorizations where id=$1',
+        [id],
+      );
+      assert(row.rows[0].id === id && row.rows[0].type === 'text');
+    } finally {
+      await client.query('rollback');
+      client.release();
+      await pool.end();
+    }
+  },
 });
