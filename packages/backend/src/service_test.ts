@@ -90,7 +90,7 @@ Deno.test({
       await s.createWorkspace(other, { slug: slugs[1], name: 'Other workspace' });
       await s.createTeam(owner, w.slug, { key: 'AA', name: 'Public' });
       await s.createTeam(owner, w.slug, { key: 'PR', name: 'Private', private: true });
-      assert((await s.listTeams(member, w.slug)).length === 1);
+      assert((await s.listTeams(member, w.slug)).length === 2);
       const directory = await s.teamDirectory(other, w.slug);
       assert(
         directory.find((t) => t.key === 'PR')?.next_number === null,

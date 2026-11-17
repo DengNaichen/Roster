@@ -13,7 +13,7 @@ beforeEach(() => {
   };
 });
 
-it("guides a new user from zero workspaces to team creation and a visible first Todo issue", async () => {
+it("creates a workspace with its default team and a visible first Todo issue in one flow", async () => {
   const workspaces: Workspace[] = [];
   const teams: Team[] = [];
   const issues: IssueSummary[] = [];
@@ -36,7 +36,22 @@ it("guides a new user from zero workspaces to team creation and a visible first 
           return json({ error: { message: "Temporary network failure" } }, 503);
         }
         workspaceCreations += 1;
-        const created = { slug: body.slug as string, name: body.name as string };
+        const created = {
+          slug: body.slug as string,
+          name: body.name as string,
+          default_team_key: body.team_key as string,
+        };
+        teams.push({
+          key: body.team_key,
+          name: body.name,
+          emoji: "",
+          private: false,
+          joined: true,
+          accessible: true,
+          can_manage: true,
+          membership_enabled: true,
+          next_number: 1,
+        });
         workspaces.push(created);
         return json(created, 201);
       }
@@ -50,21 +65,6 @@ it("guides a new user from zero workspaces to team creation and a visible first 
       if (path.includes("/label-groups")) return json({ groups: [] });
       if (path.includes("/labels")) return json({ labels: [] });
       if (path.endsWith("/assignees")) return json({ assignees: [] });
-      if (path.endsWith("/teams") && method === "POST") {
-        const created: Team = {
-          key: body.key,
-          name: body.name,
-          emoji: body.emoji ?? "",
-          private: Boolean(body.private),
-          joined: true,
-          accessible: true,
-          can_manage: true,
-          membership_enabled: true,
-          next_number: 1,
-        };
-        teams.push(created);
-        return json(created, 201);
-      }
       if (path.includes("/issues") && method === "GET") {
         if (path.includes("status=triage")) {
           return json({ issues: issues.filter((item) => item.status === "triage") });
@@ -107,35 +107,29 @@ it("guides a new user from zero workspaces to team creation and a visible first 
   fireEvent.change(wsDialog.getByRole("textbox", { name: "Name" }), {
     target: { value: "Studio Sandbox" },
   });
+  expect((wsDialog.getByRole("textbox", { name: "Team key" }) as HTMLInputElement).value).toBe(
+    "SS",
+  );
+  fireEvent.change(wsDialog.getByRole("textbox", { name: "Team key" }), {
+    target: { value: "STU" },
+  });
   fireEvent.click(wsDialog.getByRole("button", { name: "Create workspace" }));
   expect(await wsDialog.findByText("Temporary network failure")).toBeTruthy();
   expect(workspaces).toHaveLength(0);
 
   fireEvent.click(wsDialog.getByRole("button", { name: "Create workspace" }));
-  await waitFor(() => expect(window.location.pathname).toBe("/studio-sandbox/"));
+  await waitFor(() => expect(window.location.pathname).toBe("/studio-sandbox/team/STU/issues"));
   expect(workspaceCreations).toBe(1);
-
-  expect(await screen.findByRole("heading", { name: "Create your first team" })).toBeTruthy();
+  expect(teams).toHaveLength(1);
+  expect(teams[0].key).toBe("STU");
+  expect(await screen.findByRole("heading", { name: "Studio Sandbox is ready" })).toBeTruthy();
+  expect(screen.queryByRole("heading", { name: "Create your first team" })).toBeNull();
   expect((screen.getByRole("button", { name: "New issue" }) as HTMLButtonElement).disabled).toBe(
-    true,
+    false,
   );
-
-  fireEvent.click(screen.getAllByRole("button", { name: "Create team" })[1]);
-  const teamDialog = within(await screen.findByRole("dialog", { name: "Create team" }));
-  fireEvent.change(teamDialog.getByRole("textbox", { name: "Name" }), {
-    target: { value: "Agent Platform" },
-  });
-  expect(
-    (teamDialog.getByRole("textbox", { name: "Identifier (Key)" }) as HTMLInputElement).value,
-  ).toBe("AP");
-
-  fireEvent.click(teamDialog.getByRole("button", { name: "Create team" }));
-  await waitFor(() => expect(window.location.pathname).toBe("/studio-sandbox/team/AP/issues"));
-
-  expect(await screen.findByRole("heading", { name: "Agent Platform is ready" })).toBeTruthy();
   expect(
     screen.getByRole("link", { name: "Connect coding agent (MCP)" }).getAttribute("href"),
-  ).toBe("/studio-sandbox/settings/integrations?team=AP");
+  ).toBe("/studio-sandbox/settings/integrations?team=STU");
 
   fireEvent.click(screen.getByRole("button", { name: "Create first issue" }));
   fireEvent.change(await screen.findByRole("textbox", { name: "Title" }), {
@@ -144,4 +138,5 @@ it("guides a new user from zero workspaces to team creation and a visible first 
   fireEvent.click(screen.getByRole("button", { name: "Create issue" }));
   expect(await screen.findByText("Ship onboarding flow")).toBeTruthy();
   expect(issues[0].status).toBe("todo");
+  expect(issues[0].identifier).toBe("STU-1");
 });

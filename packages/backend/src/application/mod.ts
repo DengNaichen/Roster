@@ -1,8 +1,10 @@
 import type {
   ChangeTeamMemberInput,
   CheckIssueCriterionInput,
+  CreatedWorkspace,
   CreateIssueInput,
   CreateTeamInput,
+  CreateWorkspaceInput,
   Identity,
   Issue,
   IssueDetail,
@@ -26,8 +28,8 @@ export interface Service extends CatalogService, CycleService, ActivityService, 
   listWorkspaces(ctx: RequestContext): Promise<Workspace[]>;
   createWorkspace(
     ctx: RequestContext,
-    input: { slug: string; name: string },
-  ): Promise<Workspace>;
+    input: CreateWorkspaceInput,
+  ): Promise<CreatedWorkspace>;
   updateWorkspace(
     ctx: RequestContext,
     slug: string,

@@ -78,6 +78,7 @@ Deno.test({
       const w = await service.createWorkspace(owner, {
         slug: 'doc-' + crypto.randomUUID(),
         name: 'Documents',
+        team_key: 'HOME',
       });
       workspaces.push(w.id);
       const other = await service.createWorkspace(outsider, {

@@ -1,3 +1,4 @@
+import { workspaceHome } from "./shared";
 import { CapabilitiesProvider, FeatureUnavailable, useCapabilities } from "./Capabilities";
 import { Component, lazy, ReactNode, Suspense, useEffect, useMemo, useState } from "react";
 import { CreateTeamDialog } from "./Dialogs";
@@ -104,16 +105,15 @@ function FirstWorkspace() {
             </p>
             <ul className="onboarding-steps" aria-label="How Roster is organized">
               <li>
-                <strong>Workspace</strong> — shared container for members, projects, and your MCP
-                endpoint.
+                <strong>Workspace</strong> — your shared home for tasks, specs and projects.
               </li>
               <li>
-                <strong>Team</strong> — issue queue (<code>KEY-1</code>, <code>KEY-2</code>), specs,
-                and cycles for a product or repository.
+                <strong>Team</strong> — we create your first team automatically. Add more when your
+                work needs them.
               </li>
               <li>
                 <strong>Coding agent</strong> — connect Codex, Claude Code, or Cursor via MCP from
-                any repository once a team is ready.
+                any repository when you’re ready.
               </li>
             </ul>
             <div className="onboarding-actions">
@@ -129,7 +129,7 @@ function FirstWorkspace() {
       {creating && (
         <WorkspaceDialog
           onClose={() => setCreating(false)}
-          onSaved={(workspace) => navigate(`/${workspace.slug}/`)}
+          onSaved={(workspace) => navigate(workspaceHome(workspace))}
         />
       )}
       <Session />
