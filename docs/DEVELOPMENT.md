@@ -181,13 +181,15 @@ Vercel 项目根保持仓库根，Production 中需已有 `VITE_SUPABASE_URL`、
 
 ## MCP
 
-本地：`http://127.0.0.1:18471/w/WORKSPACE/mcp`。
+真实登录本地服务：`http://127.0.0.1:18471/mcp`。免登录 preview 仍为 `/w/WORKSPACE/mcp`，不得用于验证真实 OAuth。
 
-托管：`https://PROJECT.supabase.co/functions/v1/mcp/w/WORKSPACE/mcp`。
+托管统一入口：`https://PROJECT.supabase.co/functions/v1/mcp/mcp`；只读目录为 `/mcp/readonly`。Workspace 由授权记录确定。旧 `/w/WORKSPACE/mcp` 仅在 URL 与既有授权一致时可用，旧凭据需要重新授权。
 
-未认证请求返回 401，`WWW-Authenticate` 指向同基址下的资源 metadata。OAuth 授权服务器是 Supabase Auth，授权 UI 是 Roster 前端；客户端不能使用 Supabase service-role key 代表用户。
+资源 metadata 指向 Roster OAuth broker。`OAUTH_PUBLIC_URL` 默认为授权页所在 origin，`OAUTH_CONSENT_URL` 默认为第一个 `ALLOWED_ORIGINS` 加 `/oauth/consent`。多域部署需明确设置二者，并与 Supabase 的 Site URL/授权页一致。根目录 vercel.json 将公开 AS discovery 与 authorize/token/register 路由代理到当前托管 MCP Function；更换 Supabase 项目时同步更新这些公开目标。真实本地 OAuth 使用后端 origin 设置 `OAUTH_PUBLIC_URL`，无需前端代理。
 
-当前验证了 JWT 签名、issuer、audience、过期时间和用户角色，以及 discovery、结构化工具输出。Supabase 默认 audience 是 `authenticated`，不是某一个 MCP URL；因此当前不提供资源专属 Token 隔离保证。真实 OAuth 登录、刷新、撤销和客户端兼容性尚须托管端到端验证。
+未认证请求返回 401，`WWW-Authenticate` 指向同基址下的资源 metadata。OAuth broker 由 Roster 提供，Supabase Auth 负责身份签发、PKCE 与刷新，授权 UI 是 Roster 前端；客户端不能使用 Supabase service-role key 代表用户。
+
+当前验证了 JWT 签名、issuer、audience、过期时间和用户角色，以及 discovery、结构化工具输出。Supabase 默认 audience 是 `authenticated`，不是某一个 MCP URL；Roster 不把 audience 当作工作区边界：第三方 OAuth token 必须有通过 code exchange 精确绑定的 session grant；普通 REST 拒绝第三方 OAuth token。只读授权的写工具不注册，手工调用也无法执行。read/write scope 由 broker 映射成应用权限，上游只使用标准 OIDC scope。详细边界见 [授权设计](auth/mcp-authorization.md)。真实托管 OAuth 登录、刷新和各客户端兼容性仍须部署后端到端验收；本地签名 JWT、数据库和模拟上游的测试不等同于托管验收。
 
 ## 已保留的权限语义
 

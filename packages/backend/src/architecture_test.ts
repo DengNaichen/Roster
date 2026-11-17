@@ -4,6 +4,7 @@ const composition = new Set([
   'bootstrap.ts',
   'jobs.ts',
   'integrations/github/factory.ts',
+  'integrations/oauth/factory.ts',
 ]);
 const tableOwners: Record<string, string> = {
   users: 'access',
@@ -34,6 +35,8 @@ const tableOwners: Record<string, string> = {
   audit_events: 'audit',
   pull_requests: 'github',
   github_sync: 'github',
+  oauth_authorizations: 'oauth',
+  oauth_grants: 'oauth',
 };
 function violations(path: string, source: string): string[] {
   const errors: string[] = [];

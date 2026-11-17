@@ -2,6 +2,8 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 const auth = vi.hoisted(() => ({
   oauthError: false,
+  authorizationId: "stale-id",
+  requestedAccess: "read_write",
   signedIn: true,
   signInWithOAuth: vi.fn(),
   callback: null as null | ((event: string, session: unknown) => void),
@@ -16,7 +18,17 @@ const session = {
 vi.mock("./api", () => ({
   configured: true,
   localPreview: false,
-  api: vi.fn(),
+  api: vi.fn(async (_path: string, method?: string) => {
+    if (auth.oauthError) throw new Error("Consent unavailable");
+    if (method === "POST") throw new Error("Approval recorded");
+    return {
+      id: auth.authorizationId,
+      clientId: "test-client",
+      redirectUri: "http://localhost/callback",
+      access: auth.requestedAccess,
+      workspaces: [{ id: "workspace-id", slug: "studio", name: "Studio" }],
+    };
+  }),
   supabase: {
     auth: {
       getSession: vi.fn(async () => ({
@@ -53,6 +65,8 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
   auth.oauthError = false;
   auth.signedIn = true;
+  auth.authorizationId = "stale-id";
+  auth.requestedAccess = "read_write";
 });
 describe("authentication recovery", () => {
   it("keeps the mounted app and its draft when the session expires and recovers", async () => {
@@ -169,4 +183,30 @@ it("clears the old query client when identity changes while retaining it on temp
   await screen.findByText("different-user");
   await waitFor(() => expect(first.getQueryCache().getAll()).toHaveLength(0));
   expect(clients.get("different-user")!.getQueryCache().getAll()).toHaveLength(0);
+});
+
+it("requires an explicit workspace choice and defaults a new authorization to read only", async () => {
+  auth.authorizationId = "current-id";
+  window.history.replaceState({}, "", "/oauth/consent?authorization_id=current-id");
+  render(<AuthBoundary>Application</AuthBoundary>);
+  const workspace = await screen.findByRole("combobox", { name: "Workspace" });
+  expect((workspace as HTMLSelectElement).value).toBe("studio");
+  expect((screen.getByRole("combobox", { name: "Access" }) as HTMLSelectElement).value).toBe(
+    "read",
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+  await screen.findByText("Approval recorded");
+  const { api } = await import("./api");
+  expect(api).toHaveBeenLastCalledWith("/api/oauth/authorizations/current-id", "POST", {
+    workspace: "studio",
+    access: "read",
+  });
+});
+it("does not offer writes when the client requested read-only access", async () => {
+  auth.authorizationId = "current-id";
+  auth.requestedAccess = "read";
+  window.history.replaceState({}, "", "/oauth/consent?authorization_id=current-id");
+  render(<AuthBoundary>Application</AuthBoundary>);
+  await screen.findByRole("combobox", { name: "Access" });
+  expect(screen.queryByRole("option", { name: "Read and write" })).toBeNull();
 });

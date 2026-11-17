@@ -9,9 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
-import type { OAuthAuthorizationDetails, Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { RosterLogo } from "../RosterLogo";
-import { configured, localPreview, supabase } from "./api";
+import { api, configured, localPreview, supabase } from "./api";
 type Identity = { subject: string; name: string; email: string };
 type State = {
   identity: Identity | null;
@@ -109,27 +109,34 @@ function ReturnAfterLogin() {
   }, []);
   return <main className="integration-auth">Opening workspace…</main>;
 }
+type AuthorizationDetails = {
+  id: string;
+  clientId: string;
+  redirectUri: string;
+  access: "read" | "read_write";
+  workspaces: { id: string; slug: string; name: string }[];
+};
 function Consent({ identity }: { identity: Identity | null }) {
   const id = new URLSearchParams(window.location.search).get("authorization_id");
   const current = useRef(id);
   current.current = id;
-  const [details, setDetails] = useState<OAuthAuthorizationDetails>();
+  const [details, setDetails] = useState<AuthorizationDetails>();
   const [error, setError] = useState<unknown>();
   const [pending, setPending] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [workspace, setWorkspace] = useState("");
+  const [access, setAccess] = useState<"read" | "read_write">("read");
   useEffect(() => {
     let active = true;
     setDetails(undefined);
     setError(undefined);
     if (!id || !supabase) return;
-    void supabase.auth.oauth
-      .getAuthorizationDetails(id)
-      .then(({ data, error }) => {
+    void api<AuthorizationDetails>(`/api/oauth/authorizations/${encodeURIComponent(id)}`)
+      .then((data) => {
         if (!active) return;
-        if (error) throw error;
-        if (data && "redirect_url" in data) {
-          window.location.assign(data.redirect_url);
-        } else if (data) setDetails(data);
+        setDetails(data);
+        setWorkspace(data.workspaces.length === 1 ? data.workspaces[0].slug : "");
+        setAccess("read");
       })
       .catch((e) => {
         if (active) setError(e);
@@ -138,23 +145,18 @@ function Consent({ identity }: { identity: Identity | null }) {
       active = false;
     };
   }, [id, attempt]);
-  const currentDetails = details?.authorization_id === id ? details : undefined;
+  const currentDetails = details?.id === id ? details : undefined;
   async function decide(allow: boolean) {
     if (!id || !currentDetails || pending || localPreview) return;
     setPending(true);
     try {
-      const { data, error } = allow
-        ? await supabase!.auth.oauth.approveAuthorization(id, {
-            skipBrowserRedirect: true,
-          })
-        : await supabase!.auth.oauth.denyAuthorization(id, {
-            skipBrowserRedirect: true,
-          });
+      const data = await api<{ redirect_url: string }>(
+        `/api/oauth/authorizations/${encodeURIComponent(id)}`,
+        "POST",
+        allow ? { workspace, access } : { action: "deny" },
+      );
       if (current.current !== id) return;
-      if (error) throw error;
-      if (!data?.redirect_url) {
-        throw new Error("Missing authorization redirect");
-      }
+      if (!data.redirect_url) throw new Error("Missing authorization redirect");
       window.location.assign(data.redirect_url);
     } catch (e) {
       if (current.current === id) setError(e);
@@ -200,30 +202,54 @@ function Consent({ identity }: { identity: Identity | null }) {
           <>
             {currentDetails ? (
               <div className="roster-consent-details">
-                <h2>{currentDetails.client.name}</h2>
-                {currentDetails.client.uri && (
-                  <p className="roster-consent-uri">{currentDetails.client.uri}</p>
-                )}
+                <h2>Connect your coding agent</h2>
+                <details>
+                  <summary>Connection details</summary>
+                  <p className="roster-consent-uri">Client: {currentDetails.clientId}</p>
+                  <p className="roster-consent-uri">Return address: {currentDetails.redirectUri}</p>
+                </details>
                 <p>
-                  This MCP client or application can read and update issues, specs, and projects
-                  across the Roster workspaces and teams your account can access. Approving does not
-                  grant access to your GitHub repositories.
+                  Choose one workspace and the access this connection needs. Private team
+                  permissions still apply. Switching workspaces in Roster does not change this
+                  connection.
                 </p>
-                {currentDetails.scope.trim() && (
-                  <>
-                    <p className="roster-consent-scope-label">Requested profile scopes:</p>
-                    <ul className="roster-consent-scopes">
-                      {currentDetails.scope
-                        .split(" ")
-                        .filter(Boolean)
-                        .map((scope) => (
-                          <li key={scope}>
-                            <code>{scope}</code>
-                          </li>
-                        ))}
-                    </ul>
-                  </>
+                <label>
+                  Workspace
+                  <select
+                    aria-label="Workspace"
+                    value={workspace}
+                    onChange={(e) => setWorkspace(e.target.value)}
+                    disabled={pending}
+                  >
+                    <option value="">Choose a workspace</option>
+                    {currentDetails.workspaces.map((w) => (
+                      <option key={w.id} value={w.slug}>
+                        {w.name} ({w.slug})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {currentDetails.workspaces.length === 0 && (
+                  <p>Join or create a workspace in Roster before connecting.</p>
                 )}
+                <label>
+                  Access
+                  <select
+                    aria-label="Access"
+                    value={access}
+                    onChange={(e) => setAccess(e.target.value as "read" | "read_write")}
+                    disabled={pending}
+                  >
+                    <option value="read">Read only</option>
+                    {currentDetails.access === "read_write" && (
+                      <option value="read_write">Read and write</option>
+                    )}
+                  </select>
+                </label>
+                <p>
+                  Read only lets the agent inspect tasks, specs and projects. Read and write also
+                  lets it make changes using your existing permissions.
+                </p>
               </div>
             ) : (
               !error && <p className="roster-consent-loading">Loading authorization…</p>
@@ -245,7 +271,7 @@ function Consent({ identity }: { identity: Identity | null }) {
               <button
                 className="button primary"
                 type="button"
-                disabled={!currentDetails || pending}
+                disabled={!currentDetails || !workspace || pending}
                 onClick={() => void decide(true)}
               >
                 {pending ? "Authorizing…" : "Approve"}

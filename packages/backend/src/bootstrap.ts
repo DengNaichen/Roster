@@ -1,3 +1,5 @@
+import { createOAuthIntegration } from './integrations/oauth/index.ts';
+import { createOAuthTransport } from './transport/oauth/server.ts';
 import { measureRequest } from './platform/telemetry/performance.ts';
 import { createIdentityVerifier } from './platform/auth/jwt.ts';
 import { createDatabase } from './platform/database/client.ts';
@@ -22,18 +24,44 @@ export function bootstrap(env: Environment) {
   );
   const verify = createIdentityVerifier({ issuer, audience });
   const service = createService(db);
+  const publicUrl = required(env, 'MCP_PUBLIC_URL').replace(/\/$/, '');
+  const consentUrl = env.OAUTH_CONSENT_URL ?? `${allowedOrigins[0]}/oauth/consent`;
+  const oauthPublicUrl = env.OAUTH_PUBLIC_URL ?? new URL(consentUrl).origin;
+  const oauth = createOAuthIntegration(db, service, verify, issuer, consentUrl);
+  const oauthFetch = createOAuthTransport({
+    oauth,
+    verify,
+    publicUrl: oauthPublicUrl,
+    resourceUrl: publicUrl,
+    allowedOrigins,
+  });
   const app = createHttpApp({ service, verify, allowedOrigins });
   const mcp = createMcpFetch({
     service,
     verify,
     allowedOrigins,
-    publicUrl: required(env, 'MCP_PUBLIC_URL'),
-    authorizationServer: issuer,
+    publicUrl,
+    authorizationServer: oauthPublicUrl,
+    authorize: (ctx) => oauth.context(ctx),
   });
   const measured =
     (run: (request: Request) => Response | Promise<Response>) => (request: Request) =>
       env.ROSTER_PERFORMANCE === 'true' ? measureRequest(() => run(request)) : run(request);
-  return { service, api: measured(app.fetch), mcp: measured(mcp), close: () => pool.end() };
+  return {
+    service,
+    api: measured((request) =>
+      new URL(request.url).pathname.startsWith('/api/oauth/')
+        ? oauthFetch(request)
+        : app.fetch(request)
+    ),
+    mcp: measured((request) => {
+      const path = new URL(request.url).pathname;
+      return path.startsWith('/oauth/') || path === '/.well-known/oauth-authorization-server'
+        ? oauthFetch(request)
+        : mcp(request);
+    }),
+    close: () => pool.end(),
+  };
 }
 /** Edge gateways retain the function name in URL.pathname; adapters use clean paths. */
 export function stripFunctionPrefix(request: Request, functionName: string): Request {

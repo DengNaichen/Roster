@@ -3,7 +3,10 @@ import type { Label } from './catalog.ts';
 
 import type { ActivityIssueDetails } from './activity.ts';
 export type Identity = { subject: string; name: string; email: string };
-export type RequestContext = { identity: Identity };
+export type RequestContext = {
+  identity: Identity;
+  authentication?: { kind: 'user' } | { kind: 'oauth'; clientId: string; sessionId: string };
+};
 export const statuses = [
   'triage',
   'backlog',

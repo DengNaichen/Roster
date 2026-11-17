@@ -23,6 +23,7 @@ export async function prepareTestDatabase(pool: Pool) {
       '20261103000100_spec_issues.sql': ['spec_issues'],
       '20261105000100_spec_designs.sql': ['spec_designs'],
       '20261105000200_issue_documents.sql': ['issues', 'document'],
+      '20261117080722_mcp_authorizations.sql': ['oauth_grants'],
     };
     for (const [file, [table, column]] of Object.entries(markers)) {
       const exists = await connection.query(
@@ -110,5 +111,13 @@ export async function cleanupWorkspace(pool: Pool, id: string) {
     [id],
   );
   await pool.query('delete from roster.teams where workspace_id=$1', [id]);
+  await pool.query(
+    'delete from roster.oauth_authorizations where workspace=(select slug from roster.workspaces where id=$1)',
+    [id],
+  );
+  await pool.query(
+    'delete from roster.oauth_grants where workspace=(select slug from roster.workspaces where id=$1)',
+    [id],
+  );
   await pool.query('delete from roster.workspaces where id=$1', [id]);
 }

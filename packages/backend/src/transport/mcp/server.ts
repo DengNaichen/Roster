@@ -22,6 +22,7 @@ import {
 import { specStatuses } from '../../../../contracts/spec-status.ts';
 import * as specs from '../../../../contracts/spec.ts';
 import type { Service } from '../../application/mod.ts';
+import type { Grant } from '../../integrations/oauth/index.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
 import { restCreateIssueSchema, restUpdateIssueSchema } from '../http/compat.ts';
 import { compressMcpResponse } from './compression.ts';
@@ -35,6 +36,7 @@ export interface McpOptions {
   publicUrl: string;
   authorizationServer: string;
   allowedOrigins: string[];
+  authorize?: (ctx: RequestContext) => Promise<Grant>;
 }
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/);
 // Outputs permit additive fields while exposing stable core issue contracts.
@@ -189,7 +191,12 @@ const resultSchemas: Record<string, z.ZodType> = {
   update_issue: issueOutput,
   check_issue_criterion: issueOutput,
 };
-export function createMcpServer(service: Service, ctx: RequestContext, workspace: string) {
+export function createMcpServer(
+  service: Service,
+  ctx: RequestContext,
+  workspace: string,
+  connection?: { grant: Grant; readonly: boolean },
+) {
   const server = new McpServer({ name: 'roster', version: '0.1.0' });
   function tool<T extends z.ZodRawShape>(
     name: string,
@@ -198,6 +205,11 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
     readOnly: boolean,
     run: (input: z.infer<z.ZodObject<T>>) => Promise<unknown>,
   ) {
+    if (
+      connection &&
+      (['list_workspaces', 'create_workspace', 'join_workspace'].includes(name) ||
+        (connection.readonly && !readOnly))
+    ) return;
     server.registerTool(name, {
       description,
       inputSchema: z.strictObject(shape),
@@ -205,6 +217,9 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
       annotations: { readOnlyHint: readOnly, destructiveHint: !readOnly, openWorldHint: false },
     }, async (input) => {
       try {
+        if (connection?.readonly && !readOnly) {
+          throw new AppError('forbidden', 'Read-only connection');
+        }
         const result = (await run(input)) ?? { updated: true };
         return {
           structuredContent: { result },
@@ -230,6 +245,24 @@ export function createMcpServer(service: Service, ctx: RequestContext, workspace
       }
     });
   }
+  tool(
+    'whoami',
+    'Read the authenticated user, connected workspace and effective access. The workspace is fixed by this authorization; reconnect to choose a different workspace.',
+    {},
+    true,
+    async () => {
+      const w = (await service.listWorkspaces(ctx)).find((w) => w.slug === workspace);
+      if (!w) throw new AppError('forbidden', 'Workspace access denied');
+      return {
+        user: ctx.identity,
+        workspace: w,
+        connection: {
+          client_id: connection?.grant.clientId ?? 'local-preview',
+          access: connection?.readonly ? 'read' : 'read_write',
+        },
+      };
+    },
+  );
   tool(
     'list_workspaces',
     'List the current user’s active workspaces.',
@@ -677,7 +710,8 @@ export function createMcpFetch(options: McpOptions) {
     const discovery = url.pathname.startsWith(metadataPrefix);
     const path = discovery ? url.pathname.slice(metadataPrefix.length) : url.pathname;
     const match = /^\/w\/([^/]+)\/mcp$/.exec(path);
-    if (!match || !slugSchema.safeParse(match[1]).success) {
+    const unified = path === '/mcp' || path === '/mcp/readonly';
+    if (!unified && (!match || !slugSchema.safeParse(match[1]).success)) {
       return Response.json({ error: 'not_found' }, { status: 404 });
     }
     const resource = `${base}${path}`;
@@ -708,6 +742,7 @@ export function createMcpFetch(options: McpOptions) {
       return Response.json({
         resource,
         authorization_servers: [options.authorizationServer],
+        scopes_supported: ['read', 'write'],
         bearer_methods_supported: ['header'],
       }, { headers });
     }
@@ -722,7 +757,36 @@ export function createMcpFetch(options: McpOptions) {
         headers,
       });
     }
-    const handler = createMcpHandler(() => createMcpServer(options.service, ctx, match[1]));
+    let grant: Grant | undefined;
+    if (options.authorize) {
+      try {
+        grant = await options.authorize(ctx);
+        if (match && match[1] !== grant.workspace) {
+          throw new AppError('forbidden', 'This connection is authorized for another workspace');
+        }
+      } catch (error) {
+        if (!(error instanceof AppError)) throw error;
+        return Response.json({ error: { code: error.code, message: error.message } }, {
+          status: 403,
+          headers,
+        });
+      }
+    } else if (unified) {
+      return Response.json({ error: 'Connection authorization required' }, {
+        status: 403,
+        headers,
+      });
+    }
+    const handler = createMcpHandler(() =>
+      createMcpServer(
+        options.service,
+        ctx,
+        grant?.workspace ?? match![1],
+        grant
+          ? { grant, readonly: grant.access === 'read' || path === '/mcp/readonly' }
+          : undefined,
+      )
+    );
     const response = await handler.fetch(request);
     for (const [key, value] of headers) response.headers.set(key, value);
     return compressMcpResponse(request, response);
