@@ -191,7 +191,12 @@ export type Team = {
   emoji: string;
 };
 
-export type Workspace = { slug: string; name: string };
+export type Workspace = { slug: string; name: string; default_team_key?: string };
+export function workspaceHome(workspace: Workspace): string {
+  return workspace.default_team_key
+    ? `/${workspace.slug}/team/${encodeURIComponent(workspace.default_team_key)}/issues`
+    : `/${workspace.slug}/`;
+}
 
 // Pages live under /<workspace slug>/ and the workspace's API under
 // /api/w/<workspace slug>/; the slug is the first segment of the page path.

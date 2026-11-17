@@ -14,9 +14,11 @@ const status = z.enum([
 ]);
 const type = z.enum(['spec', 'feature', 'bug', 'improvement', 'chore']);
 export const createWorkspaceSchema = z.strictObject({
+  team_key: z.string().regex(/^[A-Z][A-Z0-9]{1,5}$/).optional(),
   slug: z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/),
   name: z.string().trim().min(1).max(200),
 });
+export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
 export const updateWorkspaceSchema = createWorkspaceSchema.pick({ name: true });
 export const joinWorkspaceSchema = z.strictObject({ token: z.string().min(1).max(512) });
 export const updateMemberSchema = z.strictObject({

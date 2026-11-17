@@ -1,3 +1,4 @@
+import { defaultTeamKey } from "../../../packages/contracts/workspace.ts";
 import { describe, expect, it } from "vitest";
 import { defaultIssueStatus, deriveTeamKey, deriveWorkspaceSlug } from "./onboarding";
 
@@ -25,4 +26,10 @@ describe("onboarding helpers", () => {
     expect(defaultIssueStatus(false, "all", "backlog")).toBe("backlog");
     expect(defaultIssueStatus(false, "agent_ready", "all")).toBe("agent_ready");
   });
+});
+
+it("provides a valid default team key for multilingual and numeric workspace names", () => {
+  expect(defaultTeamKey("研发", "studio")).toBe("STU");
+  expect(defaultTeamKey("123", "123")).toBe("TEAM");
+  expect(defaultTeamKey("Studio Sandbox", "different")).toBe("SS");
 });

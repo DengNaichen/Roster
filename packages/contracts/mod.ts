@@ -32,6 +32,7 @@ export type Workspace = {
   name: string;
   role: 'admin' | 'member';
 };
+export type CreatedWorkspace = Workspace & { default_team_key: string };
 export type Member = Identity & {
   role: 'admin' | 'member';
   status: 'active' | 'suspended';
