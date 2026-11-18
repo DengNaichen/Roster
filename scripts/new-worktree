@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Create a worktree at <primary parent>/roster-worktrees/<branch-slug> from a
+# Create a worktree at <primary>/.worktrees/<branch-slug> from a
 # freshly fetched base, then run the worktree setup. See
 # .agents/skills/git-workflow/SKILL.md.
 set -eu
@@ -53,7 +53,7 @@ worktree_list=$(git -C "$repo_root" worktree list --porcelain)
 primary=$(printf '%s\n' "$worktree_list" | sed -n '1s/^worktree //p')
 [ -n "$primary" ] || fail "cannot determine the primary checkout from git worktree list"
 slug=$(printf '%s' "$branch" | tr '/' '-')
-target="$(dirname -- "$primary")/roster-worktrees/$slug"
+target="$primary/.worktrees/$slug"
 
 if [ -e "$target" ] || [ -L "$target" ]; then
 	fail "target path already exists: $target"

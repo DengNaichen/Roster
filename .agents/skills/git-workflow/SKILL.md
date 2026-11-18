@@ -28,7 +28,7 @@ description: "管理 Roster 的分支、worktree 及其本地预览隔离、提�
 ### 位置与归属
 
 - 主 checkout（`git worktree list --porcelain` 第一项，即 `~/Developer/Roster`）停在 `main`，只用于默认预览、同步和清理，不在其中写代码。
-- 手工创建的 worktree 统一放在 `<主 checkout 父目录>/roster-worktrees/<branch-slug>`，分支中的 `/` 替换为 `-`。不使用 `/tmp`、`/private/tmp` 或仓库内目录。
+- 手工创建的 worktree 统一放在 `<主 checkout>/.worktrees/<branch-slug>`，分支中的 `/` 替换为 `-`；该目录由 Git 忽略。不使用 `/tmp` 或 `/private/tmp`。
 - 宿主自行管理的 worktree（Claude Code 的 `.claude/worktrees/`、Codex App 的 `~/.codex/worktrees/`）由宿主负责位置和生命周期，不受位置约束，但同样要运行 setup 和清理。
 - 一个分支最多一个可写 worktree；并行路线先拆分支或使用堆叠分支。
 

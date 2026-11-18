@@ -19,4 +19,7 @@ __pycache__/
 
 # Claude Code managed worktrees (host-owned lifecycle).
 .claude/worktrees/
+
+# Manually managed linked worktrees.
+/.worktrees/
 .vercel
