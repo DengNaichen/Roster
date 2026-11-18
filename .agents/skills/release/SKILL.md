@@ -1,48 +1,47 @@
 ---
 name: release
-description: "准备、检查和发布 Roster 的版本与 GitHub Release；用于确定版本号、整理发布说明、核对部署验收或执行正式发布。日常分支、PR 和代码部署仍遵循 git-workflow。"
+description: "准备、检查和发布 Roster 的版本与 GitHub Release；用于确定版本号、整理发布说明、核对部署状态或执行正式发布。日常分支、PR 和代码部署仍遵循 git-workflow。"
 ---
 
 # Roster Release
 
-Release 是经过验收、可追溯到生产部署的版本快照。日常合并 main 自动部署，积累到完整改进后再发布；不要求每个 PR 都发版本。GitHub tag 和 Release 是版本依据，不批量修改私有 package 的 version。
+Roster 采用“合并 `main` 持续部署 + 里程碑式 Release”模式：日常 PR 合并到 `main` 后由 GitHub Actions 自动部署生产，积累到阶段性改动后通过 GitHub tag 和 Release 固化对外版本快照，不要求每个 PR 都发版本。不批量修改私有 package 的 version。
 
 ## 版本
 
-- 首版从 `v0.1.0` 开始。后续先读取远端 tags、正式及草稿 Release，按上个正式版本以来的实际改动选择版本，避免重复或倒退。
-- Patch（`v0.1.1`）：问题修复、小幅体验改进，不要求用户或运维调整。
-- Minor（`v0.2.0`）：完整新能力，或接口、配置、数据库有需要关注的变化。`0.x` 阶段的不兼容变化也升 minor，并明确迁移方式。
+- 首版从 `v0.1.0` 开始。每次准备版本前先读取远端 tags 与 Releases，按上个正式版本以来的实际改动确定版本号，避免重复或倒退。
+- Patch（`v0.1.1`）：问题修复、小幅体验改进，不要求用户或客户端调整。
+- Minor（`v0.2.0`）：完整新能力，或接口、配置、数据库有需要关注的变化。`0.x` 阶段的不兼容变化也升 minor，并在发布说明中写明迁移方式。
 - `v1.0.0`：核心流程与对外接口具备稳定承诺后发布，不预设日期。此后不兼容变更升 major，兼容新能力升 minor，兼容修复升 patch。
-- 提前交付验证使用 `v0.2.0-rc.1` 等版本，标为 GitHub prerelease，不设为 latest。候选版仍须在 main 历史上且 CI 通过；可以尚未部署生产，但必须记录实际验证环境、已完成测试和待验收项，不称为正式生产快照。以下生产部署及生产身份门槛只适用于正式版。正式版可使用不同于 rc 的 SHA，须重新完成生产部署与验收，说明范围仍以上个正式 tag 为起点。
+- 预发布验证使用 `v0.2.0-rc.1` 等格式，标为 GitHub prerelease，不设为 latest。候选版须在 `main` 历史上且 CI 通过，可先于生产核对发布，但不能替代正式版流程。
 
 ## 发布依据
 
-先按 [git-workflow](../git-workflow/SKILL.md) 核对仓库和任务。记录本次版本、完整目标 SHA、上个正式版本、关联 PR，以及以下证据：
+先按 [git-workflow](../git-workflow/SKILL.md) 核对仓库状态，记录本次版本、完整目标 SHA、上个正式版本及关联 PR，并确认以下各项：
 
-1. 目标提交在 main 历史上，CI 验证通过；核对该完整 SHA 的生产工作流，数据库迁移、API/MCP、前端发布全部成功。不能用另一个提交的绿灯代替。
-2. 核对当前生产前后端部署身份：读取 GitHub production deployment 的最新成功状态与 SHA，并核对 Vercel 当前生产别名所指部署的 git SHA。API/MCP 当前没有运行时版本接口，须同时取得该次工作流之后未发生函数手动部署、前端回滚或其他生产变更的运维确认；不能仅从最后一次 Actions 绿灯推断。无法取得这些证据时视为身份未确认，只准备草稿。若后续 main 已部署，重新选定并验收实际生产提交。
-3. 对本次交付的核心流程做实际验收，记录环境、操作和结果。测试通过不等于上线验收；未配置、未部署或未验收的能力要写入已知限制。
-4. 数据库、MCP 工具、配置和登录流程有变化时，核对升级顺序、客户端兼容性与恢复路径。生产配置和迁移流程见 [开发说明](../../../docs/DEVELOPMENT.md)。`jobs` 和 `github-webhook` 当前不随日常工作流自动部署，发布时以实际配置与验收证据为准。
+1. **工作流通过**：目标完整 SHA 在 `main` 历史上，该 SHA 对应的 `CI and production deployment` 工作流中 `Check and test` 与 `Deploy production`（数据库迁移、API/MCP、前端部署）全部成功；不能用另一个提交的绿灯代替。
+2. **部署记录与连通核对**：核对 GitHub `production` deployment 最新成功记录指向目标 SHA，并做一次生产连通性只读核对（确认前端生产域名与 API/MCP 端点正常响应，如请求 `/mcp` 发现端点或页面可访问）。未验证或未启用的能力写入“已知限制”。
+3. **兼容性与独立组件说明**：数据库、MCP 工具、配置或登录流程有变更时，核对升级顺序与客户端兼容说明（如 MCP 客户端需刷新 schema）。`jobs` 和 `github-webhook` 当前不随日常 `main` 工作流自动部署，涉及变更时单独核对并注明。
 
-缺少证据时完成说明草稿、列明阻塞项，不创建正式 tag 或发布正式 Release。草稿默认保存在仓库外临时文件中，或记录到正式 Roster 任务；不在主 checkout 留文件。只读检查与本地草稿准备可直接进行；创建 GitHub draft Release 同样需要用户授权。“讨论约定”“准备版本”不等于授权公开发布。用户已明确授权发布时，在门槛满足后执行，无需重复询问。
+以上任一工作流或连通核对未通过时，只准备发布说明草稿并列明阻塞项，不创建 tag 或发布 Release。草稿保存在仓库外临时文件或 Roster 任务中，不在主 checkout 留未提交文件。只读核对与本地草稿准备可直接执行；创建 tag 或 GitHub Release（含 draft/prerelease）须由用户授权，授权且条件满足后直接执行，不重复询问。
 
 ## 发布说明
 
-用中文按用户可感知的变化组织，不直接堆提交或 PR 标题。只保留有内容的栏目：
+用中文按用户可感知的变化组织，不直接堆砌提交或 PR 标题。只保留有内容的栏目：
 
-- 新增。
-- 改进与修复。
-- 升级注意：兼容性、迁移、配置及必要的恢复说明。
-- 已知限制：尚未启用或验收的功能。
+- 新增
+- 改进与修复
+- 升级注意：不兼容变更、迁移、配置或客户端刷新提示
+- 已知限制：尚未启用、独立部署或待验证的边界
 
-附目标完整 SHA、生产工作流和验收记录链接；标注关联任务与 PR，便于追溯。首版覆盖已经验收的现有能力，后续以先前正式 tag 至目标 SHA 的差异为范围。
+附完整目标 SHA、上个版本参考、生产工作流链接与关联 PR，便于追溯。
 
 ## 创建与核对
 
-Release 不触发另一套生产部署；不为打版本重跑部署或修改 production 配置。提交和 PR 操作仍由 git-workflow 管理。
+Release 不触发另一套生产部署；不为打版本重跑部署或修改 production 配置。
 
-授权发布且证据齐全后，先确认远端版本未被占用，创建指向已验收 SHA 的 annotated tag 并显式推送该 tag；再用 `gh release create <tag> --verify-tag --title <版本标题> --notes-file <说明文件>` 创建 Release。正式版本标记 latest，候选版使用 `--prerelease --latest=false`。不能依赖默认分支此刻的 HEAD 作为目标。
-
-发生网络错误或中断，先读回远端 tag 的解引用 SHA 和 Release 状态，再决定从哪一步续跑。已有 Release 时先核对目标与内容，不重复创建；仅在原发布授权范围内用 `gh release edit` 修正错误的 prerelease/latest 属性。已有 tag 只有在指向预期 SHA 时才能继续创建缺失的 Release；名称已被不同提交占用时停止并报告，不覆盖。
-
-发布后读回 tag、Release、prerelease/latest 和目标 SHA，记录链接与验收结果到正式 Roster 任务。发布过的 tag 不移动、不覆盖；后续问题通过新版本修复。回退代码或数据库属于独立操作，不能靠移动 tag 表示恢复。
+1. 确认远端 tag 与 Release 名称未被占用。
+2. 创建指向已核对目标 SHA 的 annotated tag 并显式推送该 tag（不依赖默认分支此刻的 HEAD）。
+3. 使用 `gh release create <tag> --verify-tag --title <版本标题> --notes-file <说明文件>` 创建 Release：正式版标为 latest，候选版使用 `--prerelease --latest=false`。
+4. 若发生网络中断，先读回远端 tag 的解引用 SHA 和 Release 状态再续跑；已有 tag 仅在指向预期 SHA 时才继续创建缺失的 Release，名字已被不同提交占用时停止并报告，不覆盖。
+5. 发布后读回 tag、Release、`prerelease`/`latest` 与目标 SHA 确认一致。已发布的 tag 永不移动或覆盖，后续问题通过新版本修复。
