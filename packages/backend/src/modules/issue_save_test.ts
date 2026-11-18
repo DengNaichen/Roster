@@ -119,6 +119,10 @@ Deno.test({
         issue.blocked_by[0].identifier === blocker.identifier &&
           issue.related[0].identifier === related.identifier,
       );
+      assert(
+        !Object.hasOwn(issue, 'audit'),
+        'save_issue omits bulky audit snapshots',
+      );
       const update = {
         identifier: issue.identifier,
         title: 'Changed',

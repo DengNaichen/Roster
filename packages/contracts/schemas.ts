@@ -13,6 +13,9 @@ const status = z.enum([
   'canceled',
 ]);
 const type = z.enum(['spec', 'feature', 'bug', 'improvement', 'chore']);
+const priority = z.number().int().min(0).max(4).describe(
+  '0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low',
+);
 export const createWorkspaceSchema = z.strictObject({
   team_key: z.string().regex(/^[A-Z][A-Z0-9]{1,5}$/).optional(),
   slug: z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/),
@@ -54,7 +57,7 @@ export const createIssueSchema = z.strictObject({
   document: issueDocumentSchema.optional(),
   status: status.optional(),
   type: type.nullable().optional(),
-  priority: z.number().int().min(0).max(4).optional(),
+  priority: priority.optional(),
   assignee: subject.nullable().optional(),
 });
 export const updateIssueSchema = createIssueSchema.omit({ team: true }).partial();
@@ -69,7 +72,7 @@ export const listIssuesSchema = z.strictObject({
   label_group_ids: z.array(z.number().int().positive()).optional(),
   sort: z.enum(['created', 'updated', 'priority']).optional(),
   type: z.union([type, z.literal('')]).optional(),
-  priority: z.number().int().min(0).max(4).optional(),
+  priority: priority.optional(),
   assignee: subject.nullable().optional(),
   assigned_to_me: z.boolean().optional(),
   team: z.string().optional(),

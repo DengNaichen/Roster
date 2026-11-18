@@ -28,6 +28,9 @@ import type { Service } from '../../application/mod.ts';
 import type { Grant } from '../../integrations/oauth/index.ts';
 import type { VerifyIdentity } from '../../platform/auth/jwt.ts';
 import { compressMcpResponse } from './compression.ts';
+import { parseIssueDocumentMarkdown } from './issue-document-markdown.ts';
+
+const { document: _document, ...saveIssueInputShape } = saveIssueSchema.shape;
 const reference = z.string().trim().min(1).max(200);
 const userReference = z.string().max(200).nullable().optional().describe(
   'User ID, name, email or me. Omit to keep unchanged; null (or legacy empty string) clears the assignee.',
@@ -193,7 +196,6 @@ const resultSchemas: Record<string, z.ZodType> = {
       }).passthrough(),
     ),
   }),
-  save_issue: issueOutput,
   check_issue_criterion: issueOutput,
 };
 export function createMcpServer(
@@ -408,22 +410,34 @@ export function createMcpServer(
   );
   tool(
     'save_issue',
-    'Create or update an issue atomically with labels, relations and links. Omit identifier to create (team and title required); provide identifier to update (team cannot change). Omitted fields stay unchanged; assignee null clears assignment. Labels accept exact names or numeric IDs. Relation arrays add edges; remove_* arrays remove edges. Links append without duplicating an existing title/URL pair. document replaces the whole body: read it first and preserve existing criterion IDs; use check_issue_criterion to tick one criterion.',
+    'Create or update an issue atomically with labels, relations and links. Omit identifier to create (team and title required); provide identifier to update (team cannot change). Omitted fields stay unchanged; assignee null clears assignment. Labels accept exact names or numeric IDs. Relation arrays add edges; remove_* arrays remove edges. Links append without duplicating an existing title/URL pair. description replaces the whole body from Markdown (lead before first `## `, sections, `- [ ] [AC-1] ...` under `## Acceptance criteria`); use check_issue_criterion to tick one criterion.',
     {
-      ...saveIssueSchema.shape,
+      ...saveIssueInputShape,
       ...compatibleIssueFields,
       type: compatibleIssueFields.type.optional(),
       team: reference.optional(),
+      description: z.string().max(100000).optional().describe(
+        'Issue body as Markdown text. Text before the first `## ` becomes the lead; `## Heading` starts a section (paragraphs, `-`/`1.` lists, ``` code, `|...|` tables, `> ` notes, `::: compare` with `### Left`/`### Right` subheadings and `- ` items); `- [ ] [AC-1] Title: detail` under `## Acceptance criteria` creates criteria.',
+      ),
       add_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
       remove_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
     },
     false,
-    (i) =>
-      service.saveIssue(
+    async ({ description, ...i }) => {
+      // Omit audit snapshots from save_issue replies; get_issue exposes full audit history.
+      const { audit: _audit, ...saved } = await service.saveIssue(
         ctx,
         workspace,
-        parse(saveIssueSchema, { ...i, type: i.type === '' ? null : i.type }),
-      ),
+        parse(saveIssueSchema, {
+          ...i,
+          ...(description !== undefined
+            ? { document: parseIssueDocumentMarkdown(description) }
+            : {}),
+          type: i.type === '' ? null : i.type,
+        }),
+      );
+      return saved;
+    },
   );
   tool(
     'check_issue_criterion',
