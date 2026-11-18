@@ -417,14 +417,15 @@ export function createMcpServer(
       type: compatibleIssueFields.type.optional(),
       team: reference.optional(),
       description: z.string().max(100000).optional().describe(
-        'Issue body as Markdown text. Text before the first `## ` becomes the lead; `## Heading` starts a section (paragraphs, `-`/`1.` lists, ``` code, `|...|` tables, `> ` notes, `::: compare` blocks); `- [ ] [AC-1] Title: detail` under `## Acceptance criteria` creates criteria.',
+        'Issue body as Markdown text. Text before the first `## ` becomes the lead; `## Heading` starts a section (paragraphs, `-`/`1.` lists, ``` code, `|...|` tables, `> ` notes, `::: compare` with `### Left`/`### Right` subheadings and `- ` items); `- [ ] [AC-1] Title: detail` under `## Acceptance criteria` creates criteria.',
       ),
       add_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
       remove_labels: z.array(z.union([reference, z.number().int().positive()])).max(100).optional(),
     },
     false,
-    ({ description, ...i }) =>
-      service.saveIssue(
+    async ({ description, ...i }) => {
+      // Omit audit snapshots from save_issue replies; get_issue exposes full audit history.
+      const { audit: _audit, ...saved } = await service.saveIssue(
         ctx,
         workspace,
         parse(saveIssueSchema, {
@@ -434,7 +435,9 @@ export function createMcpServer(
             : {}),
           type: i.type === '' ? null : i.type,
         }),
-      ),
+      );
+      return saved;
+    },
   );
   tool(
     'check_issue_criterion',
