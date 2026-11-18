@@ -233,7 +233,31 @@ Deno.test({
           400,
         );
         assert(error.error.message.includes(path), `REST: ${error.error.message}`);
-        const failed = await call('owner', 'save_issue', body);
+      }
+      const invalidMarkdown: [string, string][] = [
+        [
+          '## T\n| a | b |\n| --- | --- |\n| 1 |',
+          'document.sections.0.blocks.0: Every table row needs one cell per column',
+        ],
+        [
+          '## Acceptance criteria\n- [ ] [AC-1] a\n- [ ] [AC-1] b',
+          'document.criteria.1.id: Duplicate criterion ID AC-1',
+        ],
+        [
+          '## Scope\n::: compare\n### In scope\n- one',
+          'Unclosed `::: compare`',
+        ],
+        [
+          '## Code\n```ts\nconst x = 1;',
+          'Unclosed fenced code block',
+        ],
+      ];
+      for (const [description, path] of invalidMarkdown) {
+        const failed = await call('owner', 'save_issue', {
+          team: 'DOC',
+          title: 'Invalid',
+          description,
+        });
         assert(
           failed.isError && failed.content[0].text.includes(path),
           `MCP: ${failed.content[0].text}`,
@@ -248,11 +272,11 @@ Deno.test({
         legacy.error.message.includes('Unrecognized key: "description"'),
         legacy.error.message,
       );
-      const mcpLegacy = await call('owner', 'save_issue', {
+      const mcpRawDocument = await call('owner', 'save_issue', {
         identifier: created.identifier,
-        description: 'old body',
+        document: { lead: 'raw json' },
       });
-      assert(mcpLegacy.isError && mcpLegacy.content[0].text.includes('"description"'));
+      assert(mcpRawDocument.isError && mcpRawDocument.content[0].text.includes('"document"'));
       assert(
         (await admin.query(
           "select count(*)::int as n from roster.issues where workspace_id=$1 and title in ('Invalid','Legacy')",
@@ -261,20 +285,58 @@ Deno.test({
         'Rejected documents are never stored',
       );
 
+      const fullMarkdown = [
+        'Members see blocked work at a glance.',
+        '',
+        '## Scope',
+        'Show a marker on blocked rows in `IssueList`.',
+        '',
+        '::: compare',
+        '### In scope',
+        '- List rows',
+        '### Out of scope',
+        '- Board cards',
+        ':::',
+        '',
+        '## States',
+        '| State | Marker |',
+        '| --- | --- |',
+        '| Blocked | zebracell |',
+        '',
+        '> [!NOTE] Risk',
+        '> Hidden blockers stay hidden.',
+        '',
+        '1. **Open** Open the list.',
+        '',
+        '```',
+        'GET /api/w/x/issues',
+        '```',
+        '',
+        '## Acceptance criteria',
+        '- [ ] [AC-1] Blocked rows are marked.: Open the list.',
+        '- [ ] [AC-2] Unblocked rows are plain.',
+        '- [x] [AC-3] Markers survive reload.',
+      ].join('\n');
       const replacement: IssueDocument = {
         lead: 'Replaced through MCP.',
         sections: [],
         criteria: [{ id: 'AC-1', title: 'Only criterion', detail: '', done: false }],
       };
+      const replacementMarkdown = [
+        'Replaced through MCP.',
+        '',
+        '## Acceptance criteria',
+        '- [ ] [AC-1] Only criterion',
+      ].join('\n');
       const mcpCreated = await mcpOk('member', 'save_issue', {
         team: 'DOC',
         title: 'Agent issue',
-        document: full,
+        description: fullMarkdown,
       });
       assert(isDeepStrictEqual(mcpCreated.document, full), 'MCP create stores the document');
       const replaced = await mcpOk('member', 'save_issue', {
         identifier: mcpCreated.identifier,
-        document: replacement,
+        description: replacementMarkdown,
       });
       assert(
         isDeepStrictEqual(replaced.document, replacement),
